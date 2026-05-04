@@ -1,8 +1,10 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
+import { getUserEnvVarName } from "bw-common/config";
 import { createFileSystemProject } from "../../src";
 import { LOAD_CONFIG_ERRORS } from "../../src/config";
 import {
   loadRootConfig,
+  resolveRootConfig,
   ROOT_CONFIG_ERRORS,
 } from "../../src/config/rootConfig";
 import { determineParallelMax, resolveScriptShell } from "../../src/runScript";
@@ -16,6 +18,7 @@ describe("Test project root config", () => {
           parallelMax: determineParallelMax("default"),
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -27,6 +30,7 @@ describe("Test project root config", () => {
           parallelMax: 5,
           shell: "system",
           includeRootWorkspace: true,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -38,6 +42,7 @@ describe("Test project root config", () => {
           parallelMax: 5,
           shell: "system",
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -51,6 +56,7 @@ describe("Test project root config", () => {
           parallelMax: 5,
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -92,6 +98,7 @@ describe("Test project root config", () => {
           parallelMax: 3,
           shell: "bun",
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -115,6 +122,7 @@ describe("Test project root config", () => {
           parallelMax: 3,
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -128,6 +136,7 @@ describe("Test project root config", () => {
           parallelMax: 4,
           shell: "bun",
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -139,6 +148,7 @@ describe("Test project root config", () => {
           parallelMax: 4,
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -156,6 +166,7 @@ describe("Test project root config", () => {
           parallelMax: determineParallelMax("default"),
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -171,6 +182,7 @@ describe("Test project root config", () => {
           parallelMax: 5,
           shell: "system",
           includeRootWorkspace: true,
+          affectedBaseRef: "main",
         },
         workspacePatternConfigs: [],
       });
@@ -216,6 +228,46 @@ describe("Test project root config", () => {
       await summary;
 
       await expect(outputText.trim()).toBe("system");
+    });
+  });
+
+  describe("affectedBaseRef default", () => {
+    const ENV_VAR = getUserEnvVarName("affectedBaseRefDefault");
+
+    afterEach(() => {
+      delete process.env[ENV_VAR];
+    });
+
+    test("resolves to 'main' when not provided in config or env", () => {
+      expect(resolveRootConfig({}).defaults.affectedBaseRef).toBe("main");
+    });
+
+    test("uses explicit value from config", () => {
+      expect(
+        resolveRootConfig({ defaults: { affectedBaseRef: "develop" } }).defaults
+          .affectedBaseRef,
+      ).toBe("develop");
+    });
+
+    test("falls back to env var when config does not set it", () => {
+      process.env[ENV_VAR] = "release";
+      expect(resolveRootConfig({}).defaults.affectedBaseRef).toBe("release");
+    });
+
+    test("config value takes precedence over env var", () => {
+      process.env[ENV_VAR] = "release";
+      expect(
+        resolveRootConfig({ defaults: { affectedBaseRef: "develop" } }).defaults
+          .affectedBaseRef,
+      ).toBe("develop");
+    });
+
+    test("throws when affectedBaseRef is not a string", () => {
+      expect(() =>
+        resolveRootConfig({
+          defaults: { affectedBaseRef: 5 as unknown as string },
+        }),
+      ).toThrow("Root config is invalid");
     });
   });
 });

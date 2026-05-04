@@ -102,6 +102,8 @@ export type RootConfig = {
     shell?: ShellOption;
     /** Whether to include the root workspace in the workspaces list by default. (default: false) */
     includeRootWorkspace?: boolean;
+    /** The default base ref for affected workspace resolution. (default: "main") */
+    affectedBaseRef?: string;
   };
   /**
    * Workspace configs applied by pattern, in order, merging left to right,
@@ -119,6 +121,7 @@ export type ResolvedRootConfig = {
     shell: ScriptShellOption;
     /** `undefined` means the value was not set in the input config */
     includeRootWorkspace: boolean | undefined;
+    affectedBaseRef: string;
   };
   workspacePatternConfigs: WorkspacePatternConfigEntry[];
 };
