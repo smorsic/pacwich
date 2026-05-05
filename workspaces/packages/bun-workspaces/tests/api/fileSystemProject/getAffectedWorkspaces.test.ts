@@ -252,7 +252,7 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
       const e = findResult(result.workspaceResults, "e");
       expect(e.isAffected).toBe(true);
       expect(e.affectedReasons.changedFiles[0]).toMatchObject({
-        filePath: "packages/e/src/index.ts",
+        projectFilePath: "packages/e/src/index.ts",
       });
       // No git metadata in fileList mode
       expect(e.affectedReasons.changedFiles[0].gitReasons).toBeUndefined();
@@ -681,7 +681,7 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
       expect(a.isAffected).toBe(true);
       expect(a.affectedReasons.changedFiles).toEqual([
         {
-          filePath: "packages/a/src/index.ts",
+          projectFilePath: "packages/a/src/index.ts",
           inputMatch: ".",
           gitReasons: ["diff"],
         },
@@ -725,7 +725,7 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
       const a = findResult(result.workspaceResults, "a");
       expect(a.isAffected).toBe(true);
       expect(a.affectedReasons.changedFiles[0]).toMatchObject({
-        filePath: "packages/a/src/new.ts",
+        projectFilePath: "packages/a/src/new.ts",
         gitReasons: ["untracked"],
       });
     });

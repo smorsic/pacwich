@@ -50,6 +50,7 @@ import {
 import {
   getAffectedWorkspaces,
   type AffectedWorkspacesResult,
+  type FileListAffectedWorkspacesOptions,
   type GetAffectedWorkspacesOptions,
 } from "./affectedWorkspaces";
 
@@ -176,7 +177,7 @@ export type RunAffectedWorkspaceScriptOptions = {
    * script name when running inline, the script name otherwise) so that
    * inputs resolution always tracks the script being run.
    */
-  affectedOptions: Omit<GetAffectedWorkspacesOptions, "script">;
+  affectedOptions: GetAffectedWorkspacesOptions<false>;
   scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
 };
 

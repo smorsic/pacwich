@@ -29,18 +29,23 @@ export type AffectedWorkspaceResult = {
   isAffected: boolean;
   affectedReasons: {
     changedFiles: {
-      filePath: string;
+      /** The path to the file, relative to the project root */
+      projectFilePath: string;
+      /** The matched input for the file */
       inputMatch: string;
-      /** When `diffSource` is "git" */
+      /** Present when `diffSource` is "git": the reasons for the file being affected */
       gitReasons?: GitAffectedFileReason[];
     }[];
     dependencies: {
+      /** The name of the dependency */
       dependencyName: string;
+      /** The chain of dependencies that led to the affected workspace */
       chain: AffectedDependencyChainEntry[];
     }[];
   };
 };
 
+/** The source for changed files */
 export type AffectedDiffSource = "git" | "fileList";
 
 export type AffectedWorkspacesResult = {
@@ -57,74 +62,69 @@ export type AffectedWorkspacesResult = {
   workspaceResults: AffectedWorkspaceResult[];
 };
 
-export type BaseAffectedWorkspacesOptions = {
+export type BaseAffectedWorkspacesOptions<
+  AcceptsScript extends boolean = true,
+> = {
   ignorePackageDependencies?: boolean;
+} & (AcceptsScript extends true
+  ? {
+      script?: string;
+    }
+  : object);
+
+export type GitAffectedWorkspacesOptions<AcceptsScript extends boolean = true> =
+  BaseAffectedWorkspacesOptions<AcceptsScript> & {
+    /** Whether to use git to determine affected workspaces or a list of given files */
+    diffSource: "git";
+    diffOptions?: {
+      /**
+       * The base git ref to compare against.
+       *
+       * Default is "main" when not provided or
+       * when the default is not set by the
+       * root config or env var.
+       */
+      baseRef?: string;
+      /**
+       * The head git ref to compare against.
+       *
+       * Default is "HEAD" when not provided.
+       */
+      headRef?: string;
+      /** Exclude untracked files */
+      ignoreUntracked?: boolean;
+      /** Ignore staged files */
+      ignoreStaged?: boolean;
+      /** Ignore unstaged files */
+      ignoreUnstaged?: boolean;
+      /** Exclude any uncommitted files (ignores staged, unstaged, and untracked) */
+      ignoreUncommitted?: boolean;
+    };
+  };
+
+export type FileListAffectedWorkspacesOptions<
+  AcceptsScript extends boolean = true,
+> = BaseAffectedWorkspacesOptions<AcceptsScript> & {
+  /** Whether to use git or a list of given files to determine affected workspaces */
+  diffSource: "fileList";
   /**
-   * The name of a workspace script. Controls **inputs resolution only**:
-   * each workspace's script-level `inputs` (from `scripts[script].inputs`
-   * in workspace config) are used when present, falling back to
-   * `defaultInputs` otherwise.
+   * File paths, directories, or glob patterns relative to the project root.
    *
-   * Workspaces without the script in their `package.json` are still
-   * computed and reported — this option does not filter the result set.
-   * The script-level inputs lookup is keyed off the configured script name
-   * (or the inline-script name when used by `runAffectedWorkspaceScript`),
-   * not the runtime presence of the script in any workspace's package.json.
-   *
-   * When omitted, only `defaultInputs` is used.
+   * - File paths are matched literally. Paths that don't exist on disk
+   *   pass through as-is.
+   * - Directories are walked recursively into a flat file list. The
+   *   `node_modules` and `.git` directories are skipped during the walk.
+   * - Globs are expanded via `bun.Glob` against the project root and
+   *   only match files that currently exist.
+   * - Prefix with `!` to exclude. Exclusions are expanded the same way
+   *   and removed from the include set.
    */
-  script?: string;
+  changedFiles: string[];
 };
 
-export type GitAffectedWorkspacesOptions = BaseAffectedWorkspacesOptions & {
-  diffSource: "git";
-  diffOptions?: {
-    /**
-     * The base git ref to compare against.
-     *
-     * Default is "main" when not provided or
-     * when the default is not set by the
-     * root config or env var.
-     */
-    baseRef?: string;
-    /**
-     * The head git ref to compare against.
-     *
-     * Default is "HEAD" when not provided.
-     */
-    headRef?: string;
-    /** Exclude untracked files */
-    ignoreUntracked?: boolean;
-    /** Ignore staged files */
-    ignoreStaged?: boolean;
-    /** Ignore unstaged files */
-    ignoreUnstaged?: boolean;
-    /** Exclude any uncommitted files (ignores staged, unstaged, and untracked) */
-    ignoreUncommitted?: boolean;
-  };
-};
-
-export type FileListAffectedWorkspacesOptions =
-  BaseAffectedWorkspacesOptions & {
-    diffSource: "fileList";
-    /**
-     * File paths, directories, or glob patterns relative to the project root.
-     *
-     * - File paths are matched literally. Paths that don't exist on disk
-     *   pass through as-is (deleted-file semantics).
-     * - Directories are walked recursively into a flat file list. The
-     *   `node_modules` and `.git` directories are skipped during the walk.
-     * - Globs are expanded via `bun.Glob` against the project root and
-     *   only match files that currently exist.
-     * - Prefix with `!` to exclude. Exclusions are expanded the same way
-     *   and removed from the include set.
-     */
-    changedFiles: string[];
-  };
-
-export type GetAffectedWorkspacesOptions =
-  | GitAffectedWorkspacesOptions
-  | FileListAffectedWorkspacesOptions;
+export type GetAffectedWorkspacesOptions<AcceptScript extends boolean = true> =
+  | GitAffectedWorkspacesOptions<AcceptScript>
+  | FileListAffectedWorkspacesOptions<AcceptScript>;
 
 export const isOptionsForDiffSource = <DiffSource extends AffectedDiffSource>(
   options: GetAffectedWorkspacesOptions,
@@ -292,7 +292,7 @@ const toAffectedWorkspaceResult = (
   isAffected: internal.isAffected,
   affectedReasons: {
     changedFiles: internal.affectedReasons.changedFiles.map((file) => ({
-      filePath: file.filePath,
+      projectFilePath: file.filePath,
       inputMatch: file.inputPattern,
       ...(file.fileMetadata?.git && {
         gitReasons: file.fileMetadata.git.reasons,
@@ -304,7 +304,7 @@ const toAffectedWorkspaceResult = (
 
 export const getAffectedWorkspaces = async (
   project: FileSystemProject,
-  options: GetAffectedWorkspacesOptions,
+  options: GetAffectedWorkspacesOptions<true>,
 ): Promise<AffectedWorkspacesResult> => {
   const ignorePackageDependencies = options.ignorePackageDependencies ?? false;
   const { inputs: workspaceInputs, effectiveInputsByName } =

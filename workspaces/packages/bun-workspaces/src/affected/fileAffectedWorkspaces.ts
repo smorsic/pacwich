@@ -10,6 +10,11 @@ export interface AffectedDependencyChainEntry {
   /**
    * The kind of edge that led to this workspace from the previous chain entry.
    * Undefined for the starting workspace at the head of the chain.
+   *
+   * "package" means the dependency is a true package.json-resolved dependency.
+   *
+   * "input" means the dependency comes from the workspace's workspace pattern inputs,
+   * from defaultInputs or a script's inputs.
    */
   edgeSource?: AffectedDependencyEdgeSource;
 }
