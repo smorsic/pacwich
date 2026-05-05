@@ -1,6 +1,7 @@
 import type {
   WorkspaceConfig,
   WorkspaceDependenciesRule,
+  WorkspaceInputsConfig,
   WorkspaceRules,
 } from "bw-common/config";
 import { resolveOptionalArray } from "../../internal/core";
@@ -66,21 +67,38 @@ const mergeScripts = (
   return merged;
 };
 
+const mergeDefaultInputs = (
+  base: WorkspaceInputsConfig | undefined,
+  override: WorkspaceInputsConfig | undefined,
+): WorkspaceInputsConfig | undefined => override ?? base;
+
 const applyConfig = (
   acc: WorkspaceConfig,
   config: WorkspaceConfig,
-): WorkspaceConfig => ({
-  alias: uniqueArray([
-    ...resolveOptionalArray(acc.alias ?? []),
-    ...resolveOptionalArray(config.alias ?? []),
-  ]),
-  tags: uniqueArray([...(acc.tags ?? []), ...(config.tags ?? [])]),
-  scripts: mergeScripts(acc.scripts, config.scripts),
-  rules: mergeWorkspaceRules(acc.rules, config.rules),
-});
+): WorkspaceConfig => {
+  const defaultInputs = mergeDefaultInputs(
+    acc.defaultInputs,
+    config.defaultInputs,
+  );
+  return {
+    alias: uniqueArray([
+      ...resolveOptionalArray(acc.alias ?? []),
+      ...resolveOptionalArray(config.alias ?? []),
+    ]),
+    tags: uniqueArray([...(acc.tags ?? []), ...(config.tags ?? [])]),
+    scripts: mergeScripts(acc.scripts, config.scripts),
+    rules: mergeWorkspaceRules(acc.rules, config.rules),
+    ...(defaultInputs && { defaultInputs }),
+  };
+};
 
-/** Merge two or more workspace configs left to right, with each subsequent config taking precedence.
- * Any argument may be a factory function receiving the accumulated config up to that point. */
+/**
+ * Merge two or more workspace configs left to right, with each subsequent config taking precedence.
+ * Any argument may be a factory function receiving the accumulated config up to that point.
+ *
+ * Generally, objects are deeply merged, and arrays are concatenated and deduplicated,
+ * **except** for workspace inputs (defaultInputs and script inputs), which are replaced entirely.
+ */
 export const mergeWorkspaceConfig = (
   ...configs: WorkspaceConfigInput[]
 ): WorkspaceConfig =>

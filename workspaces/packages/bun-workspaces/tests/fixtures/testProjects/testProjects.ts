@@ -95,6 +95,7 @@ const TEST_PROJECTS = {
   withDependencyRulesMultiValid:
     "withDependencies/withDependencyRulesMultiValid",
   recursiveScript: "recursiveScript",
+  affectedWithInputs: "affected/withInputs",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;

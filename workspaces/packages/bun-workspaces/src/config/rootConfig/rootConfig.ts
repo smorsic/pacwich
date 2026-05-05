@@ -1,5 +1,6 @@
 import { type RootConfig, type ResolvedRootConfig } from "bw-common/config";
 import type { ParallelMaxValue } from "bw-common/parameters";
+import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
 import validate from "../../internal/generated/ajv/validateRootConfig";
 import { determineParallelMax, resolveScriptShell } from "../../runScript";
 import { getUserEnvVar } from "../userEnvVars";
@@ -38,6 +39,9 @@ export const resolveRootConfig = (config: RootConfig): ResolvedRootConfig => {
       includeRootWorkspace:
         config.defaults?.includeRootWorkspace ??
         getUserEnvVar("includeRootWorkspaceDefault") === "true",
+      affectedBaseRef: resolveDefaultAffectedBaseRef(
+        config.defaults?.affectedBaseRef,
+      ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],
   };

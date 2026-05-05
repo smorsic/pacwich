@@ -10,6 +10,11 @@ export interface AffectedDependencyChainEntry {
   /**
    * The kind of edge that led to this workspace from the previous chain entry.
    * Undefined for the starting workspace at the head of the chain.
+   *
+   * "package" means the dependency is a true package.json-resolved dependency.
+   *
+   * "input" means the dependency comes from the workspace's workspace pattern inputs,
+   * from defaultInputs or a script's inputs.
    */
   edgeSource?: AffectedDependencyEdgeSource;
 }
@@ -39,7 +44,7 @@ export interface AffectedDependencyResult {
   chain: AffectedDependencyChainEntry[];
 }
 
-export interface AffectedReasonMap<
+export interface AffectedReasons<
   FileMetadata extends object | undefined = undefined,
 > {
   changedFiles: AffectedFileResult<FileMetadata>[];
@@ -51,7 +56,7 @@ export interface AffectedWorkspaceResult<
 > {
   workspace: Workspace;
   isAffected: boolean;
-  affectedReasons: AffectedReasonMap<FileMetadata>;
+  affectedReasons: AffectedReasons<FileMetadata>;
 }
 
 export interface FileAffectedWorkspacesOptions {
@@ -81,6 +86,12 @@ const stripTrailingSlashes = (filePath: string) => filePath.replace(/\/+$/, "");
 
 const stripLeadingSlashes = (filePath: string) => filePath.replace(/^\/+/, "");
 
+const stripDotSlashSegments = (filePath: string): string => {
+  let stripped = filePath;
+  while (stripped.startsWith("./")) stripped = stripped.slice(2);
+  return stripped === "." ? "" : stripped;
+};
+
 const normalizeChangedFilePath = ({
   rootDirectory,
   filePath,
@@ -90,7 +101,7 @@ const normalizeChangedFilePath = ({
 }) => {
   const posixFilePath = toPosixPath(filePath);
   if (!path.isAbsolute(filePath)) {
-    return posixFilePath;
+    return stripDotSlashSegments(posixFilePath);
   }
   const posixRoot = stripTrailingSlashes(toPosixPath(rootDirectory));
   if (posixFilePath === posixRoot) {

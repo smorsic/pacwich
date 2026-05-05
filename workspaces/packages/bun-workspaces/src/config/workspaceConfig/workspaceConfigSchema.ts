@@ -1,6 +1,21 @@
 import type { WorkspaceConfig } from "bw-common/config";
 import type { JSONSchema, FromSchema } from "json-schema-to-ts";
 
+const WORKSPACE_INPUTS_CONFIG_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    files: {
+      type: "array",
+      items: { type: "string" },
+    },
+    workspacePatterns: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+} as const satisfies JSONSchema;
+
 export const WORKSPACE_CONFIG_JSON_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -23,6 +38,7 @@ export const WORKSPACE_CONFIG_JSON_SCHEMA = {
           order: {
             type: "number",
           },
+          inputs: WORKSPACE_INPUTS_CONFIG_SCHEMA,
         },
         additionalProperties: false,
       },
@@ -47,6 +63,7 @@ export const WORKSPACE_CONFIG_JSON_SCHEMA = {
         },
       },
     },
+    defaultInputs: WORKSPACE_INPUTS_CONFIG_SCHEMA,
   },
 } as const satisfies JSONSchema;
 

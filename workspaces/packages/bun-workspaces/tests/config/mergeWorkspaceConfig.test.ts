@@ -149,6 +149,99 @@ describe("mergeWorkspaceConfig", () => {
     });
   });
 
+  describe("defaultInputs", () => {
+    test("later config replaces earlier defaultInputs entirely", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { defaultInputs: { files: ["a"], workspacePatterns: ["lib-*"] } },
+          { defaultInputs: { files: ["b"] } },
+        ),
+      ).toMatchObject({ defaultInputs: { files: ["b"] } });
+    });
+
+    test("later config replaces with empty object when explicitly set", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { defaultInputs: { files: ["a"] } },
+          { defaultInputs: {} },
+        ),
+      ).toMatchObject({ defaultInputs: {} });
+    });
+
+    test("undefined defaultInputs in later config does not clear accumulated value", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { defaultInputs: { files: ["a"] } },
+          { defaultInputs: undefined },
+        ),
+      ).toMatchObject({ defaultInputs: { files: ["a"] } });
+    });
+
+    test("missing defaultInputs key in later config preserves accumulated value", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { defaultInputs: { files: ["a"] } },
+          { tags: ["x"] },
+        ),
+      ).toMatchObject({ defaultInputs: { files: ["a"] } });
+    });
+
+    test("does not partially merge files or workspacePatterns across configs", () => {
+      const result = mergeWorkspaceConfig(
+        { defaultInputs: { files: ["a"], workspacePatterns: ["lib-*"] } },
+        { defaultInputs: { files: ["b"] } },
+      );
+      // override has no workspacePatterns -> dropped, not preserved from base
+      expect(result.defaultInputs).toEqual({ files: ["b"] });
+    });
+
+    test("not present in result when neither config sets it", () => {
+      expect(mergeWorkspaceConfig({}, {})).not.toHaveProperty("defaultInputs");
+    });
+  });
+
+  describe("script inputs", () => {
+    test("later config replaces script inputs entirely", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            scripts: {
+              build: {
+                inputs: { files: ["a"], workspacePatterns: ["lib-*"] },
+              },
+            },
+          },
+          { scripts: { build: { inputs: { files: ["b"] } } } },
+        ),
+      ).toMatchObject({
+        scripts: { build: { inputs: { files: ["b"] } } },
+      });
+    });
+
+    test("does not partially merge files or workspacePatterns across configs", () => {
+      const result = mergeWorkspaceConfig(
+        {
+          scripts: {
+            build: { inputs: { files: ["a"], workspacePatterns: ["lib-*"] } },
+          },
+        },
+        { scripts: { build: { inputs: { files: ["b"] } } } },
+      );
+      expect(result.scripts?.build?.inputs).toEqual({ files: ["b"] });
+    });
+
+    test("missing inputs in override preserves base inputs alongside new fields", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { scripts: { build: { inputs: { files: ["a"] } } } },
+          { scripts: { build: { order: 5 } } },
+        ),
+      ).toMatchObject({
+        scripts: { build: { order: 5, inputs: { files: ["a"] } } },
+      });
+    });
+  });
+
   test("merges more than two configs left to right", () => {
     expect(
       mergeWorkspaceConfig(

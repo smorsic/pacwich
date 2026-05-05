@@ -43,6 +43,7 @@ export const resolveWorkspaceConfig = (
     tags: config.tags ?? [],
     scripts: config.scripts ?? {},
     rules: config.rules ?? {},
+    ...(config.defaultInputs && { defaultInputs: config.defaultInputs }),
   };
 };
 

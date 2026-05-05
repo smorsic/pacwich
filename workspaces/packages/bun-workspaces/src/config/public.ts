@@ -5,6 +5,7 @@ export type {
   WorkspaceDependenciesRule,
   ResolvedWorkspaceConfig,
   WorkspaceRules,
+  WorkspaceInputsConfig,
   ScriptConfig,
   RawWorkspace,
   WorkspacePatternConfigFactory,
