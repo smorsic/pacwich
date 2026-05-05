@@ -3,16 +3,17 @@ title: Concepts > Workspace Script Metadata
 titleSuffix: " | bun-workspaces"
 description: "Workspace Script Metadata | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 
 import { getWorkspaceScriptMetadataConfig } from 'bw-common/runScript';
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 
-<ConceptsHeader activeHref="workspaceScriptMetadata" />
+# Concept:  Workspace Script Metadata
+
+## Overview
 
 When running scripts via the API or CLI, metadata is available via either environment variables within your scripts or interpolation
 in an [inline script](/concepts/inline-scripts) or appended args.
@@ -22,7 +23,7 @@ context about its execution by `bun-workspaces`.
 
 This same metadata can be referenced within inline script commands and/or appended script args.
 
-## Example
+## Examples
 
 #### Interpolation via CLI:
 In this command, all workspaces will run the same `my-script.ts` file found at the project root, thanks to using `<projectPath>` to interpolate the project root's path, 

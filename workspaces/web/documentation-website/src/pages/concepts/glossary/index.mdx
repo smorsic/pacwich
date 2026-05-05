@@ -3,16 +3,17 @@ title: Concepts > Glossary
 titleSuffix: " | bun-workspaces"
 description: "Glossary | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 import { GLOSSARY_FILE_TREE, GLOSSARY_ROOT_PACKAGE_JSON, GLOSSARY_WORKSPACE_A_PACKAGE_JSON, GLOSSARY_WORKSPACE_B_PACKAGE_JSON } from "../../../lib/concepts/conceptsExamples";
 
-<ConceptsHeader activeHref="glossary" />
+# Glossary
+
+Learn some of the basic terms and primitives of `bun-workspaces` here.
 
 ## Terms
 
@@ -24,6 +25,8 @@ file is located, which contains the `"workspaces"` field.
 See [Bun's documentation](https://bun.sh/docs/install/workspaces) for more information on setting up workspaces via package.json.
 
 #### Workspace
+
+This is the same conceptually as a workspace in Bun. `bun-workspaces` simply allows enriching and working with workspaces in various ways.
 
 A nested package within a project. The root of a workspace is always a nested directory within the project 
 that contains its own `package.json` file. 

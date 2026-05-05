@@ -3,26 +3,21 @@ title: Concepts > Workspace Patterns
 titleSuffix: " | bun-workspaces"
 description: "Workspace Patterns | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 import { WORKSPACE_PATTERN_API_EXAMPLE, WorkspacePatternDoc } from "../../../lib/concepts/workspacePatterns";
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 
-<ConceptsHeader activeHref="workspacePatterns" />
+# Concept: Workspace Patterns
 
-<br/>
-<hr/>
-<br/>
-
-# Workspace Patterns - Overview
+## Overview
 
 Workspace patterns are used to match workspaces when running commands such as [run-script](/cli/commands#run-script) or [list-workspaces](/cli/commands#list-workspaces),
 and they are also used in some [configuration](/config) options.
 
-[Negation](#negation) is supported by starting any pattern with `not:`. These exclude workspaces from any other patterns provided.
+[Negation](#negation) is supported by prefixing any pattern with `not:` or `!`, the former suggested to avoid shell operator issues. These exclude workspaces from any other patterns provided.
 
 ## Default Matching
 

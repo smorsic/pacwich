@@ -3,22 +3,23 @@ title: Concepts > Parallel Scripts
 titleSuffix: " | bun-workspaces"
 description: "Parallel Scripts | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 import { exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig'
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 import { CLI_PARALLEL_SCRIPTS_EXAMPLE } from '../../../lib/cli/cliExamples';
 import { API_PARALLEL_SCRIPTS_EXAMPLE } from '../../../lib/api/apiExamples';
 import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
 
-<ConceptsHeader activeHref="parallelScripts" />
+# Concept:  Parallel Scripts
+
+## Overview
+
+Scripts run in parallel by default (disabled via `--parallel=false` in the CLI or `parallel: false` in the API), and you have control over how many concurrent scripts can run at the same time.
 
 ## Parallel Max Value
-
-Scripts run in parallel by default, and you have control over how many concurrent scripts can run at the same time.
 
 You can pass a number value, a percentage value (e.g. `50%`), or one of the keywords `"auto"`, `"default"`, or `"unbounded"`
 to the parallel max option.

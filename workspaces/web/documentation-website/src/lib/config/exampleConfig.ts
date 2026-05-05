@@ -11,6 +11,14 @@ export const exampleRootConfigSimple1: RootConfig = {
     shell: "system",
     includeRootWorkspace: false,
   },
+  workspacePatternConfigs: [
+    {
+      patterns: ["path:libraries/frontend/**/*"],
+      config: {
+        tags: ["frontend", "library"],
+      },
+    },
+  ],
 };
 
 export const exampleRootConfigSimple2: RootConfig = {
@@ -78,7 +86,7 @@ export default ${target === "workspace" ? "defineWorkspaceConfig" : "defineRootC
     config,
     null,
     2,
-  ).replace(/(?<!: )"((\w|\s|\d)+)"/g, "$1")});
+  ).replace(/"((\w|\s|\d)+)"(?=: )/g, "$1")});
 `.trim();
 };
 

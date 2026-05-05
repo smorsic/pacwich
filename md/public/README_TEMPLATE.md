@@ -2,25 +2,28 @@
 <img src="./workspaces/web/documentation-website/src/pages/public/images/png/bwunster-bg-banner-wide_3000x900.png" alt="bun-workspaces" width="100%" />
 </a>
 
+<br/>
+
+Full Documentation: [https://bunworkspaces.com](https://bunworkspaces.com)
+
+Changelog: [GitHub Releases](https://github.com/bun-workspaces/bun-workspaces/releases)
+
 # bun-workspaces
 
-### [**See Full Documentation Here**: _https://bunworkspaces.com_](https://bunworkspaces.com)
+A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhances native [Bun workspaces](https://bun.sh/docs/install/workspaces).
 
-This is a CLI and TypeScript API to enhance your monorepo development with Bun's [native workspaces](https://bun.sh/docs/install/workspaces) feature for nested JavaScript/TypeScript packages.
+- Works right away, with **no boilerplate required** 🍽️
+- Get **rich metadata** about your monorepo 🤖
+- **Orchestrate** your workspaces' package.json scripts 🎻
+- Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚
+- Use with Bun as your package manager for **Node** projects 🎁
+- Use the [MCP server](https://bunworkspaces.com/ai/mcp) to make your AI tooling aware of `bun-workspaces` and its documentation resources! 🛠️
 
-- Works right away, with no boilerplate required 🍔🍴
-- Get metadata about your monorepo 🤖
-- Orchestrate your workspaces' `package.json` scripts 📋
-- Run inline [Bun Shell](https://bun.com/docs/runtime/shell) scripts in workspaces 🐚
-- Use the [MCP server](https://bunworkspaces.com/ai/mcp) for your AI tooling to learn how to use `bun-workspaces` and add project metadata to context! 🛠️
+To get started, all you need is a repo using Bun's workspaces feature for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
 
-This is a tool to help manage a Bun monorepo, offering features beyond what [Bun's --filter feature](https://bun.com/docs/pm/filter) can do. It can be used to get a variety of metadata about your project and run scripts across your workspaces with advanced control.
-
-To get started, all you need is a repo using [Bun's workspaces feature](https://bun.sh/docs/install/workspaces) for nested JavaScript/TypeScript packages.
+Start running some [CLI commands](https://bunworkspaces.com/cli) right away in your repo, or take full advantage of the [TypeScript API](https://bunworkspaces.com/api) and its features.
 
 This package is unopinionated and works with any project structure you want. Think of this as a power suit you can snap onto native workspaces, rather than whole new monorepo framework.
-
-Start running some [CLI commands](https://bunworkspaces.com/cli) right away in your repo, or take full advantage of the [scripting API](https://bunworkspaces.com/api) and its features.
 
 ## Quick Start
 

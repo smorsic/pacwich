@@ -3,36 +3,40 @@ title: Concepts > Script Execution Order
 titleSuffix: " | bun-workspaces"
 description: "Script Execution Order | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 import { exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig'
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 
-<ConceptsHeader activeHref="scriptExecutionOrder" />
+# Concept: Script Execution Order
+
+## Overview
 
 Using the [workspace configuration](/config/workspace), you can set an `"order"` value to sort the execution order of a script per workspace. 
 
 You may want to run scripts in series (`--parallel=false` in the CLI or option `parallel: false` in the API) instead of the default parallel so that
 each script completes before the next one starts.
 
-#### Default Order
+### Default Order
 
 By default, workspaces are sorted in alphanumerical order of their relative path from the project root. 
 
-#### Configured vs. Default Order
+### Configured vs. Default Order
 
 Workspace scripts with
 an `"order"` value will be executed before workspaces with no `"order"` set for the same script, falling back to the default order.
 
-#### Example
+## Example
 
 In this example, any other workspaces in the project with an `"order"` for the `"start"` script less than `10` will be executed before this workspace, 
 and any workspaces with an `"order"` for the `"start"` script greater than `10` will be executed after this workspace.
 
 
 <SyntaxHighlighter language="json">
-  {JSON.stringify(exampleWorkspaceConfigSimple, null, 2)}
+  {JSON.stringify({
+    alias: exampleWorkspaceConfigSimple.alias,
+    scripts: exampleWorkspaceConfigSimple.scripts,
+  }, null, 2)}
 </SyntaxHighlighter>

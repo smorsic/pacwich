@@ -31,8 +31,20 @@ const CONFIG_LOCATION_PATHS: Record<
   packageJson: (_, packageJsonKey) => `package.json["${packageJsonKey}"]`,
 };
 
+const CONFIG_LOCATION_DESCRIPTIONS: Record<ConfigLocationType, string> = {
+  tsFile: "TypeScript file",
+  jsFile: "JavaScript file",
+  jsoncFile: "JSONC file",
+  jsonFile: "JSON file",
+  packageJson: "package.json key",
+};
+
 export const createConfigLocationPath = (
   locationType: ConfigLocationType,
   name: string,
   packageJsonKey: string,
 ) => CONFIG_LOCATION_PATHS[locationType](name, packageJsonKey);
+
+export const createConfigLocationDescription = (
+  locationType: ConfigLocationType,
+) => CONFIG_LOCATION_DESCRIPTIONS[locationType];

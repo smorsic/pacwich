@@ -3,20 +3,21 @@ title: Concepts > Inline Scripts
 titleSuffix: " | bun-workspaces"
 description: "Inline Scripts | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 
 import { exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig'
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 import { CLI_INLINE_NAME_EXAMPLE, CLI_INLINE_SHELL_EXAMPLE } from '../../../lib/cli/cliExamples';
 import { API_INLINE_NAME_EXAMPLE, API_INLINE_SHELL_EXAMPLE } from '../../../lib/api/apiExamples';
 import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
 import { Link } from 'rspress/theme';
 
-<ConceptsHeader activeHref="inlineScripts" />
+# Concept:  Inline Scripts
+
+## Overview
 
 Normally, a ["script"](/concepts/glossary#script) in bun-workspaces references one of the entries found in a workspace's `"scripts"` field in its `package.json` file.
 

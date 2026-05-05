@@ -3,7 +3,7 @@ title: Concepts > Workspace Dependencies
 titleSuffix: " | bun-workspaces"
 description: "Workspace Dependencies | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
@@ -11,13 +11,14 @@ footer: false
 import { getWorkspaceScriptMetadataConfig } from 'bw-common/runScript';
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
 import { exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 
-<ConceptsHeader activeHref="workspaceDependencies" />
+# Concept: Workspace Dependencies
 
-## Workspace Dependencies - Overview
+## Overview
 
 [Workspaces](/concepts/glossary#workspace) can depend on other workspaces and import/export code between them. This is a native capability of workspaces in Bun.
+
+### Setting up Dependencies - Example
 
 For example, this might be some workspace's `package.json` file, where `my-workspace-b` depends on `my-workspace-a`:
 

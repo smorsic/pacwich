@@ -14,7 +14,8 @@ const CHANGELOG_URL = `${GITHUB_REPO_URL}/releases`;
 const LICENSE_URL = GITHUB_REPO_URL + "/blob/main/LICENSE.md";
 const NPM_PACKAGE_URL = "https://www.npmjs.com/package/bun-workspaces";
 
-const TITLE = "bun-workspaces — Better Bun monorepo management | Documentation";
+const TITLE =
+  "bun-workspaces — Enhanced Bun monorepo management | Documentation";
 const DESCRIPTION =
   "A tool for managing monorepos using native Bun workspaces, helping you develop JavaScript and TypeScript projects with the bun-workspaces CLI and API.";
 
@@ -313,8 +314,9 @@ export default defineConfig({
         tag: TAG_ICONS.config,
         items: [
           {
-            text: "General",
+            text: "Overview",
             link: "/config",
+            activeMatch: "/config$",
           },
           {
             text: "Root Configuration",
@@ -418,5 +420,257 @@ export default defineConfig({
         tag: TAG_ICONS.blog,
       },
     ],
+    sidebar: {
+      "/cli": [
+        {
+          text: "CLI",
+          collapsible: false,
+          items: [
+            {
+              text: "Quick Start",
+              link: "/cli",
+            },
+            {
+              text: "Reference",
+              collapsible: false,
+              items: [
+                {
+                  text: "Global Options",
+                  link: "/cli/global-options",
+                },
+                {
+                  text: "Commands",
+                  link: "/cli/commands",
+                  collapsed: true,
+                  items: [
+                    {
+                      text: "list-workspaces (ls)",
+                      link: "/cli/commands#list-workspaces",
+                    },
+                    {
+                      text: "workspace-info (info)",
+                      link: "/cli/commands#workspace-info",
+                    },
+                    {
+                      text: "list-scripts (ls-scripts)",
+                      link: "/cli/commands#list-scripts",
+                    },
+                    {
+                      text: "script-info",
+                      link: "/cli/commands#script-info",
+                    },
+                    {
+                      text: "list-tags (ls-tags)",
+                      link: "/cli/commands#list-tags",
+                    },
+                    {
+                      text: "tag-info",
+                      link: "/cli/commands#tag-info",
+                    },
+                    {
+                      text: "run-script (run)",
+                      link: "/cli/commands#run-script",
+                    },
+                    {
+                      text: "mcp-server",
+                      link: "/cli/commands#mcp-server",
+                    },
+                    {
+                      text: "doctor",
+                      link: "/cli/commands#doctor",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: "TS/JS API",
+          link: "/api",
+        },
+        {
+          text: "Configuration",
+          link: "/config",
+        },
+        {
+          text: "Concepts",
+          link: "/concepts/glossary",
+        },
+      ],
+      "/api": [
+        {
+          text: "CLI",
+          link: "/cli",
+        },
+        {
+          text: "TS/JS API",
+          collapsible: false,
+          items: [
+            {
+              text: "Quick Start",
+              link: "/api",
+            },
+            {
+              text: "Reference",
+              link: "/api/reference",
+              collapsed: false,
+              items: [
+                {
+                  text: "Workspace",
+                  link: "/api/reference#workspace",
+                },
+                {
+                  text: "Project",
+                  link: "/api/reference#project",
+                },
+                {
+                  text: "FileSystemProject",
+                  link: "/api/reference#filesystemproject",
+                },
+                {
+                  text: "createFileSystemProject",
+                  link: "/api/reference#createfilesystemproject",
+                },
+                {
+                  text: "createMemoryProject",
+                  link: "/api/reference#creatememoryproject",
+                },
+                {
+                  text: "setLogLevel",
+                  link: "/api/reference#setloglevel",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: "Configuration",
+          link: "/config",
+        },
+        {
+          text: "Concepts",
+          link: "/concepts/glossary",
+        },
+      ],
+      "/config": [
+        {
+          text: "CLI",
+          link: "/cli",
+        },
+        {
+          text: "TS/JS API",
+          link: "/api",
+        },
+        {
+          text: "Configuration",
+          collapsible: false,
+          items: [
+            {
+              text: "Overview & Quick Examples",
+              link: "/config",
+            },
+            {
+              text: "Workspace Configuration",
+              link: "/config/workspace",
+              items: [
+                {
+                  text: "Workspace Config File",
+                  link: "/config/workspace",
+                },
+              ],
+            },
+            {
+              text: "Project Configuration",
+              link: "/config/root",
+              items: [
+                {
+                  text: "Root Config File",
+                  link: "/config/root",
+                },
+                {
+                  text: "More: Workspace Pattern Configs",
+                  link: "/config/workspace-pattern-configs",
+                },
+                {
+                  text: "Environment Variables",
+                  link: "/config/env-vars",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          text: "Concepts",
+          link: "/concepts/glossary",
+        },
+      ],
+      "/concepts": [
+        {
+          text: "CLI",
+          link: "/cli",
+        },
+        {
+          text: "TS/JS API",
+          link: "/api",
+        },
+        {
+          text: "Configuration",
+          link: "/config",
+        },
+        {
+          text: "Concepts",
+          collapsible: false,
+          items: [
+            {
+              text: "Glossary",
+              link: "/concepts/glossary",
+            },
+            {
+              text: "Workspaces",
+              items: [
+                {
+                  text: "Workspace Aliases",
+                  link: "/concepts/workspace-aliases",
+                },
+                {
+                  text: "Workspace Patterns",
+                  link: "/concepts/workspace-patterns",
+                },
+                {
+                  text: "Workspace Dependencies",
+                  link: "/concepts/workspace-dependencies",
+                },
+                {
+                  text: "Root Workspace",
+                  link: "/concepts/root-workspace",
+                },
+              ],
+            },
+            {
+              text: "Scripts",
+              items: [
+                {
+                  text: "Inline Scripts",
+                  link: "/concepts/inline-scripts",
+                },
+                {
+                  text: "Parallel Scripts",
+                  link: "/concepts/parallel-scripts",
+                },
+                {
+                  text: "Workspace Script Metadata",
+                  link: "/concepts/workspace-script-metadata",
+                },
+                {
+                  text: "Script Execution Order",
+                  link: "/concepts/script-execution-order",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   },
 });

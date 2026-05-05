@@ -3,22 +3,21 @@ title: Concepts > Root Workspace
 titleSuffix: " | bun-workspaces"
 description: "Root Workspace | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
 import { exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig'
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
-import { ConceptsHeader } from "../../../lib/concepts/ConceptsHeader";
 import { CLI_RUN_SCRIPT_ROOT_SELECTOR_EXAMPLE } from '../../../lib/cli/cliExamples';
 import { API_ROOT_SELECTOR_EXAMPLE } from '../../../lib/api/apiExamples';
 import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
 import { getCliGlobalOptionContent } from '../../../lib/cli/cliGlobalOptions';
 import { ROOT_WORKSPACE_SELECTOR } from 'bw-common/project';
 
-<ConceptsHeader activeHref="rootWorkspace" />
+# Concept: Root Workspace
 
-## The Root Workspace
+## Overview
 
 The root workspace is simply a [Workspace](/concepts/glossary#workspace) based on the root `package.json` of your project. 
 

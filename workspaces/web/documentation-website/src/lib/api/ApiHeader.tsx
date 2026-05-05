@@ -1,34 +1,13 @@
 import { Link } from "rspress/theme";
 import { RequiredBunVersion } from "../components/RequiredBunVersion";
 
-const LINKS = {
-  home: "/api",
-  reference: "/api/reference",
-  examples: "/api/examples",
-} as const;
-
 export interface ApiHeaderProps {
-  activeHref: keyof typeof LINKS;
   divider?: boolean;
 }
 
-export const ApiHeader = ({ activeHref, divider }: ApiHeaderProps) => {
+export const ApiHeader = ({ divider }: ApiHeaderProps) => {
   return (
     <div className="sub-header">
-      <div className="sub-header-links">
-        <Link
-          href={LINKS.home}
-          className={activeHref === "home" ? "active" : ""}
-        >
-          Quick Start
-        </Link>
-        <Link
-          href={LINKS.reference}
-          className={activeHref === "reference" ? "active" : ""}
-        >
-          Reference
-        </Link>
-      </div>
       <p className="note" style={{ marginTop: "1rem" }}>
         Install the package via <code>bun add --dev bun-workspaces</code> to use
         the TypeScript/JavaScript API.
@@ -41,7 +20,11 @@ export const ApiHeader = ({ activeHref, divider }: ApiHeaderProps) => {
         </Link>{" "}
         for more fundamental concepts.
       </p>
-      <h4 style={{ marginTop: "1rem" }}>Ensuring Workspace Data is Current</h4>
+      <h4 style={{ marginTop: "1rem" }}>TypeScript</h4>
+      <p className="note" style={{ marginTop: "1rem" }}>
+        Ensure you have <code>@types/bun</code> installed for accurate types.
+      </p>
+      <h4 style={{ marginTop: "1rem" }}>Stale Workspace Data</h4>
       <p className="note" style={{ marginTop: "1rem" }}>
         Note that you need to run <code>bun install</code> in your project for
         <code>bun-workspaces</code> to find your project's workspaces, and you
