@@ -77,7 +77,7 @@ const makeProject = (
   rootDirectory = getProjectRoot("default"),
 ): FileSystemProject => createFileSystemProject({ rootDirectory });
 
-describe("FileSystemProject.getAffectedWorkspaces", () => {
+describe("FileSystemProject.determineAffectedWorkspaces", () => {
   describe("type validation", () => {
     test("throws for non-string diffSource", () => {
       const project = makeProject();
