@@ -23,41 +23,48 @@ export type {
   GitAffectedFileReason,
 };
 
+export type AffectedChangedFile = {
+  /** The path to the file, relative to the project root */
+  projectFilePath: string;
+  /** The matched input for the file */
+  inputMatch: string;
+  /** Present when `diffSource` is "git": the reasons for the file being affected */
+  gitReasons?: GitAffectedFileReason[];
+};
+
+export type AffectedDependency = {
+  /** The name of the dependency */
+  dependencyName: string;
+  /** The chain of dependencies that led to the affected workspace */
+  chain: AffectedDependencyChainEntry[];
+};
+
 export type AffectedWorkspaceResult = {
   workspace: Workspace;
   inputs: WorkspaceInputsConfig;
   isAffected: boolean;
   affectedReasons: {
-    changedFiles: {
-      /** The path to the file, relative to the project root */
-      projectFilePath: string;
-      /** The matched input for the file */
-      inputMatch: string;
-      /** Present when `diffSource` is "git": the reasons for the file being affected */
-      gitReasons?: GitAffectedFileReason[];
-    }[];
-    dependencies: {
-      /** The name of the dependency */
-      dependencyName: string;
-      /** The chain of dependencies that led to the affected workspace */
-      chain: AffectedDependencyChainEntry[];
-    }[];
+    changedFiles: AffectedChangedFile[];
+    dependencies: AffectedDependency[];
   };
 };
 
 /** The source for changed files */
 export type AffectedDiffSource = "git" | "fileList";
 
-export type AffectedWorkspacesResult = {
-  metadata: {
-    /** The source for changed files */
-    diffSource: AffectedDiffSource;
-    /** When `diffSource` is "git" */
-    git?: {
-      baseRef: string;
-      headRef: string;
-    };
+export type AffectedWorkspacesMetadata = {
+  /** The source for changed files */
+  diffSource: AffectedDiffSource;
+  /** When `diffSource` is "git" */
+  git?: {
+    baseRef: string;
+    headRef: string;
   };
+};
+
+export type AffectedWorkspacesResult = {
+  /** Metadata based on the parameters given */
+  metadata: AffectedWorkspacesMetadata;
   /** The workspaces and their affected reasons */
   workspaceResults: AffectedWorkspaceResult[];
 };

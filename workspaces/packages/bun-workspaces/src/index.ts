@@ -33,6 +33,9 @@ export {
   type AffectedDependencyChainEntry,
   type AffectedDependencyEdgeSource,
   type GitAffectedFileReason,
+  type AffectedChangedFile,
+  type AffectedDependency,
+  type AffectedWorkspacesMetadata,
   isOptionsForDiffSource,
 } from "./project";
 export * from "./config/public";
