@@ -166,8 +166,10 @@ export type RunScriptAcrossWorkspacesResult = {
   workspaces: Workspace[];
 };
 
-export type RunAffectedWorkspacesOptions = GetAffectedWorkspacesOptions &
-  Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
+export type RunAffectedWorkspaceScriptOptions = {
+  affectedOptions: GetAffectedWorkspacesOptions;
+  scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
+};
 
 const quoteArg = (arg: string, shell: ScriptShellOption): string =>
   IS_WINDOWS && shell === "system"
@@ -688,16 +690,18 @@ class _FileSystemProject extends ProjectBase implements Project {
    *
    * Similar to {@link runScriptAcrossWorkspaces}, but only runs the script across the affected workspaces.
    */
-  async runAffectedWorkspaces(
-    options: RunAffectedWorkspacesOptions,
-  ): Promise<RunScriptAcrossWorkspacesResult> {
-    const { workspaceResults } = await this.getAffectedWorkspaces(options);
+  async runAffectedWorkspaceScript({
+    affectedOptions,
+    scriptOptions,
+  }: RunAffectedWorkspaceScriptOptions): Promise<RunScriptAcrossWorkspacesResult> {
+    const { workspaceResults } =
+      await this.getAffectedWorkspaces(affectedOptions);
 
     return this.runScriptAcrossWorkspaces({
+      ...scriptOptions,
       workspacePatterns: workspaceResults.map(
         ({ workspace }) => workspace.name,
       ),
-      ...options,
     });
   }
 
