@@ -396,17 +396,34 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
       expect(findResult(result.workspaceResults, "a").isAffected).toBe(true);
     });
 
-    test("result.inputs reflects the configured defaultInputs (no implicit triggers)", async () => {
+    test("result.inputs reflects the effective inputs used (configured + implicit)", async () => {
       const project = makeProject(getProjectRoot("affectedWithInputs"));
       const result = await project.getAffectedWorkspaces({
         diffSource: "fileList",
         changedFiles: [],
       });
       expect(findResult(result.workspaceResults, "a").inputs).toEqual({
-        files: ["src/**/*"],
+        files: ["src/**/*", "package.json", "/package.json"],
+        workspacePatterns: [],
       });
-      // 'd' has no bw.workspace.json → empty config
-      expect(findResult(result.workspaceResults, "d").inputs).toEqual({});
+      // 'd' has no bw.workspace.json → falls back to default "." pattern + implicit
+      expect(findResult(result.workspaceResults, "d").inputs).toEqual({
+        files: [".", "package.json", "/package.json"],
+        workspacePatterns: [],
+      });
+    });
+
+    test("result.inputs omits implicit patterns when ignorePackageDependencies is true", async () => {
+      const project = makeProject(getProjectRoot("affectedWithInputs"));
+      const result = await project.getAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: [],
+        ignorePackageDependencies: true,
+      });
+      expect(findResult(result.workspaceResults, "a").inputs).toEqual({
+        files: ["src/**/*"],
+        workspacePatterns: [],
+      });
     });
 
     test("workspacePatterns inputs treat matched workspaces as input dependencies", async () => {
@@ -512,17 +529,23 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
         diffSource: "fileList",
         changedFiles: [],
         script: "build",
+        ignorePackageDependencies: true,
       });
       // 'a' has script-level inputs for "build"
       expect(findResult(result.workspaceResults, "a").inputs).toEqual({
         files: ["build/**/*"],
+        workspacePatterns: [],
       });
       // 'b' falls back to defaultInputs
       expect(findResult(result.workspaceResults, "b").inputs).toEqual({
         files: ["src/**/*"],
+        workspacePatterns: [],
       });
-      // 'd' has no config → empty
-      expect(findResult(result.workspaceResults, "d").inputs).toEqual({});
+      // 'd' has no config → default "." pattern
+      expect(findResult(result.workspaceResults, "d").inputs).toEqual({
+        files: ["."],
+        workspacePatterns: [],
+      });
     });
 
     test("without script option, only defaultInputs is used (script-level inputs ignored)", async () => {

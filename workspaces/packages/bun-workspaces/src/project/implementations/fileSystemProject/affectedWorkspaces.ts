@@ -150,29 +150,34 @@ const buildWorkspaceInputs = ({
   script: string | undefined;
 }): {
   inputs: AffectedWorkspaceInput[];
-  resolvedInputsByName: Map<string, WorkspaceInputsConfig>;
+  effectiveInputsByName: Map<string, WorkspaceInputsConfig>;
 } => {
   const implicitPatterns = ignorePackageDependencies
     ? []
     : [...IMPLICIT_PACKAGE_JSON_INPUT_PATTERNS];
-  const resolvedInputsByName = new Map<string, WorkspaceInputsConfig>();
+  const effectiveInputsByName = new Map<string, WorkspaceInputsConfig>();
   const inputs = project.workspaces.map<AffectedWorkspaceInput>((workspace) => {
     const workspaceConfig = project.config.workspaces[workspace.name];
     const scriptInputs = script
       ? workspaceConfig?.scripts[script]?.inputs
       : undefined;
-    const resolvedInputs = scriptInputs ?? workspaceConfig?.defaultInputs ?? {};
-    resolvedInputsByName.set(workspace.name, resolvedInputs);
+    const sourceInputs = scriptInputs ?? workspaceConfig?.defaultInputs ?? {};
+    const effectiveFiles = [
+      ...(sourceInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN]),
+      ...implicitPatterns,
+    ];
+    const effectiveWorkspacePatterns = sourceInputs.workspacePatterns ?? [];
+    effectiveInputsByName.set(workspace.name, {
+      files: effectiveFiles,
+      workspacePatterns: effectiveWorkspacePatterns,
+    });
     return {
       workspace,
-      inputFilePatterns: [
-        ...(resolvedInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN]),
-        ...implicitPatterns,
-      ],
-      inputWorkspacePatterns: resolvedInputs.workspacePatterns ?? [],
+      inputFilePatterns: effectiveFiles,
+      inputWorkspacePatterns: effectiveWorkspacePatterns,
     };
   });
-  return { inputs, resolvedInputsByName };
+  return { inputs, effectiveInputsByName };
 };
 
 const normalizeChangedFilesPattern = (pattern: string): string =>
@@ -254,10 +259,10 @@ const expandChangedFilesPatterns = ({
 
 const toAffectedWorkspaceResult = (
   internal: InternalAffectedWorkspaceResult<GitFileMetadata | undefined>,
-  resolvedInputsByName: Map<string, WorkspaceInputsConfig>,
+  effectiveInputsByName: Map<string, WorkspaceInputsConfig>,
 ): AffectedWorkspaceResult => ({
   workspace: internal.workspace,
-  inputs: resolvedInputsByName.get(internal.workspace.name) ?? {},
+  inputs: effectiveInputsByName.get(internal.workspace.name) ?? {},
   isAffected: internal.isAffected,
   affectedReasons: {
     changedFiles: internal.affectedReasons.changedFiles.map((file) => ({
@@ -276,7 +281,7 @@ export const getAffectedWorkspaces = async (
   options: GetAffectedWorkspacesOptions,
 ): Promise<AffectedWorkspacesResult> => {
   const ignorePackageDependencies = options.ignorePackageDependencies ?? false;
-  const { inputs: workspaceInputs, resolvedInputsByName } =
+  const { inputs: workspaceInputs, effectiveInputsByName } =
     buildWorkspaceInputs({
       project,
       ignorePackageDependencies,
@@ -311,7 +316,7 @@ export const getAffectedWorkspaces = async (
         git: { baseRef, headRef },
       },
       workspaceResults: affectedWorkspaces.map((result) =>
-        toAffectedWorkspaceResult(result, resolvedInputsByName),
+        toAffectedWorkspaceResult(result, effectiveInputsByName),
       ),
     };
   }
@@ -329,7 +334,7 @@ export const getAffectedWorkspaces = async (
   return {
     metadata: { diffSource: "fileList" },
     workspaceResults: affectedWorkspaces.map((result) =>
-      toAffectedWorkspaceResult(result, resolvedInputsByName),
+      toAffectedWorkspaceResult(result, effectiveInputsByName),
     ),
   };
 };
