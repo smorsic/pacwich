@@ -349,7 +349,7 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
         changedFiles: ["packages/*/package.json"],
       });
       // every workspace's package.json matches → all workspaces affected
-      for (const name of ["a", "b", "c", "d"]) {
+      for (const name of ["a", "b", "c", "d", "e"]) {
         expect(findResult(result.workspaceResults, name).isAffected).toBe(true);
       }
     });
@@ -371,6 +371,28 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
         changedFiles: ["packages/e/src/deleted.ts"],
       });
       expect(findResult(result.workspaceResults, "e").isAffected).toBe(true);
+    });
+
+    test("'.' literal expands to every file under the project root", async () => {
+      const project = makeProject(getProjectRoot("affectedWithInputs"));
+      const result = await project.getAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: ["."],
+      });
+      // every workspace's files end up in the expansion → all affected
+      for (const name of ["a", "b", "c", "d", "e"]) {
+        expect(findResult(result.workspaceResults, name).isAffected).toBe(true);
+      }
+    });
+
+    test("'./' prefixed paths are stripped before matching", async () => {
+      const project = makeProject(getProjectRoot("affectedWithInputs"));
+      const result = await project.getAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: ["./packages/a/src/index.ts"],
+      });
+      // Without ./ stripping, this would not match 'a's "src/**/*" pattern.
+      expect(findResult(result.workspaceResults, "a").isAffected).toBe(true);
     });
   });
 
@@ -426,6 +448,21 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
       });
     });
 
+    test("effective input files are deduped when configured patterns overlap implicits", async () => {
+      const project = makeProject(getProjectRoot("affectedWithInputs"));
+      // 'e' has defaultInputs.files = ["package.json", "/package.json"]
+      // which exactly overlaps the implicit triggers. Effective files
+      // should appear once each, in the original order.
+      const result = await project.getAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: [],
+      });
+      expect(findResult(result.workspaceResults, "e").inputs).toEqual({
+        files: ["package.json", "/package.json"],
+        workspacePatterns: [],
+      });
+    });
+
     test("workspacePatterns inputs treat matched workspaces as input dependencies", async () => {
       const project = makeProject(getProjectRoot("affectedWithInputs"));
       // c has defaultInputs.workspacePatterns = ["d"]; d has no inputs config
@@ -466,7 +503,7 @@ describe("FileSystemProject.getAffectedWorkspaces", () => {
         diffSource: "fileList",
         changedFiles: ["package.json"],
       });
-      for (const name of ["a", "b", "c", "d"]) {
+      for (const name of ["a", "b", "c", "d", "e"]) {
         expect(findResult(result.workspaceResults, name).isAffected).toBe(true);
       }
     });

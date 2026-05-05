@@ -81,6 +81,12 @@ const stripTrailingSlashes = (filePath: string) => filePath.replace(/\/+$/, "");
 
 const stripLeadingSlashes = (filePath: string) => filePath.replace(/^\/+/, "");
 
+const stripDotSlashSegments = (filePath: string): string => {
+  let stripped = filePath;
+  while (stripped.startsWith("./")) stripped = stripped.slice(2);
+  return stripped === "." ? "" : stripped;
+};
+
 const normalizeChangedFilePath = ({
   rootDirectory,
   filePath,
@@ -90,7 +96,7 @@ const normalizeChangedFilePath = ({
 }) => {
   const posixFilePath = toPosixPath(filePath);
   if (!path.isAbsolute(filePath)) {
-    return posixFilePath;
+    return stripDotSlashSegments(posixFilePath);
   }
   const posixRoot = stripTrailingSlashes(toPosixPath(rootDirectory));
   if (posixFilePath === posixRoot) {

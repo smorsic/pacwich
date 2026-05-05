@@ -60,9 +60,16 @@ export type AffectedWorkspacesResult = {
 export type BaseAffectedWorkspacesOptions = {
   ignorePackageDependencies?: boolean;
   /**
-   * The name of a workspace script. When provided, each workspace's
-   * script-level `inputs` (from `scripts[script].inputs` in workspace config)
-   * are used when present, falling back to `defaultInputs` otherwise.
+   * The name of a workspace script. Controls **inputs resolution only**:
+   * each workspace's script-level `inputs` (from `scripts[script].inputs`
+   * in workspace config) are used when present, falling back to
+   * `defaultInputs` otherwise.
+   *
+   * Workspaces without the script in their `package.json` are still
+   * computed and reported — this option does not filter the result set.
+   * The script-level inputs lookup is keyed off the configured script name
+   * (or the inline-script name when used by `runAffectedWorkspaceScript`),
+   * not the runtime presence of the script in any workspace's package.json.
    *
    * When omitted, only `defaultInputs` is used.
    */
@@ -103,7 +110,14 @@ export type FileListAffectedWorkspacesOptions =
     /**
      * File paths, directories, or glob patterns relative to the project root.
      *
-     * Prefix with `!` to exclude.
+     * - File paths are matched literally. Paths that don't exist on disk
+     *   pass through as-is (deleted-file semantics).
+     * - Directories are walked recursively into a flat file list. The
+     *   `node_modules` and `.git` directories are skipped during the walk.
+     * - Globs are expanded via `bun.Glob` against the project root and
+     *   only match files that currently exist.
+     * - Prefix with `!` to exclude. Exclusions are expanded the same way
+     *   and removed from the include set.
      */
     changedFiles: string[];
   };
@@ -163,8 +177,10 @@ const buildWorkspaceInputs = ({
       : undefined;
     const sourceInputs = scriptInputs ?? workspaceConfig?.defaultInputs ?? {};
     const effectiveFiles = [
-      ...(sourceInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN]),
-      ...implicitPatterns,
+      ...new Set([
+        ...(sourceInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN]),
+        ...implicitPatterns,
+      ]),
     ];
     const effectiveWorkspacePatterns = sourceInputs.workspacePatterns ?? [];
     effectiveInputsByName.set(workspace.name, {
@@ -180,8 +196,13 @@ const buildWorkspaceInputs = ({
   return { inputs, effectiveInputsByName };
 };
 
-const normalizeChangedFilesPattern = (pattern: string): string =>
-  pattern.replaceAll("\\", "/").replace(/^\/+/, "").replace(/\/+$/, "");
+const normalizeChangedFilesPattern = (pattern: string): string => {
+  let normalized = pattern.replaceAll("\\", "/");
+  while (normalized.startsWith("./")) normalized = normalized.slice(2);
+  normalized = normalized.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (normalized === ".") return "";
+  return normalized;
+};
 
 const expandPatternToFiles = ({
   rootDirectory,
@@ -190,10 +211,10 @@ const expandPatternToFiles = ({
   rootDirectory: string;
   pattern: string;
 }): string[] => {
+  if (!pattern) return [];
   const normalized = normalizeChangedFilesPattern(pattern);
-  if (!normalized) return [];
 
-  if (GLOB_CHARACTER_REGEX.test(normalized)) {
+  if (normalized && GLOB_CHARACTER_REGEX.test(normalized)) {
     return Array.from(
       new bun.Glob(normalized).scanSync({
         cwd: rootDirectory,
@@ -202,13 +223,18 @@ const expandPatternToFiles = ({
     ).map((match) => match.replaceAll("\\", "/"));
   }
 
-  const absolute = path.join(rootDirectory, ...normalized.split("/"));
+  // Empty `normalized` means the input resolved to the project root (e.g. ".")
+  const isProjectRoot = normalized === "";
+  const absolute = isProjectRoot
+    ? rootDirectory
+    : path.join(rootDirectory, ...normalized.split("/"));
+
   let stat: fs.Stats;
   try {
     stat = fs.statSync(absolute);
   } catch {
     // Pass through paths that don't exist on disk (e.g. deleted files)
-    return [normalized];
+    return isProjectRoot ? [] : [normalized];
   }
   if (stat.isFile()) return [normalized];
   if (!stat.isDirectory()) return [];

@@ -28,7 +28,10 @@ import {
   type OutputStreamName,
   type ScriptEventName,
 } from "../../../runScript";
-import type { MultiProcessOutput } from "../../../runScript/output/multiProcessOutput";
+import {
+  createMultiProcessOutput,
+  type MultiProcessOutput,
+} from "../../../runScript/output/multiProcessOutput";
 import { checkIsRecursiveScript } from "../../../runScript/recursion";
 import { resolveScriptShell } from "../../../runScript/scriptShellOption";
 import {
@@ -167,8 +170,47 @@ export type RunScriptAcrossWorkspacesResult = {
 };
 
 export type RunAffectedWorkspaceScriptOptions = {
-  affectedOptions: GetAffectedWorkspacesOptions;
+  /**
+   * Options for resolving the affected workspaces. The `script` field is
+   * intentionally omitted — it is derived from `scriptOptions` (the inline
+   * script name when running inline, the script name otherwise) so that
+   * inputs resolution always tracks the script being run.
+   */
+  affectedOptions: Omit<GetAffectedWorkspacesOptions, "script">;
   scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
+};
+
+/**
+ * Resolves the script name used to look up script-level inputs in
+ * `runAffectedWorkspaceScript`. Uses the inline-script name when running
+ * an inline command, or the script name otherwise.
+ */
+const resolveInputsLookupScriptName = (
+  scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">,
+): string | undefined => {
+  if (!scriptOptions.inline) return scriptOptions.script;
+  if (typeof scriptOptions.inline === "object") {
+    return scriptOptions.inline.scriptName;
+  }
+  return undefined;
+};
+
+const createEmptyAffectedRunResult = (): RunScriptAcrossWorkspacesResult => {
+  const now = new Date().toISOString();
+  return {
+    output: createMultiProcessOutput([]),
+    summary: Promise.resolve({
+      totalCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      allSuccess: true,
+      startTimeISO: now,
+      endTimeISO: now,
+      durationMs: 0,
+      scriptResults: [],
+    }),
+    workspaces: [],
+  };
 };
 
 const quoteArg = (arg: string, shell: ScriptShellOption): string =>
@@ -783,16 +825,20 @@ class _FileSystemProject extends ProjectBase implements Project {
   }: RunAffectedWorkspaceScriptOptions): Promise<RunScriptAcrossWorkspacesResult> {
     const { workspaceResults } = await this.getAffectedWorkspaces({
       ...affectedOptions,
-      script:
-        affectedOptions.script ??
-        (scriptOptions.inline ? undefined : scriptOptions.script),
+      script: resolveInputsLookupScriptName(scriptOptions),
     });
+
+    const affectedNames = workspaceResults
+      .filter(({ isAffected }) => isAffected)
+      .map(({ workspace }) => workspace.name);
+
+    if (affectedNames.length === 0) {
+      return createEmptyAffectedRunResult();
+    }
 
     return this.runScriptAcrossWorkspaces({
       ...scriptOptions,
-      workspacePatterns: workspaceResults.map(
-        ({ workspace }) => workspace.name,
-      ),
+      workspacePatterns: affectedNames,
     });
   }
 
