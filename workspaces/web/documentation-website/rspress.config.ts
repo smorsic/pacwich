@@ -14,7 +14,8 @@ const CHANGELOG_URL = `${GITHUB_REPO_URL}/releases`;
 const LICENSE_URL = GITHUB_REPO_URL + "/blob/main/LICENSE.md";
 const NPM_PACKAGE_URL = "https://www.npmjs.com/package/bun-workspaces";
 
-const TITLE = "bun-workspaces — Better Bun monorepo management | Documentation";
+const TITLE =
+  "bun-workspaces — Enhanced Bun monorepo management | Documentation";
 const DESCRIPTION =
   "A tool for managing monorepos using native Bun workspaces, helping you develop JavaScript and TypeScript projects with the bun-workspaces CLI and API.";
 

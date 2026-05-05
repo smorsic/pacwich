@@ -15,9 +15,29 @@ import { SyntaxHighlighter } from '../../../lib/util/highlight';
 
 `bun-workspaces` provides its own MCP server via `bunx bun-workspaces mcp-server`. This can be used with any tooling that supports MCP.
 
-When you set up the MCP server with your tool, it will know the basics of how to use `bun-workspaces`, so you don't have to teach it,
-and it can look up more comprehensive docs via **resources**. It also will have a variety of **tools** for getting metadata about the project you're working in.
+When you set up the MCP server with your tool, an agent has access to the server's **tools** that 
+can get project metadata and **resources** that provide it complete documentation.
 
+Agents that read the server instructions on initialization will automatically have knowledge of `bun-workspaces`
+as a package with a brief overview and introduction to the CLI, kept very brief due to tools' propensity to
+truncate these instructions.
+
+## The MCP vs. CLI Debate
+
+You may have heard or read the idea that CLIs are often preferable over MCP servers for AI tooling,
+something `bun-workspaces` obviously already provides.
+
+AI tools like Claude Code can definitely explore the CLI's usage and use it plainly
+to get project metadata or run scripts, etc. without relying on MCP tools.
+
+#### Complementary, not Contradictory
+
+However, the MCP server setup can still be worth it in order for tools to be aware 
+of `bun-workspaces` in the first place, without needing to be prompted about its existence or 
+the entry into the CLI, especially if the tool reads the initial server instructions, like Claude.
+
+The **resources** also provide a quick path for an agent to explore more complete documentation if needed for deeper work
+ with the CLI, TS API, or optional config files, something not possibly from merely the CLI's usage.
 
 ## Example Integrations
 

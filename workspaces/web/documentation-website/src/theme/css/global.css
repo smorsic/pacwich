@@ -276,18 +276,13 @@ pre {
 }
 
 .home-list {
-  margin: auto 0;
-  margin-right: -4rem;
+  margin: 0 0 0 -1rem;
   width: fit-content;
   line-height: 1.2;
   max-width: min(32rem, 90vw);
   font-size: 1.05rem;
-}
-
-@media (max-width: 600px) {
-  .home-list {
-    margin-right: 0;
-  }
+  list-style: none;
+  text-align: center;
 }
 
 .home-list p {
