@@ -440,6 +440,43 @@ export default defineConfig({
           ],
         },
       ],
+      "/api": [
+        {
+          text: "Quick Start",
+          link: "/api",
+        },
+        {
+          text: "Reference",
+          link: "/api/reference",
+          collapsed: false,
+          items: [
+            {
+              text: "Workspace",
+              link: "/api/reference#workspace",
+            },
+            {
+              text: "Project",
+              link: "/api/reference#project",
+            },
+            {
+              text: "FileSystemProject",
+              link: "/api/reference#filesystemproject",
+            },
+            {
+              text: "createFileSystemProject",
+              link: "/api/reference#createfilesystemproject",
+            },
+            {
+              text: "createMemoryProject",
+              link: "/api/reference#creatememoryproject",
+            },
+            {
+              text: "setLogLevel",
+              link: "/api/reference#setloglevel",
+            },
+          ],
+        },
+      ],
     },
   },
 });

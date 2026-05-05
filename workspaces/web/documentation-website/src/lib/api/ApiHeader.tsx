@@ -1,34 +1,13 @@
 import { Link } from "rspress/theme";
 import { RequiredBunVersion } from "../components/RequiredBunVersion";
 
-const LINKS = {
-  home: "/api",
-  reference: "/api/reference",
-  examples: "/api/examples",
-} as const;
-
 export interface ApiHeaderProps {
-  activeHref: keyof typeof LINKS;
   divider?: boolean;
 }
 
-export const ApiHeader = ({ activeHref, divider }: ApiHeaderProps) => {
+export const ApiHeader = ({ divider }: ApiHeaderProps) => {
   return (
     <div className="sub-header">
-      <div className="sub-header-links">
-        <Link
-          href={LINKS.home}
-          className={activeHref === "home" ? "active" : ""}
-        >
-          Quick Start
-        </Link>
-        <Link
-          href={LINKS.reference}
-          className={activeHref === "reference" ? "active" : ""}
-        >
-          Reference
-        </Link>
-      </div>
       <p className="note" style={{ marginTop: "1rem" }}>
         Install the package via <code>bun add --dev bun-workspaces</code> to use
         the TypeScript/JavaScript API.
@@ -49,6 +28,10 @@ export const ApiHeader = ({ activeHref, divider }: ApiHeaderProps) => {
         changing a name or adding/removing one. This is because{" "}
         <code>bun.lock</code> lists workspaces and is used as the source of
         truth.
+      </p>
+      <h4 style={{ marginTop: "1rem" }}>TypeScript</h4>
+      <p className="note" style={{ marginTop: "1rem" }}>
+        Ensure you have <code>@types/bun</code> installed for accurate types.
       </p>
       <RequiredBunVersion className="bun-version sub-header-bun-version" />
       {divider && <hr />}
