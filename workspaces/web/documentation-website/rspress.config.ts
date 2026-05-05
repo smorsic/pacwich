@@ -436,26 +436,7 @@ export default defineConfig({
               items: [
                 {
                   text: "Global Options",
-                  collapsed: true,
                   link: "/cli/global-options",
-                  items: [
-                    {
-                      text: "--cwd (-d)",
-                      link: "/cli/global-options#working-directory",
-                    },
-                    {
-                      text: "--workspace-root (-w)",
-                      link: "/cli/global-options#run-from-workspace-root",
-                    },
-                    {
-                      text: "--include-root (-r)",
-                      link: "/cli/global-options#include-root",
-                    },
-                    {
-                      text: "--log-level (-l)",
-                      link: "/cli/global-options#log-level",
-                    },
-                  ],
                 },
                 {
                   text: "Commands",
