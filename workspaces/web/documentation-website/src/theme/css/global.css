@@ -382,52 +382,12 @@ hr {
   color: var(--rp-container-danger-text);
 }
 
-@media (max-width: 768px) {
-  .sub-header-links {
-    overflow-x: scroll;
-  }
-
-  .sub-header-links-title {
-    display: none;
-  }
-
-  .sub-header-links a {
-    min-width: 9rem;
-  }
-}
-
 .sub-header {
   margin-top: -1rem;
 }
 
 .sub-header hr {
   margin: 2rem 0;
-}
-
-.sub-header-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.sub-header-links-title {
-  margin-right: 0.5rem;
-}
-
-.sub-header-links a {
-  color: var(--rp-c-link);
-  padding: 0.125rem 0.85rem;
-  border-radius: 1rem;
-  font-size: 0.9rem;
-  text-align: center;
-  border: 1px solid var(--rp-c-divider);
-}
-
-.sub-header-links a.active {
-  background-color: var(--rp-c-bg-soft);
-  color: var(--rp-c-text-1);
 }
 
 .footer {
