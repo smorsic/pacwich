@@ -15,20 +15,30 @@ import { ROOT_CONFIG_TYPE, WORKSPACE_CONFIG_TYPE } from "../../../lib/config/con
 
 # Configuration: Workspace Config File
 
-## Workspace Configuration
-
 The optional configuration for a workspace is defined in a file such as <code>{createConfigLocationPath("jsonFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}</code> in its directory or in its `package.json` file.
-
-You can set a workspace's [alias(es)](/concepts/workspace-aliases), the [order sequence](/concepts/script-execution-order) for its scripts,
-workspace tags (see below), and workspace dependency rules (see below).
 
 You can also use the root config to set workspace configs in bulk by using workspace patterns.
 See the [**workspace pattern configs**](/config/workspace-pattern-configs) page for more information.
+
+## Type Definition
+
+<SyntaxHighlighter language="typescript">
+  {WORKSPACE_CONFIG_TYPE}
+</SyntaxHighlighter>
+
+### Alias
+
+**Aliases** are an alternate name or names for a workspace. See the [workspace aliases](/concepts/workspace-aliases) page for more information.
 
 ### Tags
 
 **Tags** are simple strings that can be used to group workspaces together. They can be used
 in [workspace patterns](/concepts/workspace-patterns).
+
+### Scripts
+
+A map of script names to config specific to any respective script. Currently, this is used to set the [script execution order](/concepts/script-execution-order) for scripts.
+Inline workspaces can use an [optional name](/concepts/inline-scripts#script-name) to be matched.
 
 ### Workspace Dependency Rules
 
@@ -43,14 +53,10 @@ You can also use [negated](/concepts/workspace-patterns#negation) workspace patt
 
 For example, you may disallow dependencies with the [tag](/config/workspace#tags) "backend" for a frontend workspace with `denyPatterns: ["tag:backend"]`.
 
-### Type Definition
+[Workspace dependencies](/concepts/workspace-dependencies) are explicitly defined in workspaces' `package.json` files.
 
-<SyntaxHighlighter language="typescript">
-  {WORKSPACE_CONFIG_TYPE}
-</SyntaxHighlighter>
-
-### Examples:
-#### 1. TypeScript/JavaScript file
+## Examples:
+### 1. TypeScript/JavaScript file
 
 <span className="config-path"><code>path/to/your/workspace/{createConfigLocationPath("tsFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}</code></span>
 or
@@ -60,7 +66,7 @@ or
   {createTsFileExample(exampleWorkspaceConfigSimple, "workspace")}
 </SyntaxHighlighter>
 
-#### Merge Utility
+#### `mergeWorkspaceConfig` Utility
 You can use the `mergeWorkspaceConfig` function to merge multiple workspace configurations left to right, with each subsequent config taking precedence. 
 Objects are merged deeply, and array items are concatenated while keeping items unique.
 
@@ -68,7 +74,7 @@ Objects are merged deeply, and array items are concatenated while keeping items 
   {MERGE_WORKSPACE_CONFIG_EXAMPLE}
 </SyntaxHighlighter>
 
-#### 2. JSON/JSONC file
+### 2. JSON/JSONC file
 
 <span className="config-path"><code>path/to/your/workspace/{createConfigLocationPath("jsonFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}</code></span>
 or
@@ -78,7 +84,7 @@ or
   {JSON.stringify(exampleWorkspaceConfigSimple, null, 2)}
 </SyntaxHighlighter>
 
-#### 3. package.json
+### 3. package.json
 
 <span className="config-path"><code>path/to/your/workspace/package.json</code></span>
 

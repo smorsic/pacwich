@@ -16,16 +16,13 @@ import { CONFIG_DEFAULTS_KEY } from "../../../lib/config/envVars";
 
 # Configuration: Root Config File
  
-## Project Root Configuration
-
 The optional root configuration is the general configuration for a [project](/concepts/glossary#project) at a file such as <code>{createConfigLocationPath("jsonFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}</code> or in its `package.json` file.
 
-### Type Definition
+## Type Definition
 
 <SyntaxHighlighter language="typescript">
   {ROOT_CONFIG_TYPE}
 </SyntaxHighlighter>
-
 
 ### Defaults
 
@@ -40,7 +37,7 @@ You can set workspace configs in bulk by using workspace patterns in `workspaceP
 See the [workspace pattern configs](/config/workspace-pattern-configs) page for more information.
 
 ## Examples:
-#### 1. TypeScript/JavaScript file
+### 1. TypeScript/JavaScript file
 
 <span className="config-path"><code>path/to/your/project/{createConfigLocationPath("tsFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
 or
@@ -50,7 +47,7 @@ or
   {createTsFileExample(exampleRootConfigSimple1, "root")}
 </SyntaxHighlighter>
 
-#### Merge Utility
+#### `mergeRootConfig` Utility
 You can use the `mergeRootConfig` function to merge multiple root configurations left to right, with each subsequent config taking precedence. 
 Objects are merged deeply.
 
@@ -58,7 +55,7 @@ Objects are merged deeply.
   {MERGE_ROOT_CONFIG_EXAMPLE}
 </SyntaxHighlighter>
 
-#### 2. JSON/JSONC file
+### 2. JSON/JSONC file
 
 <span className="config-path"><code>path/to/your/project/{createConfigLocationPath("jsonFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
 or
@@ -68,7 +65,7 @@ or
   {JSON.stringify(exampleRootConfigSimple1, null, 2)}
 </SyntaxHighlighter>
 
-#### 3. package.json
+### 3. package.json
 
 <span className="config-path"><code>path/to/your/project/package.json</code></span>
 

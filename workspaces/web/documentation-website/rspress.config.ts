@@ -531,7 +531,7 @@ export default defineConfig({
       ],
       "/config": [
         {
-          text: "Config",
+          text: "Configuration",
           collapsible: false,
           items: [
             {
@@ -567,12 +567,12 @@ export default defineConfig({
                   link: "/config/root",
                 },
                 {
-                  text: "Environment Variables",
-                  link: "/config/env-vars",
+                  text: "More: Workspace Pattern Configs",
+                  link: "/config/workspace-pattern-configs",
                 },
                 {
-                  text: "Workspace Pattern Configs",
-                  link: "/config/workspace-pattern-configs",
+                  text: "Environment Variables",
+                  link: "/config/env-vars",
                 },
               ],
             },

@@ -21,25 +21,24 @@ See [Root Configuration](/config/root) and [Workspace Configuration](/config/wor
 
 ## Quick Examples
 
-### Root Configuration
+### Project Root Configuration
 
 The [root configuration](/config/root) is for project-wide settings.
 
-A root configuration in TypeScript, at <code>path/to/your/project/{createConfigLocationPath("tsFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}</code>:
 <SyntaxHighlighter language="typescript">
-  {createTsFileExample(exampleRootConfigSimple1, "root")}
-</SyntaxHighlighter>
+{`// path/to/your/project/${createConfigLocationPath("tsFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}
 
-You can also use the root config to set workspace configs in bulk by using workspace patterns. 
-See the [**workspace pattern configs**](/config/workspace-pattern-configs) page for more information.
+${createTsFileExample(exampleRootConfigSimple1, "root")}`}
+</SyntaxHighlighter>
 
 ### Workspace Configuration
 
 [Workspace configurations](/config/workspace) are defined in the directory of a workspace.
 
-A workspace configuration in TypeScript, at <code>path/to/project/workspace/{createConfigLocationPath("tsFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}</code>:
 <SyntaxHighlighter language="typescript">
-  {createTsFileExample(exampleWorkspaceConfigSimple, "workspace")}
+  {`// path/to/your/project/workspace/${createConfigLocationPath("tsFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}
+
+${createTsFileExample(exampleWorkspaceConfigSimple, "workspace")}`}
 </SyntaxHighlighter>
 
 ## Config Locations / File Types
