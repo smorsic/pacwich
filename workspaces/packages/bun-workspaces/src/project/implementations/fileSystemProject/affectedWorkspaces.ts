@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+import bun from "bun";
 import type { WorkspaceInputsConfig } from "bw-common";
 import {
   getFileAffectedWorkspaces,
@@ -112,12 +115,36 @@ const DEFAULT_INPUT_FILE_PATTERN = ".";
 
 const DEFAULT_HEAD_REF = "HEAD";
 
-const buildWorkspaceInputs = (
-  project: FileSystemProject,
-): {
+/**
+ * Patterns added to every workspace's input file patterns when package
+ * dependencies are not ignored. The workspace's own `package.json` and the
+ * root `package.json` both act as triggers since they declare workspace
+ * dependencies and other behavior that affects the workspace.
+ */
+const IMPLICIT_PACKAGE_JSON_INPUT_PATTERNS = [
+  "package.json",
+  "/package.json",
+] as const;
+
+const FILE_PATTERN_NEGATION_PREFIX = "!";
+
+const GLOB_CHARACTER_REGEX = /[*?[{]/;
+
+const SKIPPED_DIR_NAMES = new Set(["node_modules", ".git"]);
+
+const buildWorkspaceInputs = ({
+  project,
+  ignorePackageDependencies,
+}: {
+  project: FileSystemProject;
+  ignorePackageDependencies: boolean;
+}): {
   inputs: AffectedWorkspaceInput[];
   resolvedInputsByName: Map<string, WorkspaceInputsConfig>;
 } => {
+  const implicitPatterns = ignorePackageDependencies
+    ? []
+    : [...IMPLICIT_PACKAGE_JSON_INPUT_PATTERNS];
   const resolvedInputsByName = new Map<string, WorkspaceInputsConfig>();
   const inputs = project.workspaces.map<AffectedWorkspaceInput>((workspace) => {
     const defaultInputs =
@@ -125,11 +152,91 @@ const buildWorkspaceInputs = (
     resolvedInputsByName.set(workspace.name, defaultInputs);
     return {
       workspace,
-      inputFilePatterns: defaultInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN],
+      inputFilePatterns: [
+        ...(defaultInputs.files ?? [DEFAULT_INPUT_FILE_PATTERN]),
+        ...implicitPatterns,
+      ],
       inputWorkspacePatterns: defaultInputs.workspacePatterns ?? [],
     };
   });
   return { inputs, resolvedInputsByName };
+};
+
+const normalizeChangedFilesPattern = (pattern: string): string =>
+  pattern.replaceAll("\\", "/").replace(/^\/+/, "").replace(/\/+$/, "");
+
+const expandPatternToFiles = ({
+  rootDirectory,
+  pattern,
+}: {
+  rootDirectory: string;
+  pattern: string;
+}): string[] => {
+  const normalized = normalizeChangedFilesPattern(pattern);
+  if (!normalized) return [];
+
+  if (GLOB_CHARACTER_REGEX.test(normalized)) {
+    return Array.from(
+      new bun.Glob(normalized).scanSync({
+        cwd: rootDirectory,
+        onlyFiles: true,
+      }),
+    ).map((match) => match.replaceAll("\\", "/"));
+  }
+
+  const absolute = path.join(rootDirectory, ...normalized.split("/"));
+  let stat: fs.Stats;
+  try {
+    stat = fs.statSync(absolute);
+  } catch {
+    // Pass through paths that don't exist on disk (e.g. deleted files)
+    return [normalized];
+  }
+  if (stat.isFile()) return [normalized];
+  if (!stat.isDirectory()) return [];
+
+  const result: string[] = [];
+  const walk = (dir: string, baseRel: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory() && SKIPPED_DIR_NAMES.has(entry.name)) continue;
+      const rel = baseRel ? `${baseRel}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        walk(path.join(dir, entry.name), rel);
+      } else if (entry.isFile()) {
+        result.push(rel);
+      }
+    }
+  };
+  walk(absolute, normalized);
+  return result;
+};
+
+const expandChangedFilesPatterns = ({
+  rootDirectory,
+  patterns,
+}: {
+  rootDirectory: string;
+  patterns: string[];
+}): string[] => {
+  const includes = new Set<string>();
+  const excludes = new Set<string>();
+  for (const pattern of patterns) {
+    const isExclude = pattern.startsWith(FILE_PATTERN_NEGATION_PREFIX);
+    const stripped = isExclude
+      ? pattern.slice(FILE_PATTERN_NEGATION_PREFIX.length)
+      : pattern;
+    const target = isExclude ? excludes : includes;
+    for (const expanded of expandPatternToFiles({
+      rootDirectory,
+      pattern: stripped,
+    })) {
+      target.add(expanded);
+    }
+  }
+  for (const excluded of excludes) {
+    includes.delete(excluded);
+  }
+  return [...includes];
 };
 
 const toAffectedWorkspaceResult = (
@@ -155,8 +262,9 @@ export const getAffectedWorkspaces = async (
   project: FileSystemProject,
   options: GetAffectedWorkspacesOptions,
 ): Promise<AffectedWorkspacesResult> => {
+  const ignorePackageDependencies = options.ignorePackageDependencies ?? false;
   const { inputs: workspaceInputs, resolvedInputsByName } =
-    buildWorkspaceInputs(project);
+    buildWorkspaceInputs({ project, ignorePackageDependencies });
 
   if (isOptionsForDiffSource(options, "git")) {
     const baseRef =
@@ -168,7 +276,7 @@ export const getAffectedWorkspaces = async (
       rootDirectory: project.rootDirectory,
       workspacesOptions: {
         workspaceInputs,
-        ignorePackageDependencies: options.ignorePackageDependencies,
+        ignorePackageDependencies,
       },
       gitOptions: {
         baseRef,
@@ -194,8 +302,11 @@ export const getAffectedWorkspaces = async (
   const { affectedWorkspaces } = await getFileAffectedWorkspaces({
     rootDirectory: project.rootDirectory,
     workspaceInputs,
-    changedFilePaths: options.changedFiles,
-    ignorePackageDependencies: options.ignorePackageDependencies,
+    changedFilePaths: expandChangedFilesPatterns({
+      rootDirectory: project.rootDirectory,
+      patterns: options.changedFiles,
+    }),
+    ignorePackageDependencies,
   });
 
   return {
