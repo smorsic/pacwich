@@ -3,10 +3,10 @@ import path from "path";
 import type { ScriptShellOption, ShellOption } from "bw-common/parameters";
 import { ROOT_WORKSPACE_SELECTOR } from "bw-common/project";
 import type { WorkspaceScriptMetadata } from "bw-common/runScript";
-import { loadRootConfig } from "../../config";
-import { getUserEnvVar } from "../../config/userEnvVars";
-import { parse, quote } from "../../internal/bundledDeps/shellQuote";
-import type { Simplify } from "../../internal/core";
+import { loadRootConfig } from "../../../config";
+import { getUserEnvVar } from "../../../config/userEnvVars";
+import { parse, quote } from "../../../internal/bundledDeps/shellQuote";
+import type { Simplify } from "../../../internal/core";
 import {
   DEFAULT_TEMP_DIR,
   IS_WINDOWS,
@@ -15,8 +15,8 @@ import {
   isPlainObject,
   validateJSArray,
   validateJSTypes,
-} from "../../internal/core";
-import { logger } from "../../internal/logger";
+} from "../../../internal/core";
+import { logger } from "../../../internal/logger";
 import {
   runScript,
   runScripts,
@@ -27,23 +27,28 @@ import {
   type RunScriptExit,
   type OutputStreamName,
   type ScriptEventName,
-} from "../../runScript";
-import type { MultiProcessOutput } from "../../runScript/output/multiProcessOutput";
-import { checkIsRecursiveScript } from "../../runScript/recursion";
-import { resolveScriptShell } from "../../runScript/scriptShellOption";
+} from "../../../runScript";
+import type { MultiProcessOutput } from "../../../runScript/output/multiProcessOutput";
+import { checkIsRecursiveScript } from "../../../runScript/recursion";
+import { resolveScriptShell } from "../../../runScript/scriptShellOption";
 import {
   findWorkspaces,
   sortWorkspaces,
   type Workspace,
-} from "../../workspaces";
-import { preventDependencyCycles } from "../../workspaces/dependencyGraph";
-import { PROJECT_ERRORS } from "../errors";
-import type { Project, ProjectConfig } from "../project";
+} from "../../../workspaces";
+import { preventDependencyCycles } from "../../../workspaces/dependencyGraph";
+import { PROJECT_ERRORS } from "../../errors";
+import type { Project, ProjectConfig } from "../../project";
 import {
   ProjectBase,
   resolveRootWorkspaceSelector,
   resolveWorkspacePath,
-} from "./projectBase";
+} from "../projectBase";
+import {
+  getAffectedWorkspaces,
+  type AffectedWorkspacesResult,
+  type GetAffectedWorkspacesOptions,
+} from "./affectedWorkspaces";
 
 /** Arguments for {@link createFileSystemProject} */
 export type CreateFileSystemProjectOptions = {
@@ -160,6 +165,9 @@ export type RunScriptAcrossWorkspacesResult = {
   /** The workspaces targeted */
   workspaces: Workspace[];
 };
+
+export type RunAffectedWorkspacesOptions = GetAffectedWorkspacesOptions &
+  Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
 
 const quoteArg = (arg: string, shell: ScriptShellOption): string =>
   IS_WINDOWS && shell === "system"
@@ -661,6 +669,36 @@ class _FileSystemProject extends ProjectBase implements Project {
       ...result,
       workspaces,
     };
+  }
+
+  /**
+   * Determine the affected workspaces based on the given options.
+   *
+   * Returns a summary of all workspaces, whether they are affected or not,
+   * and the reasons why they are affected.
+   */
+  async getAffectedWorkspaces(
+    options: GetAffectedWorkspacesOptions,
+  ): Promise<AffectedWorkspacesResult> {
+    return getAffectedWorkspaces(this, options);
+  }
+
+  /**
+   * Run the script across the affected workspaces.
+   *
+   * Similar to {@link runScriptAcrossWorkspaces}, but only runs the script across the affected workspaces.
+   */
+  async runAffectedWorkspaces(
+    options: RunAffectedWorkspacesOptions,
+  ): Promise<RunScriptAcrossWorkspacesResult> {
+    const { workspaceResults } = await this.getAffectedWorkspaces(options);
+
+    return this.runScriptAcrossWorkspaces({
+      workspacePatterns: workspaceResults.map(
+        ({ workspace }) => workspace.name,
+      ),
+      ...options,
+    });
   }
 
   static #initialized = false;

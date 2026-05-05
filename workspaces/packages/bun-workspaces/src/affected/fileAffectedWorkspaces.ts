@@ -39,7 +39,7 @@ export interface AffectedDependencyResult {
   chain: AffectedDependencyChainEntry[];
 }
 
-export interface AffectedReasonMap<
+export interface AffectedReasons<
   FileMetadata extends object | undefined = undefined,
 > {
   changedFiles: AffectedFileResult<FileMetadata>[];
@@ -51,7 +51,7 @@ export interface AffectedWorkspaceResult<
 > {
   workspace: Workspace;
   isAffected: boolean;
-  affectedReasons: AffectedReasonMap<FileMetadata>;
+  affectedReasons: AffectedReasons<FileMetadata>;
 }
 
 export interface FileAffectedWorkspacesOptions {
