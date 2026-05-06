@@ -360,6 +360,10 @@ export default defineConfig({
             link: "/concepts/root-workspace",
           },
           {
+            text: "Affected Workspaces",
+            link: "/concepts/affected",
+          },
+          {
             text: "Inline Scripts",
             link: "/concepts/inline-scripts",
           },
@@ -644,6 +648,10 @@ export default defineConfig({
                 {
                   text: "Root Workspace",
                   link: "/concepts/root-workspace",
+                },
+                {
+                  text: "Affected Workspaces",
+                  link: "/concepts/affected",
                 },
               ],
             },
