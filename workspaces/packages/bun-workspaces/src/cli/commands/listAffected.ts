@@ -11,7 +11,7 @@ import {
   commandOutputLogger,
   createJsonLines,
   handleProjectCommand,
-  splitWorkspacePatterns,
+  splitWhitespaceArg,
 } from "./commandHandlerUtils";
 
 const SHORT_SHA_LENGTH = 7;
@@ -159,7 +159,7 @@ export const listAffected = handleProjectCommand(
       options.files !== undefined
         ? {
             diffSource: "fileList",
-            changedFiles: splitWorkspacePatterns(options.files),
+            changedFiles: splitWhitespaceArg(options.files),
             script: options.script,
             ignoreWorkspaceDependencies:
               options.ignoreWorkspaceDeps || undefined,

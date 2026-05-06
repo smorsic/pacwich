@@ -5,7 +5,7 @@ import { expandHomePath } from "../../../internal/core";
 import { logger } from "../../../internal/logger";
 import {
   handleProjectCommand,
-  splitWorkspacePatterns,
+  splitWhitespaceArg,
 } from "../commandHandlerUtils";
 import {
   getDefaultOutputStyle,
@@ -85,7 +85,7 @@ export const runScript = handleProjectCommand(
 
     const workspacePatterns = positionalWorkspacePatterns?.length
       ? positionalWorkspacePatterns
-      : splitWorkspacePatterns(options.workspacePatterns ?? "");
+      : splitWhitespaceArg(options.workspacePatterns ?? "");
 
     logger.debug(
       `Command: Run ${options.inline ? "inline " : ""}script ${JSON.stringify(script)} for ${

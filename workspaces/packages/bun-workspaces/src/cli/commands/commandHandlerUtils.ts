@@ -29,12 +29,18 @@ export type ProjectCommandContext = GlobalCommandContext & {
   projectError: Error | null;
 };
 
-/** Splits workspace patterns by whitespace, but allows escaping spaces via backslash */
-export const splitWorkspacePatterns = (workspacePatterns: string) =>
-  workspacePatterns
+/**
+ * Splits a multi-value CLI arg on whitespace (any of space/tab/newline). A
+ * literal space inside a value can be preserved by escaping it with a
+ * backslash (e.g. `path/with\ space`). Used for `--files` and
+ * `--workspace-patterns`, both of which accept output of `$(bw ...)`
+ * substitutions, which are typically newline-separated.
+ */
+export const splitWhitespaceArg = (raw: string) =>
+  raw
     .split(/(?<!\\)\s+/)
     .filter(Boolean)
-    .map((pattern) => pattern.replace(/\\\s/g, " "));
+    .map((value) => value.replace(/\\\s/g, " "));
 
 export const createWorkspaceInfoLines = (workspace: Workspace) => [
   `Workspace: ${workspace.name}${workspace.isRoot ? " (root)" : ""}`,
