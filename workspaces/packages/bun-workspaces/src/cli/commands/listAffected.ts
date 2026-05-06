@@ -1,3 +1,4 @@
+import path from "path";
 import { logger } from "../../internal/logger";
 import type {
   AffectedDependency,
@@ -22,15 +23,15 @@ const formatGitHeader = (
   if (metadata.diffSource !== "git" || !metadata.git) return null;
   const { baseRef, headRef, baseSha, headSha } = metadata.git;
   return [
-    `Base: ${baseRef} (${shortSha(baseSha)})`,
-    `Head: ${headRef} (${shortSha(headSha)})`,
+    `Git base ref: \x1b[1m${baseRef}\x1b[0m (${shortSha(baseSha)})`,
+    `Git head ref: \x1b[1m${headRef}\x1b[0m (${shortSha(headSha)})`,
   ].join("\n");
 };
 
 const formatDependencyChain = (dependency: AffectedDependency): string => {
   const segments = dependency.chain.map((entry, index) => {
     if (index === 0 || !entry.edgeSource) return entry.workspaceName;
-    return `--[${entry.edgeSource}]--> ${entry.workspaceName}`;
+    return `\x1b[90m--[${entry.edgeSource}]->\x1b[0m ${entry.workspaceName}`;
   });
   return segments.join(" ");
 };
@@ -39,25 +40,18 @@ const createWorkspaceSummaryLines = (
   result: AffectedWorkspaceResult,
 ): string[] => {
   const { workspace, affectedReasons } = result;
-  const lines: string[] = [`Workspace: ${workspace.name}`];
-  const fileCount = affectedReasons.changedFiles.length;
+  const lines: string[] = [`\x1b[1mWorkspace: ${workspace.name}\x1b[0m`];
   lines.push(
-    ` - Changed files: ${fileCount}${
-      fileCount === 0
-        ? ""
-        : `\n${affectedReasons.changedFiles
-            .map(({ projectFilePath }) => `   - ${projectFilePath}`)
-            .join("\n")}`
-    }`,
+    `\x1b[96mChanged input files:\x1b[0m ${affectedReasons.changedFiles.length}`,
   );
   if (affectedReasons.dependencies.length) {
     lines.push(
-      ` - Affected dependencies: ${affectedReasons.dependencies
+      `\x1b[96mAffected dependencies:\x1b[0m ${affectedReasons.dependencies
         .map(({ dependencyName }) => dependencyName)
         .join(", ")}`,
     );
   } else {
-    lines.push(` - Affected dependencies: (none)`);
+    lines.push(`\x1b[96mAffected dependencies:\x1b[0m (none)`);
   }
   return lines;
 };
@@ -66,28 +60,28 @@ const createWorkspaceDetailedLines = (
   result: AffectedWorkspaceResult,
 ): string[] => {
   const { workspace, affectedReasons } = result;
-  const lines: string[] = [`Workspace: ${workspace.name}`];
+  const lines: string[] = [`\x1b[1mWorkspace: ${workspace.name}\x1b[0m`];
   if (affectedReasons.changedFiles.length) {
-    lines.push(" - Changed files:");
+    lines.push("\x1b[96mChanged input files:\x1b[0m");
     for (const file of affectedReasons.changedFiles) {
-      const reasons = file.gitReasons?.length
-        ? ` [${file.gitReasons.join(", ")}]`
-        : "";
+      const reasons = file.gitReasons
+        ?.filter((reason) => reason !== "diff")
+        .join(", ");
       lines.push(
-        `   - ${file.projectFilePath} (matched by ${JSON.stringify(file.inputMatch)})${reasons}`,
+        ` - ${path.relative(workspace.path, file.projectFilePath)} \x1b[90m(input: ${JSON.stringify(file.inputMatch)})${reasons ? ` [${reasons}]` : ""}\x1b[0m`,
       );
     }
   } else {
-    lines.push(" - Changed files: (none)");
+    lines.push("\x1b[96mChanged input files: (none)\x1b[0m");
   }
   if (affectedReasons.dependencies.length) {
-    lines.push(" - Affected dependencies:");
+    lines.push("\x1b[96mAffected dependencies:\x1b[0m");
     for (const dependency of affectedReasons.dependencies) {
-      lines.push(`   - ${dependency.dependencyName}`);
-      lines.push(`     chain: ${formatDependencyChain(dependency)}`);
+      lines.push(` - ${dependency.dependencyName}`);
+      lines.push(`   chain: ${formatDependencyChain(dependency)}`);
     }
   } else {
-    lines.push(" - Affected dependencies: (none)");
+    lines.push("\x1b[96mAffected dependencies:\x1b[0m (none)");
   }
   return lines;
 };
@@ -171,7 +165,7 @@ export const listAffected = handleProjectCommand(
       return;
     }
 
-    const lines: string[] = [];
+    const lines: string[] = [""];
     const gitHeader = formatGitHeader(result.metadata);
     if (gitHeader) lines.push(gitHeader, "");
 
@@ -182,7 +176,12 @@ export const listAffected = handleProjectCommand(
         ? createWorkspaceDetailedLines
         : createWorkspaceSummaryLines;
       for (const workspaceResult of affectedResults) {
-        lines.push(...renderWorkspace(workspaceResult));
+        lines.push(...renderWorkspace(workspaceResult), "");
+      }
+
+      if (!options.detailed) {
+        // gray
+        lines.push("\x1b[90mPass --detailed for more info\x1b[0m");
       }
     }
 
