@@ -5,6 +5,7 @@ import {
   setupCliTest,
 } from "../../util/cliTestUtils";
 import { createGitFixture, type GitFixture } from "../../util/gitFixtures";
+import { withWindowsPath } from "../../util/windows";
 
 const PROJECT_ROOT_PACKAGE_JSON = JSON.stringify({
   name: "test-root",
@@ -199,8 +200,11 @@ describe("List Affected", () => {
       );
       expect(result.exitCode).toBe(0);
       const out = result.stdout.sanitized;
-      // 'a' has its file listed with the input pattern that matched
-      expect(out).toMatch(/Workspace: a[\s\S]*src\/index\.ts/);
+      // 'a' has its file listed with the input pattern that matched.
+      // The path is rendered with the OS-native separator, like
+      // list-workspaces output, so wrap with `withWindowsPath`.
+      expect(out).toContain("Workspace: a");
+      expect(out).toContain(withWindowsPath("src/index.ts"));
       expect(out).toContain('(input: "src/**/*")');
       // 'b' has chain that traces back to 'a' via the package edge
       expect(out).toMatch(/chain: b.*--\[package\].*a/);

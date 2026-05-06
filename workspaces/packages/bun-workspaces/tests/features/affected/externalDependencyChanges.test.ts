@@ -190,4 +190,105 @@ describe("computeExternalDependencyChanges", () => {
     });
     expect(result.size).toBe(0);
   });
+
+  describe("divergent per-workspace versions", () => {
+    test("prefers `<workspaceName>/<dep>` key when present, falls back to bare key", () => {
+      const a = makeTestWorkspace({
+        name: "pkg-a",
+        externalDependencies: [{ name: "react", dev: false }],
+      });
+      const b = makeTestWorkspace({
+        name: "pkg-b",
+        externalDependencies: [{ name: "react", dev: false }],
+      });
+      // Mirrors the actual bun.lock shape for divergent versions:
+      // pkg-a uses the hoisted version; pkg-b has a workspace-scoped entry
+      const baseLock = new Map([
+        ["react", "17.0.2"],
+        ["pkg-b/react", "18.2.0"],
+      ]);
+      const headLock = new Map([
+        ["react", "17.0.2"],
+        ["pkg-b/react", "18.3.1"],
+      ]);
+      const result = computeExternalDependencyChanges({
+        workspaces: [a, b],
+        baseLock,
+        headLock,
+      });
+      // Only pkg-b should be flagged — its scoped entry moved
+      expect(result.get("pkg-a")).toBeUndefined();
+      expect(result.get("pkg-b")).toEqual([
+        {
+          name: "react",
+          dev: false,
+          baseVersion: "18.2.0",
+          headVersion: "18.3.1",
+        },
+      ]);
+    });
+
+    test("a hoisted bump only affects the workspace using the hoist", () => {
+      const a = makeTestWorkspace({
+        name: "pkg-a",
+        externalDependencies: [{ name: "react", dev: false }],
+      });
+      const b = makeTestWorkspace({
+        name: "pkg-b",
+        externalDependencies: [{ name: "react", dev: false }],
+      });
+      // pkg-a uses the hoisted version; pkg-b is locally pinned. Only the
+      // hoisted version moves.
+      const baseLock = new Map([
+        ["react", "17.0.1"],
+        ["pkg-b/react", "18.2.0"],
+      ]);
+      const headLock = new Map([
+        ["react", "17.0.2"],
+        ["pkg-b/react", "18.2.0"],
+      ]);
+      const result = computeExternalDependencyChanges({
+        workspaces: [a, b],
+        baseLock,
+        headLock,
+      });
+      expect(result.get("pkg-a")).toEqual([
+        {
+          name: "react",
+          dev: false,
+          baseVersion: "17.0.1",
+          headVersion: "17.0.2",
+        },
+      ]);
+      expect(result.get("pkg-b")).toBeUndefined();
+    });
+
+    test("scoped dep names work in the namespaced key (e.g. `<workspace>/@scope/foo`)", () => {
+      const b = makeTestWorkspace({
+        name: "pkg-b",
+        externalDependencies: [{ name: "@types/node", dev: true }],
+      });
+      const baseLock = new Map([
+        ["@types/node", "18.0.0"],
+        ["pkg-b/@types/node", "20.0.0"],
+      ]);
+      const headLock = new Map([
+        ["@types/node", "18.0.0"],
+        ["pkg-b/@types/node", "20.1.0"],
+      ]);
+      const result = computeExternalDependencyChanges({
+        workspaces: [b],
+        baseLock,
+        headLock,
+      });
+      expect(result.get("pkg-b")).toEqual([
+        {
+          name: "@types/node",
+          dev: true,
+          baseVersion: "20.0.0",
+          headVersion: "20.1.0",
+        },
+      ]);
+    });
+  });
 });

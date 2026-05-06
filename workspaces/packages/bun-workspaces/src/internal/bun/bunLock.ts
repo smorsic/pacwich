@@ -145,6 +145,9 @@ export const parseBunLockPackageVersions = (
     if (lastAt <= 0) continue;
     const version = head.slice(lastAt + 1);
     if (!version) continue;
+    // bun.lock entries for workspace packages carry a `workspace:<path>`
+    // pseudo-version. Skip — we only track real registry-resolved versions.
+    if (version.startsWith("workspace:")) continue;
     versions.set(name, version);
   }
 
