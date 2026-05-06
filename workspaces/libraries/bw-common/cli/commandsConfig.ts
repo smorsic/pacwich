@@ -176,6 +176,69 @@ export const CLI_COMMANDS_CONFIG = {
       "Start the bun-workspaces MCP (Model Context Protocol) server over stdio",
     options: {},
   },
+  listAffected: {
+    command: "list-affected",
+    isGlobal: false,
+    aliases: ["ls-affected"],
+    description:
+      "List workspaces affected by a set of changed files (git or file list)",
+    options: {
+      base: {
+        flags: ["-B", "--base <ref>"],
+        description:
+          "Git base ref to diff against (default from config / 'main'). Cannot be used with --files",
+      },
+      head: {
+        flags: ["-H", "--head <ref>"],
+        description:
+          'Git head ref to diff against (default "HEAD"). Cannot be used with --files',
+      },
+      files: {
+        flags: ["-F", "--files <files>"],
+        description:
+          "Changed files (paths/dirs/globs, '!' to exclude), separated by spaces. Cannot be used with --base or --head",
+      },
+      script: {
+        flags: ["-S", "--script <script>"],
+        description: "Resolve inputs for the named script",
+      },
+      ignoreUntracked: {
+        flags: ["--ignore-untracked"],
+        description: "Exclude untracked files",
+      },
+      ignoreUnstaged: {
+        flags: ["--ignore-unstaged"],
+        description: "Exclude unstaged files",
+      },
+      ignoreStaged: {
+        flags: ["--ignore-staged"],
+        description: "Exclude staged files",
+      },
+      ignoreUncommitted: {
+        flags: ["--ignore-uncommitted"],
+        description:
+          "Exclude all uncommitted changes (staged, unstaged, untracked)",
+      },
+      explain: {
+        flags: ["-e", "--explain"],
+        description:
+          "Include changed-file counts and dependency reasons. With --json, outputs the full result object",
+      },
+      detailed: {
+        flags: ["-D", "--detailed"],
+        description:
+          "With --explain, render full per-file data and dependency edge chains",
+      },
+      json: {
+        flags: JSON_FLAGS,
+        description: "Output as JSON",
+      },
+      pretty: {
+        flags: PRETTY_FLAGS,
+        description: "Pretty print JSON",
+      },
+    },
+  },
   runScript: {
     command: "run-script [script] [workspacePatterns...]",
     isGlobal: false,
