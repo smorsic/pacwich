@@ -324,19 +324,57 @@ describe("List Affected", () => {
 
   describe("--ignore-external-deps", () => {
     test("suppresses lockfile-based external dep tracking in fileList mode", async () => {
-      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const { run } = setupCliTest({
+        testProject: "withDependenciesWithExternal",
+      });
       const result = await run(
         "list-affected",
         "--files",
         "bun.lock",
         "--ignore-external-deps",
+      );
+      expect(result.exitCode).toBe(0);
+      // 'a' would have been flagged via lockfile heuristic but suppression
+      // disables that path.
+      assertOutputMatches(result.stdout.sanitized, "No affected workspaces");
+    });
+  });
+
+  describe("external dependencies in --explain", () => {
+    test("default summary lists external dep names", async () => {
+      const { run } = setupCliTest({
+        testProject: "withDependenciesWithExternal",
+      });
+      const result = await run(
+        "list-affected",
+        "--files",
+        "bun.lock",
+        "--explain",
+      );
+      expect(result.exitCode).toBe(0);
+      const out = result.stdout.sanitized;
+      expect(out).toContain("Workspace: a");
+      // 'a' has lodash + typescript (dev) externals
+      expect(out).toMatch(
+        /Workspace: a[\s\S]*Changed external dependencies:.*lodash/,
+      );
+      expect(out).toContain("typescript (dev)");
+    });
+
+    test("detailed view renders 'lockfile changed' note for fileList mode", async () => {
+      const { run } = setupCliTest({
+        testProject: "withDependenciesWithExternal",
+      });
+      const result = await run(
+        "list-affected",
+        "--files",
+        "bun.lock",
         "--explain",
         "--detailed",
       );
       expect(result.exitCode).toBe(0);
-      // No workspace should surface external dep changes when suppressed
-      expect(result.stdout.sanitized).not.toContain(
-        "Changed external dependencies:\n",
+      expect(result.stdout.sanitized).toContain(
+        "lockfile changed; precise diff unavailable",
       );
     });
   });

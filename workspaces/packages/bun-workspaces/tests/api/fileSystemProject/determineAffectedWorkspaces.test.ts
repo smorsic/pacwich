@@ -479,14 +479,14 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
   });
 
   describe("bun.lock as a fileList signal", () => {
-    test("bun.lock in changedFiles flags workspaces with non-empty externalDependencies", async () => {
+    test("workspaces without external deps are not affected by bun.lock alone", async () => {
       const project = makeProject(getProjectRoot("affectedWithInputs"));
       const result = await project.determineAffectedWorkspaces({
         diffSource: "fileList",
         changedFiles: ["bun.lock"],
       });
-      // The fixture's workspaces have no external deps in package.json so
-      // none should be marked affected by lockfile alone (smoke test).
+      // The affectedWithInputs fixture's workspaces have no external deps,
+      // so the lockfile-as-trigger heuristic produces no synthetic entries.
       for (const name of ["a", "b", "c", "d", "e"]) {
         expect(findResult(result.workspaceResults, name).isAffected).toBe(
           false,
@@ -494,13 +494,41 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       }
     });
 
+    test("workspaces with external deps are flagged with synthetic null/null entries", async () => {
+      const project = makeProject(
+        getProjectRoot("withDependenciesWithExternal"),
+      );
+      const result = await project.determineAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: ["bun.lock"],
+      });
+      // 'a' has lodash + typescript externals → flagged
+      const a = findResult(result.workspaceResults, "a");
+      expect(a.isAffected).toBe(true);
+      expect(a.affectedReasons.externalDependencies).toEqual([
+        { name: "lodash", dev: false, baseVersion: null, headVersion: null },
+        {
+          name: "typescript",
+          dev: true,
+          baseVersion: null,
+          headVersion: null,
+        },
+      ]);
+      // 'd' has no external deps → not flagged via this signal
+      expect(findResult(result.workspaceResults, "d").isAffected).toBe(false);
+    });
+
     test("ignoreExternalDependencies suppresses the bun.lock signal in fileList mode", async () => {
-      const project = makeProject(getProjectRoot("affectedWithInputs"));
+      const project = makeProject(
+        getProjectRoot("withDependenciesWithExternal"),
+      );
       const result = await project.determineAffectedWorkspaces({
         diffSource: "fileList",
         changedFiles: ["bun.lock"],
         ignoreExternalDependencies: true,
       });
+      // Even 'a' (which has externals) is not flagged when suppressed
+      expect(findResult(result.workspaceResults, "a").isAffected).toBe(false);
       for (const ws of result.workspaceResults) {
         expect(ws.affectedReasons.externalDependencies).toEqual([]);
       }
