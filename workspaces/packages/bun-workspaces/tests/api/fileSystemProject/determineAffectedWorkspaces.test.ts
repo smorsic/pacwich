@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { InvalidJSTypeError } from "../../../src/internal/core";
 import {
   createFileSystemProject,
@@ -6,7 +6,7 @@ import {
   type FileSystemProject,
 } from "../../../src/project";
 import { getProjectRoot } from "../../fixtures/testProjects";
-import { createGitFixture, type GitFixture } from "../../util/gitFixtures";
+import { createGitFixture } from "../../util/gitFixtures";
 
 const PROJECT_ROOT_PACKAGE_JSON = JSON.stringify({
   name: "test-root",
@@ -45,22 +45,6 @@ const TWO_WORKSPACE_PROJECT_FILES = [
     }),
   },
 ];
-
-const fixtures: GitFixture[] = [];
-
-const newFixture = async (
-  ...args: Parameters<typeof createGitFixture>
-): Promise<GitFixture> => {
-  const fixture = await createGitFixture(...args);
-  fixtures.push(fixture);
-  return fixture;
-};
-
-afterEach(() => {
-  while (fixtures.length) {
-    fixtures.pop()!.cleanup();
-  }
-});
 
 const findResult = (
   results: AffectedWorkspaceResult[],
@@ -627,7 +611,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
 
   describe("git diffSource", () => {
     test("metadata.git carries the resolved baseRef and headRef", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -659,7 +643,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("default baseRef comes from root config / 'main' fallback; default headRef is 'HEAD'", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -683,7 +667,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("metadata.git includes baseSha and headSha resolved from named refs", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -711,7 +695,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("changed files are populated with gitReasons", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -741,7 +725,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("ignoreUncommitted is forwarded so working-tree changes do not surface", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           modify: [{ path: "packages/a/src/index.ts", content: "x" }],
@@ -760,7 +744,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("untracked files are treated as changes when not ignored", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           modify: [{ path: "packages/a/src/new.ts", content: "x" }],
@@ -783,7 +767,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("dependency cascade also works with the git diffSource", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -848,7 +832,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     ];
 
     test("a lockfile-only version bump for an external dep flags the workspace", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -895,7 +879,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
     });
 
     test("ignoreExternalDependencies suppresses lockfile-based tracking entirely", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -982,7 +966,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
           }),
         },
       ];
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: cascadeProjectFiles },
           {

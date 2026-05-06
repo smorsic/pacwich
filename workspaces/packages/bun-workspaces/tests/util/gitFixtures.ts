@@ -54,7 +54,7 @@ export interface GitFixtureCommitRef {
   sha: string;
 }
 
-export interface GitFixture {
+export interface GitFixture extends AsyncDisposable {
   /** Absolute path to the git repo root */
   repoPath: string;
   /** Absolute path to the project root (equals repoPath unless projectSubdir is set) */
@@ -67,7 +67,11 @@ export interface GitFixture {
   headSha: string;
   /** Run an arbitrary git command in the repo (for setup tweaks not covered by the schema) */
   runGit: (args: string[]) => Promise<string>;
-  /** Remove the temp repo */
+  /**
+   * Remove the temp repo. Idempotent. Tests should normally hold the fixture
+   * with `await using` so disposal is automatic and per-test, which is
+   * required for safe concurrent execution.
+   */
   cleanup: () => void;
 }
 
@@ -174,6 +178,13 @@ export const createGitFixture = async (
 
   const headSha = (await runGit(["rev-parse", "HEAD"], repoPath)).trim();
 
+  let disposed = false;
+  const cleanup = () => {
+    if (disposed) return;
+    disposed = true;
+    fs.rmSync(repoPath, { force: true, recursive: true });
+  };
+
   return {
     repoPath,
     projectPath,
@@ -187,8 +198,7 @@ export const createGitFixture = async (
     },
     headSha,
     runGit: (args) => runGit(args, repoPath),
-    cleanup: () => {
-      fs.rmSync(repoPath, { force: true, recursive: true });
-    },
+    cleanup,
+    [Symbol.asyncDispose]: async () => cleanup(),
   };
 };

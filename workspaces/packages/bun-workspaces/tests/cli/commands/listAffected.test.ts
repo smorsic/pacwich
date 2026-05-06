@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
   assertOutputMatches,
   listCommandAndAliases,
   setupCliTest,
 } from "../../util/cliTestUtils";
-import { createGitFixture, type GitFixture } from "../../util/gitFixtures";
+import { createGitFixture } from "../../util/gitFixtures";
 import { withWindowsPath } from "../../util/windows";
 
 const PROJECT_ROOT_PACKAGE_JSON = JSON.stringify({
@@ -44,22 +44,6 @@ const TWO_WORKSPACE_PROJECT_FILES = [
     }),
   },
 ];
-
-const fixtures: GitFixture[] = [];
-
-const newGitFixture = async (
-  ...args: Parameters<typeof createGitFixture>
-): Promise<GitFixture> => {
-  const fixture = await createGitFixture(...args);
-  fixtures.push(fixture);
-  return fixture;
-};
-
-afterEach(() => {
-  while (fixtures.length) {
-    fixtures.pop()!.cleanup();
-  }
-});
 
 describe("List Affected", () => {
   describe("command and aliases", () => {
@@ -419,7 +403,7 @@ describe("List Affected", () => {
 
   describe("git diff source", () => {
     test("--base and --head select the diff range", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -443,7 +427,7 @@ describe("List Affected", () => {
     });
 
     test("--explain header shows the refs and short SHAs", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: TWO_WORKSPACE_PROJECT_FILES },
           {
@@ -472,7 +456,7 @@ describe("List Affected", () => {
     });
 
     test("--ignore-uncommitted excludes working-tree state", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           modify: [{ path: "packages/a/src/index.ts", content: "x" }],
@@ -493,7 +477,7 @@ describe("List Affected", () => {
     });
 
     test("--ignore-untracked excludes untracked files", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           modify: [{ path: "packages/a/src/new.ts", content: "x" }],
@@ -514,7 +498,7 @@ describe("List Affected", () => {
     });
 
     test("--ignore-staged excludes staged files", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           stage: [{ path: "packages/a/src/index.ts", content: "1" }],
@@ -540,7 +524,7 @@ describe("List Affected", () => {
     });
 
     test("--ignore-unstaged excludes unstaged files", async () => {
-      const fixture = await newGitFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: TWO_WORKSPACE_PROJECT_FILES }],
         workingState: {
           modify: [{ path: "packages/a/src/index.ts", content: "x" }],
