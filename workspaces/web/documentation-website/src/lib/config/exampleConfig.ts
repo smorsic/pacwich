@@ -98,6 +98,11 @@ import { mergeWorkspaceConfig } from "bun-workspaces/config";
 export default mergeWorkspaceConfig(
   { alias: "a", tags: ["x"] },
   { alias: "b", scripts: { build: { order: 1 } } },
+  { 
+    // inputs always override previous entries instead of deep merging
+    defaultInputs: { files: ["src/**/*.ts"] },
+    scripts: { build: { inputs: { files: ["src/**/*.ts"] } } },
+  },
   // Factory function receives the accumulated config up to that point
   (prevConfig) => ({ tags: ["y"] }),
 );

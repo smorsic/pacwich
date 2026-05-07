@@ -1,4 +1,8 @@
-import { type RootConfig, type WorkspaceConfig } from "bw-common/config";
+import {
+  type WorkspaceInputsConfig,
+  type RootConfig,
+  type WorkspaceConfig,
+} from "bw-common/config";
 import {
   PARALLEL_MAX_VALUES,
   SCRIPT_SHELL_OPTIONS,
@@ -60,6 +64,26 @@ export const ROOT_CONFIG_TYPE =
         ' | "default"',
     );
 
+const inputsConfigDisplay = {
+  comment: "Inputs for affected workspace resolution",
+  files: {
+    comment: "Default is all git-tracked files in the workspace directory",
+    array: true,
+    item: { primitive: true, types: ["string"] },
+  },
+  workspacePatterns: {
+    comment: "Workspaces to treat like dependencies",
+    array: true,
+    item: { primitive: true, types: ["string"] },
+  },
+  externalDependencies: {
+    comment:
+      'Dependency names (e.g. "react") to treat as dependencies (default: all)',
+    array: true,
+    item: { primitive: true, types: ["string"] },
+  },
+} as ValueToDisplay<RequiredDeep<WorkspaceInputsConfig>>;
+
 const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
   alias: {
     value: "string | string[]",
@@ -73,6 +97,7 @@ const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
       types: ["string"],
     },
   },
+  defaultInputs: inputsConfigDisplay,
   scripts: {
     "[script: string]": {
       order: {
@@ -80,6 +105,7 @@ const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
         types: ["number"],
         comment: "Optional sorting order for running scripts",
       },
+      inputs: inputsConfigDisplay,
     },
   },
   rules: {

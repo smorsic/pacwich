@@ -35,10 +35,28 @@ See the [**workspace pattern configs**](/config/workspace-pattern-configs) page 
 **Tags** are simple strings that can be used to group workspaces together. They can be used
 in [workspace patterns](/concepts/workspace-patterns).
 
+### Default Inputs
+
+The `defaultInputs` used to determine which files are considered inputs for the workspace, 
+such as for [affected workspaces](/concepts/affected) resolution. These are applied to all 
+scripts in the workspace that don't configure their own inputs (see below).
+
+See the [workspace inputs](/concepts/workspace-inputs) page for more information.
+
 ### Scripts
 
-A map of script names to config specific to any respective script. Currently, this is used to set the [script execution order](/concepts/script-execution-order) for scripts.
+A map of script names to config specific to any respective script.
 Inline workspaces can use an [optional name](/concepts/inline-scripts#script-name) to be matched.
+
+#### Order
+
+The `scripts[name].order` option is used to set the [script execution order](/concepts/script-execution-order) for scripts.
+
+#### Inputs
+
+The `scripts[name].inputs` option is used to set the inputs for the script, such as for [affected workspaces](/concepts/affected) resolution.
+
+See the [workspace inputs](/concepts/workspace-inputs) page for more information.
 
 ### Workspace Dependency Rules
 
