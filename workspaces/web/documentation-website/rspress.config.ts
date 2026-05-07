@@ -445,7 +445,7 @@ export default defineConfig({
                 {
                   text: "Commands",
                   link: "/cli/commands",
-                  collapsed: true,
+                  collapsed: false,
                   items: [
                     {
                       text: "list-workspaces (ls)",
