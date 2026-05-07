@@ -8,7 +8,10 @@ import { WORKSPACE_CONFIG_JSON_SCHEMA } from "../src/config/workspaceConfig/work
 if (import.meta.main) {
   console.log("Compiling AJV scripts...");
 
-  const ajv = new Ajv({ code: { source: true }, allowUnionTypes: true });
+  const ajv = new Ajv({
+    code: { source: true, esm: true },
+    allowUnionTypes: true,
+  });
 
   const validateWorkspaceConfig = ajv.compile(WORKSPACE_CONFIG_JSON_SCHEMA);
   const validateRootConfig = ajv.compile(ROOT_CONFIG_JSON_SCHEMA);
