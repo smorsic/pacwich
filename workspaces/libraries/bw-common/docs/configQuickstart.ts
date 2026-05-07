@@ -69,7 +69,7 @@ export default defineWorkspaceConfig({
   // Applies to all scripts that don't configure their own inputs
   defaultInputs: { 
     // File paths, directory paths, or globs relative to the workspace's path.
-    // Default is all git-tracked files in the workspace directory.
+    // Default is all git-trackable files in the workspace directory.
     files: ["src/**/*.ts", "!src/**/*.test.ts"],
     // Workspaces to treat like dependencies that aren't package.json dependencies
     workspacePatterns: ["tag:lib"],

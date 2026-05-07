@@ -331,6 +331,10 @@ export default defineConfig({
             link: "/config/workspace-pattern-configs",
           },
           {
+            text: "Workspace Inputs",
+            link: "/config/workspace-inputs",
+          },
+          {
             text: "Environment Variables",
             link: "/config/env-vars",
           },
@@ -366,10 +370,6 @@ export default defineConfig({
           {
             text: "Affected Workspaces",
             link: "/concepts/affected",
-          },
-          {
-            text: "Workspace Inputs",
-            link: "/concepts/workspace-inputs",
           },
           {
             text: "Inline Scripts",
@@ -598,6 +598,10 @@ export default defineConfig({
                   text: "Workspace Config File",
                   link: "/config/workspace",
                 },
+                {
+                  text: "More: Workspace Inputs",
+                  link: "/config/workspace-inputs",
+                },
               ],
             },
             {
@@ -668,10 +672,6 @@ export default defineConfig({
                 {
                   text: "Affected Workspaces",
                   link: "/concepts/affected",
-                },
-                {
-                  text: "Workspace Inputs",
-                  link: "/concepts/workspace-inputs",
                 },
               ],
             },

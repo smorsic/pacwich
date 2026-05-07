@@ -30,7 +30,7 @@ export type WorkspaceRules = {
  * These can be used to specify the files and workspace patterns
  * that should be considered inputs for the script.
  *
- * The default inputs when not provided are all git-tracked files in the workspace.
+ * The default inputs when not provided are all git-trackable files in the workspace.
  */
 export type WorkspaceInputsConfig = {
   /**
@@ -38,9 +38,9 @@ export type WorkspaceInputsConfig = {
    *
    * Prefix with `!` to exclude.
    *
-   * The default inputs when not provided are all git-tracked files in the workspace.
+   * The default inputs when not provided are all git-trackable files in the workspace.
    *
-   * Files that are not git-tracked are not considered inputs.
+   * Files that are not git-trackable are not considered inputs.
    *
    * Paths with a leading `/` are considered project-root-relative.
    */
@@ -82,7 +82,7 @@ export type ScriptConfig = {
    * These can be used to specify the files and workspace patterns
    * that should be considered inputs for the script.
    *
-   * The default inputs when not provided are all git-tracked files in the workspace.
+   * The default inputs when not provided are all git-trackable files in the workspace.
    */
   inputs?: WorkspaceInputsConfig;
 };

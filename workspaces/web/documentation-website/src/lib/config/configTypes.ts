@@ -67,7 +67,7 @@ export const ROOT_CONFIG_TYPE =
 const inputsConfigDisplay = {
   comment: "Inputs for affected workspace resolution",
   files: {
-    comment: "Default is all git-tracked files in the workspace directory",
+    comment: "Default is all git-trackable files in the workspace directory",
     array: true,
     item: { primitive: true, types: ["string"] },
   },

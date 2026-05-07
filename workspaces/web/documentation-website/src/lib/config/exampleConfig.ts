@@ -171,3 +171,48 @@ export default defineRootConfig({
   ],
 });
 `.trim();
+
+export const INPUTS_FILES_EXAMPLE = `
+{
+  "defaultInputs": {
+    "files": ["src/**/*.ts", "!src/**/*.test.ts"],
+  },
+  "scripts": {
+    "test": {
+      "inputs": {
+        "files": ["src/**/*.ts"],
+      },
+    },
+  },
+}
+`.trim();
+
+export const INPUTS_WORKSPACE_PATTERNS_EXAMPLE = `
+{
+  "defaultInputs": {
+    "workspacePatterns": ["tag:my-tag"],
+  },
+  "scripts": {
+    "build": {
+      "inputs": {
+        "workspacePatterns": ["path:my-path/**/*"],
+      },
+    },
+  },
+}
+`.trim();
+
+export const INPUTS_EXTERNAL_DEPENDENCIES_EXAMPLE = ` 
+{
+  "defaultInputs": {
+    "externalDependencies": ["lodash"],
+  },
+  "scripts": {
+    "build": {
+      "inputs": {
+        "externalDependencies": ["lodash", "react"],
+      },
+    },
+  },
+}
+`.trim();
