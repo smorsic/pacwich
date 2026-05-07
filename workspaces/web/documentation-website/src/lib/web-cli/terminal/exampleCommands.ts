@@ -42,6 +42,16 @@ export const EXAMPLE_COMMANDS = [
     command: "tag-info application",
   },
   {
+    name: "List Affected Workspaces",
+    description: "List all workspaces affected by changes",
+    command: "list-affected --files='packages/shared/**/*.ts'",
+  },
+  {
+    name: "Explain Affected Workspaces",
+    description: "List all workspaces affected by changes",
+    command: "list-affected --files='packages/shared/**/*.ts' --explain",
+  },
+  {
     name: "Run Script - type-check all workspaces",
     description: "Run the type-check script for all workspaces in parallel",
     command: "run type-check",
@@ -100,6 +110,11 @@ export const EXAMPLE_COMMANDS = [
     name: "Run Script - Named options instead of positional args",
     description: "Named options can be used instead of positional args",
     command: 'run --workspace-patterns="frontend backend" --script=build',
+  },
+  {
+    name: "Run Script - Run Affected Workspaces",
+    description: "Run a script for all workspaces affected by changes",
+    command: "run-affected build --files='packages/frontend/**/*.{ts,tsx}'",
   },
   {
     name: "Include the Root workspace",
