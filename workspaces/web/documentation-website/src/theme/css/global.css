@@ -354,18 +354,22 @@ hr {
 .cli-command-options-container {
   margin-top: 0.25rem;
   margin-bottom: 0.75rem;
+
+  hr {
+    margin: 0.25rem;
+  }
+
+  :last-child hr {
+    display: none;
+  }
 }
 
-.cli-command-option-flags :nth-child(2) {
-  margin-left: 0.3rem;
-}
-
-.cli-command-option-flags > * {
-  display: inline-block;
-}
-
-.cli-command-option-flags code {
-  white-space: nowrap;
+.cli-command-option-flags {
+  margin-bottom: 0.25rem;
+  line-height: 1.3 !important;
+  span {
+    margin-left: 0.3rem;
+  }
 }
 
 .config-path {

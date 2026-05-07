@@ -60,7 +60,8 @@ export const CLI_COMMANDS_CONFIG = {
     options: {
       workspacePatterns: {
         flags: ["-W", "--workspace-patterns <patterns>"],
-        description: "Workspace patterns to match, separated by spaces",
+        description:
+          "Workspace patterns to match, separated by whitespace. Use backslashes to escape spaces if needed.",
       },
       nameOnly: {
         flags: ["-n", "--name-only"],
@@ -196,7 +197,7 @@ export const CLI_COMMANDS_CONFIG = {
       files: {
         flags: ["-F", "--files <files>"],
         description:
-          "Changed files (paths/dirs/globs, '!' to exclude), separated by spaces. Cannot be used with --base or --head",
+          "Changed files (paths/dirs/globs, '!' to exclude), separated by spaces. Use backslashes to escape spaces if needed. Bypasses git, so cannot be used with --base or --head.",
       },
       script: {
         flags: ["-S", "--script <script>"],
@@ -340,7 +341,7 @@ export const CLI_COMMANDS_CONFIG = {
       files: {
         flags: ["-F", "--files <files>"],
         description:
-          "Changed files (paths/dirs/globs, '!' to exclude), separated by spaces. Cannot be used with --base or --head",
+          "Changed files (paths/dirs/globs, '!' to exclude), separated by whitespace. Use backslashes to escape spaces if needed. Bypasses git, so cannot be used with --base or --head.",
       },
       ignoreUntracked: {
         flags: ["--ignore-untracked"],
