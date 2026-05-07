@@ -476,6 +476,14 @@ export default defineConfig({
                       link: "/cli/commands#run-script",
                     },
                     {
+                      text: "list-affected (ls-affected)",
+                      link: "/cli/commands#list-affected",
+                    },
+                    {
+                      text: "run-affected",
+                      link: "/cli/commands#run-affected",
+                    },
+                    {
                       text: "mcp-server",
                       link: "/cli/commands#mcp-server",
                     },
