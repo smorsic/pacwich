@@ -143,7 +143,7 @@ export const WORKSPACE_EXAMPLE = `
     {
       "name": "lodash",
       "version": "^4.17.21",
-      "dev": false // if in devDependencies
+      "source": "dependencies" (or "devDependencies", "peerDependencies", "optionalDependencies")
     },
   ],
 }

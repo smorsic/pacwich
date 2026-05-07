@@ -1,9 +1,4 @@
-import {
-  type NavItem,
-  type Sidebar,
-  type SidebarItem,
-  type SidebarGroup,
-} from "rspress/core";
+import { type NavItem, type SidebarGroup } from "rspress/core";
 import packageJson from "../../packages/bun-workspaces/package.json";
 import { TAG_ICONS } from "./tagIcons";
 

@@ -76,7 +76,7 @@ By default, all other dependencies in a workspace's `package.json` are considere
 inputs to a workspace. The resolved version in `bun.lock` is used to determine if
 an external dependency has changed.
 
-You can also specify only specific package names as inputs to a workspace.
+You can configure a list of specific external package names to consider inputs.
 
 When not provided, all external dependencies are considered inputs. When provided, only the specified dependencies are considered inputs,
 so an empty array means no external dependencies are considered inputs.
