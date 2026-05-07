@@ -37,9 +37,12 @@ const formatDependencyChain = (dependency: AffectedDependency): string => {
   return segments.join(" ");
 };
 
+const formatSourceMarker = (change: ExternalDependencyChange): string =>
+  change.source === "devDependencies" ? " (dev)" : "";
+
 const formatExternalDepEntryShort = (
   change: ExternalDependencyChange,
-): string => `${change.name}${change.dev ? " (dev)" : ""}`;
+): string => `${change.name}${formatSourceMarker(change)}`;
 
 const formatExternalDepEntryDetailed = (
   change: ExternalDependencyChange,
@@ -48,7 +51,7 @@ const formatExternalDepEntryDetailed = (
     change.baseVersion === null && change.headVersion === null
       ? "lockfile changed; precise diff unavailable"
       : `${change.baseVersion ?? "(absent)"} -> ${change.headVersion ?? "(absent)"}`;
-  return `${change.name}${change.dev ? " (dev)" : ""} \x1b[90m[${versions}]\x1b[0m`;
+  return `${change.name}${formatSourceMarker(change)} \x1b[90m[${versions}]\x1b[0m`;
 };
 
 const createWorkspaceSummaryLines = (

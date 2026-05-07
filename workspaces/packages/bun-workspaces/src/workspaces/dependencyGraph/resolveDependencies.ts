@@ -7,6 +7,7 @@ import {
 import type {
   ExternalDependency,
   ExternalDependencyCatalog,
+  ExternalDependencySource,
   Workspace,
 } from "../workspace";
 
@@ -19,7 +20,7 @@ export type WorkspaceMap = {
 };
 
 type ExternalDependencyAccumulator = {
-  dev: boolean;
+  source: ExternalDependencySource;
   version: string;
   catalog?: ExternalDependencyCatalog;
 };
@@ -46,14 +47,19 @@ export const resolveWorkspaceDependencies = (
         string,
         ExternalDependencyAccumulator
       >();
-      const dependencyMaps: { map: Record<string, string>; isDev: boolean }[] =
-        [
-          { map: packageJson.dependencies, isDev: false },
-          { map: packageJson.devDependencies, isDev: true },
-          { map: packageJson.peerDependencies, isDev: false },
-          { map: packageJson.optionalDependencies, isDev: false },
-        ];
-      for (const { map, isDev } of dependencyMaps) {
+      const dependencyMaps: {
+        map: Record<string, string>;
+        source: ExternalDependencySource;
+      }[] = [
+        { map: packageJson.dependencies, source: "dependencies" },
+        { map: packageJson.devDependencies, source: "devDependencies" },
+        { map: packageJson.peerDependencies, source: "peerDependencies" },
+        {
+          map: packageJson.optionalDependencies,
+          source: "optionalDependencies",
+        },
+      ];
+      for (const { map, source } of dependencyMaps) {
         for (const [dependencyName, dependencyVersion] of Object.entries(map)) {
           const catalog = parseCatalogRef(dependencyVersion);
           const resolvedVersion =
@@ -73,26 +79,31 @@ export const resolveWorkspaceDependencies = (
             }
             continue;
           }
-          // External dep — record. dev: true sticks unless we see a non-dev
-          // entry for the same name (in which case it becomes runtime).
-          // Version/catalog reflect the last entry seen for the name.
+          // External dep — record. Source precedence: a non-`devDependencies`
+          // source overrides `devDependencies`; otherwise the first source
+          // seen wins. Version/catalog reflect the last entry seen for the name.
           const existing = externalAccumulator.get(dependencyName);
           if (!existing) {
             externalAccumulator.set(dependencyName, {
-              dev: isDev,
+              source,
               version: resolvedVersion,
               catalog,
             });
           } else {
             existing.version = resolvedVersion;
             existing.catalog = catalog;
-            if (existing.dev && !isDev) existing.dev = false;
+            if (
+              existing.source === "devDependencies" &&
+              source !== "devDependencies"
+            ) {
+              existing.source = source;
+            }
           }
         }
       }
       workspace.externalDependencies = [...externalAccumulator.entries()]
-        .map(([name, { dev, version, catalog }]): ExternalDependency => {
-          const entry: ExternalDependency = { name, version, dev };
+        .map(([name, { source, version, catalog }]): ExternalDependency => {
+          const entry: ExternalDependency = { name, version, source };
           if (catalog) entry.catalog = catalog;
           return entry;
         })

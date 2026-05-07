@@ -1,5 +1,5 @@
 import type { BunLockVersionMap } from "../internal/bun/bunLock";
-import type { Workspace } from "../workspaces";
+import type { ExternalDependencySource, Workspace } from "../workspaces";
 
 /**
  * A version delta for a single workspace's external dependency between
@@ -8,12 +8,17 @@ import type { Workspace } from "../workspaces";
  * `baseVersion`/`headVersion` are `null` when the dep was absent at that
  * side of the comparison (added or removed). When both are non-null and
  * differ, the version was upgraded/downgraded.
+ *
+ * All four `package.json` dependency map sources participate. For
+ * `optionalDependencies` and `peerDependencies`, lockfile presence is the
+ * effective gate — if bun didn't resolve a version (e.g. an optional native
+ * binding skipped on this platform), no change is emitted.
  */
 export type ExternalDependencyChange = {
   /** The package name */
   name: string;
-  /** Whether the dep is dev-only on this workspace */
-  dev: boolean;
+  /** Which `package.json` dependency map this dep was declared in */
+  source: ExternalDependencySource;
   /** Version at the base point; `null` if absent */
   baseVersion: string | null;
   /** Version at the head point; `null` if absent */
@@ -62,7 +67,7 @@ export const computeExternalDependencyChanges = ({
   const result: ExternalDependencyChangesByWorkspace = new Map();
   for (const workspace of workspaces) {
     const changes: ExternalDependencyChange[] = [];
-    for (const { name, dev } of workspace.externalDependencies) {
+    for (const { name, source } of workspace.externalDependencies) {
       const baseVersion = resolveWorkspaceDepVersion({
         lock: baseLock,
         workspaceName: workspace.name,
@@ -74,7 +79,7 @@ export const computeExternalDependencyChanges = ({
         depName: name,
       });
       if (baseVersion === headVersion) continue;
-      changes.push({ name, dev, baseVersion, headVersion });
+      changes.push({ name, source, baseVersion, headVersion });
     }
     if (changes.length) result.set(workspace.name, changes);
   }

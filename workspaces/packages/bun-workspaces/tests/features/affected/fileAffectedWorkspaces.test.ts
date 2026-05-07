@@ -2140,8 +2140,8 @@ describe("getFileAffectedWorkspaces", () => {
         name: "a",
         path: "packages/a",
         externalDependencies: [
-          { name: "lodash", version: "^4.0.0", dev: false },
-          { name: "typescript", version: "^5.0.0", dev: true },
+          { name: "lodash", version: "^4.0.0", source: "dependencies" },
+          { name: "typescript", version: "^5.0.0", source: "devDependencies" },
         ],
       });
 
@@ -2152,13 +2152,13 @@ describe("getFileAffectedWorkspaces", () => {
           [
             {
               name: "lodash",
-              dev: false,
+              source: "dependencies",
               baseVersion: "4.17.0",
               headVersion: "4.17.21",
             },
             {
               name: "typescript",
-              dev: true,
+              source: "devDependencies",
               baseVersion: "5.0.0",
               headVersion: "5.4.0",
             },
@@ -2181,13 +2181,13 @@ describe("getFileAffectedWorkspaces", () => {
       ).toEqual([
         {
           name: "lodash",
-          dev: false,
+          source: "dependencies",
           baseVersion: "4.17.0",
           headVersion: "4.17.21",
         },
         {
           name: "typescript",
-          dev: true,
+          source: "devDependencies",
           baseVersion: "5.0.0",
           headVersion: "5.4.0",
         },
@@ -2231,7 +2231,7 @@ describe("getFileAffectedWorkspaces", () => {
       ).toEqual([
         {
           name: "lodash",
-          dev: false,
+          source: "dependencies",
           baseVersion: "4.17.0",
           headVersion: "4.17.21",
         },
@@ -2267,7 +2267,7 @@ describe("getFileAffectedWorkspaces", () => {
         name: "b",
         path: "packages/b",
         externalDependencies: [
-          { name: "lodash", version: "^4.0.0", dev: false },
+          { name: "lodash", version: "^4.0.0", source: "dependencies" },
         ],
       });
       const result = await getFileAffectedWorkspaces({
@@ -2283,7 +2283,7 @@ describe("getFileAffectedWorkspaces", () => {
             [
               {
                 name: "lodash",
-                dev: false,
+                source: "dependencies",
                 baseVersion: "4.17.0",
                 headVersion: "4.17.21",
               },
@@ -2294,7 +2294,7 @@ describe("getFileAffectedWorkspaces", () => {
             [
               {
                 name: "lodash",
-                dev: false,
+                source: "dependencies",
                 baseVersion: "4.17.0",
                 headVersion: "4.17.21",
               },

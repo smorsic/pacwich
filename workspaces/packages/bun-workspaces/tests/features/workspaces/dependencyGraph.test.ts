@@ -63,25 +63,25 @@ describe("findWorkspaces with dependencies", () => {
 });
 
 describe("Workspace.externalDependencies", () => {
-  test("captures dependencies and devDependencies with the dev flag set correctly", () => {
+  test("captures dependencies and devDependencies tagged with their source", () => {
     const { workspaces } = findWorkspaces({
       rootDirectory: getProjectRoot("withDependenciesWithExternal"),
     });
     const a = workspaces.find((w) => w.name === "a")!;
     expect(a.externalDependencies).toEqual([
-      { name: "lodash", version: "^4.17.0", dev: false },
-      { name: "typescript", version: "^5.0.0", dev: true },
+      { name: "lodash", version: "^4.17.0", source: "dependencies" },
+      { name: "typescript", version: "^5.0.0", source: "devDependencies" },
     ]);
   });
 
-  test("includes peerDependencies and optionalDependencies as runtime (dev=false)", () => {
+  test("captures peerDependencies and optionalDependencies tagged with their source", () => {
     const { workspaces } = findWorkspaces({
       rootDirectory: getProjectRoot("withDependenciesWithExternal"),
     });
     const c = workspaces.find((w) => w.name === "c")!;
     expect(c.externalDependencies).toEqual([
-      { name: "fsevents", version: "^2.0.0", dev: false },
-      { name: "react", version: "^18.0.0", dev: false },
+      { name: "fsevents", version: "^2.0.0", source: "optionalDependencies" },
+      { name: "react", version: "^18.0.0", source: "peerDependencies" },
     ]);
   });
 
@@ -112,7 +112,7 @@ describe("Workspace.externalDependencies", () => {
         {
           name: "lodash",
           version: "^4.17.0",
-          dev: false,
+          source: "dependencies",
           catalog: { name: "" },
         },
       ]);
@@ -127,7 +127,7 @@ describe("Workspace.externalDependencies", () => {
         {
           name: "react",
           version: "^17.0.0",
-          dev: false,
+          source: "dependencies",
           catalog: { name: "react17" },
         },
       ]);
@@ -142,7 +142,7 @@ describe("Workspace.externalDependencies", () => {
         {
           name: "typescript",
           version: "catalog:nope",
-          dev: true,
+          source: "devDependencies",
           catalog: { name: "nope" },
         },
       ]);
@@ -157,12 +157,12 @@ describe("Workspace.externalDependencies", () => {
         {
           name: "left-pad",
           version: "^1.3.0",
-          dev: false,
+          source: "dependencies",
         },
         {
           name: "lodash",
           version: "^4.17.0",
-          dev: false,
+          source: "dependencies",
           catalog: { name: "" },
         },
       ]);

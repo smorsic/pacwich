@@ -490,10 +490,32 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       const a = findResult(result.workspaceResults, "a");
       expect(a.isAffected).toBe(true);
       expect(a.affectedReasons.externalDependencies).toEqual([
-        { name: "lodash", dev: false, baseVersion: null, headVersion: null },
+        {
+          name: "lodash",
+          source: "dependencies",
+          baseVersion: null,
+          headVersion: null,
+        },
         {
           name: "typescript",
-          dev: true,
+          source: "devDependencies",
+          baseVersion: null,
+          headVersion: null,
+        },
+      ]);
+      // 'c' has peer + optional externals → also flagged (all four sources participate)
+      const c = findResult(result.workspaceResults, "c");
+      expect(c.isAffected).toBe(true);
+      expect(c.affectedReasons.externalDependencies).toEqual([
+        {
+          name: "fsevents",
+          source: "optionalDependencies",
+          baseVersion: null,
+          headVersion: null,
+        },
+        {
+          name: "react",
+          source: "peerDependencies",
           baseVersion: null,
           headVersion: null,
         },
@@ -535,7 +557,12 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       // reported reasons.
       expect(a.isAffected).toBe(true);
       expect(a.affectedReasons.externalDependencies).toEqual([
-        { name: "lodash", dev: false, baseVersion: null, headVersion: null },
+        {
+          name: "lodash",
+          source: "dependencies",
+          baseVersion: null,
+          headVersion: null,
+        },
       ]);
     });
 
@@ -566,7 +593,12 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       // c-default has no bw.workspace.json → no filter → react participates.
       expect(c.isAffected).toBe(true);
       expect(c.affectedReasons.externalDependencies).toEqual([
-        { name: "react", dev: false, baseVersion: null, headVersion: null },
+        {
+          name: "react",
+          source: "dependencies",
+          baseVersion: null,
+          headVersion: null,
+        },
       ]);
     });
 
@@ -946,7 +978,7 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       expect(a.affectedReasons.externalDependencies).toEqual([
         {
           name: "lodash",
-          dev: false,
+          source: "dependencies",
           baseVersion: "4.17.21",
           headVersion: "4.17.22",
         },

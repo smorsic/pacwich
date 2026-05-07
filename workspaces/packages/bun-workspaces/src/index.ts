@@ -55,6 +55,7 @@ export {
   type Workspace,
   type ExternalDependency,
   type ExternalDependencyCatalog,
+  type ExternalDependencySource,
 } from "./workspaces";
 export { type SimpleAsyncIterable, BunWorkspacesError } from "./internal/core";
 export { type LogLevelSetting } from "bw-common/logging";

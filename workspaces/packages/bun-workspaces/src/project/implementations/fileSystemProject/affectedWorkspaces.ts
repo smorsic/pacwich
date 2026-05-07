@@ -224,9 +224,9 @@ const buildLockfileChangeSyntheticEntries = (
     if (!workspace.externalDependencies.length) continue;
     result.set(
       workspace.name,
-      workspace.externalDependencies.map(({ name, dev }) => ({
+      workspace.externalDependencies.map(({ name, source }) => ({
         name,
-        dev,
+        source,
         baseVersion: null,
         headVersion: null,
       })),

@@ -71,13 +71,15 @@ describe("computeExternalDependencyChanges", () => {
     makeTestWorkspace({
       name: "a",
       externalDependencies: [
-        { name: "lodash", version: "^4.17.0", dev: false },
-        { name: "typescript", version: "^5.0.0", dev: true },
+        { name: "lodash", version: "^4.17.0", source: "dependencies" },
+        { name: "typescript", version: "^5.0.0", source: "devDependencies" },
       ],
     }),
     makeTestWorkspace({
       name: "b",
-      externalDependencies: [{ name: "react", version: "^18.0.0", dev: false }],
+      externalDependencies: [
+        { name: "react", version: "^18.0.0", source: "dependencies" },
+      ],
     }),
   ];
 
@@ -114,7 +116,7 @@ describe("computeExternalDependencyChanges", () => {
     expect(result.get("a")).toEqual([
       {
         name: "lodash",
-        dev: false,
+        source: "dependencies",
         baseVersion: "4.17.21",
         headVersion: "4.17.22",
       },
@@ -132,7 +134,7 @@ describe("computeExternalDependencyChanges", () => {
     });
     expect(result.get("a")).toContainEqual({
       name: "lodash",
-      dev: false,
+      source: "dependencies",
       baseVersion: null,
       headVersion: "4.17.21",
     });
@@ -151,19 +153,19 @@ describe("computeExternalDependencyChanges", () => {
     });
     expect(result.get("a")).toContainEqual({
       name: "lodash",
-      dev: false,
+      source: "dependencies",
       baseVersion: "4.17.21",
       headVersion: null,
     });
     expect(result.get("a")).toContainEqual({
       name: "typescript",
-      dev: true,
+      source: "devDependencies",
       baseVersion: "5.0.0",
       headVersion: null,
     });
   });
 
-  test("preserves the dev flag from the workspace's externalDependencies entry", () => {
+  test("preserves the source from the workspace's externalDependencies entry", () => {
     const baseLock = new Map([["typescript", "5.0.0"]]);
     const headLock = new Map([["typescript", "5.1.0"]]);
     const result = computeExternalDependencyChanges({
@@ -174,11 +176,71 @@ describe("computeExternalDependencyChanges", () => {
     expect(result.get("a")).toEqual([
       {
         name: "typescript",
-        dev: true,
+        source: "devDependencies",
         baseVersion: "5.0.0",
         headVersion: "5.1.0",
       },
     ]);
+  });
+
+  test("includes peer and optional sources when their versions move in the lockfile", () => {
+    const peerOnly = makeTestWorkspace({
+      name: "peer-only",
+      externalDependencies: [
+        { name: "react", version: "^18.0.0", source: "peerDependencies" },
+      ],
+    });
+    const optionalOnly = makeTestWorkspace({
+      name: "optional-only",
+      externalDependencies: [
+        { name: "fsevents", version: "^2.0.0", source: "optionalDependencies" },
+      ],
+    });
+    const baseLock = new Map([
+      ["react", "18.0.0"],
+      ["fsevents", "2.3.0"],
+    ]);
+    const headLock = new Map([
+      ["react", "18.2.0"],
+      ["fsevents", "2.3.3"],
+    ]);
+    const result = computeExternalDependencyChanges({
+      workspaces: [peerOnly, optionalOnly],
+      baseLock,
+      headLock,
+    });
+    expect(result.get("peer-only")).toEqual([
+      {
+        name: "react",
+        source: "peerDependencies",
+        baseVersion: "18.0.0",
+        headVersion: "18.2.0",
+      },
+    ]);
+    expect(result.get("optional-only")).toEqual([
+      {
+        name: "fsevents",
+        source: "optionalDependencies",
+        baseVersion: "2.3.0",
+        headVersion: "2.3.3",
+      },
+    ]);
+  });
+
+  test("optional/peer deps with no lockfile resolution emit no change (lockfile presence is the gate)", () => {
+    const workspace = makeTestWorkspace({
+      name: "platform-conditional",
+      externalDependencies: [
+        { name: "fsevents", version: "^2.0.0", source: "optionalDependencies" },
+      ],
+    });
+    // fsevents was skipped on this platform — never resolved at either ref.
+    const result = computeExternalDependencyChanges({
+      workspaces: [workspace],
+      baseLock: new Map(),
+      headLock: new Map(),
+    });
+    expect(result.size).toBe(0);
   });
 
   test("workspaces with no external deps produce no entries", () => {
@@ -196,13 +258,13 @@ describe("computeExternalDependencyChanges", () => {
       const a = makeTestWorkspace({
         name: "pkg-a",
         externalDependencies: [
-          { name: "react", version: "^18.0.0", dev: false },
+          { name: "react", version: "^18.0.0", source: "dependencies" },
         ],
       });
       const b = makeTestWorkspace({
         name: "pkg-b",
         externalDependencies: [
-          { name: "react", version: "^18.0.0", dev: false },
+          { name: "react", version: "^18.0.0", source: "dependencies" },
         ],
       });
       // Mirrors the actual bun.lock shape for divergent versions:
@@ -225,7 +287,7 @@ describe("computeExternalDependencyChanges", () => {
       expect(result.get("pkg-b")).toEqual([
         {
           name: "react",
-          dev: false,
+          source: "dependencies",
           baseVersion: "18.2.0",
           headVersion: "18.3.1",
         },
@@ -236,13 +298,13 @@ describe("computeExternalDependencyChanges", () => {
       const a = makeTestWorkspace({
         name: "pkg-a",
         externalDependencies: [
-          { name: "react", version: "^18.0.0", dev: false },
+          { name: "react", version: "^18.0.0", source: "dependencies" },
         ],
       });
       const b = makeTestWorkspace({
         name: "pkg-b",
         externalDependencies: [
-          { name: "react", version: "^18.0.0", dev: false },
+          { name: "react", version: "^18.0.0", source: "dependencies" },
         ],
       });
       // pkg-a uses the hoisted version; pkg-b is locally pinned. Only the
@@ -263,7 +325,7 @@ describe("computeExternalDependencyChanges", () => {
       expect(result.get("pkg-a")).toEqual([
         {
           name: "react",
-          dev: false,
+          source: "dependencies",
           baseVersion: "17.0.1",
           headVersion: "17.0.2",
         },
@@ -275,7 +337,11 @@ describe("computeExternalDependencyChanges", () => {
       const b = makeTestWorkspace({
         name: "pkg-b",
         externalDependencies: [
-          { name: "@types/node", version: "^20.0.0", dev: true },
+          {
+            name: "@types/node",
+            version: "^20.0.0",
+            source: "devDependencies",
+          },
         ],
       });
       const baseLock = new Map([
@@ -294,7 +360,7 @@ describe("computeExternalDependencyChanges", () => {
       expect(result.get("pkg-b")).toEqual([
         {
           name: "@types/node",
-          dev: true,
+          source: "devDependencies",
           baseVersion: "20.0.0",
           headVersion: "20.1.0",
         },
