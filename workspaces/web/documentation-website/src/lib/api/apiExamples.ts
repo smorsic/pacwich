@@ -33,7 +33,8 @@ const testProject = createMemoryProject({
       scripts: ["my-test-script"],
       aliases: ["test-alias"],
       dependencies: [],
-      dependents: []
+      dependents: [],
+      externalDependencies: [],
     }
   ]
 });
@@ -136,6 +137,15 @@ export const WORKSPACE_EXAMPLE = `
 
   // Names of other workspaces that depend on this workspace
   dependents: ["my-dependent"],
+
+  // Other external dependencies, e.g. lodash, react
+  externalDependencies: [
+    {
+      "name": "lodash",
+      "version": "^4.17.21",
+      "dev": false // if in devDependencies
+    },
+  ],
 }
 `.trim();
 
