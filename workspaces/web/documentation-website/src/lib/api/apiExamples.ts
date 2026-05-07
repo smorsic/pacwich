@@ -294,7 +294,7 @@ const { workspaceResults } = await project.determineAffectedWorkspaces({
 
 export const API_DETERMINE_AFFECTED_FILE_LIST_EXAMPLE = `
 const { workspaceResults } = await project.determineAffectedWorkspaces({
-  // Bypass git and pass a list of changed files instead that match workspace inputs
+  // Bypass git and pass a list of changed files that match inputs
   diffSource: "fileList",
   changedFiles: ["src/**/*.ts", "something.txt"],
 });

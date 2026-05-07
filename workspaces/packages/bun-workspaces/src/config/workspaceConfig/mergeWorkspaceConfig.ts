@@ -97,7 +97,7 @@ const applyConfig = (
  * Any argument may be a factory function receiving the accumulated config up to that point.
  *
  * Generally, objects are deeply merged, and arrays are concatenated and deduplicated,
- * **except** for workspace inputs (defaultInputs and script inputs), which are replaced entirely.
+ * **except** for inputs (defaultInputs and script inputs), which are replaced entirely.
  */
 export const mergeWorkspaceConfig = (
   ...configs: WorkspaceConfigInput[]

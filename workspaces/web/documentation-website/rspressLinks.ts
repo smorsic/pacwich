@@ -81,7 +81,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         link: "/config/workspace-pattern-configs",
       },
       {
-        text: "Workspace Inputs",
+        text: "Inputs",
         link: "/config/workspace-inputs",
       },
       {
@@ -318,7 +318,7 @@ const SIDEBAR_GROUPS = {
               link: "/config/workspace",
             },
             {
-              text: "More: Workspace Inputs",
+              text: "More: Inputs",
               link: "/config/workspace-inputs",
             },
           ],

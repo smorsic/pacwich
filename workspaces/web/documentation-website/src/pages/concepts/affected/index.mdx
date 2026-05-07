@@ -28,7 +28,7 @@ When not [configured](/config/workspace-inputs), the default inputs are:
 * All [workspace dependencies](/config/workspace#workspace-dependencies). If a workspace dependency is affected for any reason, its dependent is also considered affected.
 * The version resolved in `bun.lock` for all other dependencies in a workspace's `package.json`.
 
-Inputs can be configured per script as well. See the [workspace inputs](/config/workspace-inputs) page for more information.
+Inputs can be configured per script as well. See the [inputs](/config/workspace-inputs) page for more information.
 
 ### How is an affected workspace determined?
 
@@ -73,7 +73,7 @@ bw run-affected my-script --base=my-branch --ignore-uncommitted
 
 #### Using a list of changed files
 
-You can bypass using git entirely and simply pass a list of changed files that match workspace inputs.
+You can bypass using git entirely and simply pass a list of changed files that match inputs.
 
 <SyntaxHighlighter language="bash">
 {`

@@ -45,7 +45,7 @@ Tags are strings to group workspaces together; they do not need to be unique.
   "alias": "my-alias", // can be array
   "tags": ["my-tag"],
   // Default inputs used to determine if the workspace is affected, applied to
-  // all scripts that don't configure their own inputs. See "Workspace inputs" below.
+  // all scripts that don't configure their own inputs. See "Inputs" below.
   "defaultInputs": {
     "files": ["src/**/*.ts", "!src/**/*.test.ts"],
     "workspacePatterns": ["tag:shared-lib"],
@@ -75,7 +75,7 @@ Tags are strings to group workspaces together; they do not need to be unique.
 }
 ```
 
-### Workspace inputs
+### Inputs
 
 The `defaultInputs` field (and the per-script `scripts[name].inputs` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (`WorkspaceInputsConfig`):
 
