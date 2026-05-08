@@ -73,7 +73,7 @@ A workspace is "affected" when something in its set of **inputs** has changed. I
 
 Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
 
-- `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern project-root-relative. Prefix `!` to exclude. Only git-trackable files match.
+- `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern relative to the project root. Prefix `!` to exclude. Only git-trackable files match.
 - `workspacePatterns`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep).
 - `externalDependencies`: an allowlist of package names. Omitted = all external deps participate; `[]` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
 
@@ -402,7 +402,7 @@ Tags are strings to group workspaces together; they do not need to be unique.
     "build": {
       // per-script inputs override defaultInputs for this script's affected resolution
       "inputs": {
-        "files": ["src/**/*.ts", "/shared-types/**/*.ts"], // leading "/" = project-root-relative
+        "files": ["src/**/*.ts", "/shared-types/**/*.ts"], // leading "/" = relative to the project root
       },
     },
   },
@@ -422,7 +422,7 @@ Tags are strings to group workspaces together; they do not need to be unique.
 
 The `defaultInputs` field (and the per-script `scripts[name].inputs` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (`WorkspaceInputsConfig`):
 
-- `files` — file paths, directories, or globs relative to the workspace's directory. Leading `/` makes a pattern project-root-relative. Prefix with `!` to exclude. Only git-trackable files are matched. Default when not provided is `["."]` (everything in the workspace dir).
+- `files` — file paths, directories, or globs relative to the workspace's directory. Leading `/` makes a pattern relative to the project root. Prefix with `!` to exclude. Only git-trackable files are matched. Default when not provided is `["."]` (everything in the workspace dir).
 - `workspacePatterns` — workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep edge).
 - `externalDependencies` — allowlist of package names that participate in lockfile-change detection. Omitted = all external deps participate; `[]` = none participate; non-empty list = only listed names participate (intersected with the workspace's actual external deps from `package.json`).
 
