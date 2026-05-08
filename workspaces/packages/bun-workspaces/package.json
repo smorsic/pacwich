@@ -36,7 +36,7 @@
     "cli": "bun  run bin/cli.js",
     "cli:dev": "_BW_RUNTIME_MODE=development bun  run bin/cli.js",
     "cli:build": "bun  run dist/bin/cli.js",
-    "ajv": "bun  run scripts/ajv.ts",
+    "ajv": "bun run scripts/ajv.ts",
     "generate-mcp-docs": "bun  run scripts/generateMcpDocs.ts",
     "test": "rm -rf dist.test && bun test --timeout 10000",
     "test:clean": "rm -rf tests/fixtures/testProjects/**/node_modules && rm -rf tests/fixtures/testProjects/**/bun.lock && bun run test",
@@ -46,7 +46,7 @@
     "build:test": "BUILD_INCLUDE_TESTS=true bun  run scripts/build.ts && chmod +x dist.test/bin/cli.js && cd dist.test && bun install && IS_BUILD=true bun  run test",
     "build:rslib-only": "rslib build",
     "type-check": "tsc --noEmit",
-    "generate-modules": "bun  run ajv && bun  run generate-mcp-docs",
+    "generate-modules": "bun run ajv && bun  run generate-mcp-docs",
     "mcp:inspect": "mcp-inspector bun  run bin/cli.js --cwd ../../../ mcp"
   },
   "devDependencies": {

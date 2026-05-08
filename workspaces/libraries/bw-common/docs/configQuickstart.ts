@@ -1,6 +1,6 @@
 export const ROOT_CONFIG_QUICKSTART = `
 // bw.root.ts — place in your project root directory
-// Also supported: bw.root.js, bw.root.json, bw.root.jsonc, 
+// Also supported: bw.root.js, bw.root.json, bw.root.jsonc,
 // or a "bw-root" key in package.json
 
 import { defineRootConfig } from "bun-workspaces/config";
@@ -57,7 +57,7 @@ export default defineRootConfig({
 export const WORKSPACE_CONFIG_QUICKSTART = `
 // bw.workspace.ts — place in a workspace directory
 
-// Also supported: bw.workspace.js, bw.workspace.json, bw.workspace.jsonc, 
+// Also supported: bw.workspace.js, bw.workspace.json, bw.workspace.jsonc,
 // or a "bw" key in package.json
 
 import { defineWorkspaceConfig } from "bun-workspaces/config";
@@ -67,7 +67,7 @@ export default defineWorkspaceConfig({
   tags: ["app", "frontend"],
   // Optional, for configuring affected workspace resolution inputs
   // Applies to all scripts that don't configure their own inputs
-  defaultInputs: { 
+  defaultInputs: {
     // File paths, directory paths, or globs relative to the workspace's path.
     // Default is all git-trackable files in the workspace directory.
     files: ["src/**/*.ts", "!src/**/*.test.ts"],
@@ -80,10 +80,10 @@ export default defineWorkspaceConfig({
     // lower order runs first in sequenced script execution
     build: {
       // Optional, for setting the default script execution order
-      order: 1, 
+      order: 1,
       // Optional, for configuring affected workspace resolution inputs
       // Applies to the build script only
-      inputs: { files: ["src/**/*.ts"] } 
+      inputs: { files: ["src/**/*.ts"] },
     },
     test: { order: 2 },
   },

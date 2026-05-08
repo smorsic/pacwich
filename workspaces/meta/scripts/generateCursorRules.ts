@@ -19,7 +19,7 @@ if (import.meta.main) {
   ]) {
     const contextFilePath = path.resolve(root, contextFile);
     logger.info(`Reading ${contextFile}`);
-    content += await Bun.file(contextFilePath).text();
+    content += (content ? "\n" : "") + (await Bun.file(contextFilePath).text());
   }
   logger.info("All files read");
 

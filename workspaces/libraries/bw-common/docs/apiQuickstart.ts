@@ -65,7 +65,7 @@ const { output, summary } = project.runScriptAcrossWorkspaces({
   // Optional, callback when script starts, skips, or exits
   onScriptEvent: (event, { workspace, exitResult }) => {
     // event: "start", "skip", "exit"
-  }
+  },
 });
 
 // Get a stream of script output
@@ -117,11 +117,15 @@ const workspacesWithScript = project.listWorkspacesWithScript("my-script");
 
 // Run a script in a workspace
 const runSingleScript = async () => {
-  ${RUN_WORKSPACE_SCRIPT_EXAMPLE.split("\n").join("\n  ")}
-}
+  ${RUN_WORKSPACE_SCRIPT_EXAMPLE.split("\n")
+    .join("\n  ")
+    .replace(/\n {2}\n/g, "\n\n")}
+};
 
 // Run a script in all workspaces that have it in their package.json "scripts" field
 const runManyScripts = async () => {
-  ${RUN_SCRIPT_ACROSS_WORKSPACES_EXAMPLE.split("\n").join("\n  ")}
-}
+  ${RUN_SCRIPT_ACROSS_WORKSPACES_EXAMPLE.split("\n")
+    .join("\n  ")
+    .replace(/\n {2}\n/g, "\n\n")}
+};
 `.trim();
