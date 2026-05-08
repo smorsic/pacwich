@@ -187,12 +187,12 @@ export const CLI_COMMANDS_CONFIG = {
       base: {
         flags: ["-B", "--base <ref>"],
         description:
-          "Git base ref to diff against (default from config / 'main'). Cannot be used with --files",
+          "Git base ref to diff against (default is main if not configured). Cannot be used with --files",
       },
       head: {
         flags: ["-H", "--head <ref>"],
         description:
-          'Git head ref to diff against (default "HEAD"). Cannot be used with --files',
+          "Git head ref to diff against (default: HEAD). Cannot be used with --files",
       },
       files: {
         flags: ["-F", "--files <files>"],
@@ -223,11 +223,12 @@ export const CLI_COMMANDS_CONFIG = {
       ignoreWorkspaceDeps: {
         flags: ["--ignore-workspace-deps"],
         description:
-          "Skip cascading affected workspaces through `workspace:*` dependencies",
+          "Ignore workspace dependencies derived from package.json files",
       },
       ignoreExternalDeps: {
         flags: ["--ignore-external-deps"],
-        description: "Skip lockfile-based external dependency version tracking",
+        description:
+          "Ignore changes to external dependencies (e.g. npm packages) versions in bun.lock",
       },
       explain: {
         flags: ["-e", "--explain"],
@@ -258,11 +259,12 @@ export const CLI_COMMANDS_CONFIG = {
     options: {
       script: {
         flags: ["-S", "--script <script>"],
-        description: "The script to run.",
+        description: "The script to run. (Alternative to positional argument)",
       },
       workspacePatterns: {
         flags: ["-W", "--workspace-patterns <patterns>"],
-        description: "Workspace patterns to match, separated by spaces.",
+        description:
+          "Workspace patterns to match, separated by spaces. (Alternative to positional arguments)",
       },
       parallel: {
         flags: ["-P", "--parallel [max]"],
@@ -326,12 +328,12 @@ export const CLI_COMMANDS_CONFIG = {
     options: {
       script: {
         flags: ["-S", "--script <script>"],
-        description: "The script to run",
+        description: "The script to run. (Alternative to positional argument)",
       },
       base: {
         flags: ["-B", "--base <ref>"],
         description:
-          "Git base ref to diff against (default from config / 'main'). Cannot be used with --files",
+          "Git base ref to diff against (default is main if not configured). Cannot be used with --files",
       },
       head: {
         flags: ["-H", "--head <ref>"],
@@ -363,11 +365,12 @@ export const CLI_COMMANDS_CONFIG = {
       ignoreWorkspaceDeps: {
         flags: ["--ignore-workspace-deps"],
         description:
-          "Skip cascading affected workspaces through `workspace:*` dependencies",
+          "Ignore workspace dependencies derived from package.json files",
       },
       ignoreExternalDeps: {
         flags: ["--ignore-external-deps"],
-        description: "Skip lockfile-based external dependency version tracking",
+        description:
+          "Ignore changes to external dependencies (e.g. npm packages) versions in bun.lock",
       },
       parallel: {
         flags: ["-P", "--parallel [max]"],

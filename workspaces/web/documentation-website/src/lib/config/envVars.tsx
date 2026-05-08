@@ -89,7 +89,7 @@ export const ENV_VARS_METADATA: Record<
     rootConfigDefaultsKey: `${CONFIG_DEFAULTS_KEY}.affectedBaseRef`,
     description: (
       <span>
-        The default git base ref for affected workspace resolution. THis is{" "}
+        The default git base ref for affected workspace resolution. This is{" "}
         <code>main</code> when not overridden.
       </span>
     ),

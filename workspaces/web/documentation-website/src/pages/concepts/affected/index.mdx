@@ -25,7 +25,7 @@ By default, a workspace is considered to have a set of **inputs**, the sources o
 
 When not [configured](/config/workspace-inputs), the default inputs are:
 * All git-trackable files in the workspace's directory
-* All [workspace dependencies](/config/workspace#workspace-dependencies). If a workspace dependency is affected for any reason, its dependents are also considered affected.
+* All [workspace dependencies](/concepts/workspace-dependencies). If a workspace dependency is affected for any reason, its dependents are also considered affected.
 * The version resolved in `bun.lock` for all other dependencies in a workspace's `package.json`.
 
 Inputs can be configured per script as well. See the [inputs](/config/workspace-inputs) page for more information.
@@ -78,6 +78,9 @@ You can bypass using git entirely and simply pass a list of changed files that m
 <SyntaxHighlighter language="bash">
 {`
 bw ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+
+# Paths with leading / are relative to the project root
+bw run-affected --files="/tsconfig.json packages/example/**/*.ts"
 `.trim()}
 </SyntaxHighlighter>
 

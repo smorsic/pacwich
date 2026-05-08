@@ -42,7 +42,7 @@ export type WorkspaceInputsConfig = {
    *
    * Files that are not git-trackable are not considered inputs.
    *
-   * Paths with a leading `/` are considered project-root-relative.
+   * Paths with a leading `/` are relative to the project root.
    */
   files?: string[];
   /**

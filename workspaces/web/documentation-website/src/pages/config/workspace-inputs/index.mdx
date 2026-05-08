@@ -28,7 +28,7 @@ changes to a particular workspace, which is used for determining [affected works
 The default inputs when not provided are all git-trackable files in a workspace's directory,
 effectively making `"."` the default input pattern for a workspace's files.
 
-Other implicit inputs by default are all [workspace dependencies](/config/workspace#workspace-dependencies), 
+Other implicit inputs by default are all [workspace dependencies](/concepts/workspace-dependencies), 
 and all other dependencies in the workspace's `package.json`.
 There are ways to further customize these implicit inputs, as described below.
 
@@ -36,7 +36,7 @@ There are ways to further customize these implicit inputs, as described below.
 
 Files are specified as paths relative to the workspace's directory.
 
-Paths with a leading `/` are considered project-root-relative.
+Paths with a leading `/` are relative to the project root.
 
 Prefix with `!` to exclude.
 
@@ -52,7 +52,7 @@ Prefix with `!` to exclude.
 ## Workspace Patterns
 
 In cases such as determining [affected workspaces](/concepts/affected),
-[workspace dependencies](/config/workspace#workspace-dependencies) (dependencies
+[workspace dependencies](/concepts/workspace-dependencies) (dependencies
 using `"workspace:*"` in a workspace's `package.json`) are considered
 inputs to a workspace by default.
 
@@ -60,7 +60,7 @@ inputs to a workspace by default.
 the graph of workspaces computationally fast and cheap, relying instead on explicit
 `package.json` dependencies.
 
-When you need to treat other workspaces that aren't true dependencies like dependencies to a workspace, 
+When you need to treat other workspaces like dependencies, 
 you can also specify [workspace patterns](/concepts/workspace-patterns) to be considered inputs to a workspace via the inputs.
 
 [Workspace configuration](/config/workspace) example:
