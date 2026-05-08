@@ -13,6 +13,7 @@ import { exampleRootConfigSimple1, exampleRootConfigSimple2, createPackageJsonEx
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { ROOT_CONFIG_TYPE } from "../../../lib/config/configTypes";
 import { CONFIG_DEFAULTS_KEY } from "../../../lib/config/envVars";
+import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
 
 # Configuration: Root Config File
  
@@ -26,9 +27,13 @@ The optional root configuration is the general configuration for a [project](/co
 
 ### Defaults
 
-The values in <code>{CONFIG_DEFAULTS_KEY}</code> can also be set by [environment variables](/config/env-vars). Defaults provided in the configuration take precedence over environment variables.
+The values in <code>{CONFIG_DEFAULTS_KEY}</code> can also be set by [environment variables](/config/env-vars). Configuration values take precedence over environment variables.
 
-You can set defaults for the [parallel max value](/concepts/parallel-scripts#parallel-max-value), the [shell option for inline scripts](/concepts/inline-scripts#shell), and whether to include the [root workspace](/concepts/root-workspace) in the project's workspaces list.
+* <code>{ENV_VARS_METADATA.parallelMaxDefault.rootConfigDefaultsKey}</code>: The [parallel max value](/concepts/parallel-scripts#parallel-max-value)
+* <code>{ENV_VARS_METADATA.scriptShellDefault.rootConfigDefaultsKey}</code>: The [shell option for inline scripts](/concepts/inline-scripts#shell)
+* <code>{ENV_VARS_METADATA.includeRootWorkspaceDefault.rootConfigDefaultsKey}</code>: Whether to include the [root workspace](/concepts/root-workspace) in the project's workspaces list
+* <code>{ENV_VARS_METADATA.affectedBaseRefDefault.rootConfigDefaultsKey}</code>: The default git base ref for [affected workspaces](/concepts/affected) resolution
+  (this is <code>main</code> when not overridden)
 
 ### Workspace Pattern Configs
 

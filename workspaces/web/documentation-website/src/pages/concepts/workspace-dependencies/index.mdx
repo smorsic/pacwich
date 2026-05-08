@@ -18,6 +18,10 @@ import { exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple } from '../..
 
 [Workspaces](/concepts/glossary#workspace) can depend on other workspaces and import/export code between them. This is a native capability of workspaces in Bun.
 
+**`bun-workspaces` does not perform source code analysis.** This keeps determining
+the graph of workspaces computationally fast and cheap, relying instead on explicit
+`package.json` dependencies (using `"workspace:*"`) seen below:
+
 ### Setting up Dependencies - Example
 
 For example, this might be some workspace's `package.json` file, where `my-workspace-b` depends on `my-workspace-a`:

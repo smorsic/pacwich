@@ -10,6 +10,7 @@ export const exampleRootConfigSimple1: RootConfig = {
     parallelMax: 4,
     shell: "system",
     includeRootWorkspace: false,
+    affectedBaseRef: "my-branch",
   },
   workspacePatternConfigs: [
     {
@@ -26,6 +27,7 @@ export const exampleRootConfigSimple2: RootConfig = {
     parallelMax: "50%",
     shell: "system",
     includeRootWorkspace: true,
+    affectedBaseRef: "my-branch",
   },
 };
 
@@ -96,6 +98,11 @@ import { mergeWorkspaceConfig } from "bun-workspaces/config";
 export default mergeWorkspaceConfig(
   { alias: "a", tags: ["x"] },
   { alias: "b", scripts: { build: { order: 1 } } },
+  { 
+    // inputs always override previous entries instead of deep merging
+    defaultInputs: { files: ["src/**/*.ts"] },
+    scripts: { build: { inputs: { files: ["src/**/*.ts"] } } },
+  },
   // Factory function receives the accumulated config up to that point
   (prevConfig) => ({ tags: ["y"] }),
 );
@@ -163,4 +170,55 @@ export default defineRootConfig({
     }
   ],
 });
+`.trim();
+
+export const INPUTS_FILES_EXAMPLE = `
+{
+  "defaultInputs": {
+    "files": [
+      "src/**/*.ts", 
+      "!src/**/*.test.ts",
+      "/tsconfig.json" // relative to project root
+    ],
+  },
+  "scripts": {
+    "test": {
+      "inputs": {
+        "files": [
+          "src/**/*.ts"
+        ],
+      },
+    },
+  },
+}
+`.trim();
+
+export const INPUTS_WORKSPACE_PATTERNS_EXAMPLE = `
+{
+  "defaultInputs": {
+    "workspacePatterns": ["tag:my-tag"],
+  },
+  "scripts": {
+    "build": {
+      "inputs": {
+        "workspacePatterns": ["path:my-path/**/*"],
+      },
+    },
+  },
+}
+`.trim();
+
+export const INPUTS_EXTERNAL_DEPENDENCIES_EXAMPLE = ` 
+{
+  "defaultInputs": {
+    "externalDependencies": ["lodash"],
+  },
+  "scripts": {
+    "build": {
+      "inputs": {
+        "externalDependencies": ["lodash", "react"],
+      },
+    },
+  },
+}
 `.trim();

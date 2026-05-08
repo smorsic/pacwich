@@ -1,0 +1,89 @@
+---
+title:  Inputs
+titleSuffix: " | bun-workspaces"
+description: "Inputs | Configuration | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+
+import { SyntaxHighlighter } from "../../../lib/util/highlight";
+import { INPUTS_FILES_EXAMPLE, INPUTS_WORKSPACE_PATTERNS_EXAMPLE, INPUTS_EXTERNAL_DEPENDENCIES_EXAMPLE } from "../../../lib/config/exampleConfig";
+
+# Workspace Configuration: Inputs
+
+## Overview
+
+Inputs are the files and dependencies that are considered inputs for a script.
+
+These are set by [workspace config](/config/workspace) options, which can be set at
+the workspace level (`defaultInputs`) or at the script level (`scripts[name].inputs`).
+
+Inputs are used to determine whether changes to files in the project are considered
+changes to a particular workspace, which is used for determining [affected workspaces](/concepts/affected).
+
+### Defaults
+
+The default inputs when not provided are all git-trackable files in a workspace's directory,
+effectively making `"."` the default input pattern for a workspace's files.
+
+Other implicit inputs by default are all [workspace dependencies](/concepts/workspace-dependencies), 
+and all other dependencies in the workspace's `package.json`.
+There are ways to further customize these implicit inputs, as described below.
+
+## Files
+
+Files are specified as paths relative to the workspace's directory.
+
+Paths with a leading `/` are relative to the project root.
+
+Prefix with `!` to exclude.
+
+**Only git-trackable files are considered inputs.**
+
+[Workspace configuration](/config/workspace) example:
+<SyntaxHighlighter language="json">
+  {
+    INPUTS_FILES_EXAMPLE
+  }
+</SyntaxHighlighter>
+
+## Workspace Patterns
+
+In cases such as determining [affected workspaces](/concepts/affected),
+[workspace dependencies](/concepts/workspace-dependencies) (dependencies
+using `"workspace:*"` in a workspace's `package.json`) are considered
+inputs to a workspace by default.
+
+**`bun-workspaces` does not perform source code analysis.** This keeps determining
+the graph of workspaces computationally fast and cheap, relying instead on explicit
+`package.json` dependencies.
+
+When you need to treat other workspaces like dependencies, 
+you can also specify [workspace patterns](/concepts/workspace-patterns) to be considered inputs to a workspace via the inputs.
+
+[Workspace configuration](/config/workspace) example:
+<SyntaxHighlighter language="json">
+  {
+    INPUTS_WORKSPACE_PATTERNS_EXAMPLE
+  }
+</SyntaxHighlighter>
+
+## External Dependencies
+
+By default, all other dependencies in a workspace's `package.json` are considered
+inputs to a workspace. The resolved version in `bun.lock` is used to determine if
+an external dependency has changed.
+
+You can configure a list of specific external package names to consider inputs.
+
+When not provided, all external dependencies are considered inputs. When provided, only the specified dependencies are considered inputs,
+so an empty array means no external dependencies are considered inputs.
+
+[Workspace configuration](/config/workspace) example:
+<SyntaxHighlighter language="json">
+  {
+    INPUTS_EXTERNAL_DEPENDENCIES_EXAMPLE
+  }
+</SyntaxHighlighter>

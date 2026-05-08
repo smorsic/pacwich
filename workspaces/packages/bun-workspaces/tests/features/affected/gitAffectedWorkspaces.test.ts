@@ -1,26 +1,10 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
   getGitAffectedWorkspaces,
   type GitAffectedWorkspaceResult,
 } from "../../../src/affected";
-import { createGitFixture, type GitFixture } from "../../util/gitFixtures";
+import { createGitFixture } from "../../util/gitFixtures";
 import { makeTestWorkspace } from "../../util/testData";
-
-const fixtures: GitFixture[] = [];
-
-const newFixture = async (
-  ...args: Parameters<typeof createGitFixture>
-): Promise<GitFixture> => {
-  const fixture = await createGitFixture(...args);
-  fixtures.push(fixture);
-  return fixture;
-};
-
-afterEach(() => {
-  while (fixtures.length) {
-    fixtures.pop()!.cleanup();
-  }
-});
 
 const findResult = (
   results: GitAffectedWorkspaceResult[],
@@ -36,7 +20,7 @@ const findResult = (
 describe("getGitAffectedWorkspaces", () => {
   describe("git → workspace composition", () => {
     test("attaches git metadata to changed files for a matching workspace", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -90,7 +74,7 @@ describe("getGitAffectedWorkspaces", () => {
     });
 
     test("preserves multiple git reasons in fileMetadata", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -142,7 +126,7 @@ describe("getGitAffectedWorkspaces", () => {
     });
 
     test("includes untracked files as changes when not ignored", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [{ message: "init", files: [{ path: "seed", content: "1" }] }],
         workingState: {
           modify: [{ path: "packages/a/src/new.ts", content: "1" }],
@@ -188,7 +172,7 @@ describe("getGitAffectedWorkspaces", () => {
     });
 
     test("forwards ignoreUncommitted to git so working-tree changes do not surface", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -231,7 +215,7 @@ describe("getGitAffectedWorkspaces", () => {
 
   describe("workspace filtering", () => {
     test("does not mark a workspace affected when changed files are outside its inputs", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -272,7 +256,7 @@ describe("getGitAffectedWorkspaces", () => {
     });
 
     test("marks only the workspaces matching the changed file paths", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -321,7 +305,7 @@ describe("getGitAffectedWorkspaces", () => {
 
   describe("dependency cascade", () => {
     test("propagates affected state to dependents based on workspace package dependencies", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -382,8 +366,8 @@ describe("getGitAffectedWorkspaces", () => {
       ]);
     });
 
-    test("forwards ignorePackageDependencies to file-affected logic", async () => {
-      const fixture = await newFixture({
+    test("forwards ignoreWorkspaceDependencies to file-affected logic", async () => {
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -422,7 +406,7 @@ describe("getGitAffectedWorkspaces", () => {
               inputWorkspacePatterns: [],
             },
           ],
-          ignorePackageDependencies: true,
+          ignoreWorkspaceDependencies: true,
         },
         gitOptions: {
           baseRef: fixture.shaForMessage("init"),
@@ -438,7 +422,7 @@ describe("getGitAffectedWorkspaces", () => {
 
   describe("project subdirectory", () => {
     test("scopes git results to files within the project subdirectory", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         projectSubdir: "project",
         commits: [
           {

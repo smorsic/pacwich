@@ -173,6 +173,7 @@ export const findWorkspaces = ({
         tags: workspaceConfig?.tags ?? [],
         dependencies: [],
         dependents: [],
+        externalDependencies: [],
       };
 
       if (workspace.isRoot) {

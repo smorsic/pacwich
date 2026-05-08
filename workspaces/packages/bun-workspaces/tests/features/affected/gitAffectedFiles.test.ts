@@ -1,33 +1,17 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
   GIT_AFFECTED_ERRORS,
   getGitAffectedFiles,
 } from "../../../src/affected/gitAffectedFiles";
-import { createGitFixture, type GitFixture } from "../../util/gitFixtures";
-
-const fixtures: GitFixture[] = [];
-
-const newFixture = async (
-  ...args: Parameters<typeof createGitFixture>
-): Promise<GitFixture> => {
-  const fixture = await createGitFixture(...args);
-  fixtures.push(fixture);
-  return fixture;
-};
-
-afterEach(() => {
-  while (fixtures.length) {
-    fixtures.pop()!.cleanup();
-  }
-});
+import { createGitFixture } from "../../util/gitFixtures";
 
 describe("getGitAffectedFiles", () => {
   describe("committed range", () => {
     test("returns files changed between base and head", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -54,7 +38,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("identical refs produce no diff entries", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -74,7 +58,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("includes deleted files", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -101,7 +85,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("accepts branch refs as base and head", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -125,8 +109,36 @@ describe("getGitAffectedFiles", () => {
       expect(files).toEqual([{ projectFilePath: "a.txt", reasons: ["diff"] }]);
     });
 
+    test("returns the resolved baseSha and headSha for the given refs", async () => {
+      await using fixture = await createGitFixture({
+        commits: [
+          {
+            message: "init",
+            files: [{ path: "a.txt", content: "1" }],
+          },
+          {
+            message: "change",
+            files: [{ path: "a.txt", content: "2" }],
+          },
+        ],
+        initialBranch: "main",
+      });
+      const initSha = fixture.shaForMessage("init");
+      const changeSha = fixture.shaForMessage("change");
+
+      const { baseSha, headSha } = await getGitAffectedFiles({
+        rootDirectory: fixture.projectPath,
+        baseRef: "HEAD~1",
+        headRef: "main",
+        ignoreUncommitted: true,
+      });
+
+      expect(baseSha).toBe(initSha);
+      expect(headSha).toBe(changeSha);
+    });
+
     test("invalid base ref throws GitCommandFailed", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
         ],
@@ -148,7 +160,7 @@ describe("getGitAffectedFiles", () => {
       // `core.quotePath=true`, line-based parsing of `--name-only` would
       // surface this path as `"\346\227\245.txt"` (literal quotes,
       // octal-escaped bytes); `-z` emits raw bytes instead.
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "日.txt", content: "1" }] },
           { message: "change", files: [{ path: "日.txt", content: "2" }] },
@@ -171,7 +183,7 @@ describe("getGitAffectedFiles", () => {
 
   describe("working tree state", () => {
     test("includes staged, unstaged, and untracked files", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -204,7 +216,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("partially staged file reports both staged and unstaged", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -228,7 +240,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("a file in the diff range and modified locally reports both reasons", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -256,7 +268,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("a file with diff, staged, and unstaged changes reports all three reasons", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },
@@ -281,7 +293,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("untracked respects gitignore", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -308,7 +320,7 @@ describe("getGitAffectedFiles", () => {
 
   describe("ignore flags", () => {
     test("ignoreUntracked excludes untracked files only", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
         ],
@@ -334,7 +346,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreStaged excludes staged files only", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
         ],
@@ -355,7 +367,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreUnstaged excludes unstaged files only", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
         ],
@@ -376,7 +388,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreStaged + ignoreUntracked leaves diff and unstaged", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },
@@ -416,7 +428,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreStaged + ignoreUnstaged leaves diff and untracked", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },
@@ -443,7 +455,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreUncommitted overrides individual ignore flags", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },
@@ -468,7 +480,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("ignoreUncommitted excludes all working-tree state", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },
@@ -494,7 +506,7 @@ describe("getGitAffectedFiles", () => {
 
   describe("project root resolution", () => {
     test("filters files outside the project root when project is a subdir", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           {
             message: "init",
@@ -527,7 +539,7 @@ describe("getGitAffectedFiles", () => {
     });
 
     test("works when project root is the git root", async () => {
-      const fixture = await newFixture({
+      await using fixture = await createGitFixture({
         commits: [
           { message: "init", files: [{ path: "a.txt", content: "1" }] },
           { message: "change", files: [{ path: "a.txt", content: "2" }] },

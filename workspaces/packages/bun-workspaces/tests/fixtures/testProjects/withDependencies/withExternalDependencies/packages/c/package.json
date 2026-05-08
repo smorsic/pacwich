@@ -1,0 +1,9 @@
+{
+  "name": "c",
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.0.0"
+  }
+}

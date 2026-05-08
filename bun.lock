@@ -33,7 +33,7 @@
     },
     "workspaces/packages/bun-workspaces": {
       "name": "bun-workspaces",
-      "version": "1.8.2",
+      "version": "1.9.0",
       "bin": {
         "bun-workspaces": "bin/cli.js",
         "bw": "bin/cli.js",

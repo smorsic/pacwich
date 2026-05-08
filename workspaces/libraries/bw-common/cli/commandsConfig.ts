@@ -60,7 +60,8 @@ export const CLI_COMMANDS_CONFIG = {
     options: {
       workspacePatterns: {
         flags: ["-W", "--workspace-patterns <patterns>"],
-        description: "Workspace patterns to match, separated by spaces",
+        description:
+          "Workspace patterns to match, separated by whitespace. Use backslashes to escape spaces if needed.",
       },
       nameOnly: {
         flags: ["-n", "--name-only"],
@@ -176,6 +177,79 @@ export const CLI_COMMANDS_CONFIG = {
       "Start the bun-workspaces MCP (Model Context Protocol) server over stdio",
     options: {},
   },
+  listAffected: {
+    command: "list-affected",
+    isGlobal: false,
+    aliases: ["ls-affected"],
+    description:
+      "List workspaces affected by a set of changed files (git or file list)",
+    options: {
+      base: {
+        flags: ["-B", "--base <ref>"],
+        description:
+          "Git base ref to diff against (default is main if not configured). Cannot be used with --files",
+      },
+      head: {
+        flags: ["-H", "--head <ref>"],
+        description:
+          "Git head ref to diff against (default: HEAD). Cannot be used with --files",
+      },
+      files: {
+        flags: ["-F", "--files <files>"],
+        description:
+          "Changed files (paths/dirs/globs, '!' to exclude), separated by spaces. Use backslashes to escape spaces if needed. Bypasses git, so cannot be used with --base or --head.",
+      },
+      script: {
+        flags: ["-S", "--script <script>"],
+        description: "Resolve inputs for the named script",
+      },
+      ignoreUntracked: {
+        flags: ["--ignore-untracked"],
+        description: "Exclude untracked files",
+      },
+      ignoreUnstaged: {
+        flags: ["--ignore-unstaged"],
+        description: "Exclude unstaged files",
+      },
+      ignoreStaged: {
+        flags: ["--ignore-staged"],
+        description: "Exclude staged files",
+      },
+      ignoreUncommitted: {
+        flags: ["--ignore-uncommitted"],
+        description:
+          "Exclude all uncommitted changes (staged, unstaged, untracked)",
+      },
+      ignoreWorkspaceDeps: {
+        flags: ["--ignore-workspace-deps"],
+        description:
+          "Ignore workspace dependencies derived from package.json files",
+      },
+      ignoreExternalDeps: {
+        flags: ["--ignore-external-deps"],
+        description:
+          "Ignore changes to external dependencies (e.g. npm packages) versions in bun.lock",
+      },
+      explain: {
+        flags: ["-e", "--explain"],
+        description:
+          "Include changed-file counts and dependency reasons. With --json, outputs the full result object",
+      },
+      detailed: {
+        flags: ["-D", "--detailed"],
+        description:
+          "With --explain, render full per-file data and dependency edge chains",
+      },
+      json: {
+        flags: JSON_FLAGS,
+        description: "Output as JSON",
+      },
+      pretty: {
+        flags: PRETTY_FLAGS,
+        description: "Pretty print JSON",
+      },
+    },
+  },
   runScript: {
     command: "run-script [script] [workspacePatterns...]",
     isGlobal: false,
@@ -185,11 +259,118 @@ export const CLI_COMMANDS_CONFIG = {
     options: {
       script: {
         flags: ["-S", "--script <script>"],
-        description: "The script to run.",
+        description: "The script to run. (Alternative to positional argument)",
       },
       workspacePatterns: {
         flags: ["-W", "--workspace-patterns <patterns>"],
-        description: "Workspace patterns to match, separated by spaces.",
+        description:
+          "Workspace patterns to match, separated by spaces. (Alternative to positional arguments)",
+      },
+      parallel: {
+        flags: ["-P", "--parallel [max]"],
+        description:
+          'Run the scripts in parallel. Pass "false" for series, or a concurrency limit as a number, percentage ("50%"), "auto", "default", or"unbounded"',
+      },
+      args: {
+        flags: ["-a", "--args <args>"],
+        description: "Args to append to the script command",
+      },
+      outputStyle: {
+        flags: ["-o", "--output-style <style>"],
+        description: "The output style to use",
+        values: [...OUTPUT_STYLE_VALUES],
+      },
+      groupedLines: {
+        flags: ["-L", "--grouped-lines <count>"],
+        description: `With grouped output, the max preview lines (number or "auto", default "auto")`,
+      },
+      noPrefix: {
+        flags: ["-N", "--no-prefix"],
+        description: "(DEPRECATED) Use --output-style=plain instead",
+        deprecated: true,
+      },
+      inline: {
+        flags: ["-i", "--inline"],
+        description:
+          "Run the script as an inline command from the workspace directory",
+      },
+      inlineName: {
+        flags: ["-I", "--inline-name <name>"],
+        description: "An optional name for the script when --inline is passed",
+      },
+      shell: {
+        flags: ["-s", "--shell <shell>"],
+        values: [...SCRIPT_SHELL_OPTIONS, "default"],
+        description: `When using --inline, the shell to use to run the script`,
+      },
+      depOrder: {
+        flags: ["-d", "--dep-order"],
+        description:
+          "Scripts for dependent workspaces run only after their dependencies",
+      },
+      ignoreDepFailure: {
+        flags: ["-f", "--ignore-dep-failure"],
+        description:
+          "In dependency order, continue running scripts even if a dependency fails",
+      },
+      jsonOutfile: {
+        flags: ["-j", "--json-outfile <file>"],
+        description: "Output results in a JSON file",
+      },
+    },
+  },
+  runAffected: {
+    command: "run-affected [script]",
+    isGlobal: false,
+    aliases: [],
+    description:
+      "Run a script across the workspaces affected by a set of changed files (git or file list)",
+    options: {
+      script: {
+        flags: ["-S", "--script <script>"],
+        description: "The script to run. (Alternative to positional argument)",
+      },
+      base: {
+        flags: ["-B", "--base <ref>"],
+        description:
+          "Git base ref to diff against (default is main if not configured). Cannot be used with --files",
+      },
+      head: {
+        flags: ["-H", "--head <ref>"],
+        description:
+          'Git head ref to diff against (default "HEAD"). Cannot be used with --files',
+      },
+      files: {
+        flags: ["-F", "--files <files>"],
+        description:
+          "Changed files (paths/dirs/globs, '!' to exclude), separated by whitespace. Use backslashes to escape spaces if needed. Bypasses git, so cannot be used with --base or --head.",
+      },
+      ignoreUntracked: {
+        flags: ["--ignore-untracked"],
+        description: "Exclude untracked files",
+      },
+      ignoreUnstaged: {
+        flags: ["--ignore-unstaged"],
+        description: "Exclude unstaged files",
+      },
+      ignoreStaged: {
+        flags: ["--ignore-staged"],
+        description: "Exclude staged files",
+      },
+      ignoreUncommitted: {
+        flags: ["--ignore-uncommitted"],
+        description:
+          "Exclude all uncommitted changes (staged, unstaged, untracked)",
+      },
+      ignoreWorkspaceDeps: {
+        flags: ["--ignore-workspace-deps"],
+        description:
+          "Ignore workspace dependencies derived from package.json files",
+      },
+      ignoreExternalDeps: {
+        flags: ["--ignore-external-deps"],
+        description:
+          "Ignore changes to external dependencies (e.g. npm packages) versions in bun.lock",
       },
       parallel: {
         flags: ["-P", "--parallel [max]"],

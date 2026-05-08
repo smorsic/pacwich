@@ -1,0 +1,12 @@
+{
+  "defaultInputs": {
+    "files": ["src/**/*"]
+  },
+  "scripts": {
+    "build": {
+      "inputs": {
+        "files": ["build/**/*"]
+      }
+    }
+  }
+}

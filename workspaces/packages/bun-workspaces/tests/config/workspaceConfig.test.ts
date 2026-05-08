@@ -225,6 +225,64 @@ describe("workspace config", () => {
         }),
       ).not.toThrow();
     });
+
+    describe("inputs / defaultInputs", () => {
+      test("accepts defaultInputs with files and workspacePatterns", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: {
+              files: ["src/**/*.ts", "!src/**/*.test.ts"],
+              workspacePatterns: ["tag:lib"],
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts empty defaultInputs object", () => {
+        expect(() =>
+          validateWorkspaceConfig({ defaultInputs: {} }),
+        ).not.toThrow();
+      });
+
+      test("accepts script-level inputs", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            scripts: {
+              build: { inputs: { files: ["src/**/*.ts"] } },
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("throws when defaultInputs.files contains non-strings", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { files: [123] },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when defaultInputs has unknown property", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { extra: ["a"] },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when script inputs has unknown property", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            scripts: {
+              // @ts-expect-error - Invalid config
+              build: { inputs: { extra: ["a"] } },
+            },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+    });
   });
 
   describe("loadWorkspaceConfig with invalid config", () => {

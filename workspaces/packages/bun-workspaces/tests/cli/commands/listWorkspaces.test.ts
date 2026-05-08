@@ -56,6 +56,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     tags: [],
     dependencies: [],
     dependents: [],
+    externalDependencies: [],
   },
   {
     name: "application-1b",
@@ -67,6 +68,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     tags: [],
     dependencies: [],
     dependents: [],
+    externalDependencies: [],
   },
   {
     name: "library-1a",
@@ -78,6 +80,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     tags: [],
     dependencies: [],
     dependents: [],
+    externalDependencies: [],
   },
   {
     name: "library-1b",
@@ -89,6 +92,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     tags: [],
     dependencies: [],
     dependents: [],
+    externalDependencies: [],
   },
 ];
 

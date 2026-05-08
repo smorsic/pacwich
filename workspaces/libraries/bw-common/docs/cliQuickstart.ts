@@ -60,6 +60,18 @@ bw run my-script --output-style=prefixed
 # Use the plain output style (no workspace prefixes)
 bw run my-script --output-style=plain
 
+# List affected workspaces based on git diff (main vs. HEAD when not configured)
+bw list-affected
+
+# Set the git base and head for comparison
+bw list-affected --base=my-branch-a --head=my-branch-b
+
+# See detailed reasons for affected workspaces
+bw list-affected --explain --detailed
+
+# Run a script across the workspaces affected by a change
+bw run-affected my-script
+
 # Silence all output of the run command
 bw --log-level=silent run my-script --output-style=none
 

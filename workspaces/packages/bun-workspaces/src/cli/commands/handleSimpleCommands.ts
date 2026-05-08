@@ -9,7 +9,7 @@ import {
   createWorkspaceInfoLines,
   handleProjectCommand,
   handleGlobalCommand,
-  splitWorkspacePatterns,
+  splitWhitespaceArg,
 } from "./commandHandlerUtils";
 
 export const doctor = handleGlobalCommand(
@@ -74,7 +74,7 @@ export const listWorkspaces = handleProjectCommand(
 
     const patterns = positionalWorkspacePatterns?.length
       ? positionalWorkspacePatterns
-      : splitWorkspacePatterns(options.workspacePatterns ?? "");
+      : splitWhitespaceArg(options.workspacePatterns ?? "");
 
     const workspaces = patterns?.length
       ? project.findWorkspacesByPattern(...patterns)

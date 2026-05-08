@@ -78,6 +78,9 @@ const TEST_PROJECTS = {
   withDependenciesIndirectCycleMixed: "withDependencies/withIndirectCycleMixed",
   withDependenciesCatalogDependencies:
     "withDependencies/withCatalogDependencies",
+  withDependenciesWithExternal: "withDependencies/withExternalDependencies",
+  withDependenciesWithExternalCatalog:
+    "withDependencies/withExternalDependenciesCatalog",
   withDependencyRulesDenyDirect:
     "withDependencies/withDependencyRulesDenyDirect",
   withDependencyRulesDenyIndirect:
@@ -95,6 +98,8 @@ const TEST_PROJECTS = {
   withDependencyRulesMultiValid:
     "withDependencies/withDependencyRulesMultiValid",
   recursiveScript: "recursiveScript",
+  affectedWithInputs: "affected/withInputs",
+  affectedWithExternalDepInputs: "affected/withExternalDepInputs",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;

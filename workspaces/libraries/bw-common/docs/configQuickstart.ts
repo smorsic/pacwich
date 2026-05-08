@@ -31,6 +31,11 @@ export default defineRootConfig({
       // "tag:app" matches because the first entry added it
       patterns: ["tag:app"],
       config: {
+        // Inputs always override previous entries instead of deep merging
+        defaultInputs: { files: ["src/**/*.ts"] },
+        scripts: {
+          build: { order: 1, inputs: { files: ["src/**/*.ts"] } },
+        },
         rules: {
           workspaceDependencies: {
             allowPatterns: ["tag:lib"], // apps may only depend on libs
@@ -60,9 +65,26 @@ import { defineWorkspaceConfig } from "bun-workspaces/config";
 export default defineWorkspaceConfig({
   alias: "my-web-app", // shorthand name; use array for multiple
   tags: ["app", "frontend"],
+  // Optional, for configuring affected workspace resolution inputs
+  // Applies to all scripts that don't configure their own inputs
+  defaultInputs: { 
+    // File paths, directory paths, or globs relative to the workspace's path.
+    // Default is all git-trackable files in the workspace directory.
+    files: ["src/**/*.ts", "!src/**/*.test.ts"],
+    // Workspaces to treat like dependencies that aren't package.json dependencies
+    workspacePatterns: ["tag:lib"],
+    // Dependency names (e.g. "react") to treat as dependencies (default: all)
+    externalDependencies: ["react"],
+  },
   scripts: {
     // lower order runs first in sequenced script execution
-    build: { order: 1 },
+    build: {
+      // Optional, for setting the default script execution order
+      order: 1, 
+      // Optional, for configuring affected workspace resolution inputs
+      // Applies to the build script only
+      inputs: { files: ["src/**/*.ts"] } 
+    },
     test: { order: 2 },
   },
   rules: {

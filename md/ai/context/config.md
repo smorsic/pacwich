@@ -10,6 +10,7 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
     "parallelMax": 5, // same options as seen in CLI examples above
     "shell": "system", // "bun" or "system" (default "bun")
     "includeRootWorkspace": true, // treat root package.json as a normal workspace
+    "affectedBaseRef": "main", // default git base ref for affected resolution (env: BW_AFFECTED_BASE_REF_DEFAULT)
   },
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
@@ -43,10 +44,23 @@ Tags are strings to group workspaces together; they do not need to be unique.
 {
   "alias": "my-alias", // can be array
   "tags": ["my-tag"],
+  // Default inputs used to determine if the workspace is affected, applied to
+  // all scripts that don't configure their own inputs. See "Inputs" below.
+  "defaultInputs": {
+    "files": ["src/**/*.ts", "!src/**/*.test.ts"],
+    "workspacePatterns": ["tag:shared-lib"],
+    "externalDependencies": ["lodash", "react"],
+  },
   "scripts": {
     "lint": {
       // set optional sorting order for scripts
       "order": 1,
+    },
+    "build": {
+      // per-script inputs override defaultInputs for this script's affected resolution
+      "inputs": {
+        "files": ["src/**/*.ts", "/shared-types/**/*.ts"], // leading "/" = relative to the project root
+      },
     },
   },
   "rules": {
@@ -60,6 +74,16 @@ Tags are strings to group workspaces together; they do not need to be unique.
   },
 }
 ```
+
+### Inputs
+
+The `defaultInputs` field (and the per-script `scripts[name].inputs` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (`WorkspaceInputsConfig`):
+
+- `files` — file paths, directories, or globs relative to the workspace's directory. Leading `/` makes a pattern relative to the project root. Prefix with `!` to exclude. Only git-trackable files are matched. Default when not provided is `["."]` (everything in the workspace dir).
+- `workspacePatterns` — workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep edge).
+- `externalDependencies` — allowlist of package names that participate in lockfile-change detection. Omitted = all external deps participate; `[]` = none participate; non-empty list = only listed names participate (intersected with the workspace's actual external deps from `package.json`).
+
+Per-script `inputs` fully replaces `defaultInputs` for that script — the two are not merged. If a script has its own `inputs` field, `defaultInputs` is ignored for that script.
 
 ### Workspace Dependency Rules
 
@@ -131,7 +155,7 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 - `workspace.dependencies` — names of workspace dependencies
 - `workspace.dependents` — names of workspaces that depend on this one
 
-`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`.
+`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`.
 
 ## TypeScript/JSON Config Files
 

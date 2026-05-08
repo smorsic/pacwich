@@ -19,9 +19,25 @@ export {
   type RunScriptAcrossWorkspacesSummary,
   type RunScriptAcrossWorkspacesOutput as RunScriptAcrossWorkspacesProcessOutput,
   type RunScriptAcrossWorkspacesResult,
+  type RunAffectedWorkspaceScriptOptions,
   type ParallelOption,
   type ScriptEventMetadata,
   type OnScriptEventCallback,
+  type AffectedDiffSource,
+  type AffectedWorkspaceResult,
+  type AffectedWorkspacesResult,
+  type BaseAffectedWorkspacesOptions,
+  type GitAffectedWorkspacesOptions,
+  type FileListAffectedWorkspacesOptions,
+  type DetermineAffectedWorkspacesOptions,
+  type AffectedDependencyChainEntry,
+  type AffectedDependencyEdgeSource,
+  type GitAffectedFileReason,
+  type AffectedChangedFile,
+  type AffectedDependency,
+  type AffectedWorkspacesMetadata,
+  type ExternalDependencyChange,
+  isOptionsForDiffSource,
 } from "./project";
 export * from "./config/public";
 export {
@@ -35,7 +51,12 @@ export {
   type WorkspaceScriptCommandMethod,
   type RunScriptsParallelOptions,
 } from "./runScript";
-export { type Workspace } from "./workspaces";
+export {
+  type Workspace,
+  type ExternalDependency,
+  type ExternalDependencyCatalog,
+  type ExternalDependencySource,
+} from "./workspaces";
 export { type SimpleAsyncIterable, BunWorkspacesError } from "./internal/core";
 export { type LogLevelSetting } from "bw-common/logging";
 export { setLogLevel } from "./internal/logger";

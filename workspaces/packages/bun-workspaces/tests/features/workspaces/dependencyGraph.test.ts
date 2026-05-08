@@ -62,6 +62,114 @@ describe("findWorkspaces with dependencies", () => {
   });
 });
 
+describe("Workspace.externalDependencies", () => {
+  test("captures dependencies and devDependencies tagged with their source", () => {
+    const { workspaces } = findWorkspaces({
+      rootDirectory: getProjectRoot("withDependenciesWithExternal"),
+    });
+    const a = workspaces.find((w) => w.name === "a")!;
+    expect(a.externalDependencies).toEqual([
+      { name: "lodash", version: "^4.17.0", source: "dependencies" },
+      { name: "typescript", version: "^5.0.0", source: "devDependencies" },
+    ]);
+  });
+
+  test("captures peerDependencies and optionalDependencies tagged with their source", () => {
+    const { workspaces } = findWorkspaces({
+      rootDirectory: getProjectRoot("withDependenciesWithExternal"),
+    });
+    const c = workspaces.find((w) => w.name === "c")!;
+    expect(c.externalDependencies).toEqual([
+      { name: "fsevents", version: "^2.0.0", source: "optionalDependencies" },
+      { name: "react", version: "^18.0.0", source: "peerDependencies" },
+    ]);
+  });
+
+  test("excludes workspace:* dependencies from externalDependencies", () => {
+    const { workspaces } = findWorkspaces({
+      rootDirectory: getProjectRoot("withDependenciesSimple"),
+    });
+    for (const workspace of workspaces) {
+      expect(workspace.externalDependencies).toEqual([]);
+    }
+  });
+
+  test("workspaces with no external deps have an empty array", () => {
+    const { workspaces } = findWorkspaces({
+      rootDirectory: getProjectRoot("withDependenciesWithExternal"),
+    });
+    const d = workspaces.find((w) => w.name === "d")!;
+    expect(d.externalDependencies).toEqual([]);
+  });
+
+  describe("catalog references", () => {
+    test("default `catalog:` resolves to the catalog version with `catalog: { name: '' }`", () => {
+      const { workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withDependenciesWithExternalCatalog"),
+      });
+      const a = workspaces.find((w) => w.name === "a")!;
+      expect(a.externalDependencies).toEqual([
+        {
+          name: "lodash",
+          version: "^4.17.0",
+          source: "dependencies",
+          catalog: { name: "" },
+        },
+      ]);
+    });
+
+    test("named `catalog:<name>` resolves to the named catalog version with the catalog name", () => {
+      const { workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withDependenciesWithExternalCatalog"),
+      });
+      const b = workspaces.find((w) => w.name === "b")!;
+      expect(b.externalDependencies).toEqual([
+        {
+          name: "react",
+          version: "^17.0.0",
+          source: "dependencies",
+          catalog: { name: "react17" },
+        },
+      ]);
+    });
+
+    test("unresolvable catalog refs preserve the literal `catalog:<name>` as version while still tagging the catalog name", () => {
+      const { workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withDependenciesWithExternalCatalog"),
+      });
+      const c = workspaces.find((w) => w.name === "c")!;
+      expect(c.externalDependencies).toEqual([
+        {
+          name: "typescript",
+          version: "catalog:nope",
+          source: "devDependencies",
+          catalog: { name: "nope" },
+        },
+      ]);
+    });
+
+    test("non-catalog deps in the same workspace do not get a catalog field", () => {
+      const { workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withDependenciesWithExternalCatalog"),
+      });
+      const d = workspaces.find((w) => w.name === "d")!;
+      expect(d.externalDependencies).toEqual([
+        {
+          name: "left-pad",
+          version: "^1.3.0",
+          source: "dependencies",
+        },
+        {
+          name: "lodash",
+          version: "^4.17.0",
+          source: "dependencies",
+          catalog: { name: "" },
+        },
+      ]);
+    });
+  });
+});
+
 describe("preventDependencyCycles", () => {
   test("returns workspaces and empty cycles when no cycles exist", () => {
     const workspaces = [

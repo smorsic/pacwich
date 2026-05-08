@@ -17,6 +17,7 @@ A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhan
 - **Orchestrate** your workspaces' package.json scripts 🎻
 - Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚
 - Use with Bun as your package manager for **Node** projects 🎁
+- Determine **affected workspaces** based on changed files 🕸️
 - Use the [MCP server](https://bunworkspaces.com/ai/mcp) to make your AI tooling aware of `bun-workspaces` and its documentation resources! 🛠️
 
 To get started, all you need is a repo using Bun's workspaces feature for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
@@ -103,6 +104,18 @@ bw run my-script --output-style=prefixed
 
 # Use the plain output style (no workspace prefixes)
 bw run my-script --output-style=plain
+
+# List affected workspaces based on git diff (main vs. HEAD when not configured)
+bw list-affected
+
+# Set the git base and head for comparison
+bw list-affected --base=my-branch-a --head=my-branch-b
+
+# See detailed reasons for affected workspaces
+bw list-affected --explain --detailed
+
+# Run a script across the workspaces affected by a change
+bw run-affected my-script
 
 # Silence all output of the run command
 bw --log-level=silent run my-script --output-style=none
@@ -265,9 +278,26 @@ import { defineWorkspaceConfig } from "bun-workspaces/config";
 export default defineWorkspaceConfig({
   alias: "my-web-app", // shorthand name; use array for multiple
   tags: ["app", "frontend"],
+  // Optional, for configuring affected workspace resolution inputs
+  // Applies to all scripts that don't configure their own inputs
+  defaultInputs: {
+    // File paths, directory paths, or globs relative to the workspace's path.
+    // Default is all git-trackable files in the workspace directory.
+    files: ["src/**/*.ts", "!src/**/*.test.ts"],
+    // Workspaces to treat like dependencies that aren't package.json dependencies
+    workspacePatterns: ["tag:lib"],
+    // Dependency names (e.g. "react") to treat as dependencies (default: all)
+    externalDependencies: ["react"],
+  },
   scripts: {
     // lower order runs first in sequenced script execution
-    build: { order: 1 },
+    build: {
+      // Optional, for setting the default script execution order
+      order: 1,
+      // Optional, for configuring affected workspace resolution inputs
+      // Applies to the build script only
+      inputs: { files: ["src/**/*.ts"] },
+    },
     test: { order: 2 },
   },
   rules: {
@@ -323,6 +353,11 @@ export default defineRootConfig({
       // "tag:app" matches because the first entry added it
       patterns: ["tag:app"],
       config: {
+        // Inputs always override previous entries instead of deep merging
+        defaultInputs: { files: ["src/**/*.ts"] },
+        scripts: {
+          build: { order: 1, inputs: { files: ["src/**/*.ts"] } },
+        },
         rules: {
           workspaceDependencies: {
             allowPatterns: ["tag:lib"], // apps may only depend on libs

@@ -3,10 +3,10 @@ import path from "path";
 import type { ScriptShellOption, ShellOption } from "bw-common/parameters";
 import { ROOT_WORKSPACE_SELECTOR } from "bw-common/project";
 import type { WorkspaceScriptMetadata } from "bw-common/runScript";
-import { loadRootConfig } from "../../config";
-import { getUserEnvVar } from "../../config/userEnvVars";
-import { parse, quote } from "../../internal/bundledDeps/shellQuote";
-import type { Simplify } from "../../internal/core";
+import { loadRootConfig } from "../../../config";
+import { getUserEnvVar } from "../../../config/userEnvVars";
+import { parse, quote } from "../../../internal/bundledDeps/shellQuote";
+import type { Simplify } from "../../../internal/core";
 import {
   DEFAULT_TEMP_DIR,
   IS_WINDOWS,
@@ -15,8 +15,8 @@ import {
   isPlainObject,
   validateJSArray,
   validateJSTypes,
-} from "../../internal/core";
-import { logger } from "../../internal/logger";
+} from "../../../internal/core";
+import { logger } from "../../../internal/logger";
 import {
   runScript,
   runScripts,
@@ -27,23 +27,31 @@ import {
   type RunScriptExit,
   type OutputStreamName,
   type ScriptEventName,
-} from "../../runScript";
-import type { MultiProcessOutput } from "../../runScript/output/multiProcessOutput";
-import { checkIsRecursiveScript } from "../../runScript/recursion";
-import { resolveScriptShell } from "../../runScript/scriptShellOption";
+} from "../../../runScript";
+import {
+  createMultiProcessOutput,
+  type MultiProcessOutput,
+} from "../../../runScript/output/multiProcessOutput";
+import { checkIsRecursiveScript } from "../../../runScript/recursion";
+import { resolveScriptShell } from "../../../runScript/scriptShellOption";
 import {
   findWorkspaces,
   sortWorkspaces,
   type Workspace,
-} from "../../workspaces";
-import { preventDependencyCycles } from "../../workspaces/dependencyGraph";
-import { PROJECT_ERRORS } from "../errors";
-import type { Project, ProjectConfig } from "../project";
+} from "../../../workspaces";
+import { preventDependencyCycles } from "../../../workspaces/dependencyGraph";
+import { PROJECT_ERRORS } from "../../errors";
+import type { Project, ProjectConfig } from "../../project";
 import {
   ProjectBase,
   resolveRootWorkspaceSelector,
   resolveWorkspacePath,
-} from "./projectBase";
+} from "../projectBase";
+import {
+  determineAffectedWorkspaces,
+  type AffectedWorkspacesResult,
+  type DetermineAffectedWorkspacesOptions,
+} from "./affectedWorkspaces";
 
 /** Arguments for {@link createFileSystemProject} */
 export type CreateFileSystemProjectOptions = {
@@ -159,6 +167,50 @@ export type RunScriptAcrossWorkspacesResult = {
   summary: Promise<RunScriptAcrossWorkspacesSummary>;
   /** The workspaces targeted */
   workspaces: Workspace[];
+};
+
+export type RunAffectedWorkspaceScriptOptions = {
+  /**
+   * Options for resolving the affected workspaces. The `script` field is
+   * intentionally omitted — it is derived from `scriptOptions` (the inline
+   * script name when running inline, the script name otherwise) so that
+   * inputs resolution always tracks the script being run.
+   */
+  affectedOptions: DetermineAffectedWorkspacesOptions<false>;
+  scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">;
+};
+
+/**
+ * Resolves the script name used to look up script-level inputs in
+ * `runAffectedWorkspaceScript`. Uses the inline-script name when running
+ * an inline command, or the script name otherwise.
+ */
+const resolveInputsLookupScriptName = (
+  scriptOptions: Omit<RunScriptAcrossWorkspacesOptions, "workspacePatterns">,
+): string | undefined => {
+  if (!scriptOptions.inline) return scriptOptions.script;
+  if (typeof scriptOptions.inline === "object") {
+    return scriptOptions.inline.scriptName;
+  }
+  return undefined;
+};
+
+const createEmptyAffectedRunResult = (): RunScriptAcrossWorkspacesResult => {
+  const now = new Date().toISOString();
+  return {
+    output: createMultiProcessOutput([]),
+    summary: Promise.resolve({
+      totalCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      allSuccess: true,
+      startTimeISO: now,
+      endTimeISO: now,
+      durationMs: 0,
+      scriptResults: [],
+    }),
+    workspaces: [],
+  };
 };
 
 const quoteArg = (arg: string, shell: ScriptShellOption): string =>
@@ -661,6 +713,138 @@ class _FileSystemProject extends ProjectBase implements Project {
       ...result,
       workspaces,
     };
+  }
+
+  /**
+   * Determine the affected workspaces based on the given options.
+   *
+   * Returns a summary of all workspaces, whether they are affected or not,
+   * and the reasons why they are affected.
+   */
+  async determineAffectedWorkspaces(
+    options: DetermineAffectedWorkspacesOptions,
+  ): Promise<AffectedWorkspacesResult> {
+    validateJSTypes(
+      {
+        "diffSource option": {
+          value: options.diffSource,
+          typeofName: "string",
+        },
+        "ignoreWorkspaceDependencies option": {
+          value: options.ignoreWorkspaceDependencies,
+          typeofName: "boolean",
+          optional: true,
+        },
+        "ignoreExternalDependencies option": {
+          value: options.ignoreExternalDependencies,
+          typeofName: "boolean",
+          optional: true,
+        },
+        "script option": {
+          value: options.script,
+          typeofName: "string",
+          optional: true,
+        },
+      },
+      { throw: true },
+    );
+
+    if (options.diffSource !== "git" && options.diffSource !== "fileList") {
+      throw new InvalidJSTypeError(
+        `Type error: diffSource option expects "git" | "fileList", received ${JSON.stringify((options as { diffSource: unknown }).diffSource)}`,
+      );
+    }
+
+    if (options.diffSource === "git") {
+      validateJSTypes(
+        {
+          "diffOptions option": {
+            value: options.diffOptions,
+            typeofName: "object",
+            optional: true,
+          },
+        },
+        { throw: true },
+      );
+      if (options.diffOptions !== undefined) {
+        validateJSTypes(
+          {
+            "diffOptions.baseRef option": {
+              value: options.diffOptions.baseRef,
+              typeofName: "string",
+              optional: true,
+            },
+            "diffOptions.headRef option": {
+              value: options.diffOptions.headRef,
+              typeofName: "string",
+              optional: true,
+            },
+            "diffOptions.ignoreUntracked option": {
+              value: options.diffOptions.ignoreUntracked,
+              typeofName: "boolean",
+              optional: true,
+            },
+            "diffOptions.ignoreStaged option": {
+              value: options.diffOptions.ignoreStaged,
+              typeofName: "boolean",
+              optional: true,
+            },
+            "diffOptions.ignoreUnstaged option": {
+              value: options.diffOptions.ignoreUnstaged,
+              typeofName: "boolean",
+              optional: true,
+            },
+            "diffOptions.ignoreUncommitted option": {
+              value: options.diffOptions.ignoreUncommitted,
+              typeofName: "boolean",
+              optional: true,
+            },
+          },
+          { throw: true },
+        );
+      }
+    } else {
+      validateJSTypes(
+        {
+          "changedFiles option": {
+            value: options.changedFiles,
+            array: true,
+            itemOptions: { typeofName: "string" },
+          },
+        },
+        { throw: true },
+      );
+    }
+
+    return determineAffectedWorkspaces(this, options);
+  }
+
+  /**
+   * Run the script across the affected workspaces.
+   *
+   * Similar to {@link runScriptAcrossWorkspaces}, but only runs the script across the affected workspaces.
+   */
+  async runAffectedWorkspaceScript({
+    affectedOptions,
+    scriptOptions,
+  }: RunAffectedWorkspaceScriptOptions): Promise<RunScriptAcrossWorkspacesResult> {
+    const { workspaceResults } = await this.determineAffectedWorkspaces({
+      ...affectedOptions,
+      script: resolveInputsLookupScriptName(scriptOptions),
+    });
+
+    const affectedNames = workspaceResults
+      .filter(({ isAffected }) => isAffected)
+      .map(({ workspace }) => workspace.name);
+
+    if (affectedNames.length === 0) {
+      return createEmptyAffectedRunResult();
+    }
+
+    return this.runScriptAcrossWorkspaces({
+      ...scriptOptions,
+      workspacePatterns: affectedNames,
+    });
   }
 
   static #initialized = false;

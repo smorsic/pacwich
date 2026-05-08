@@ -1,1 +1,2 @@
 bun.lock
+!withDependencies/withExternalDependenciesCatalog/bun.lock

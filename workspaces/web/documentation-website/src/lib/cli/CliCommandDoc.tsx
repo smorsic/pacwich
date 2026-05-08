@@ -104,17 +104,16 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
                   option.flags.join(", ")
                 }
               >
-                <div className="cli-command-option-flags">
-                  <p>
-                    <code>{option.flags.join(" | ")}</code>
-                  </p>
-                  <p>{option.description}</p>
+                <p className="cli-command-option-flags">
+                  <code>{option.flags.join(" | ")}</code>:
+                  <span>{option.description}</span>
                   {option.values?.length ? (
-                    <p style={{ marginLeft: "0.25rem" }}>
+                    <span style={{ marginLeft: "0.25rem" }}>
                       (Values: <span>{option.values.join(" | ")}</span>)
-                    </p>
+                    </span>
                   ) : null}
-                </div>
+                </p>
+                <hr />
               </div>
             ))}
           </div>

@@ -24,6 +24,48 @@ export type WorkspaceRules = {
   workspaceDependencies?: WorkspaceDependenciesRule;
 };
 
+/**
+ * Configured inputs for a script.
+ *
+ * These can be used to specify the files and workspace patterns
+ * that should be considered inputs for the script.
+ *
+ * The default inputs when not provided are all git-trackable files in the workspace.
+ */
+export type WorkspaceInputsConfig = {
+  /**
+   * File paths, directory paths, or globs relative to the workspace's path.
+   *
+   * Prefix with `!` to exclude.
+   *
+   * The default inputs when not provided are all git-trackable files in the workspace.
+   *
+   * Files that are not git-trackable are not considered inputs.
+   *
+   * Paths with a leading `/` are relative to the project root.
+   */
+  files?: string[];
+  /**
+   * Matched workspaces are treated as inputs for the script.
+   *
+   * For example, when workspaces are provided here, they will
+   * be treated like dependencies in the affected workspace resolution.
+   */
+  workspacePatterns?: string[];
+  /**
+   * Filters which of the workspace's declared external (non-workspace) deps
+   * participate in lockfile-change detection.
+   *
+   * - When omitted, every declared external dep participates (default).
+   * - When set to an empty array, no external deps participate (the workspace
+   *   will not be flagged from a lockfile change unless something else makes it so).
+   * - When set to a non-empty list of package names, only the listed names
+   *   participate. Names not present in the workspace's actual
+   *   `externalDependencies` are silently ignored.
+   */
+  externalDependencies?: string[];
+};
+
 /** Configuration that applies to a specific package.json script */
 export type ScriptConfig = {
   /**
@@ -33,6 +75,16 @@ export type ScriptConfig = {
    * of their relative path from the project root.
    */
   order?: number;
+
+  /**
+   * Inputs for the script.
+   *
+   * These can be used to specify the files and workspace patterns
+   * that should be considered inputs for the script.
+   *
+   * The default inputs when not provided are all git-trackable files in the workspace.
+   */
+  inputs?: WorkspaceInputsConfig;
 };
 
 /** Configuration that applies to a specific workspace */
@@ -58,6 +110,11 @@ export type WorkspaceConfig = {
    * Rules that validate the workspace.
    */
   rules?: WorkspaceRules;
+  /**
+   * The default inputs for the workspace
+   * applied to all scripts that don't configure their own inputs.
+   */
+  defaultInputs?: WorkspaceInputsConfig;
 };
 
 export type ResolvedWorkspaceConfig = {
@@ -65,6 +122,7 @@ export type ResolvedWorkspaceConfig = {
   tags: string[];
   scripts: Record<string, ScriptConfig>;
   rules: WorkspaceRules;
+  defaultInputs?: WorkspaceInputsConfig;
 };
 
 /** Static workspace context passed to a {@link WorkspacePatternConfigFactory}.
@@ -102,6 +160,8 @@ export type RootConfig = {
     shell?: ShellOption;
     /** Whether to include the root workspace in the workspaces list by default. (default: false) */
     includeRootWorkspace?: boolean;
+    /** The default base ref for affected workspace resolution. (default: "main") */
+    affectedBaseRef?: string;
   };
   /**
    * Workspace configs applied by pattern, in order, merging left to right,
@@ -119,6 +179,7 @@ export type ResolvedRootConfig = {
     shell: ScriptShellOption;
     /** `undefined` means the value was not set in the input config */
     includeRootWorkspace: boolean | undefined;
+    affectedBaseRef: string;
   };
   workspacePatternConfigs: WorkspacePatternConfigEntry[];
 };

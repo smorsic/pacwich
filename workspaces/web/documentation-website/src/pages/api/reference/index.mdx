@@ -23,6 +23,9 @@ import {
   MAP_TAGS_TO_WORKSPACES_EXAMPLE,
   RUN_SCRIPT_ACROSS_WORKSPACES_EXAMPLE,
   RUN_WORKSPACE_SCRIPT_EXAMPLE,
+  API_DETERMINE_AFFECTED_GIT_EXAMPLE,
+  API_DETERMINE_AFFECTED_FILE_LIST_EXAMPLE,
+  API_DETERMINE_AFFECTED_OPTIONS_EXAMPLE,
   SET_LOG_LEVEL_EXAMPLE,
   CREATE_MEMORY_PROJECT_EXAMPLE,
   WORKSPACE_EXAMPLE,
@@ -222,7 +225,7 @@ Run a script in all workspaces that have it in their package.json "scripts" fiel
 {RUN_SCRIPT_ACROSS_WORKSPACES_EXAMPLE}
 </SyntaxHighlighter>
 
-### More Info
+#### More Info
 
 * See more on the syntax of [workspace patterns](/concepts/workspace-patterns) for selecting workspaces to run.
 * See more on [workspace dependencies](/concepts/workspace-dependencies) for running scripts in dependency order.
@@ -230,6 +233,47 @@ Run a script in all workspaces that have it in their package.json "scripts" fiel
 * See more on running [parallel scripts](/concepts/parallel-scripts).
 * See more on [workspace script metadata](/concepts/workspace-script-metadata), such as environment variables available in scripts and interpolating values in inline scripts and args such as `<workspaceName>`.<br/>
 
+
+### .determineAffectedWorkspaces
+`determineAffectedWorkspaces(options: DetermineAffectedWorkspacesOptions): AffectedWorkspacesResult`
+
+Determine the workspaces that are affected by a change. The return object
+is the same as the CLI's output for `list-affected --explain --json`.
+
+Using git diff to determine affected workspaces:
+<SyntaxHighlighter language="typescript">
+{API_DETERMINE_AFFECTED_GIT_EXAMPLE}
+</SyntaxHighlighter>
+
+Using a list of changed files to determine affected workspaces:
+<SyntaxHighlighter language="typescript">
+{API_DETERMINE_AFFECTED_FILE_LIST_EXAMPLE}
+</SyntaxHighlighter>
+
+#### More Info
+
+* See more on [affected workspaces](/concepts/affected).
+* See more on [inputs](/config/workspace-inputs) that determine if a workspace is affected.
+
+<hr className="reference-divider"/>
+
+### .runAffectedWorkspaceScript
+`runAffectedWorkspaceScript(options: RunAffectedWorkspaceScriptOptions): RunAffectedWorkspaceScriptResult`
+
+Run a script in the workspaces that are affected by a change.
+
+This behaves similarly to [runScriptAcrossWorkspaces](/api/reference#runscriptacrossworkspaces),
+while also taking similar options to [determineAffectedWorkspaces](/api/reference#determineaffectedworkspaces).
+
+<SyntaxHighlighter language="typescript">
+{API_DETERMINE_AFFECTED_OPTIONS_EXAMPLE}
+</SyntaxHighlighter>
+
+
+#### More Info
+
+* See more on [affected workspaces](/concepts/affected).
+* See more on [inputs](/config/workspace-inputs) that determine if a workspace is affected.
 
 ## createMemoryProject
 `createMemoryProject(options: CreateMemoryProjectOptions): MemoryProject`

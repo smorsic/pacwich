@@ -1,3 +1,13 @@
+import fs from "fs";
+import path from "path";
+import {
+  parseBunLockPackageVersions,
+  type BunLockVersionMap,
+} from "../internal/bun/bunLock";
+import { BunWorkspacesError } from "../internal/core";
+import { logger } from "../internal/logger";
+import type { Workspace } from "../workspaces";
+import { computeExternalDependencyChanges } from "./externalDependencyChanges";
 import {
   getFileAffectedWorkspaces,
   type AffectedWorkspaceResult,
@@ -5,6 +15,7 @@ import {
 } from "./fileAffectedWorkspaces";
 import {
   getGitAffectedFiles,
+  readProjectFileAtGitRef,
   type GetGitAffectedFilesOptions,
   type GitAffectedFile,
 } from "./gitAffectedFiles";
@@ -14,8 +25,17 @@ export type GitAffectedWorkspacesOptions = {
   rootDirectory: string;
   workspacesOptions: Omit<
     FileAffectedWorkspacesOptions,
-    "rootDirectory" | "changedFilePaths"
-  >;
+    "rootDirectory" | "changedFilePaths" | "externalDepChangesByWorkspace"
+  > & {
+    /**
+     * All workspaces in the project — required for external dep version
+     * tracking. Pass an empty array (or omit and pass
+     * `ignoreExternalDependencies`) to disable that path.
+     */
+    workspaces?: Workspace[];
+    /** Whether to skip lockfile-based external dep version tracking */
+    ignoreExternalDependencies?: boolean;
+  };
   gitOptions: Omit<GetGitAffectedFilesOptions, "rootDirectory">;
 };
 
@@ -28,6 +48,54 @@ export type GitAffectedWorkspaceResult =
 
 export type GitAffectedWorkspacesResult = {
   affectedWorkspaces: GitAffectedWorkspaceResult[];
+  /** The full SHA the `baseRef` resolves to */
+  baseSha: string;
+  /** The full SHA the `headRef` resolves to */
+  headSha: string;
+};
+
+const BUN_LOCK_PROJECT_RELATIVE_PATH = "bun.lock";
+
+const readCurrentBunLock = (rootDirectory: string): string | null => {
+  const lockPath = path.join(rootDirectory, BUN_LOCK_PROJECT_RELATIVE_PATH);
+  try {
+    return fs.readFileSync(lockPath, "utf8");
+  } catch {
+    return null;
+  }
+};
+
+const loadVersionsAt = async (
+  rootDirectory: string,
+  ref: string,
+): Promise<BunLockVersionMap> => {
+  const contents = await readProjectFileAtGitRef({
+    rootDirectory,
+    ref,
+    projectRelativePath: BUN_LOCK_PROJECT_RELATIVE_PATH,
+  });
+  if (contents === null) return new Map();
+  const parsed = parseBunLockPackageVersions(contents);
+  if (parsed instanceof BunWorkspacesError) {
+    logger.warn(
+      `Could not parse bun.lock at ref "${ref}": ${parsed.message}. Treating as empty.`,
+    );
+    return new Map();
+  }
+  return parsed;
+};
+
+const loadCurrentVersions = (rootDirectory: string): BunLockVersionMap => {
+  const contents = readCurrentBunLock(rootDirectory);
+  if (contents === null) return new Map();
+  const parsed = parseBunLockPackageVersions(contents);
+  if (parsed instanceof BunWorkspacesError) {
+    logger.warn(
+      `Could not parse current bun.lock: ${parsed.message}. Treating as empty.`,
+    );
+    return new Map();
+  }
+  return parsed;
 };
 
 export const getGitAffectedWorkspaces = async ({
@@ -35,7 +103,11 @@ export const getGitAffectedWorkspaces = async ({
   workspacesOptions,
   gitOptions,
 }: GitAffectedWorkspacesOptions): Promise<GitAffectedWorkspacesResult> => {
-  const { files: gitFiles } = await getGitAffectedFiles({
+  const {
+    files: gitFiles,
+    baseSha,
+    headSha,
+  } = await getGitAffectedFiles({
     rootDirectory,
     ...gitOptions,
   });
@@ -44,10 +116,29 @@ export const getGitAffectedWorkspaces = async ({
     gitFiles.map((file) => [file.projectFilePath, file]),
   );
 
+  const projectWorkspaces = workspacesOptions.workspaces ?? [];
+  const externalDepChangesByWorkspace =
+    workspacesOptions.ignoreExternalDependencies || !projectWorkspaces.length
+      ? new Map()
+      : computeExternalDependencyChanges({
+          workspaces: projectWorkspaces,
+          baseLock: await loadVersionsAt(rootDirectory, gitOptions.baseRef),
+          headLock:
+            gitOptions.headRef === "HEAD"
+              ? loadCurrentVersions(rootDirectory)
+              : await loadVersionsAt(rootDirectory, gitOptions.headRef),
+        });
+
+  const {
+    workspaces: _omit,
+    ignoreExternalDependencies: _omit2,
+    ...fileOpts
+  } = workspacesOptions;
   const { affectedWorkspaces } = await getFileAffectedWorkspaces({
     rootDirectory,
-    ...workspacesOptions,
+    ...fileOpts,
     changedFilePaths: gitFiles.map((file) => file.projectFilePath),
+    externalDepChangesByWorkspace,
   });
 
   const annotatedWorkspaces: GitAffectedWorkspaceResult[] =
@@ -64,5 +155,5 @@ export const getGitAffectedWorkspaces = async ({
       },
     }));
 
-  return { affectedWorkspaces: annotatedWorkspaces };
+  return { affectedWorkspaces: annotatedWorkspaces, baseSha, headSha };
 };

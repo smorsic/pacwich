@@ -1,0 +1,9 @@
+{
+  "name": "a",
+  "dependencies": {
+    "lodash": "^4.17.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

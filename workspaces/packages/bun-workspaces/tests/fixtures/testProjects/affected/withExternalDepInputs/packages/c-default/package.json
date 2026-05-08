@@ -1,0 +1,6 @@
+{
+  "name": "c-default",
+  "dependencies": {
+    "react": "^18.0.0"
+  }
+}

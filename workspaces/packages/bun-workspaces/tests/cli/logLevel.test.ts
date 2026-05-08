@@ -21,6 +21,7 @@ const expectedOneWorkspaceJson = () => ({
   tags: expectedOneWorkspace.tags,
   dependencies: expectedOneWorkspace.dependencies,
   dependents: expectedOneWorkspace.dependents,
+  externalDependencies: expectedOneWorkspace.externalDependencies,
 });
 
 describe("CLI Log Level", () => {

@@ -75,6 +75,7 @@ describe("bw MCP tools", () => {
         tags: [],
         dependencies: [],
         dependents: [],
+        externalDependencies: [],
       });
     });
 

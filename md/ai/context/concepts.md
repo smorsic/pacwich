@@ -50,3 +50,24 @@ bw run "bun <projectPath>/my-script.ts" --inline \
   --inline-name="my-script-name" \
   --args="<workspaceName> <workspacePath>"
 ```
+
+### Affected workspaces
+
+A workspace is "affected" when something in its set of **inputs** has changed. Inputs default to:
+
+- Files in the workspace's directory (only git-trackable files; the default file pattern is `"."`)
+- Workspace dependencies — if a workspace dep is affected for any reason, dependents cascade as affected
+- All non-workspace dependencies declared in its `package.json` (across all four maps: `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`). Version changes are detected by diffing resolved versions in `bun.lock`. For `peerDependencies`/`optionalDependencies`, lockfile presence is the gate — an unresolved optional (e.g., a platform-skipped native binding) emits no change.
+
+Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
+
+- `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern relative to the project root. Prefix `!` to exclude. Only git-trackable files match.
+- `workspacePatterns`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep).
+- `externalDependencies`: an allowlist of package names. Omitted = all external deps participate; `[]` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
+
+There are two diff sources:
+
+- **git** (default): diff `HEAD` against the configured base ref (default `main`, configurable via `affectedBaseRef` in the root config or `BW_AFFECTED_BASE_REF_DEFAULT` env var). Uncommitted changes (staged, unstaged, untracked) are included by default. Gitignored files never participate.
+- **fileList**: pass changed files explicitly (paths, dirs, or globs) — bypasses git entirely.
+
+Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.

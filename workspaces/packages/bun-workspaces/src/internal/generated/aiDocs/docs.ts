@@ -8,7 +8,9 @@ Three main domain terms to know:
 
 - Project: generally represents a monorepo and is defined by the root \`package.json\` file
 - Workspace: a nested package within a project. The root package.json can count as a workspace as well, but by default, only nested packages are considered workspaces.
-- Script: an entry in the \`scripts\` field of a workspace's \`package.json\` file. bw can also run one-off commands known as "inline scripts," which can use the Bun shell or system shell (\`sh -c\` or \`cmd /d /s /c\` for windows).`;
+- Script: an entry in the \`scripts\` field of a workspace's \`package.json\` file. bw can also run one-off commands known as "inline scripts," which can use the Bun shell or system shell (\`sh -c\` or \`cmd /d /s /c\` for windows).
+
+bw also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives \`bw list-affected\`/\`bw run-affected\` for orchestrating builds, tests, etc. across only the workspaces that need them.`;
 export const DOC_CONCEPTS = `## Concepts
 
 ### Workspace patterns
@@ -60,7 +62,28 @@ const scriptName = process.env.BW_SCRIPT_NAME;
 bw run "bun <projectPath>/my-script.ts" --inline \\
   --inline-name="my-script-name" \\
   --args="<workspaceName> <workspacePath>"
-\`\`\``;
+\`\`\`
+
+### Affected workspaces
+
+A workspace is "affected" when something in its set of **inputs** has changed. Inputs default to:
+
+- Files in the workspace's directory (only git-trackable files; the default file pattern is \`"."\`)
+- Workspace dependencies — if a workspace dep is affected for any reason, dependents cascade as affected
+- All non-workspace dependencies declared in its \`package.json\` (across all four maps: \`dependencies\`, \`devDependencies\`, \`peerDependencies\`, \`optionalDependencies\`). Version changes are detected by diffing resolved versions in \`bun.lock\`. For \`peerDependencies\`/\`optionalDependencies\`, lockfile presence is the gate — an unresolved optional (e.g., a platform-skipped native binding) emits no change.
+
+Inputs are configurable per workspace (\`defaultInputs\`) and per script (\`scripts[name].inputs\`):
+
+- \`files\`: file/dir/glob patterns relative to the workspace. Leading \`/\` makes a pattern relative to the project root. Prefix \`!\` to exclude. Only git-trackable files match.
+- \`workspacePatterns\`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real \`package.json\` dep).
+- \`externalDependencies\`: an allowlist of package names. Omitted = all external deps participate; \`[]\` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
+
+There are two diff sources:
+
+- **git** (default): diff \`HEAD\` against the configured base ref (default \`main\`, configurable via \`affectedBaseRef\` in the root config or \`BW_AFFECTED_BASE_REF_DEFAULT\` env var). Uncommitted changes (staged, unstaged, untracked) are included by default. Gitignored files never participate.
+- **fileList**: pass changed files explicitly (paths, dirs, or globs) — bypasses git entirely.
+
+Use \`--explain\` for a per-workspace summary of changed inputs and dep cascade reasons, and \`--explain --detailed\` for full per-file/edge breakdowns including the affected-dep chain.`;
 export const DOC_CLI = `### CLI examples:
 
 \`\`\`bash
@@ -124,6 +147,54 @@ bw run my-script --output-style=prefixed
 
 # Use the plain output style (no workspace prefixes)
 bw run my-script --output-style=plain
+
+# List affected workspaces (default: git diff HEAD vs the configured base ref, "main" by default)
+bw list-affected
+bw ls-affected # alias
+
+# Compare specific git refs
+bw ls-affected --base=my-branch-a --head=my-branch-b
+bw ls-affected -B my-branch-a -H my-branch-b # short forms
+
+# Resolve inputs for a specific script (uses scripts[name].inputs when configured)
+bw ls-affected --script=build
+
+# Ignore some uncommitted changes (uncommitted included by default)
+bw ls-affected --ignore-uncommitted # all of: staged, unstaged, untracked
+bw ls-affected --ignore-untracked
+bw ls-affected --ignore-unstaged
+bw ls-affected --ignore-staged
+
+# Skip workspace dep cascade (only direct file/external-dep changes flag a workspace)
+bw ls-affected --ignore-workspace-deps
+
+# Skip lockfile-based external dep version tracking
+bw ls-affected --ignore-external-deps
+
+# Bypass git entirely with an explicit list of changed files
+# (paths, dirs, globs; '!' to exclude; whitespace-separated)
+bw ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+bw ls-affected -F "packages/a/**/*.ts !packages/a/**/*.test.ts"
+
+# Per-workspace summary of why each workspace is affected
+bw ls-affected --explain
+bw ls-affected -e
+
+# Full per-file changes and dep cascade chain for each affected workspace
+bw ls-affected --explain --detailed
+bw ls-affected -e -D
+
+# JSON output (with --explain produces the full result object)
+bw ls-affected --json --pretty
+bw ls-affected --explain --json --pretty
+
+# Run a script across affected workspaces (accepts the same affected options
+# as ls-affected, plus the same script-execution options as run-script:
+# --parallel, --dep-order, --args, --output-style, --inline, etc.)
+bw run-affected build
+bw run-affected build --base=my-branch --ignore-uncommitted --dep-order
+bw run-affected build --files="packages/a/src/**/*.ts" --parallel=2
+bw run-affected "bun build" --inline --inline-name=build # inline command form
 
 ### Global Options ###
 # Root directory of project:
@@ -189,6 +260,44 @@ project.runScriptAcrossWorkspaces({
     // event: "start", "skip", "exit"
   },
 });
+
+// Determine affected workspaces — git mode (default)
+project.determineAffectedWorkspaces({
+  diffSource: "git",
+  // optional: resolve inputs for a specific script (uses scripts[name].inputs)
+  script: "build",
+  // optional: skip workspace dep cascade
+  ignoreWorkspaceDependencies: false,
+  // optional: skip lockfile-based external dep version tracking
+  ignoreExternalDependencies: false,
+  diffOptions: {
+    baseRef: "main", // default from config / "main"
+    headRef: "HEAD", // default
+    ignoreUncommitted: false, // staged + unstaged + untracked
+    ignoreUntracked: false,
+    ignoreUnstaged: false,
+    ignoreStaged: false,
+  },
+});
+
+// Determine affected workspaces — fileList mode (bypass git)
+project.determineAffectedWorkspaces({
+  diffSource: "fileList",
+  // paths, directories, or globs (relative to project root); '!' to exclude
+  changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
+});
+
+// Run a script across affected workspaces. Accepts the same affected options
+// as determineAffectedWorkspaces, plus the script-execution options from
+// runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
+project.runAffectedWorkspaceScript({
+  script: "build",
+  diffSource: "git",
+  diffOptions: { baseRef: "main", ignoreUncommitted: true },
+  parallel: { max: 2 },
+  dependencyOrder: true,
+  ignoreDependencyFailure: true,
+});
 \`\`\`
 
 ## The Workspace object
@@ -208,10 +317,26 @@ project.runScriptAcrossWorkspaces({
   "scripts": ["my-script"],
   // Aliases defined in workspace configuration (bw.workspace.jsonc/bw.workspace.json)
   "aliases": ["my-alias"],
+  // Tags defined in workspace configuration
+  "tags": ["my-tag"],
   // Names of other workspaces that this workspace depends on
   "dependencies": ["my-dependency"],
   // Names of other workspaces that depend on this workspace
   "dependents": ["my-dependent"],
+  // Non-workspace package deps declared in package.json (across all four maps).
+  // \`source\` is one of "dependencies" | "devDependencies" | "peerDependencies" | "optionalDependencies".
+  // \`version\` is the package.json range, with \`catalog:\`/\`catalog:<name>\` resolved when possible.
+  // \`catalog\` is present when declared via a catalog ref.
+  "externalDependencies": [
+    { "name": "lodash", "version": "^4.17.0", "source": "dependencies" },
+    { "name": "typescript", "version": "^5.0.0", "source": "devDependencies" },
+    {
+      "name": "react",
+      "version": "^18.0.0",
+      "source": "dependencies",
+      "catalog": { "name": "" },
+    },
+  ],
 }
 \`\`\``;
 export const DOC_CONFIG = `## Root config
@@ -226,6 +351,7 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
     "parallelMax": 5, // same options as seen in CLI examples above
     "shell": "system", // "bun" or "system" (default "bun")
     "includeRootWorkspace": true, // treat root package.json as a normal workspace
+    "affectedBaseRef": "main", // default git base ref for affected resolution (env: BW_AFFECTED_BASE_REF_DEFAULT)
   },
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
@@ -259,10 +385,23 @@ Tags are strings to group workspaces together; they do not need to be unique.
 {
   "alias": "my-alias", // can be array
   "tags": ["my-tag"],
+  // Default inputs used to determine if the workspace is affected, applied to
+  // all scripts that don't configure their own inputs. See "Inputs" below.
+  "defaultInputs": {
+    "files": ["src/**/*.ts", "!src/**/*.test.ts"],
+    "workspacePatterns": ["tag:shared-lib"],
+    "externalDependencies": ["lodash", "react"],
+  },
   "scripts": {
     "lint": {
       // set optional sorting order for scripts
       "order": 1,
+    },
+    "build": {
+      // per-script inputs override defaultInputs for this script's affected resolution
+      "inputs": {
+        "files": ["src/**/*.ts", "/shared-types/**/*.ts"], // leading "/" = relative to the project root
+      },
     },
   },
   "rules": {
@@ -276,6 +415,16 @@ Tags are strings to group workspaces together; they do not need to be unique.
   },
 }
 \`\`\`
+
+### Inputs
+
+The \`defaultInputs\` field (and the per-script \`scripts[name].inputs\` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (\`WorkspaceInputsConfig\`):
+
+- \`files\` — file paths, directories, or globs relative to the workspace's directory. Leading \`/\` makes a pattern relative to the project root. Prefix with \`!\` to exclude. Only git-trackable files are matched. Default when not provided is \`["."]\` (everything in the workspace dir).
+- \`workspacePatterns\` — workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real \`package.json\` dep edge).
+- \`externalDependencies\` — allowlist of package names that participate in lockfile-change detection. Omitted = all external deps participate; \`[]\` = none participate; non-empty list = only listed names participate (intersected with the workspace's actual external deps from \`package.json\`).
+
+Per-script \`inputs\` fully replaces \`defaultInputs\` for that script — the two are not merged. If a script has its own \`inputs\` field, \`defaultInputs\` is ignored for that script.
 
 ### Workspace Dependency Rules
 
@@ -347,7 +496,7 @@ The factory \`(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => 
 - \`workspace.dependencies\` — names of workspace dependencies
 - \`workspace.dependents\` — names of workspaces that depend on this one
 
-\`prevConfig\` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has \`aliases: string[]\`, \`tags: string[]\`, \`scripts: Record<string, ScriptConfig>\`, \`rules: WorkspaceRules\`.
+\`prevConfig\` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has \`aliases: string[]\`, \`tags: string[]\`, \`scripts: Record<string, ScriptConfig>\`, \`rules: WorkspaceRules\`, \`defaultInputs?: WorkspaceInputsConfig\`.
 
 ## TypeScript/JSON Config Files
 

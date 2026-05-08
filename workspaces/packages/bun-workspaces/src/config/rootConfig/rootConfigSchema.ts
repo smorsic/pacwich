@@ -18,6 +18,9 @@ export const ROOT_CONFIG_JSON_SCHEMA = {
         includeRootWorkspace: {
           type: "boolean",
         },
+        affectedBaseRef: {
+          type: "string",
+        },
       },
     },
     workspacePatternConfigs: {

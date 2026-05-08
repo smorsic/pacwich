@@ -44,6 +44,7 @@
     }
   },
   "scripts": {
+    "cli": "bw",
     "bw": "bw run -o plain -W bw --script=",
     "bw:test": "bw run -o plain test bw --",
     "bw:lint": "bw run -o plain lint bw --",

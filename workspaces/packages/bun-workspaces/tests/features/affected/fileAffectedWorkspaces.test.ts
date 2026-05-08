@@ -3,6 +3,7 @@ import type { Workspace } from "../../../src";
 import {
   getFileAffectedWorkspaces,
   type AffectedWorkspaceInput,
+  type ExternalDependencyChange,
 } from "../../../src/affected";
 import { setLogLevel } from "../../../src/internal/logger";
 import { makeTestWorkspace } from "../../util/testData";
@@ -49,6 +50,7 @@ describe("getFileAffectedWorkspaces", () => {
               },
             ],
             dependencies: [],
+            externalDependencies: [],
           },
         },
       ]);
@@ -1332,6 +1334,7 @@ describe("getFileAffectedWorkspaces", () => {
               },
             ],
             dependencies: [],
+            externalDependencies: [],
           },
         },
         {
@@ -1348,6 +1351,7 @@ describe("getFileAffectedWorkspaces", () => {
                 ],
               },
             ],
+            externalDependencies: [],
           },
         },
       ]);
@@ -1392,17 +1396,11 @@ describe("getFileAffectedWorkspaces", () => {
               chain: [
                 { workspaceName: "a" },
                 { workspaceName: "b", edgeSource: "package" },
-              ],
-            },
-            {
-              dependencyName: "c",
-              chain: [
-                { workspaceName: "a" },
-                { workspaceName: "b", edgeSource: "package" },
                 { workspaceName: "c", edgeSource: "package" },
               ],
             },
           ],
+          externalDependencies: [],
         },
       });
       expect(result.affectedWorkspaces[1].affectedReasons.dependencies).toEqual(
@@ -1468,7 +1466,7 @@ describe("getFileAffectedWorkspaces", () => {
       );
     });
 
-    test("lists each transitively-changed dep separately along the chain", async () => {
+    test("chain extends through every affected dep edge regardless of intermediate direct causes", async () => {
       const c = makeTestWorkspace({
         name: "c",
         path: "packages/c",
@@ -1496,17 +1494,13 @@ describe("getFileAffectedWorkspaces", () => {
         changedFilePaths: ["packages/b/src/x.ts", "packages/c/src/y.ts"],
       });
 
+      // Both b and c are direct causes (own files changed). From a, b is the
+      // direct dep; the chain still extends through to c so the user can
+      // see the full propagation path.
       expect(result.affectedWorkspaces[0].affectedReasons.dependencies).toEqual(
         [
           {
             dependencyName: "b",
-            chain: [
-              { workspaceName: "a" },
-              { workspaceName: "b", edgeSource: "package" },
-            ],
-          },
-          {
-            dependencyName: "c",
             chain: [
               { workspaceName: "a" },
               { workspaceName: "b", edgeSource: "package" },
@@ -1609,13 +1603,6 @@ describe("getFileAffectedWorkspaces", () => {
         [
           {
             dependencyName: "b",
-            chain: [
-              { workspaceName: "a" },
-              { workspaceName: "b", edgeSource: "input" },
-            ],
-          },
-          {
-            dependencyName: "c",
             chain: [
               { workspaceName: "a" },
               { workspaceName: "b", edgeSource: "input" },
@@ -1739,13 +1726,6 @@ describe("getFileAffectedWorkspaces", () => {
             chain: [
               { workspaceName: "app" },
               { workspaceName: "lib", edgeSource: "input" },
-            ],
-          },
-          {
-            dependencyName: "shared",
-            chain: [
-              { workspaceName: "app" },
-              { workspaceName: "lib", edgeSource: "input" },
               { workspaceName: "shared", edgeSource: "package" },
             ],
           },
@@ -1790,13 +1770,6 @@ describe("getFileAffectedWorkspaces", () => {
         [
           {
             dependencyName: "mid",
-            chain: [
-              { workspaceName: "app" },
-              { workspaceName: "mid", edgeSource: "package" },
-            ],
-          },
-          {
-            dependencyName: "data",
             chain: [
               { workspaceName: "app" },
               { workspaceName: "mid", edgeSource: "package" },
@@ -1845,7 +1818,7 @@ describe("getFileAffectedWorkspaces", () => {
     });
   });
 
-  describe("ignorePackageDependencies", () => {
+  describe("ignoreWorkspaceDependencies", () => {
     test("disables propagation through package edges", async () => {
       const dep = makeTestWorkspace({
         name: "dep",
@@ -1865,7 +1838,7 @@ describe("getFileAffectedWorkspaces", () => {
           makeInput({ workspace: app, inputFilePatterns: ["src"] }),
         ],
         changedFilePaths: ["packages/dep/src/x.ts"],
-        ignorePackageDependencies: true,
+        ignoreWorkspaceDependencies: true,
       });
 
       expect(result.affectedWorkspaces[0].isAffected).toBe(true);
@@ -1900,7 +1873,7 @@ describe("getFileAffectedWorkspaces", () => {
           makeInput({ workspace: c, inputFilePatterns: ["src"] }),
         ],
         changedFilePaths: ["packages/c/src/x.ts"],
-        ignorePackageDependencies: true,
+        ignoreWorkspaceDependencies: true,
       });
 
       expect(result.affectedWorkspaces.map((w) => w.isAffected)).toEqual([
@@ -1915,13 +1888,6 @@ describe("getFileAffectedWorkspaces", () => {
             chain: [
               { workspaceName: "a" },
               { workspaceName: "b", edgeSource: "input" },
-            ],
-          },
-          {
-            dependencyName: "c",
-            chain: [
-              { workspaceName: "a" },
-              { workspaceName: "b", edgeSource: "input" },
               { workspaceName: "c", edgeSource: "input" },
             ],
           },
@@ -1929,7 +1895,7 @@ describe("getFileAffectedWorkspaces", () => {
       );
     });
 
-    test("with ignorePackageDependencies, package transitivity through an input dep is dropped", async () => {
+    test("with ignoreWorkspaceDependencies, package transitivity through an input dep is dropped", async () => {
       // app --input--> lib --package--> shared, shared changes
       const shared = makeTestWorkspace({
         name: "shared",
@@ -1954,7 +1920,7 @@ describe("getFileAffectedWorkspaces", () => {
           }),
         ],
         changedFilePaths: ["packages/shared/src/x.ts"],
-        ignorePackageDependencies: true,
+        ignoreWorkspaceDependencies: true,
       });
 
       // shared: directly changed
@@ -1965,7 +1931,7 @@ describe("getFileAffectedWorkspaces", () => {
       expect(result.affectedWorkspaces[2].isAffected).toBe(false);
     });
 
-    test("with ignorePackageDependencies, all chain edges are `input`", async () => {
+    test("with ignoreWorkspaceDependencies, all chain edges are `input`", async () => {
       const c = makeTestWorkspace({ name: "c", path: "packages/c" });
       const b = makeTestWorkspace({ name: "b", path: "packages/b" });
       const a = makeTestWorkspace({ name: "a", path: "packages/a" });
@@ -1984,7 +1950,7 @@ describe("getFileAffectedWorkspaces", () => {
           makeInput({ workspace: c, inputFilePatterns: ["src"] }),
         ],
         changedFilePaths: ["packages/c/src/x.ts"],
-        ignorePackageDependencies: true,
+        ignoreWorkspaceDependencies: true,
       });
 
       const chainEdges =
@@ -2025,6 +1991,7 @@ describe("getFileAffectedWorkspaces", () => {
         affectedReasons: {
           changedFiles: [],
           dependencies: [],
+          externalDependencies: [],
         },
       });
     });
@@ -2164,6 +2131,181 @@ describe("getFileAffectedWorkspaces", () => {
           },
         ],
       );
+    });
+  });
+
+  describe("inputExternalDependencyNames filter", () => {
+    const makeWorkspaceWithExternals = () =>
+      makeTestWorkspace({
+        name: "a",
+        path: "packages/a",
+        externalDependencies: [
+          { name: "lodash", version: "^4.0.0", source: "dependencies" },
+          { name: "typescript", version: "^5.0.0", source: "devDependencies" },
+        ],
+      });
+
+    const lockfileChanges = (): Map<string, ExternalDependencyChange[]> =>
+      new Map([
+        [
+          "a",
+          [
+            {
+              name: "lodash",
+              source: "dependencies",
+              baseVersion: "4.17.0",
+              headVersion: "4.17.21",
+            },
+            {
+              name: "typescript",
+              source: "devDependencies",
+              baseVersion: "5.0.0",
+              headVersion: "5.4.0",
+            },
+          ],
+        ],
+      ]);
+
+    test("undefined filter lets every declared external dep participate", async () => {
+      const workspace = makeWorkspaceWithExternals();
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        workspaceInputs: [makeInput({ workspace })],
+        changedFilePaths: [],
+        externalDepChangesByWorkspace: lockfileChanges(),
+      });
+
+      expect(result.affectedWorkspaces[0].isAffected).toBe(true);
+      expect(
+        result.affectedWorkspaces[0].affectedReasons.externalDependencies,
+      ).toEqual([
+        {
+          name: "lodash",
+          source: "dependencies",
+          baseVersion: "4.17.0",
+          headVersion: "4.17.21",
+        },
+        {
+          name: "typescript",
+          source: "devDependencies",
+          baseVersion: "5.0.0",
+          headVersion: "5.4.0",
+        },
+      ]);
+    });
+
+    test("empty array filter excludes the workspace from lockfile-driven affectedness", async () => {
+      const workspace = makeWorkspaceWithExternals();
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        workspaceInputs: [
+          makeInput({ workspace, inputExternalDependencyNames: [] }),
+        ],
+        changedFilePaths: [],
+        externalDepChangesByWorkspace: lockfileChanges(),
+      });
+
+      expect(result.affectedWorkspaces[0].isAffected).toBe(false);
+      expect(
+        result.affectedWorkspaces[0].affectedReasons.externalDependencies,
+      ).toEqual([]);
+    });
+
+    test("non-empty filter limits participating deps to listed names", async () => {
+      const workspace = makeWorkspaceWithExternals();
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        workspaceInputs: [
+          makeInput({
+            workspace,
+            inputExternalDependencyNames: ["lodash"],
+          }),
+        ],
+        changedFilePaths: [],
+        externalDepChangesByWorkspace: lockfileChanges(),
+      });
+
+      expect(result.affectedWorkspaces[0].isAffected).toBe(true);
+      expect(
+        result.affectedWorkspaces[0].affectedReasons.externalDependencies,
+      ).toEqual([
+        {
+          name: "lodash",
+          source: "dependencies",
+          baseVersion: "4.17.0",
+          headVersion: "4.17.21",
+        },
+      ]);
+    });
+
+    test("filter names that don't match any declared external are silently ignored", async () => {
+      const workspace = makeWorkspaceWithExternals();
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        workspaceInputs: [
+          makeInput({
+            workspace,
+            inputExternalDependencyNames: ["react", "vue"],
+          }),
+        ],
+        changedFilePaths: [],
+        externalDepChangesByWorkspace: lockfileChanges(),
+      });
+
+      // Neither "react" nor "vue" is a declared external of 'a', so no
+      // external-dep change matches the filter and the workspace isn't
+      // flagged via the lockfile signal.
+      expect(result.affectedWorkspaces[0].isAffected).toBe(false);
+      expect(
+        result.affectedWorkspaces[0].affectedReasons.externalDependencies,
+      ).toEqual([]);
+    });
+
+    test("filter applies per-workspace independently", async () => {
+      const a = makeWorkspaceWithExternals();
+      const b = makeTestWorkspace({
+        name: "b",
+        path: "packages/b",
+        externalDependencies: [
+          { name: "lodash", version: "^4.0.0", source: "dependencies" },
+        ],
+      });
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        workspaceInputs: [
+          makeInput({ workspace: a, inputExternalDependencyNames: [] }),
+          makeInput({ workspace: b }),
+        ],
+        changedFilePaths: [],
+        externalDepChangesByWorkspace: new Map([
+          [
+            "a",
+            [
+              {
+                name: "lodash",
+                source: "dependencies",
+                baseVersion: "4.17.0",
+                headVersion: "4.17.21",
+              },
+            ],
+          ],
+          [
+            "b",
+            [
+              {
+                name: "lodash",
+                source: "dependencies",
+                baseVersion: "4.17.0",
+                headVersion: "4.17.21",
+              },
+            ],
+          ],
+        ]),
+      });
+
+      // 'a' has the filter set to [] — silenced. 'b' has no filter — flagged.
+      expect(result.affectedWorkspaces[0].isAffected).toBe(false);
+      expect(result.affectedWorkspaces[1].isAffected).toBe(true);
     });
   });
 });

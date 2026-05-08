@@ -25,6 +25,7 @@ const EXPECTED_APPLICATION_1A_JSON = {
   tags: [],
   dependencies: [],
   dependents: [],
+  externalDependencies: [],
 };
 
 describe("Workspace Info", () => {

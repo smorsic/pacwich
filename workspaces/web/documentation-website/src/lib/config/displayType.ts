@@ -75,6 +75,9 @@ const _formatSimpleTypeToDisplay = <V extends ValueToDisplay<any>>(
           .map((line) => indent + "  // " + line + "\n")
           .join("");
       }
+      if (key === "comment") {
+        continue;
+      }
       result +=
         nextIndent +
         key +

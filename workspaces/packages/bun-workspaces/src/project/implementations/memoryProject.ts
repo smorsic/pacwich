@@ -116,6 +116,7 @@ class _MemoryProject extends ProjectBase implements Project {
         tags: [],
         dependencies: [],
         dependents: [],
+        externalDependencies: [],
       } as Workspace);
 
     validateWorkspace(this.rootWorkspace);

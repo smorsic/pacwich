@@ -1,0 +1,6 @@
+{
+  "name": "c",
+  "devDependencies": {
+    "typescript": "catalog:nope"
+  }
+}

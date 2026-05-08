@@ -62,6 +62,54 @@ bw run my-script --output-style=prefixed
 # Use the plain output style (no workspace prefixes)
 bw run my-script --output-style=plain
 
+# List affected workspaces (default: git diff HEAD vs the configured base ref, "main" by default)
+bw list-affected
+bw ls-affected # alias
+
+# Compare specific git refs
+bw ls-affected --base=my-branch-a --head=my-branch-b
+bw ls-affected -B my-branch-a -H my-branch-b # short forms
+
+# Resolve inputs for a specific script (uses scripts[name].inputs when configured)
+bw ls-affected --script=build
+
+# Ignore some uncommitted changes (uncommitted included by default)
+bw ls-affected --ignore-uncommitted # all of: staged, unstaged, untracked
+bw ls-affected --ignore-untracked
+bw ls-affected --ignore-unstaged
+bw ls-affected --ignore-staged
+
+# Skip workspace dep cascade (only direct file/external-dep changes flag a workspace)
+bw ls-affected --ignore-workspace-deps
+
+# Skip lockfile-based external dep version tracking
+bw ls-affected --ignore-external-deps
+
+# Bypass git entirely with an explicit list of changed files
+# (paths, dirs, globs; '!' to exclude; whitespace-separated)
+bw ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+bw ls-affected -F "packages/a/**/*.ts !packages/a/**/*.test.ts"
+
+# Per-workspace summary of why each workspace is affected
+bw ls-affected --explain
+bw ls-affected -e
+
+# Full per-file changes and dep cascade chain for each affected workspace
+bw ls-affected --explain --detailed
+bw ls-affected -e -D
+
+# JSON output (with --explain produces the full result object)
+bw ls-affected --json --pretty
+bw ls-affected --explain --json --pretty
+
+# Run a script across affected workspaces (accepts the same affected options
+# as ls-affected, plus the same script-execution options as run-script:
+# --parallel, --dep-order, --args, --output-style, --inline, etc.)
+bw run-affected build
+bw run-affected build --base=my-branch --ignore-uncommitted --dep-order
+bw run-affected build --files="packages/a/src/**/*.ts" --parallel=2
+bw run-affected "bun build" --inline --inline-name=build # inline command form
+
 ### Global Options ###
 # Root directory of project:
 bw --cwd=/path/to/project ls

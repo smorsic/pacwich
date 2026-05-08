@@ -14,6 +14,7 @@ export const makeTestWorkspace = (data: Partial<Workspace>): Workspace => ({
   tags: [],
   dependencies: [],
   dependents: [],
+  externalDependencies: [],
   ...data,
   path: withWindowsPath(data.path ?? ""),
 });

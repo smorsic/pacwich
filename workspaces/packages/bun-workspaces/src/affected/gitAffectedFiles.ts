@@ -52,6 +52,10 @@ export interface GitAffectedFile {
 
 export interface GetGitAffectedFilesResult {
   files: GitAffectedFile[];
+  /** The full SHA the `baseRef` resolves to */
+  baseSha: string;
+  /** The full SHA the `headRef` resolves to */
+  headSha: string;
 }
 
 interface RunGitResult {
@@ -111,6 +115,45 @@ const resolveGitRoot = async (rootDirectory: string): Promise<string> => {
   return result.stdout.trim();
 };
 
+/**
+ * Read a project-root-relative file's contents at a specific git ref via
+ * `git show <ref>:<repo-relative-path>`. Returns `null` if the file does not
+ * exist at that ref (e.g. it was added later). Throws on other git errors.
+ */
+export const readProjectFileAtGitRef = async ({
+  rootDirectory,
+  ref,
+  projectRelativePath,
+}: {
+  rootDirectory: string;
+  ref: string;
+  projectRelativePath: string;
+}): Promise<string | null> => {
+  const gitRoot = fs.realpathSync.native(
+    path.resolve(await resolveGitRoot(rootDirectory)),
+  );
+  const absoluteProjectRoot = fs.realpathSync.native(
+    path.resolve(rootDirectory),
+  );
+  const absoluteFile = path.resolve(absoluteProjectRoot, projectRelativePath);
+  const repoRelative = path
+    .relative(gitRoot, absoluteFile)
+    .split(path.sep)
+    .join("/");
+
+  const result = await runGit(["show", `${ref}:${repoRelative}`], gitRoot);
+  if (result.exitCode === 0) return result.stdout;
+  if (
+    result.stderr.includes("does not exist") ||
+    result.stderr.includes("exists on disk, but not in")
+  ) {
+    return null;
+  }
+  throw new GIT_AFFECTED_ERRORS.GitCommandFailed(
+    `git show ${ref}:${repoRelative} failed (exit ${result.exitCode}): ${result.stderr.trim()}`,
+  );
+};
+
 const toProjectFilePath = ({
   gitRoot,
   absoluteProjectRoot,
@@ -151,6 +194,11 @@ export const getGitAffectedFiles = async (
   const includeStaged = !ignoreUncommitted && !ignoreStaged;
   const includeUnstaged = !ignoreUncommitted && !ignoreUnstaged;
   const includeUntracked = !ignoreUncommitted && !ignoreUntracked;
+
+  const [baseSha, headSha] = await Promise.all([
+    runGitOrThrow(["rev-parse", baseRef], gitRoot).then((out) => out.trim()),
+    runGitOrThrow(["rev-parse", headRef], gitRoot).then((out) => out.trim()),
+  ]);
 
   type Bucket = { reason: GitAffectedFileReason; paths: string[] };
   const collectors: Promise<Bucket>[] = [
@@ -214,5 +262,5 @@ export const getGitAffectedFiles = async (
     }))
     .sort((a, b) => a.projectFilePath.localeCompare(b.projectFilePath));
 
-  return { files };
+  return { files, baseSha, headSha };
 };
