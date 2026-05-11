@@ -61,12 +61,6 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
   };
 };
 
-export const stringifyWorkspacePattern = (
-  pattern: WorkspacePattern,
-): string => {
-  return `${pattern.target}${WORKSPACE_PATTERN_SEPARATOR}${pattern.value}`;
-};
-
 const PATTERN_TARGET_HANDLERS: Record<
   WorkspacePatternTarget | "default",
   (
