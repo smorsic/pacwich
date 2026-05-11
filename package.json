@@ -70,8 +70,8 @@
     "type-check": "bw run type-check -P --",
     "generate-cursor-rules": "bw -l silent run generate-cursor-rules meta -o plain",
     "generate-readme": "bw -l silent run generate-readme meta -o plain",
-    "init-bw-package": "BW_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/bun-workspaces run generate-modules & bun --cwd=workspaces/libraries/bw-common run build:dts && wait",
-    "prepare": "touch USER.md && bun --silent init-bw-package && (bun --silent generate-readme & bun --silent generate-cursor-rules && wait)"
+    "init-bw-package": "BW_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/bun-workspaces run generate-modules && bun --cwd=workspaces/libraries/bw-common run build:dts",
+    "prepare": "touch USER.md && bun --silent init-bw-package && bun --silent generate-readme && bun --silent generate-cursor-rules"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
