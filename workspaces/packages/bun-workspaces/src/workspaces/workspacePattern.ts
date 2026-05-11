@@ -14,6 +14,7 @@ export type WorkspacePattern = {
   target: WorkspacePatternTarget | "default";
   value: string;
   isNegated: boolean;
+  isRegex: boolean;
 };
 
 export const WORKSPACE_PATTERN_NEGATION_PREFIX = "not:";
@@ -27,6 +28,20 @@ export const WORKSPACE_PATTERN_NEGATION_PREFIXES = [
 
 export const WORKSPACE_PATTERN_SEPARATOR = ":";
 
+export const WORKSPACE_PATTERN_REGEX_PREFIX = "re:";
+
+const validateRegexSource = (source: string, originalPattern: string) => {
+  try {
+    new RegExp(source);
+  } catch (cause) {
+    throw new WORKSPACE_PATTERN_ERRORS.InvalidWorkspacePattern(
+      `Invalid regex in workspace pattern "${originalPattern}": ${
+        (cause as Error).message
+      }`,
+    );
+  }
+};
+
 export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
   const negationPrefix = WORKSPACE_PATTERN_NEGATION_PREFIXES.find((prefix) =>
     pattern.startsWith(prefix),
@@ -34,85 +49,144 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
 
   const isNegated = !!negationPrefix;
 
-  const patternValue = negationPrefix
+  const afterNegation = negationPrefix
     ? pattern.slice(negationPrefix.length)
     : pattern;
 
+  // "re:" before any target consumes the rest as a regex against the default target.
+  // e.g. "re:path:foo" → default-target regex over literal source "path:foo".
+  if (afterNegation.startsWith(WORKSPACE_PATTERN_REGEX_PREFIX)) {
+    const value = afterNegation.slice(WORKSPACE_PATTERN_REGEX_PREFIX.length);
+    validateRegexSource(value, pattern);
+    return {
+      target: "default",
+      value,
+      isNegated,
+      isRegex: true,
+    };
+  }
+
   const target = TARGETS.find((target) =>
-    patternValue.startsWith(target + WORKSPACE_PATTERN_SEPARATOR),
+    afterNegation.startsWith(target + WORKSPACE_PATTERN_SEPARATOR),
   );
 
   if (!target) {
     return {
       target: "default",
-      value: patternValue,
+      value: afterNegation,
       isNegated,
+      isRegex: false,
     };
   }
 
-  const value = patternValue.slice(
+  const afterTarget = afterNegation.slice(
     target.length + WORKSPACE_PATTERN_SEPARATOR.length,
   );
 
+  if (afterTarget.startsWith(WORKSPACE_PATTERN_REGEX_PREFIX)) {
+    const value = afterTarget.slice(WORKSPACE_PATTERN_REGEX_PREFIX.length);
+    validateRegexSource(value, pattern);
+    return {
+      target,
+      value,
+      isNegated,
+      isRegex: true,
+    };
+  }
+
   return {
     target,
-    value,
+    value: afterTarget,
     isNegated,
+    isRegex: false,
   };
-};
-
-export const stringifyWorkspacePattern = (
-  pattern: WorkspacePattern,
-): string => {
-  return `${pattern.target}${WORKSPACE_PATTERN_SEPARATOR}${pattern.value}`;
 };
 
 const PATTERN_TARGET_HANDLERS: Record<
   WorkspacePatternTarget | "default",
-  (
-    pattern: WorkspacePattern,
-    workspaces: Workspace[],
-    wildcardRegex: RegExp,
-  ) => Workspace[]
+  (pattern: WorkspacePattern, workspaces: Workspace[]) => Workspace[]
 > = {
-  default: (pattern, workspaces, wildcardRegex) => {
-    return workspaces.filter((workspace) => {
-      return (
-        (pattern.value.includes("*")
-          ? wildcardRegex.test(workspace.name)
-          : workspace.name === pattern.value) ||
-        workspace.aliases.some((alias) =>
-          pattern.value.includes("*")
-            ? wildcardRegex.test(alias)
-            : alias === pattern.value,
-        )
+  default: (pattern, workspaces) => {
+    if (pattern.isRegex) {
+      const regex = new RegExp(pattern.value);
+      return workspaces.filter(
+        (workspace) =>
+          regex.test(workspace.name) ||
+          workspace.aliases.some((alias) => regex.test(alias)),
       );
-    });
+    }
+    if (pattern.value.includes("*")) {
+      const wildcardRegex = createWildcardRegex(pattern.value);
+      return workspaces.filter(
+        (workspace) =>
+          wildcardRegex.test(workspace.name) ||
+          workspace.aliases.some((alias) => wildcardRegex.test(alias)),
+      );
+    }
+    return workspaces.filter(
+      (workspace) =>
+        workspace.name === pattern.value ||
+        workspace.aliases.includes(pattern.value),
+    );
   },
-  name: (pattern, workspaces, wildcardRegex) => {
-    return workspaces.filter((workspace) => {
-      return pattern.value.includes("*")
-        ? wildcardRegex.test(workspace.name)
-        : workspace.name === pattern.value;
-    });
+  name: (pattern, workspaces) => {
+    if (pattern.isRegex) {
+      const regex = new RegExp(pattern.value);
+      return workspaces.filter((workspace) => regex.test(workspace.name));
+    }
+    if (pattern.value.includes("*")) {
+      const wildcardRegex = createWildcardRegex(pattern.value);
+      return workspaces.filter((workspace) =>
+        wildcardRegex.test(workspace.name),
+      );
+    }
+    return workspaces.filter((workspace) => workspace.name === pattern.value);
   },
-  alias: (pattern, workspaces, wildcardRegex) => {
-    return workspaces.filter((workspace) => {
-      return pattern.value.includes("*")
-        ? workspace.aliases.some((alias) => wildcardRegex.test(alias))
-        : workspace.aliases.includes(pattern.value);
-    });
+  alias: (pattern, workspaces) => {
+    if (pattern.isRegex) {
+      const regex = new RegExp(pattern.value);
+      return workspaces.filter((workspace) =>
+        workspace.aliases.some((alias) => regex.test(alias)),
+      );
+    }
+    if (pattern.value.includes("*")) {
+      const wildcardRegex = createWildcardRegex(pattern.value);
+      return workspaces.filter((workspace) =>
+        workspace.aliases.some((alias) => wildcardRegex.test(alias)),
+      );
+    }
+    return workspaces.filter((workspace) =>
+      workspace.aliases.includes(pattern.value),
+    );
   },
   path: (pattern, workspaces) => {
+    if (pattern.isRegex) {
+      const regex = new RegExp(pattern.value);
+      // Normalize backslashes so regex sources stay portable: a single
+      // forward-slash-based regex works on both Windows and POSIX paths.
+      return workspaces.filter((workspace) =>
+        regex.test(workspace.path.replaceAll("\\", "/")),
+      );
+    }
     return workspaces.filter((workspace) =>
       new bun.Glob(pattern.value.replace(/\/+$/, "")).match(workspace.path),
     );
   },
-  tag: (pattern, workspaces, wildcardRegex) => {
+  tag: (pattern, workspaces) => {
+    if (pattern.isRegex) {
+      const regex = new RegExp(pattern.value);
+      return workspaces.filter((workspace) =>
+        workspace.tags.some((tag) => regex.test(tag)),
+      );
+    }
+    if (pattern.value.includes("*")) {
+      const wildcardRegex = createWildcardRegex(pattern.value);
+      return workspaces.filter((workspace) =>
+        workspace.tags.some((tag) => wildcardRegex.test(tag)),
+      );
+    }
     return workspaces.filter((workspace) =>
-      pattern.value.includes("*")
-        ? workspace.tags.some((tag) => wildcardRegex.test(tag))
-        : workspace.tags.includes(pattern.value),
+      workspace.tags.includes(pattern.value),
     );
   },
 };
@@ -120,12 +194,7 @@ const PATTERN_TARGET_HANDLERS: Record<
 const matchWorkspacesByPattern = (
   pattern: WorkspacePattern,
   workspaces: Workspace[],
-) =>
-  PATTERN_TARGET_HANDLERS[pattern.target](
-    pattern,
-    workspaces,
-    createWildcardRegex(pattern.value),
-  );
+) => PATTERN_TARGET_HANDLERS[pattern.target](pattern, workspaces);
 
 export const matchWorkspacesByPatterns = (
   patterns: string[],

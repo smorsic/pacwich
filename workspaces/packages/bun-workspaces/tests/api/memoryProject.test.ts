@@ -206,6 +206,23 @@ describe("MemoryProject", () => {
     );
   });
 
+  test("findWorkspacesByPattern supports re: regex patterns", () => {
+    const projectWithData = createTestProject();
+    // default target tests name and alias
+    expect(projectWithData.findWorkspacesByPattern("re:^test-[12]$")).toEqual([
+      testWs1,
+      testWs2,
+    ]);
+    expect(projectWithData.findWorkspacesByPattern("re:2-alias$")).toEqual([
+      testWs2,
+    ]);
+    // target:re: scopes the match
+    expect(projectWithData.findWorkspacesByPattern("name:re:-1$")).toEqual([
+      testWs1,
+    ]);
+    expect(projectWithData.findWorkspacesByPattern("alias:re:-1$")).toEqual([]);
+  });
+
   test("throws for duplicate workspace name", () => {
     expect(() =>
       createMemoryProject({

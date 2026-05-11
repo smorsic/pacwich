@@ -48,6 +48,7 @@ runs:
           const packageJson = JSON.parse(await Bun.file(packageJsonPath).text());
           packageJson.workspaces.packages = [
            "workspaces/packages/*",
+           "workspaces/meta",
            "workspaces/web/*",
            "workspaces/libraries/*"
           ];

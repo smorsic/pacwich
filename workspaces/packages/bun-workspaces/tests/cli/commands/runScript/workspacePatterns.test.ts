@@ -101,6 +101,58 @@ describe("CLI Run Script (workspace patterns)", () => {
       );
     });
 
+    test("re: regex pattern matches against name or alias (default target)", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "re:^application-1[ab]$",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[application-1a] script for all workspaces
+[application-1b] script for all workspaces
+✅ application-1a: all-workspaces
+✅ application-1b: all-workspaces
+2 scripts ran successfully`,
+      );
+    });
+
+    test("path:re: regex pattern scopes match to workspace path", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "path:re:^libraries/library[AB]$",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[library-1a] script for all workspaces
+[library-1b] script for all workspaces
+✅ library-1a: all-workspaces
+✅ library-1b: all-workspaces
+2 scripts ran successfully`,
+      );
+    });
+
+    test("invalid regex surfaces an error", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "re:[unclosed",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr.sanitizedCompactLines).toContain(
+        `Invalid regex in workspace pattern "re:[unclosed"`,
+      );
+    });
+
     test("aliases match workspaces", async () => {
       const { run } = setupCliTest({ testProject: "simple1" });
       const result = await run(
