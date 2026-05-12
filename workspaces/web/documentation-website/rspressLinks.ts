@@ -409,7 +409,8 @@ type SidebarGroupKey = keyof typeof SIDEBAR_GROUPS;
 
 export const createSidebar = (groupKey: SidebarGroupKey) => ({
   [SIDEBAR_GROUPS[groupKey].path]: Object.entries(SIDEBAR_GROUPS).map(
-    ([key, { group }]) => ({
+    ([key, { path, group }]) => ({
+      link: path,
       collapsed: key !== groupKey,
       ...group,
     }),

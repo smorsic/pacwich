@@ -88,6 +88,10 @@ export default defineConfig({
           from: "/concepts/script-runtime-metadata",
           to: "/concepts/workspace-script-metadata",
         },
+        {
+          from: "/concepts$",
+          to: "/concepts/glossary",
+        },
       ],
     }),
     // TODO: This worked briefly with mismatched versions. This will likely not work again until rspress v2 is out of beta.
