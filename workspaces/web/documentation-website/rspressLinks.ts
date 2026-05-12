@@ -143,19 +143,20 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     text: "AI",
     link: "/ai",
     position: "left",
-    activeMatch: "/ai",
     tag: TAG_ICONS.ai,
     items: [
       {
         text: "Overview",
         link: "/ai",
+        activeMatch: "/ai$",
       },
       {
         text: "AGENTS.md",
         link: "/ai/agents",
+        activeMatch: "/ai/agents",
       },
       {
-        text: "MCP",
+        text: "MCP Server",
         link: "/ai/mcp",
       },
     ],
