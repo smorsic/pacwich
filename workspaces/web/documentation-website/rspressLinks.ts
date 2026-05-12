@@ -141,11 +141,19 @@ export const HEADER_NAV_LINKS: NavItem[] = [
   },
   {
     text: "AI",
-    link: "/ai/mcp",
+    link: "/ai",
     position: "left",
     activeMatch: "/ai",
     tag: TAG_ICONS.ai,
     items: [
+      {
+        text: "Overview",
+        link: "/ai",
+      },
+      {
+        text: "AGENTS.md",
+        link: "/ai/agents",
+      },
       {
         text: "MCP",
         link: "/ai/mcp",
@@ -344,7 +352,6 @@ const SIDEBAR_GROUPS = {
       ],
     },
   },
-
   concepts: {
     path: "/concepts",
     group: {
@@ -399,6 +406,26 @@ const SIDEBAR_GROUPS = {
               link: "/concepts/script-execution-order",
             },
           ],
+        },
+      ],
+    },
+  },
+  ai: {
+    path: "/ai",
+    group: {
+      text: "AI",
+      items: [
+        {
+          text: "Overview",
+          link: "/ai",
+        },
+        {
+          text: "AGENTS.md",
+          link: "/ai/agents",
+        },
+        {
+          text: "MCP Server",
+          link: "/ai/mcp",
         },
       ],
     },
