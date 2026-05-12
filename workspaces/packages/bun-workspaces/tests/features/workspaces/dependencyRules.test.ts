@@ -16,6 +16,15 @@ const makeWorkspaceMapEntry = (
   packageJson: expect.any(Object),
 });
 
+// Synthetic root workspace for tests that don't exercise @root semantics —
+// validateWorkspaceDependencyRules requires a rootWorkspace for pattern resolution.
+const TEST_ROOT_WORKSPACE = makeTestWorkspace({
+  name: "__test-root__",
+  isRoot: true,
+  path: "",
+  matchPattern: "",
+});
+
 describe("validateWorkspaceDependencyRules", () => {
   describe("no rules", () => {
     test("does nothing when workspaces have no rules", () => {
@@ -26,7 +35,10 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
   });
@@ -40,9 +52,12 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("throws when an indirect dependency matches denyPatterns", () => {
@@ -56,9 +71,12 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("throws when an indirect dependency matches denyPatterns via a longer chain", () => {
@@ -75,9 +93,12 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
         d: makeWorkspaceMapEntry(makeTestWorkspace({ name: "d" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("does not throw when no dependencies match denyPatterns", () => {
@@ -89,7 +110,10 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -101,7 +125,10 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -119,9 +146,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "b", tags: ["internal"] }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("does not throw when tag does not match denyPatterns", () => {
@@ -139,7 +169,10 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -161,9 +194,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "b", path: "private/packages/b" }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("matches by alias pattern", () => {
@@ -180,9 +216,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "b", aliases: ["my-alias"] }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("matches by wildcard name pattern", () => {
@@ -195,9 +234,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "private-lib" }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("only validates the workspace that has the rule, not others", () => {
@@ -215,9 +257,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "d", dependencies: ["c"] }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
   });
 
@@ -231,7 +276,10 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -247,7 +295,10 @@ describe("validateWorkspaceDependencyRules", () => {
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -260,9 +311,12 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("throws when an indirect dependency is not in allowPatterns", () => {
@@ -276,9 +330,12 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("allows by tag pattern", () => {
@@ -294,7 +351,10 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -310,9 +370,12 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "b", tags: ["internal"] }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
 
     test("does not throw when workspace has no dependencies and allowPatterns is set", () => {
@@ -323,7 +386,10 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
   });
@@ -346,7 +412,10 @@ describe("validateWorkspaceDependencyRules", () => {
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -365,11 +434,17 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
       try {
-        validateWorkspaceDependencyRules({ workspaceMap });
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        });
       } catch (e) {
         expect((e as Error).message).toContain("denied by denyPatterns");
         expect((e as Error).message).not.toContain(
@@ -394,11 +469,17 @@ describe("validateWorkspaceDependencyRules", () => {
         b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
         c: makeWorkspaceMapEntry(makeTestWorkspace({ name: "c" })),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
       try {
-        validateWorkspaceDependencyRules({ workspaceMap });
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        });
       } catch (e) {
         expect((e as Error).message).toContain(
           "not permitted by allowPatterns",
@@ -419,7 +500,10 @@ describe("validateWorkspaceDependencyRules", () => {
         ),
       };
       expect(() =>
-        validateWorkspaceDependencyRules({ workspaceMap }),
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
       ).not.toThrow();
     });
 
@@ -433,9 +517,84 @@ describe("validateWorkspaceDependencyRules", () => {
           makeTestWorkspace({ name: "b", dependencies: ["a"] }),
         ),
       };
-      expect(() => validateWorkspaceDependencyRules({ workspaceMap })).toThrow(
-        WORKSPACE_ERRORS.DependencyRuleViolation,
-      );
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: TEST_ROOT_WORKSPACE,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
+    });
+  });
+
+  describe("@root selector", () => {
+    test("denyPatterns: [@root] throws when the root workspace is a transitive dep", () => {
+      const rootWs = makeTestWorkspace({ name: "root-ws", isRoot: true });
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          makeTestWorkspace({ name: "a", dependencies: ["root-ws"] }),
+          { rules: { workspaceDependencies: { denyPatterns: ["@root"] } } },
+        ),
+        "root-ws": makeWorkspaceMapEntry(rootWs),
+      };
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: rootWs,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
+    });
+
+    test("denyPatterns: [@root] does not falsely flag non-root deps", () => {
+      const rootWs = makeTestWorkspace({ name: "root-ws", isRoot: true });
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          { rules: { workspaceDependencies: { denyPatterns: ["@root"] } } },
+        ),
+        b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
+        "root-ws": makeWorkspaceMapEntry(rootWs),
+      };
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: rootWs,
+        }),
+      ).not.toThrow();
+    });
+
+    test("allowPatterns: [@root] permits only the root workspace as a dep", () => {
+      const rootWs = makeTestWorkspace({ name: "root-ws", isRoot: true });
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          makeTestWorkspace({ name: "a", dependencies: ["root-ws"] }),
+          { rules: { workspaceDependencies: { allowPatterns: ["@root"] } } },
+        ),
+        "root-ws": makeWorkspaceMapEntry(rootWs),
+      };
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: rootWs,
+        }),
+      ).not.toThrow();
+    });
+
+    test("allowPatterns: [@root] rejects a non-root dep", () => {
+      const rootWs = makeTestWorkspace({ name: "root-ws", isRoot: true });
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          { rules: { workspaceDependencies: { allowPatterns: ["@root"] } } },
+        ),
+        b: makeWorkspaceMapEntry(makeTestWorkspace({ name: "b" })),
+        "root-ws": makeWorkspaceMapEntry(rootWs),
+      };
+      expect(() =>
+        validateWorkspaceDependencyRules({
+          workspaceMap,
+          rootWorkspace: rootWs,
+        }),
+      ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
   });
 });

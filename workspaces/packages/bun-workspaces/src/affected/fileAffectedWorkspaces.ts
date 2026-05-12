@@ -82,6 +82,8 @@ export interface FileAffectedWorkspacesOptions {
   workspaceInputs: AffectedWorkspaceInput[];
   /** The paths of all files that are considered changed */
   changedFilePaths: string[];
+  /** The project's root workspace (for "@root" pattern resolution) */
+  rootWorkspace: Workspace;
   /** Per-workspace external dep version deltas (from a lockfile compare) */
   externalDepChangesByWorkspace?: ExternalDependencyChangesByWorkspace;
   /** Whether to ignore cascade through workspace `workspace:*` dependencies */
@@ -294,8 +296,10 @@ const matchChangedFilesForWorkspace = ({
 
 const resolveInputWorkspaceDependencies = ({
   workspaceInputs,
+  rootWorkspace,
 }: {
   workspaceInputs: AffectedWorkspaceInput[];
+  rootWorkspace: Workspace;
 }): Map<string, string[]> => {
   const inputDependenciesByName = new Map<string, string[]>();
   const allWorkspaces = workspaceInputs.map(({ workspace }) => workspace);
@@ -308,6 +312,7 @@ const resolveInputWorkspaceDependencies = ({
     const matchedNames = matchWorkspacesByPatterns(
       inputWorkspacePatterns,
       allWorkspaces,
+      rootWorkspace,
     )
       .map((matchedWorkspace) => matchedWorkspace.name)
       .filter((matchedName) => matchedName !== workspace.name);
@@ -543,6 +548,7 @@ export const getFileAffectedWorkspaces = async ({
   rootDirectory,
   workspaceInputs,
   changedFilePaths,
+  rootWorkspace,
   externalDepChangesByWorkspace = new Map(),
   ignoreWorkspaceDependencies = false,
 }: FileAffectedWorkspacesOptions): Promise<FileAffectedWorkspacesResult> => {
@@ -575,6 +581,7 @@ export const getFileAffectedWorkspaces = async ({
 
   const inputDependenciesByName = resolveInputWorkspaceDependencies({
     workspaceInputs,
+    rootWorkspace,
   });
 
   const affectedSet = computeAffectedWorkspaceSet({

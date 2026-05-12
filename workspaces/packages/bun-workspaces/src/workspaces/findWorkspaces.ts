@@ -212,10 +212,11 @@ export const findWorkspaces = ({
       workspaceMap,
       workspaceAliases,
       workspacePatternConfigs,
+      rootWorkspace,
     );
   }
 
-  validateWorkspaceDependencyRules({ workspaceMap });
+  validateWorkspaceDependencyRules({ workspaceMap, rootWorkspace });
 
   validateWorkspaceAliases(workspaces, workspaceAliases, rootWorkspace.name);
 

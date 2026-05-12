@@ -19,6 +19,35 @@ and they are also used in some [configuration](/config) options.
 
 [Negation](#negation) is supported by prefixing any pattern with `not:` or `!`, the former suggested to avoid shell operator issues. These exclude workspaces from any other patterns provided.
 
+[Regular expressions](#regex-modifier) are supported by prefixing any pattern value with `re:`.
+
+
+<SyntaxHighlighter>
+  {`
+Workspace Pattern Syntax:
+[not:][(name|alias|path|tag):][re:]<value>
+`.trim()}
+</SyntaxHighlighter>
+
+### Quick Examples:
+
+<SyntaxHighlighter language="bash">
+  {`
+"my-name-or-alias" # matches workspace name or alias
+"my-name-pattern-*" # matches workspace names only by wildcard
+"alias:my-alias-pattern-*" # matches workspace aliases by wildcard
+"path:packages/**/*" # matches workspace paths by glob
+"tag:my-tag" # matches workspaces with tag
+"not:my-name-or-alias" # excludes workspace name or alias
+"not:tag:my-tag-pattern-*" # excludes workspace tag matching wildcard
+"re:^my-regex-pattern$" # matches workspace name or alias by regex
+"not:tag:re:^my-tag-regex-pattern$" # excludes workspace tag by regex
+"@root" # matches the root workspace
+`.trim()}
+</SyntaxHighlighter>
+
+The [`@root` special selector](/concepts/root-workspace#referencing-the-root-workspace) matches the [root workspace](/concepts/root-workspace).
+
 ## Default Matching
 
 By default, normal strings match a workspace name or alias.
@@ -49,13 +78,33 @@ Matching specifiers give you more control and options for how you match workspac
 
 ## Negation
 
-You can negate a pattern by prefixing it with `not:`.
+You can negate a pattern by prefixing it with `not:` or `!`.
+`not:` is preferred over `!` to avoid shell operator issues.
 These exclude workspaces from any other patterns provided.
+
+Negated patterns are removed from the set of matched workspaces, so
+a "all workspaces except my-workspace" requires two patterns: `"*"` and `"not:my-workspace"`.
 
 <SyntaxHighlighter language="bash">
   {`
+# All workspaces except the name or alias "my-name-or-alias"
+bw ls "*" "not:my-name-or-alias"
+
 # All workspaces except those with the tag "my-tag"
 bw ls "*" "not:tag:my-tag"`.trim()}
+</SyntaxHighlighter>
+
+## Regex Modifier
+
+You can use the `re:` modifier to match patterns using regular expressions.
+<SyntaxHighlighter language="bash">
+  {`
+# All workspaces with names that start with "app-"
+bw ls "re:^app-.*"
+
+# All workspaces except those with tags that start with "my-tag-"
+bw ls "*" "not:tag:re:^my-tag-.*"
+`.trim()}
 </SyntaxHighlighter>
 
 ## In the API

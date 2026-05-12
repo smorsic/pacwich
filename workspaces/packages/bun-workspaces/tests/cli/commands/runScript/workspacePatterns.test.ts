@@ -101,7 +101,7 @@ describe("CLI Run Script (workspace patterns)", () => {
       );
     });
 
-    test("re: regex pattern matches against name or alias (default target)", async () => {
+    test("re: regex pattern matches against name only (default target)", async () => {
       const { run } = setupCliTest({ testProject: "simple1" });
       const result = await run(
         "run-script",

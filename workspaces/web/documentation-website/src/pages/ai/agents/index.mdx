@@ -1,0 +1,39 @@
+---
+title: AGENTS.md | AI
+titleSuffix: " | bun-workspaces"
+description: "AGENTS.md integration for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+
+import { SyntaxHighlighter } from '../../../lib/util/highlight';
+
+# AI Integrations: AGENTS.md
+
+`bun-workspaces` provides an **AGENTS.md** file that can be used to provide context to AI tools about the package, which
+can be found at `node_modules/bun-workspaces/AGENTS.md` after you install `bun-workspaces`.
+
+The content of this file is the same as the combined contents of the [MCP](/ai/mcp) server's documentation resources.
+
+You can use this file to provide immediate knowledge of `bun-workspaces` to an agent.
+
+## CLAUDE.md
+
+Since CLAUDE.md supports importing other files, you can easily integrate this file into your context by adding the following line to your CLAUDE.md file:
+
+<SyntaxHighlighter language="markdown">
+{`
+<!-- CLAUDE.md contents -->
+
+@./node_modules/bun-workspaces/AGENTS.md
+`.trim()}
+</SyntaxHighlighter>
+
+## Other Tooling
+
+If your tool does not support imports like CLAUDE.md, you can manually copy the contents of `node_modules/bun-workspaces/AGENTS.md` into your tool's context
+or create a symlink to the file in your tool's config.
+
+You might also consider using the [MCP server](/ai/mcp) if your tool supports it.

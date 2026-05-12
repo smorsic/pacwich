@@ -127,21 +127,20 @@ export abstract class ProjectBase implements Project {
   }
 
   findWorkspacesByPattern(...workspacePatterns: string[]): Workspace[] {
-    const workspaces: Workspace[] = [];
-    if (workspacePatterns.includes(ROOT_WORKSPACE_SELECTOR)) {
-      workspaces.push(this.rootWorkspace);
-      workspacePatterns = workspacePatterns.filter(
-        (pattern) => pattern !== ROOT_WORKSPACE_SELECTOR,
-      );
-    }
-
-    workspaces.push(
-      ...sortWorkspaces(
-        matchWorkspacesByPatterns(workspacePatterns, this.workspaces),
-      ),
+    const matched = matchWorkspacesByPatterns(
+      workspacePatterns,
+      this.workspaces,
+      this.rootWorkspace,
     );
 
-    return workspaces;
+    // Preserve historical ordering: root workspace first, then sorted others.
+    const rootName = this.rootWorkspace.name;
+    const rootMatch = matched.find((workspace) => workspace.name === rootName);
+    const rest = sortWorkspaces(
+      matched.filter((workspace) => workspace.name !== rootName),
+    );
+
+    return rootMatch ? [rootMatch, ...rest] : rest;
   }
 
   createScriptCommand(

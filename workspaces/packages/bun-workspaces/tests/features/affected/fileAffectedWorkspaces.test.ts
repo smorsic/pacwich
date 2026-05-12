@@ -28,6 +28,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["src/index.ts"] }),
         ],
@@ -61,6 +62,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: [
           "packages/a/src/index.ts",
@@ -90,6 +92,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["src/"] }),
         ],
@@ -112,6 +115,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["src/**/*.ts"] }),
         ],
@@ -144,6 +148,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["{src,lib}/**/*.ts"] }),
         ],
@@ -175,6 +180,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: ["packages/b/src/index.ts", "other/file.ts"],
       });
@@ -191,6 +197,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputFilePatterns: ["src"] }),
           makeInput({ workspace: b, inputFilePatterns: ["src"] }),
@@ -223,6 +230,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -248,6 +256,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -288,6 +297,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: [""] })],
         changedFilePaths: [
           "packages/a/src/x.ts",
@@ -321,6 +331,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: root,
@@ -355,6 +366,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: "/repo",
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: ["/repo/packages/a/src/index.ts"],
       });
@@ -375,6 +387,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: "/repo",
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: ["/elsewhere/packages/a/src/index.ts"],
       });
@@ -387,6 +400,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: "/repo/",
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: ["/repo/packages/a/src/index.ts"],
       });
@@ -407,6 +421,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: ["packages\\a\\src\\index.ts"],
       });
@@ -429,6 +444,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -454,6 +470,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -488,6 +505,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -523,6 +541,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -551,6 +570,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -576,6 +596,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -625,6 +646,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["../shared"] }),
         ],
@@ -651,6 +673,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: [".."] })],
         changedFilePaths: ["packages/b/x.ts", "other/x.ts"],
       });
@@ -671,6 +694,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["../shared/**/*.ts"] }),
         ],
@@ -702,6 +726,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputFilePatterns: ["/foo/../bar"] }),
         ],
@@ -727,6 +752,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -765,6 +791,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -801,6 +828,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -836,6 +864,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -871,6 +900,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -900,6 +930,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -923,6 +954,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -964,6 +996,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -992,6 +1025,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -1023,6 +1057,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1059,6 +1094,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1089,6 +1125,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1126,6 +1163,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: libA, inputFilePatterns: ["src"] }),
           makeInput({ workspace: libB, inputFilePatterns: ["src"] }),
@@ -1160,6 +1198,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: libA, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1182,6 +1221,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1208,6 +1248,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: libA, inputFilePatterns: ["src"] }),
           makeInput({ workspace: libB, inputFilePatterns: ["src"] }),
@@ -1248,6 +1289,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: libA, inputFilePatterns: ["src"] }),
           makeInput({ workspace: libB, inputFilePatterns: ["src"] }),
@@ -1281,6 +1323,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -1314,6 +1357,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: dep, inputFilePatterns: ["src"] }),
           makeInput({ workspace: app, inputFilePatterns: ["src"] }),
@@ -1377,6 +1421,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputFilePatterns: ["src"] }),
           makeInput({ workspace: b, inputFilePatterns: ["src"] }),
@@ -1438,6 +1483,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputFilePatterns: ["src"] }),
           makeInput({ workspace: c, inputFilePatterns: ["src"] }),
@@ -1486,6 +1532,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputFilePatterns: ["src"] }),
           makeInput({ workspace: b, inputFilePatterns: ["src"] }),
@@ -1533,6 +1580,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputFilePatterns: ["src"] }),
           makeInput({ workspace: b, inputFilePatterns: ["src"] }),
@@ -1558,6 +1606,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: app, inputFilePatterns: ["src"] }),
         ],
@@ -1579,6 +1628,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -1626,6 +1676,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -1646,6 +1697,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputWorkspacePatterns: ["b"] }),
           makeInput({ workspace: b, inputWorkspacePatterns: ["c"] }),
@@ -1671,6 +1723,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1702,6 +1755,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: shared, inputFilePatterns: ["src"] }),
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
@@ -1749,6 +1803,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: data, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1794,6 +1849,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: shared, inputFilePatterns: ["src"] }),
           makeInput({
@@ -1833,6 +1889,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: dep, inputFilePatterns: ["src"] }),
           makeInput({ workspace: app, inputFilePatterns: ["src"] }),
@@ -1861,6 +1918,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -1911,6 +1969,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: shared, inputFilePatterns: ["src"] }),
           makeInput({ workspace: lib, inputFilePatterns: ["src"] }),
@@ -1938,6 +1997,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -1969,6 +2029,7 @@ describe("getFileAffectedWorkspaces", () => {
     test("returns an empty result for empty workspaceInputs", async () => {
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [],
         changedFilePaths: ["packages/a/src/x.ts"],
       });
@@ -1981,6 +2042,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace, inputFilePatterns: ["src"] })],
         changedFilePaths: [],
       });
@@ -2001,6 +2063,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace })],
         changedFilePaths: ["packages/a/src/x.ts"],
       });
@@ -2017,6 +2080,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: dep, inputFilePatterns: ["src"] }),
           makeInput({
@@ -2046,6 +2110,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -2071,6 +2136,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace: a,
@@ -2099,6 +2165,7 @@ describe("getFileAffectedWorkspaces", () => {
 
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: dep, inputFilePatterns: ["src"] }),
           makeInput({
@@ -2170,6 +2237,7 @@ describe("getFileAffectedWorkspaces", () => {
       const workspace = makeWorkspaceWithExternals();
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [makeInput({ workspace })],
         changedFilePaths: [],
         externalDepChangesByWorkspace: lockfileChanges(),
@@ -2198,6 +2266,7 @@ describe("getFileAffectedWorkspaces", () => {
       const workspace = makeWorkspaceWithExternals();
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace, inputExternalDependencyNames: [] }),
         ],
@@ -2215,6 +2284,7 @@ describe("getFileAffectedWorkspaces", () => {
       const workspace = makeWorkspaceWithExternals();
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -2242,6 +2312,7 @@ describe("getFileAffectedWorkspaces", () => {
       const workspace = makeWorkspaceWithExternals();
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({
             workspace,
@@ -2272,6 +2343,7 @@ describe("getFileAffectedWorkspaces", () => {
       });
       const result = await getFileAffectedWorkspaces({
         rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
         workspaceInputs: [
           makeInput({ workspace: a, inputExternalDependencyNames: [] }),
           makeInput({ workspace: b }),

@@ -3,7 +3,7 @@ title: MCP | AI
 titleSuffix: " | bun-workspaces"
 description: "MCP server integration for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
 pageType: doc
-sidebar: false
+sidebar: true
 outline: true
 footer: false
 ---
@@ -21,6 +21,11 @@ can get project metadata and **resources** that provide it complete documentatio
 Agents that read the server instructions on initialization will automatically have knowledge of `bun-workspaces`
 as a package with a brief overview and introduction to the CLI, kept very brief due to tools' propensity to
 truncate these instructions.
+
+## Using AGENTS.md Instead
+
+If you want your agent to know how to use `bun-workspaces` in full right away, you
+may prefer to use the AGENTS.md file `bun-workspaces` provides instead. [Read more](/ai/agents)
 
 ## The MCP vs. CLI Debate
 

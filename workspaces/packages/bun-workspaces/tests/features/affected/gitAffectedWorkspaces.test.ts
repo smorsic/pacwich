@@ -41,6 +41,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,
@@ -104,6 +105,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,
@@ -141,6 +143,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,
@@ -192,6 +195,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,
@@ -236,6 +240,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,
@@ -278,6 +283,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace: workspaceA,
@@ -332,6 +338,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace: workspaceA,
@@ -394,6 +401,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace: workspaceA,
@@ -450,6 +458,7 @@ describe("getGitAffectedWorkspaces", () => {
       const { affectedWorkspaces } = await getGitAffectedWorkspaces({
         rootDirectory: fixture.projectPath,
         workspacesOptions: {
+          rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
           workspaceInputs: [
             {
               workspace,

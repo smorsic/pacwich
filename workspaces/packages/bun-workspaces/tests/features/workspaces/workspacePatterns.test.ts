@@ -43,6 +43,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "app.*",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -52,24 +53,28 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "^app",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
     expect(parseWorkspacePattern("alias:re:.*A$")).toEqual({
       target: "alias",
       value: ".*A$",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
     expect(parseWorkspacePattern("path:re:libraries/.*")).toEqual({
       target: "path",
       value: "libraries/.*",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
     expect(parseWorkspacePattern("tag:re:.*end$")).toEqual({
       target: "tag",
       value: ".*end$",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -80,6 +85,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "path:foo",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -89,6 +95,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "app.*",
       isNegated: true,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -98,6 +105,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "app.*",
       isNegated: true,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -107,6 +115,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "^lib$",
       isNegated: true,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -116,6 +125,7 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "not:something",
       isNegated: false,
       isRegex: true,
+      isRootSelector: false,
     });
   });
 
@@ -134,27 +144,32 @@ describe("parseWorkspacePattern - regex prefix", () => {
       value: "my-workspace",
       isNegated: false,
       isRegex: false,
+      isRootSelector: false,
     });
     expect(parseWorkspacePattern("path:packages/*")).toEqual({
       target: "path",
       value: "packages/*",
       isNegated: false,
       isRegex: false,
+      isRootSelector: false,
     });
   });
 });
 
 describe("matchWorkspacesByPatterns - regex behavior", () => {
-  test("default target regex matches against name or alias", () => {
+  test("default target regex matches against name only, not alias", () => {
     expect(names(matchWorkspacesByPatterns(["re:^app"], workspaces))).toEqual([
       "application-1a",
       "application-1b",
     ]);
-    // alias-only match: "appA" does not start with "lib" but alias "appA" matches
-    expect(names(matchWorkspacesByPatterns(["re:A$"], workspaces))).toEqual([
-      "application-1a",
-      "library-1a",
-    ]);
+    // alias "appA" must not match a default-target regex — only names
+    expect(names(matchWorkspacesByPatterns(["re:^appA$"], workspaces))).toEqual(
+      [],
+    );
+    // but explicit alias:re: still does
+    expect(
+      names(matchWorkspacesByPatterns(["alias:re:^appA$"], workspaces)),
+    ).toEqual(["application-1a"]);
   });
 
   test("regex is raw — unanchored by default", () => {
@@ -251,5 +266,144 @@ describe("matchWorkspacesByPatterns - regex behavior", () => {
     expect(() => matchWorkspacesByPatterns(["re:[bad"], workspaces)).toThrow(
       WORKSPACE_PATTERN_ERRORS.InvalidWorkspacePattern,
     );
+  });
+});
+
+describe("parseWorkspacePattern - root selector", () => {
+  test("@root parses as a root selector", () => {
+    expect(parseWorkspacePattern("@root")).toEqual({
+      target: "default",
+      value: "@root",
+      isNegated: false,
+      isRegex: false,
+      isRootSelector: true,
+    });
+  });
+
+  test("not:@root parses as a negated root selector", () => {
+    expect(parseWorkspacePattern("not:@root")).toEqual({
+      target: "default",
+      value: "@root",
+      isNegated: true,
+      isRegex: false,
+      isRootSelector: true,
+    });
+  });
+
+  test("!@root short form also parses as a negated root selector", () => {
+    expect(parseWorkspacePattern("!@root")).toEqual({
+      target: "default",
+      value: "@root",
+      isNegated: true,
+      isRegex: false,
+      isRootSelector: true,
+    });
+  });
+
+  test("target-scoped @root is treated as a literal value, not the selector", () => {
+    expect(parseWorkspacePattern("name:@root")).toEqual({
+      target: "name",
+      value: "@root",
+      isNegated: false,
+      isRegex: false,
+      isRootSelector: false,
+    });
+    expect(parseWorkspacePattern("tag:@root")).toEqual({
+      target: "tag",
+      value: "@root",
+      isNegated: false,
+      isRegex: false,
+      isRootSelector: false,
+    });
+  });
+
+  test("re:@root is a regex with literal '@root' source, not the selector", () => {
+    expect(parseWorkspacePattern("re:@root")).toEqual({
+      target: "default",
+      value: "@root",
+      isNegated: false,
+      isRegex: true,
+      isRootSelector: false,
+    });
+  });
+});
+
+describe("matchWorkspacesByPatterns - root selector", () => {
+  const rootWorkspace = makeTestWorkspace({
+    name: "test-root",
+    isRoot: true,
+    path: "",
+    matchPattern: "",
+    aliases: ["root-alias"],
+    tags: ["root-tag"],
+  });
+
+  test("@root matches the provided root workspace even when not in input", () => {
+    expect(
+      names(matchWorkspacesByPatterns(["@root"], workspaces, rootWorkspace)),
+    ).toEqual(["test-root"]);
+  });
+
+  test("@root yields nothing when no rootWorkspace is provided", () => {
+    expect(names(matchWorkspacesByPatterns(["@root"], workspaces))).toEqual([]);
+  });
+
+  test("@root combines with other patterns", () => {
+    expect(
+      names(
+        matchWorkspacesByPatterns(
+          ["application-1a", "@root"],
+          workspaces,
+          rootWorkspace,
+        ),
+      ),
+    ).toEqual(["application-1a", "test-root"]);
+  });
+
+  test("@root dedupes when root is also in the workspaces array", () => {
+    const workspacesWithRoot = [...workspaces, rootWorkspace];
+    expect(
+      names(
+        matchWorkspacesByPatterns(
+          ["@root", "@root"],
+          workspacesWithRoot,
+          rootWorkspace,
+        ),
+      ),
+    ).toEqual(["test-root"]);
+  });
+
+  test("not:@root excludes the root workspace from the include set", () => {
+    const workspacesWithRoot = [...workspaces, rootWorkspace];
+    expect(
+      names(
+        matchWorkspacesByPatterns(
+          ["*", "not:@root"],
+          workspacesWithRoot,
+          rootWorkspace,
+        ),
+      ),
+    ).toEqual(workspaces.map((w) => w.name));
+  });
+
+  test("!@root short form negates the root selector", () => {
+    expect(
+      names(
+        matchWorkspacesByPatterns(
+          ["@root", "!@root"],
+          workspaces,
+          rootWorkspace,
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  test("target-scoped @root does not match the root workspace as a selector", () => {
+    // "name:@root" treats "@root" as a literal name — no workspace is named "@root"
+    expect(
+      names(
+        matchWorkspacesByPatterns(["name:@root"], workspaces, rootWorkspace),
+      ),
+    ).toEqual([]);
   });
 });

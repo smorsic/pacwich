@@ -18,7 +18,7 @@ A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhan
 - Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚
 - Use with Bun as your package manager for **Node** projects 🎁
 - Determine **affected workspaces** based on changed files 🕸️
-- Use the [MCP server](https://bunworkspaces.com/ai/mcp) to make your AI tooling aware of `bun-workspaces` and its documentation resources! 🛠️
+- AI: Provides an [AGENTS.md](https://bunworkspaces.com/ai/agents) file and an [MCP server](https://bunworkspaces.com/ai/mcp)! 🛠️
 
 To get started, all you need is a repo using Bun's workspaces feature for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
 

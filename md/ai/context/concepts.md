@@ -2,7 +2,9 @@
 
 ### Workspace patterns
 
-Many features accept a list of workspace patterns to match a subset of workspaces.
+Many features accept a list of workspace patterns to match a subset of workspaces:
+
+`[not:][(name|alias|path|tag):][re:]<value>`
 
 By default, a pattern matches the workspace name or alias: `my-workspace-name` or `my-alias-name`. Aliases are defined in config explained below.
 
@@ -12,8 +14,12 @@ Patterns can include a wildcard to match only by workspace name: `my-workspace-*
 - Path pattern specifier (supports glob): `path:packages/**/*`.
 - Name pattern specifier: `name:my-workspace-*`.
 - Tag pattern specifier: `tag:my-tag`.
-- Special root workspace selector: `@root`.
 - Any pattern can start with `not:` to negate the pattern. (e.g. "not:my-workspace-name", "not:tag:my-tag-\*") This excludes workspaces that match any other present patterns from a result.
+- Regex pattern modifier can be applied before the pattern value: `re:` (e.g. "re:^my-workspace-.+" or "not:alias:re:^my-alias-.+")
+
+#### Special selectors
+
+- Special root workspace selector: `@root`. This is a reference to the root workspace, whether it's included in a Project's workspace list or not.
 
 ### Workspace Script Metadata
 

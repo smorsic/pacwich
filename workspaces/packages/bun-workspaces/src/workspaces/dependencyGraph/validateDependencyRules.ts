@@ -1,4 +1,5 @@
 import { WORKSPACE_ERRORS } from "../errors";
+import type { Workspace } from "../workspace";
 import { matchWorkspacesByPatterns } from "../workspacePattern";
 import type { WorkspaceMap } from "./resolveDependencies";
 
@@ -32,10 +33,12 @@ const getTransitiveDeps = (
 
 export type ValidateWorkspaceDependencyRulesOptions = {
   workspaceMap: WorkspaceMap;
+  rootWorkspace: Workspace;
 };
 
 export const validateWorkspaceDependencyRules = ({
   workspaceMap,
+  rootWorkspace,
 }: ValidateWorkspaceDependencyRulesOptions): void => {
   const violations: string[] = [];
 
@@ -56,10 +59,15 @@ export const validateWorkspaceDependencyRules = ({
 
       const chainStr = chain.join(" -> ");
 
+      // matchWorkspacesByPatterns can inject the root workspace when an
+      // "@root" pattern is present, even if it isn't in the input universe.
+      // We're only asking "does the single dep match?" so confirm by name.
       if (rule.allowPatterns) {
-        const isAllowed =
-          matchWorkspacesByPatterns(rule.allowPatterns, [depWorkspace]).length >
-          0;
+        const isAllowed = matchWorkspacesByPatterns(
+          rule.allowPatterns,
+          [depWorkspace],
+          rootWorkspace,
+        ).some((matched) => matched.name === depWorkspace.name);
         if (!isAllowed) {
           violations.push(
             `"${workspaceName}" violates workspaceDependencies rule: workspace "${depName}" is not permitted by allowPatterns (dependency chain: ${chainStr})`,
@@ -69,9 +77,11 @@ export const validateWorkspaceDependencyRules = ({
       }
 
       if (rule.denyPatterns) {
-        const isDenied =
-          matchWorkspacesByPatterns(rule.denyPatterns, [depWorkspace]).length >
-          0;
+        const isDenied = matchWorkspacesByPatterns(
+          rule.denyPatterns,
+          [depWorkspace],
+          rootWorkspace,
+        ).some((matched) => matched.name === depWorkspace.name);
         if (isDenied) {
           violations.push(
             `"${workspaceName}" violates workspaceDependencies rule: workspace "${depName}" is denied by denyPatterns (dependency chain: ${chainStr})`,

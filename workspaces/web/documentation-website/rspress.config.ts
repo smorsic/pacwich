@@ -271,6 +271,7 @@ export default defineConfig({
       ...createSidebar("api"),
       ...createSidebar("config"),
       ...createSidebar("concepts"),
+      ...createSidebar("ai"),
     },
   },
 });
