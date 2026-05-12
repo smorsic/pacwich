@@ -121,6 +121,53 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
         expect(w.tags).not.toContain("unreachable");
       }
     });
+
+    test("@root pattern applies config to the root workspace (includeRootWorkspace=false)", () => {
+      const { rootWorkspace, workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withRootWorkspace"),
+        includeRootWorkspace: false,
+        workspacePatternConfigs: [
+          { patterns: ["@root"], config: { tags: ["root-tagged"] } },
+        ],
+      });
+      expect(rootWorkspace.tags).toContain("root-tagged");
+      for (const w of workspaces) {
+        expect(w.tags).not.toContain("root-tagged");
+      }
+    });
+
+    test("@root pattern applies config to the root workspace (includeRootWorkspace=true)", () => {
+      const { rootWorkspace, workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withRootWorkspace"),
+        includeRootWorkspace: true,
+        workspacePatternConfigs: [
+          { patterns: ["@root"], config: { tags: ["root-tagged"] } },
+        ],
+      });
+      expect(rootWorkspace.tags).toContain("root-tagged");
+      const nonRoot = workspaces.filter((w) => !w.isRoot);
+      for (const w of nonRoot) {
+        expect(w.tags).not.toContain("root-tagged");
+      }
+    });
+
+    test("not:@root excludes the root workspace from a wildcard match", () => {
+      const { rootWorkspace, workspaces } = findWorkspaces({
+        rootDirectory: getProjectRoot("withRootWorkspace"),
+        includeRootWorkspace: true,
+        workspacePatternConfigs: [
+          {
+            patterns: ["*", "not:@root"],
+            config: { tags: ["non-root-tagged"] },
+          },
+        ],
+      });
+      expect(rootWorkspace.tags).not.toContain("non-root-tagged");
+      const nonRoot = workspaces.filter((w) => !w.isRoot);
+      for (const w of nonRoot) {
+        expect(w.tags).toContain("non-root-tagged");
+      }
+    });
   });
 
   describe("multiple entries applied left to right", () => {

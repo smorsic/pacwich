@@ -37,9 +37,14 @@ export const applyWorkspacePatternConfigs = (
   workspaceMap: WorkspaceMap,
   workspaceAliases: Record<string, string>,
   patternConfigs: WorkspacePatternConfigEntry[],
+  rootWorkspace: Workspace,
 ): void => {
   for (const entry of patternConfigs) {
-    const matched = matchWorkspacesByPatterns(entry.patterns, workspaces);
+    const matched = matchWorkspacesByPatterns(
+      entry.patterns,
+      workspaces,
+      rootWorkspace,
+    );
 
     for (const workspace of matched) {
       const mapEntry = workspaceMap[workspace.name];

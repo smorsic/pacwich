@@ -1,4 +1,5 @@
 import bun from "bun";
+import { ROOT_WORKSPACE_SELECTOR } from "bw-common/project";
 import {
   WORKSPACE_PATTERN_TARGETS,
   type WorkspacePatternTarget,
@@ -15,6 +16,7 @@ export type WorkspacePattern = {
   value: string;
   isNegated: boolean;
   isRegex: boolean;
+  isRootSelector: boolean;
 };
 
 export const WORKSPACE_PATTERN_NEGATION_PREFIX = "not:";
@@ -53,6 +55,20 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
     ? pattern.slice(negationPrefix.length)
     : pattern;
 
+  // The "@root" selector resolves to the project's root workspace. Recognized
+  // immediately after optional negation, so "not:@root" / "!@root" also work.
+  // A target-scoped value of "@root" (e.g. "name:@root") is treated as a literal,
+  // not a root selector.
+  if (afterNegation === ROOT_WORKSPACE_SELECTOR) {
+    return {
+      target: "default",
+      value: ROOT_WORKSPACE_SELECTOR,
+      isNegated,
+      isRegex: false,
+      isRootSelector: true,
+    };
+  }
+
   // "re:" before any target consumes the rest as a regex against the default target.
   // e.g. "re:path:foo" → default-target regex over literal source "path:foo".
   if (afterNegation.startsWith(WORKSPACE_PATTERN_REGEX_PREFIX)) {
@@ -63,6 +79,7 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
       value,
       isNegated,
       isRegex: true,
+      isRootSelector: false,
     };
   }
 
@@ -76,6 +93,7 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
       value: afterNegation,
       isNegated,
       isRegex: false,
+      isRootSelector: false,
     };
   }
 
@@ -91,6 +109,7 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
       value,
       isNegated,
       isRegex: true,
+      isRootSelector: false,
     };
   }
 
@@ -99,6 +118,7 @@ export const parseWorkspacePattern = (pattern: string): WorkspacePattern => {
     value: afterTarget,
     isNegated,
     isRegex: false,
+    isRootSelector: false,
   };
 };
 
@@ -194,11 +214,18 @@ const PATTERN_TARGET_HANDLERS: Record<
 const matchWorkspacesByPattern = (
   pattern: WorkspacePattern,
   workspaces: Workspace[],
-) => PATTERN_TARGET_HANDLERS[pattern.target](pattern, workspaces);
+  rootWorkspace: Workspace | undefined,
+): Workspace[] => {
+  if (pattern.isRootSelector) {
+    return rootWorkspace ? [rootWorkspace] : [];
+  }
+  return PATTERN_TARGET_HANDLERS[pattern.target](pattern, workspaces);
+};
 
 export const matchWorkspacesByPatterns = (
   patterns: string[],
   workspaces: Workspace[],
+  rootWorkspace?: Workspace,
 ) => {
   const parsedPatterns = patterns.map(parseWorkspacePattern);
 
@@ -208,11 +235,11 @@ export const matchWorkspacesByPatterns = (
   );
 
   const excludeWorkspaces = excludePatterns.flatMap((pattern) =>
-    matchWorkspacesByPattern(pattern, workspaces),
+    matchWorkspacesByPattern(pattern, workspaces, rootWorkspace),
   );
 
   const includeWorkspaces = includePatterns.flatMap((pattern) =>
-    matchWorkspacesByPattern(pattern, workspaces),
+    matchWorkspacesByPattern(pattern, workspaces, rootWorkspace),
   );
 
   return includeWorkspaces.filter(

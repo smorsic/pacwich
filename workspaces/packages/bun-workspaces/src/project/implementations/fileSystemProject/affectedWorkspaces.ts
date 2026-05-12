@@ -368,6 +368,7 @@ export const determineAffectedWorkspaces = async (
         workspacesOptions: {
           workspaceInputs,
           workspaces: project.workspaces,
+          rootWorkspace: project.rootWorkspace,
           ignoreWorkspaceDependencies,
           ignoreExternalDependencies,
         },
@@ -408,6 +409,7 @@ export const determineAffectedWorkspaces = async (
     rootDirectory: project.rootDirectory,
     workspaceInputs,
     changedFilePaths: expandedChangedFilePaths,
+    rootWorkspace: project.rootWorkspace,
     externalDepChangesByWorkspace,
     ignoreWorkspaceDependencies,
   });
