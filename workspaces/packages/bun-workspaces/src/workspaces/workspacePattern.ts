@@ -127,20 +127,17 @@ const PATTERN_TARGET_HANDLERS: Record<
   (pattern: WorkspacePattern, workspaces: Workspace[]) => Workspace[]
 > = {
   default: (pattern, workspaces) => {
+    // Plain string at the default target matches name OR alias. Wildcard and
+    // regex forms intentionally narrow to name only to avoid ambiguity — use
+    // an explicit "alias:" prefix to match aliases by wildcard/regex.
     if (pattern.isRegex) {
       const regex = new RegExp(pattern.value);
-      return workspaces.filter(
-        (workspace) =>
-          regex.test(workspace.name) ||
-          workspace.aliases.some((alias) => regex.test(alias)),
-      );
+      return workspaces.filter((workspace) => regex.test(workspace.name));
     }
     if (pattern.value.includes("*")) {
       const wildcardRegex = createWildcardRegex(pattern.value);
-      return workspaces.filter(
-        (workspace) =>
-          wildcardRegex.test(workspace.name) ||
-          workspace.aliases.some((alias) => wildcardRegex.test(alias)),
+      return workspaces.filter((workspace) =>
+        wildcardRegex.test(workspace.name),
       );
     }
     return workspaces.filter(

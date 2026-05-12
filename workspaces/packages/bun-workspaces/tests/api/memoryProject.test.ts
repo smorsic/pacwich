@@ -208,14 +208,16 @@ describe("MemoryProject", () => {
 
   test("findWorkspacesByPattern supports re: regex patterns", () => {
     const projectWithData = createTestProject();
-    // default target tests name and alias
+    // default target regex matches name only — matches both workspaces here
     expect(projectWithData.findWorkspacesByPattern("re:^test-[12]$")).toEqual([
       testWs1,
       testWs2,
     ]);
-    expect(projectWithData.findWorkspacesByPattern("re:2-alias$")).toEqual([
-      testWs2,
-    ]);
+    // default-target regex does not match against aliases — "test-2-alias" is alias-only
+    expect(projectWithData.findWorkspacesByPattern("re:2-alias$")).toEqual([]);
+    expect(
+      projectWithData.findWorkspacesByPattern("alias:re:2-alias$"),
+    ).toEqual([testWs2]);
     // target:re: scopes the match
     expect(projectWithData.findWorkspacesByPattern("name:re:-1$")).toEqual([
       testWs1,

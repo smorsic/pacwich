@@ -157,16 +157,19 @@ describe("parseWorkspacePattern - regex prefix", () => {
 });
 
 describe("matchWorkspacesByPatterns - regex behavior", () => {
-  test("default target regex matches against name or alias", () => {
+  test("default target regex matches against name only, not alias", () => {
     expect(names(matchWorkspacesByPatterns(["re:^app"], workspaces))).toEqual([
       "application-1a",
       "application-1b",
     ]);
-    // alias-only match: "appA" does not start with "lib" but alias "appA" matches
-    expect(names(matchWorkspacesByPatterns(["re:A$"], workspaces))).toEqual([
-      "application-1a",
-      "library-1a",
-    ]);
+    // alias "appA" must not match a default-target regex — only names
+    expect(names(matchWorkspacesByPatterns(["re:^appA$"], workspaces))).toEqual(
+      [],
+    );
+    // but explicit alias:re: still does
+    expect(
+      names(matchWorkspacesByPatterns(["alias:re:^appA$"], workspaces)),
+    ).toEqual(["application-1a"]);
   });
 
   test("regex is raw — unanchored by default", () => {
