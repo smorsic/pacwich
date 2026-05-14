@@ -55,7 +55,6 @@
     "@types/shell-quote": "catalog:bun-workspaces-dev",
     "@xterm/headless": "catalog:bun-workspaces-dev",
     "ajv": "catalog:bun-workspaces-dev",
-    "ajv-cli": "catalog:bun-workspaces-dev",
     "dts-bundle-generator": "catalog:bun-workspaces-dev"
   },
   "dependencies": {
