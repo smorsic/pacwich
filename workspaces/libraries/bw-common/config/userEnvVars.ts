@@ -3,6 +3,7 @@ export const USER_ENV_VARS = {
   scriptShellDefault: "BW_SHELL_DEFAULT",
   includeRootWorkspaceDefault: "BW_INCLUDE_ROOT_WORKSPACE_DEFAULT",
   affectedBaseRefDefault: "BW_AFFECTED_BASE_REF_DEFAULT",
+  disableExecutableConfigsDefault: "BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT",
 } as const;
 
 export type UserEnvVarName = keyof typeof USER_ENV_VARS;

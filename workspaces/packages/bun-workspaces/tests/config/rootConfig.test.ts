@@ -176,6 +176,58 @@ describe("Test project root config", () => {
       });
       expect(project.config.root.defaults.parallelMax).toBe(3);
     });
+
+    describe("BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT env var fallback", () => {
+      const envName = getUserEnvVarName("disableExecutableConfigsDefault");
+      const original = process.env[envName];
+
+      afterEach(() => {
+        if (original === undefined) delete process.env[envName];
+        else process.env[envName] = original;
+      });
+
+      test("env=true skips bw.root.ts when option is unset", () => {
+        process.env[envName] = "true";
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+        });
+        expect(project.config.root.defaults.parallelMax).toBe(5);
+      });
+
+      test("env=false honors bw.root.ts when option is unset", () => {
+        process.env[envName] = "false";
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+        });
+        expect(project.config.root.defaults.parallelMax).toBe(3);
+      });
+
+      test("option explicitly set overrides env=true", () => {
+        process.env[envName] = "true";
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+          disableExecutableConfigs: false,
+        });
+        expect(project.config.root.defaults.parallelMax).toBe(3);
+      });
+
+      test("option explicitly set overrides env=false", () => {
+        process.env[envName] = "false";
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+          disableExecutableConfigs: true,
+        });
+        expect(project.config.root.defaults.parallelMax).toBe(5);
+      });
+
+      test("env=garbage is ignored and falls through to default false", () => {
+        process.env[envName] = "yes";
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+        });
+        expect(project.config.root.defaults.parallelMax).toBe(3);
+      });
+    });
   });
 
   describe("JavaScript config files", () => {

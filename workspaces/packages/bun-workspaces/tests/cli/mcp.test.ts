@@ -40,8 +40,15 @@ describe("CLI - mcp-server command", () => {
     expect(response.result?.instructions).toContain(SERVER_INSTRUCTIONS);
   });
 
-  test("accepts --enable-all-config-files flag", async () => {
-    const response = await sendMcpInitialize(["--enable-all-config-files"]);
+  test("accepts global --disable-executable-configs flag", async () => {
+    const response = await sendMcpInitialize(["--disable-executable-configs"]);
+    expect(response.result?.instructions).toContain(SERVER_INSTRUCTIONS);
+  });
+
+  test("accepts global --no-disable-executable-configs flag", async () => {
+    const response = await sendMcpInitialize([
+      "--no-disable-executable-configs",
+    ]);
     expect(response.result?.instructions).toContain(SERVER_INSTRUCTIONS);
   });
 });

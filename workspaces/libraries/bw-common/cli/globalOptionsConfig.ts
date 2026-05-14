@@ -5,6 +5,7 @@ export interface CliGlobalOptions {
   cwd: string;
   includeRoot: boolean;
   workspaceRoot: boolean;
+  disableExecutableConfigs: boolean;
 }
 
 export interface CliGlobalOptionConfig {
@@ -46,6 +47,15 @@ const CLI_GLOBAL_OPTIONS_CONFIG = {
     shortOption: "-w",
     description:
       "Run from the project root above the current working directory",
+    defaultValue: "",
+    values: null,
+    param: "",
+  },
+  disableExecutableConfigs: {
+    mainOption: "--disable-executable-configs",
+    shortOption: "",
+    description:
+      "Skip evaluating executable config files (bw.root.{ts,js}, bw.workspace.{ts,js}); only jsonc/json/package.json configs are read. Defaults to off for most commands and on for mcp-server (use --no-disable-executable-configs to allow executable configs in mcp-server). Can also be set via the BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT env var (true|false).",
     defaultValue: "",
     values: null,
     param: "",

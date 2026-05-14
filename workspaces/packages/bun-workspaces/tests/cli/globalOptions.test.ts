@@ -404,4 +404,93 @@ describe("CLI Global Options", () => {
       },
     );
   });
+
+  describe("--disable-executable-configs", () => {
+    const findAlias = (
+      workspaces: { name: string; aliases: string[] }[],
+      name: string,
+    ) => workspaces.find((w) => w.name === name)?.aliases ?? [];
+
+    test("without the flag, bw.workspace.ts wins precedence (appA-ts alias)", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+      });
+      const result = await run("ls", "--json");
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      expect(findAlias(workspaces, "application-1a")).toContain("appA-ts");
+    });
+
+    test("with the flag, bw.workspace.ts is skipped (jsonc alias wins)", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+      });
+      const result = await run("--disable-executable-configs", "ls", "--json");
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      const aliases = findAlias(workspaces, "application-1a");
+      expect(aliases).toContain("appA-jsonc");
+      expect(aliases).not.toContain("appA-ts");
+      expect(aliases).not.toContain("appA-js");
+    });
+
+    test("--no-disable-executable-configs explicitly re-enables (no-op default)", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+      });
+      const result = await run(
+        "--no-disable-executable-configs",
+        "ls",
+        "--json",
+      );
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      expect(findAlias(workspaces, "application-1a")).toContain("appA-ts");
+    });
+
+    test("BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT=true skips bw.workspace.ts", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+        env: {
+          [getUserEnvVarName("disableExecutableConfigsDefault")]: "true",
+        },
+      });
+      const result = await run("ls", "--json");
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      const aliases = findAlias(workspaces, "application-1a");
+      expect(aliases).toContain("appA-jsonc");
+      expect(aliases).not.toContain("appA-ts");
+    });
+
+    test("BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT=false honors bw.workspace.ts", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+        env: {
+          [getUserEnvVarName("disableExecutableConfigsDefault")]: "false",
+        },
+      });
+      const result = await run("ls", "--json");
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      expect(findAlias(workspaces, "application-1a")).toContain("appA-ts");
+    });
+
+    test("--no-disable-executable-configs CLI flag overrides env var", async () => {
+      const { run } = setupCliTest({
+        testProject: "workspaceConfigTsPrecedence",
+        env: {
+          [getUserEnvVarName("disableExecutableConfigsDefault")]: "true",
+        },
+      });
+      const result = await run(
+        "--no-disable-executable-configs",
+        "ls",
+        "--json",
+      );
+      expect(result.exitCode).toBe(0);
+      const workspaces = JSON.parse(result.stdout.raw);
+      expect(findAlias(workspaces, "application-1a")).toContain("appA-ts");
+    });
+  });
 });

@@ -22,6 +22,13 @@ export type GlobalCommandContext = {
   terminalWidth: number;
   terminalHeight: number;
   workingDirectory: string;
+  /**
+   * Value of the global `--disable-executable-configs` flag.
+   * `undefined` means the flag was not passed; commands are free to
+   * apply their own default (notably the mcp-server command defaults
+   * to disabled for security).
+   */
+  disableExecutableConfigs: boolean | undefined;
 };
 
 export type ProjectCommandContext = GlobalCommandContext & {

@@ -4,7 +4,7 @@ import type { ScriptShellOption, ShellOption } from "bw-common/parameters";
 import { ROOT_WORKSPACE_SELECTOR } from "bw-common/project";
 import type { WorkspaceScriptMetadata } from "bw-common/runScript";
 import { loadRootConfig } from "../../../config";
-import { getUserEnvVar } from "../../../config/userEnvVars";
+import { getUserBoolEnvVar, getUserEnvVar } from "../../../config/userEnvVars";
 import { parse, quote } from "../../../internal/bundledDeps/shellQuote";
 import type { Simplify } from "../../../internal/core";
 import {
@@ -69,6 +69,9 @@ export type CreateFileSystemProjectOptions = {
    * When true, skip discovery of `.ts`/`.js` config files (`bw.root.{ts,js}`,
    * `bw.workspace.{ts,js}`) so no executable code is loaded from the project.
    * `.jsonc`/`.json` configs and the `package.json` `bw` key still resolve.
+   *
+   * When omitted, the `BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT` user env var is
+   * consulted (`"true"` or `"false"`). If neither is set, defaults to false.
    *
    * Intended for callers that may load projects from untrusted directories
    * — most notably the MCP server, which can be redirected to arbitrary
@@ -321,8 +324,14 @@ class _FileSystemProject extends ProjectBase implements Project {
       expandHomePath(options.rootDirectory ?? ""),
     );
 
+    // Root config can't supply a default for this — the config file itself
+    // is what we're deciding whether to evaluate. Precedence is therefore
+    // option > BW_DISABLE_EXECUTABLE_CONFIGS_DEFAULT env var > false.
     const loadConfigOptions = {
-      disableExecutableConfigs: options.disableExecutableConfigs,
+      disableExecutableConfigs:
+        options.disableExecutableConfigs ??
+        getUserBoolEnvVar("disableExecutableConfigsDefault") ??
+        false,
     };
 
     const rootConfig = loadRootConfig(this.rootDirectory, loadConfigOptions);

@@ -31,10 +31,10 @@ const addGlobalOption = (
   const { mainOption, shortOption, description, param, values, defaultValue } =
     getCliGlobalOptionConfig(optionName);
 
-  let option = new Option(
-    `${shortOption} ${mainOption}${param ? ` <${param}>` : ""}`,
-    description,
-  );
+  const flagsString = `${shortOption ? `${shortOption} ` : ""}${mainOption}${
+    param ? ` <${param}>` : ""
+  }`;
+  let option = new Option(flagsString, description);
 
   const effectiveDefaultValue = defaultOverride ?? defaultValue;
   if (effectiveDefaultValue) {
@@ -142,6 +142,7 @@ const defineGlobalOptions = (
 
   addGlobalOption(program, "logLevel");
   addGlobalOption(program, "includeRoot");
+  addGlobalOption(program, "disableExecutableConfigs");
 
   return { cwd };
 };
@@ -156,6 +157,7 @@ const applyGlobalOptions = (options: CliGlobalOptions) => {
     project = createFileSystemProject({
       rootDirectory: options.cwd,
       includeRootWorkspace: options.includeRoot,
+      disableExecutableConfigs: options.disableExecutableConfigs,
     });
 
     logger.debug(
@@ -171,7 +173,12 @@ const applyGlobalOptions = (options: CliGlobalOptions) => {
     }) as unknown as FileSystemProject;
   }
 
-  return { project, projectError: error, workingDirectory: options.cwd };
+  return {
+    project,
+    projectError: error,
+    workingDirectory: options.cwd,
+    disableExecutableConfigs: options.disableExecutableConfigs,
+  };
 };
 
 export const initializeWithGlobalOptions = (
