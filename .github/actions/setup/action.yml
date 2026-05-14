@@ -54,7 +54,7 @@ runs:
           ];
           await Bun.write(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`);
         '
-        # don't allow dep scripts to run
+        # If we can avoid running dependency install scripts, we should do it for security
         bun install --ignore-scripts
         bun prepare
 
@@ -62,6 +62,6 @@ runs:
       id: install-deps
       shell: bash
       run: |
-        # The repo's prepare is ran manually 
+        # If we can avoid running dependency install scripts, we should do it for security
         bun install --frozen-lockfile --ignore-scripts
         bun prepare
