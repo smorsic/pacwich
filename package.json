@@ -62,6 +62,8 @@
     "sandbox:cli:release": "bun --cwd=./workspaces/sandboxes/local-vs-release run cli:release",
     "sandbox:api:local": "bw run api:local local-vs-release -o plain --",
     "sandbox:api:release": "bw run api:release local-vs-release -o plain --",
+    "lint": "bw run lint",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "test": "bw run test && bw run build:test",
