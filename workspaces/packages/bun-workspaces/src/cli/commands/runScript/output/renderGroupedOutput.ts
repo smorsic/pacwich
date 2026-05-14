@@ -1,4 +1,4 @@
-import { runOnExit } from "../../../../internal/core";
+import { runOnExit, sanitizeOutput } from "../../../../internal/core";
 import {
   createTypedEventFactory,
   type TypedEvent,
@@ -228,7 +228,8 @@ export const renderGroupedOutput = async (
       }
 
       const workspaceLine =
-        textOps[BORDER_COLOR]("Workspace: ") + textOps.bold(workspace.name);
+        textOps[BORDER_COLOR]("Workspace: ") +
+        textOps.bold(sanitizeOutput(workspace.name));
       const statusLine =
         textOps[BORDER_COLOR]("   Status: ") +
         textOps[STATUS_COLORS[state.status]](statusText);

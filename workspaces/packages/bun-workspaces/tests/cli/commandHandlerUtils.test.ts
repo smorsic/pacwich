@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { splitWhitespaceArg } from "../../src/cli/commands/commandHandlerUtils";
+import {
+  createScriptInfoLines,
+  createWorkspaceInfoLines,
+  splitWhitespaceArg,
+} from "../../src/cli/commands/commandHandlerUtils";
+import type { Workspace } from "../../src/workspaces";
 
 describe("splitWhitespaceArg", () => {
   test("returns an empty array for empty string", () => {
@@ -59,5 +64,62 @@ describe("splitWhitespaceArg", () => {
     expect(
       splitWhitespaceArg("workspace-a\npath:packages/with\\ space/*\nname:b"),
     ).toEqual(["workspace-a", "path:packages/with space/*", "name:b"]);
+  });
+});
+
+describe("output sanitization of external workspace fields", () => {
+  const buildWorkspace = (overrides: Partial<Workspace> = {}): Workspace => ({
+    name: "good-name",
+    isRoot: false,
+    path: "packages/good",
+    matchPattern: "packages/*",
+    scripts: ["build"],
+    aliases: [],
+    tags: [],
+    dependencies: [],
+    dependents: [],
+    externalDependencies: [],
+    ...overrides,
+  });
+
+  test("createWorkspaceInfoLines strips ANSI and C0 controls from every field", () => {
+    const evil = "\x1b[2J\x1b[H\x07";
+    const lines = createWorkspaceInfoLines(
+      buildWorkspace({
+        name: `${evil}name`,
+        path: `${evil}packages/p`,
+        matchPattern: `${evil}packages/*`,
+        scripts: [`${evil}build`, "lint"],
+        aliases: [`${evil}aa`, "bb"],
+        tags: [`${evil}t1`, "t2"],
+        dependencies: [`${evil}dep`],
+        dependents: [`${evil}dependent`],
+      }),
+    );
+    const joined = lines.join("\n");
+    expect(joined).not.toContain("\x1b");
+    expect(joined).not.toContain("\x07");
+    expect(joined).toContain("Workspace: name");
+    expect(joined).toContain("Path: packages/p");
+    expect(joined).toContain("Glob Match: packages/*");
+    expect(joined).toContain("Scripts: build, lint");
+    expect(joined).toContain("Aliases: aa, bb");
+    expect(joined).toContain("Tags: t1, t2");
+    expect(joined).toContain("Dependencies: dep");
+    expect(joined).toContain("Dependents: dependent");
+  });
+
+  test("createScriptInfoLines strips ANSI and C0 controls from script and workspace names", () => {
+    const evil = "\x1b[2J\x07";
+    const lines = createScriptInfoLines(`${evil}build`, [
+      buildWorkspace({ name: `${evil}alpha` }),
+      buildWorkspace({ name: "beta" }),
+    ]);
+    const joined = lines.join("\n");
+    expect(joined).not.toContain("\x1b");
+    expect(joined).not.toContain("\x07");
+    expect(joined).toContain("Script: build");
+    expect(joined).toContain(" - alpha");
+    expect(joined).toContain(" - beta");
   });
 });

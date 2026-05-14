@@ -7,7 +7,23 @@ import { BUN_WORKSPACES_VERSION } from "../../version";
 import { createShortId } from "../language/string/id";
 import { runOnExit } from "./onExit";
 
-const getTempBasePackageDir = () => path.join(os.tmpdir(), "bun-workspaces");
+/**
+ * Per-user suffix on the temp base dir prevents a different local user from
+ * pre-creating or symlink-squatting `/tmp/bun-workspaces` to steer our writes.
+ * On platforms without a numeric uid (Windows), `os.tmpdir()` is already
+ * per-user so the suffix becomes inert.
+ */
+const getUserSuffix = (): string => {
+  try {
+    const { uid } = os.userInfo();
+    return uid >= 0 ? `-${uid}` : "";
+  } catch {
+    return "";
+  }
+};
+
+const getTempBasePackageDir = () =>
+  path.join(os.tmpdir(), `bun-workspaces${getUserSuffix()}`);
 
 const getTempParentDir = () =>
   path.join(getTempBasePackageDir(), BUN_WORKSPACES_VERSION);
@@ -29,8 +45,11 @@ class TempDir {
   initialize(clean = false) {
     if (fs.existsSync(this.dir)) return;
 
-    fs.mkdirSync(this.dir, { recursive: true });
-    fs.chmodSync(this.dir, 0o700);
+    // Pass mode at creation time so the dir is never briefly readable by
+    // other local users between mkdir and a subsequent chmod (closes the
+    // TOCTOU window where another process could enter the dir before the
+    // mode is tightened).
+    fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
 
     if (clean) {
       for (const dir of fs.readdirSync(path.resolve(getTempBasePackageDir()))) {

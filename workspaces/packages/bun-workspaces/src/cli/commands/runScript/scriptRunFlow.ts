@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { ParallelMaxValue, ScriptShellOption } from "bw-common/parameters";
-import { expandHomePath } from "../../../internal/core";
+import { expandHomePath, sanitizeOutput } from "../../../internal/core";
 import { logger } from "../../../internal/logger";
 import type {
   FileSystemProject,
@@ -205,13 +205,15 @@ export const handleScriptRunFlow = async ({
   exitResults.scriptResults.forEach(
     ({ success, metadata: { workspace }, exitCode }) => {
       const isSkipped = exitCode === -1;
+      const safeWorkspaceName = sanitizeOutput(workspace.name);
+      const safeScriptName = sanitizeOutput(scriptName ?? "");
       if (isSkipped) {
         logger.info(
-          `➖ ${workspace.name}: ${scriptName} (skipped due to dependency failure)`,
+          `➖ ${safeWorkspaceName}: ${safeScriptName} (skipped due to dependency failure)`,
         );
       } else {
         logger.info(
-          `${success ? "✅" : "❌"} ${workspace.name}: ${scriptName}${exitCode ? ` (exited with code ${exitCode})` : ""}`,
+          `${success ? "✅" : "❌"} ${safeWorkspaceName}: ${safeScriptName}${exitCode ? ` (exited with code ${exitCode})` : ""}`,
         );
       }
     },

@@ -1,3 +1,4 @@
+import { sanitizeOutput } from "../../../../internal/core";
 import type { RunScriptAcrossWorkspacesOutput } from "../../../../project";
 import type { WriteOutputOptions } from "../../../createCli";
 import { sanitizeChunk } from "./sanitizeChunk";
@@ -14,7 +15,9 @@ export async function* generatePlainOutputLines(
   const workspaceLineBuffers: Record<string, string> = {};
 
   const formatLine = (line: string, workspaceName: string) => {
-    const prefixedLine = prefix ? `[${workspaceName}] ${line}` : line;
+    const prefixedLine = prefix
+      ? `[${sanitizeOutput(workspaceName)}] ${line}`
+      : line;
     return `\x1b[0m${prefixedLine}`;
   };
 

@@ -1,9 +1,23 @@
 import fs from "fs";
+import os from "os";
 import { expect, test, describe } from "bun:test";
-import { DEFAULT_TEMP_DIR } from "../../../src/internal/core";
+import { DEFAULT_TEMP_DIR, IS_POSIX } from "../../../src/internal/core";
 import { runScript } from "../../../src/runScript";
 
 describe("Temp file utils", () => {
+  test.if(IS_POSIX)(
+    "temp dir is created with mode 0o700 and per-user base name",
+    () => {
+      DEFAULT_TEMP_DIR.initialize();
+      const stat = fs.statSync(DEFAULT_TEMP_DIR.dir);
+      // Owner rwx only; no group/other bits.
+      expect(stat.mode & 0o777).toBe(0o700);
+
+      const { uid } = os.userInfo();
+      expect(DEFAULT_TEMP_DIR.dir).toContain(`bun-workspaces-${uid}`);
+    },
+  );
+
   test("createFile", () => {
     const { filePath, cleanup } = DEFAULT_TEMP_DIR.createFile({
       name: "test.txt",

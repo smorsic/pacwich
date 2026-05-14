@@ -1,4 +1,5 @@
 import path from "path";
+import { sanitizeOutput } from "../../internal/core";
 import { logger } from "../../internal/logger";
 import type {
   AffectedDependency,
@@ -31,8 +32,9 @@ const formatGitHeader = (
 
 const formatDependencyChain = (dependency: AffectedDependency): string => {
   const segments = dependency.chain.map((entry, index) => {
-    if (index === 0 || !entry.edgeSource) return entry.workspaceName;
-    return `\x1b[90m--[${entry.edgeSource}]->\x1b[0m ${entry.workspaceName}`;
+    const safeName = sanitizeOutput(entry.workspaceName);
+    if (index === 0 || !entry.edgeSource) return safeName;
+    return `\x1b[90m--[${entry.edgeSource}]->\x1b[0m ${safeName}`;
   });
   return segments.join(" ");
 };
@@ -42,7 +44,7 @@ const formatSourceMarker = (change: ExternalDependencyChange): string =>
 
 const formatExternalDepEntryShort = (
   change: ExternalDependencyChange,
-): string => `${change.name}${formatSourceMarker(change)}`;
+): string => `${sanitizeOutput(change.name)}${formatSourceMarker(change)}`;
 
 const formatExternalDepEntryDetailed = (
   change: ExternalDependencyChange,
@@ -50,8 +52,8 @@ const formatExternalDepEntryDetailed = (
   const versions =
     change.baseVersion === null && change.headVersion === null
       ? "lockfile changed; precise diff unavailable"
-      : `${change.baseVersion ?? "(absent)"} -> ${change.headVersion ?? "(absent)"}`;
-  return `${change.name}${formatSourceMarker(change)} \x1b[90m[${versions}]\x1b[0m`;
+      : `${sanitizeOutput(change.baseVersion ?? "(absent)")} -> ${sanitizeOutput(change.headVersion ?? "(absent)")}`;
+  return `${sanitizeOutput(change.name)}${formatSourceMarker(change)} \x1b[90m[${versions}]\x1b[0m`;
 };
 
 const createWorkspaceSummaryLines = (
@@ -59,8 +61,8 @@ const createWorkspaceSummaryLines = (
 ): string[] => {
   const { workspace, affectedReasons } = result;
   const lines: string[] = [
-    `\x1b[1mWorkspace: ${workspace.name}\x1b[0m`,
-    `Path: ${workspace.path}`,
+    `\x1b[1mWorkspace: ${sanitizeOutput(workspace.name)}\x1b[0m`,
+    `Path: ${sanitizeOutput(workspace.path)}`,
   ];
   lines.push(
     `\x1b[96mChanged input files:\x1b[0m ${affectedReasons.changedFiles.length}`,
@@ -68,7 +70,7 @@ const createWorkspaceSummaryLines = (
   if (affectedReasons.dependencies.length) {
     lines.push(
       `\x1b[96mAffected dependencies:\x1b[0m ${affectedReasons.dependencies
-        .map(({ dependencyName }) => dependencyName)
+        .map(({ dependencyName }) => sanitizeOutput(dependencyName))
         .join(", ")}`,
     );
   } else {
@@ -91,8 +93,8 @@ const createWorkspaceDetailedLines = (
 ): string[] => {
   const { workspace, affectedReasons } = result;
   const lines: string[] = [
-    `\x1b[1mWorkspace: ${workspace.name}\x1b[0m`,
-    `Path: ${workspace.path}`,
+    `\x1b[1mWorkspace: ${sanitizeOutput(workspace.name)}\x1b[0m`,
+    `Path: ${sanitizeOutput(workspace.path)}`,
   ];
   if (affectedReasons.changedFiles.length) {
     lines.push("\x1b[96mChanged input files:\x1b[0m");
@@ -101,7 +103,7 @@ const createWorkspaceDetailedLines = (
         ?.filter((reason) => reason !== "diff")
         .join(", ");
       lines.push(
-        ` - ${path.relative(workspace.path, file.projectFilePath)} \x1b[90m(input: ${JSON.stringify(file.inputMatch)})${reasons ? ` [${reasons}]` : ""}\x1b[0m`,
+        ` - ${sanitizeOutput(path.relative(workspace.path, file.projectFilePath))} \x1b[90m(input: ${JSON.stringify(file.inputMatch)})${reasons ? ` [${reasons}]` : ""}\x1b[0m`,
       );
     }
   } else {
@@ -110,7 +112,7 @@ const createWorkspaceDetailedLines = (
   if (affectedReasons.dependencies.length) {
     lines.push("\x1b[96mAffected dependencies:\x1b[0m");
     for (const dependency of affectedReasons.dependencies) {
-      lines.push(` - ${dependency.dependencyName}`);
+      lines.push(` - ${sanitizeOutput(dependency.dependencyName)}`);
       lines.push(`   chain: ${formatDependencyChain(dependency)}`);
     }
   } else {
@@ -206,7 +208,9 @@ export const listAffected = handleProjectCommand(
     if (!options.explain) {
       if (affectedResults.length) {
         commandOutputLogger.info(
-          affectedResults.map(({ workspace }) => workspace.name).join("\n"),
+          affectedResults
+            .map(({ workspace }) => sanitizeOutput(workspace.name))
+            .join("\n"),
         );
       } else {
         logger.info("No affected workspaces");

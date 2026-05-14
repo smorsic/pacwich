@@ -1,6 +1,7 @@
 import { ROOT_WORKSPACE_SELECTOR } from "bw-common/project";
 import { isJSONObject } from "bw-common/types";
 import { getDoctorInfo } from "../../doctor";
+import { sanitizeOutput } from "../../internal/core";
 import { logger } from "../../internal/logger";
 import {
   createJsonLines,
@@ -90,7 +91,7 @@ export const listWorkspaces = handleProjectCommand(
     } else {
       workspaces.forEach((workspace) => {
         if (options.nameOnly) {
-          lines.push(workspace.name);
+          lines.push(sanitizeOutput(workspace.name));
         } else {
           lines.push(...createWorkspaceInfoLines(workspace));
         }
@@ -143,7 +144,7 @@ export const listScripts = handleProjectCommand(
         .sort(({ name: nameA }, { name: nameB }) => nameA.localeCompare(nameB))
         .forEach(({ name, workspaces }) => {
           if (options.nameOnly) {
-            lines.push(name);
+            lines.push(sanitizeOutput(name));
           } else {
             lines.push(...createScriptInfoLines(name, workspaces));
           }
@@ -211,7 +212,7 @@ export const scriptInfo = handleProjectCommand(
             options,
           )
         : options.workspacesOnly
-          ? scriptMetadata.workspaces.map(({ name }) => name)
+          ? scriptMetadata.workspaces.map(({ name }) => sanitizeOutput(name))
           : createScriptInfoLines(script, scriptMetadata.workspaces)
       ).join("\n"),
     );
@@ -248,10 +249,10 @@ export const listTags = handleProjectCommand(
 
       tags.forEach(({ tag, workspaces }) => {
         if (options.nameOnly) {
-          lines.push(tag);
+          lines.push(sanitizeOutput(tag));
         } else {
           lines.push(
-            `Tag: ${tag}\n${workspaces.map((name) => ` - ${name}`).join("\n")}`,
+            `Tag: ${sanitizeOutput(tag)}\n${workspaces.map((name) => ` - ${sanitizeOutput(name)}`).join("\n")}`,
           );
         }
       });
@@ -282,7 +283,7 @@ export const tagInfo = handleProjectCommand(
     commandOutputLogger.info(
       options.json
         ? createJsonLines(tagInfo, options).join("\n")
-        : `Tag: ${tagInfo.name}\n${tagInfo.workspaces.map((name) => ` - ${name}`).join("\n")}`,
+        : `Tag: ${sanitizeOutput(tagInfo.name)}\n${tagInfo.workspaces.map((name) => ` - ${sanitizeOutput(name)}`).join("\n")}`,
     );
   },
 );

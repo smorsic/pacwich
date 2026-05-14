@@ -5,6 +5,7 @@ import {
   type CliProjectCommandName,
 } from "bw-common/cli";
 import { Option, type Command } from "../../internal/bundledDeps/commander";
+import { sanitizeOutput } from "../../internal/core";
 import { BunWorkspacesError } from "../../internal/core/error";
 import { createLogger, logger } from "../../internal/logger";
 import type { FileSystemProject } from "../../project/implementations/fileSystemProject";
@@ -50,22 +51,22 @@ export const splitWhitespaceArg = (raw: string) =>
     .map((value) => value.replace(/\\\s/g, " "));
 
 export const createWorkspaceInfoLines = (workspace: Workspace) => [
-  `Workspace: ${workspace.name}${workspace.isRoot ? " (root)" : ""}`,
-  ` - Aliases: ${workspace.aliases.join(", ")}`,
-  ` - Path: ${workspace.path}`,
-  ` - Glob Match: ${workspace.matchPattern}`,
-  ` - Scripts: ${workspace.scripts.join(", ")}`,
-  ` - Tags: ${workspace.tags.join(", ")}`,
-  ` - Dependencies: ${workspace.dependencies.join(", ")}`,
-  ` - Dependents: ${workspace.dependents.join(", ")}`,
+  `Workspace: ${sanitizeOutput(workspace.name)}${workspace.isRoot ? " (root)" : ""}`,
+  ` - Aliases: ${workspace.aliases.map(sanitizeOutput).join(", ")}`,
+  ` - Path: ${sanitizeOutput(workspace.path)}`,
+  ` - Glob Match: ${sanitizeOutput(workspace.matchPattern)}`,
+  ` - Scripts: ${workspace.scripts.map(sanitizeOutput).join(", ")}`,
+  ` - Tags: ${workspace.tags.map(sanitizeOutput).join(", ")}`,
+  ` - Dependencies: ${workspace.dependencies.map(sanitizeOutput).join(", ")}`,
+  ` - Dependents: ${workspace.dependents.map(sanitizeOutput).join(", ")}`,
 ];
 
 export const createScriptInfoLines = (
   script: string,
   workspaces: Workspace[],
 ) => [
-  `Script: ${script}`,
-  ...workspaces.map((workspace) => ` - ${workspace.name}`),
+  `Script: ${sanitizeOutput(script)}`,
+  ...workspaces.map((workspace) => ` - ${sanitizeOutput(workspace.name)}`),
 ];
 
 export const createJsonLines = (data: unknown, options: { pretty: boolean }) =>
