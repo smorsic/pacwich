@@ -648,6 +648,23 @@ describe("workspace config", () => {
       ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
     });
 
+    test("ts config is skipped when disableExecutableConfigs is true", () => {
+      const { workspaceMap } = findWorkspaces({
+        rootDirectory: getProjectRoot("workspaceConfigTsPrecedence"),
+        loadConfigOptions: { disableExecutableConfigs: true },
+      });
+      // tsPrecedence fixtures define different aliases per file type;
+      // when ts is skipped the loader falls through to the next location
+      // (js in this fixture), so neither ts nor jsonc aliases should appear.
+      const aliasesPerWorkspace = Object.entries(workspaceMap)
+        .filter(([name]) => name !== "test-root")
+        .map(([name, entry]) => ({ name, aliases: entry.config.aliases }));
+      for (const { aliases } of aliasesPerWorkspace) {
+        expect(aliases).not.toContain("appA-ts");
+        expect(aliases).not.toContain("appB-ts");
+      }
+    });
+
     test("ts config loads with precedence", () => {
       const { workspaces, workspaceMap } = findWorkspaces({
         rootDirectory: getProjectRoot("workspaceConfigTsPrecedence"),

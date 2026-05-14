@@ -21,7 +21,7 @@ const createShellScript = (command: string) => {
   return DEFAULT_TEMP_DIR.createFile({
     name: fileName,
     content: command,
-    mode: 0o755,
+    mode: 0o700,
   });
 };
 

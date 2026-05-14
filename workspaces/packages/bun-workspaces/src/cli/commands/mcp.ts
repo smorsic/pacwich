@@ -4,8 +4,11 @@ import { handleGlobalCommand } from "./commandHandlerUtils";
 
 export const mcpServer = handleGlobalCommand(
   "mcpServer",
-  async ({ workingDirectory }) => {
+  async ({ workingDirectory }, options: { enableAllConfigFiles: boolean }) => {
     logger.printLevel = "silent";
-    await startBwMcpServer({ initialWorkingDirectory: workingDirectory });
+    await startBwMcpServer({
+      initialWorkingDirectory: workingDirectory,
+      enableExecutableConfigs: options.enableAllConfigFiles,
+    });
   },
 );

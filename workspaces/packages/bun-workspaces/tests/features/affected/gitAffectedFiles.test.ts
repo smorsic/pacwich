@@ -154,6 +154,57 @@ describe("getGitAffectedFiles", () => {
       ).rejects.toBeInstanceOf(GIT_AFFECTED_ERRORS.GitCommandFailed);
     });
 
+    test("baseRef starting with '-' is rejected before git is invoked", async () => {
+      await using fixture = await createGitFixture({
+        commits: [
+          { message: "init", files: [{ path: "a.txt", content: "1" }] },
+        ],
+      });
+
+      await expect(
+        getGitAffectedFiles({
+          rootDirectory: fixture.projectPath,
+          baseRef: "--upload-pack=evil",
+          headRef: fixture.headSha,
+          ignoreUncommitted: true,
+        }),
+      ).rejects.toBeInstanceOf(GIT_AFFECTED_ERRORS.InvalidGitRef);
+    });
+
+    test("headRef starting with '-' is rejected before git is invoked", async () => {
+      await using fixture = await createGitFixture({
+        commits: [
+          { message: "init", files: [{ path: "a.txt", content: "1" }] },
+        ],
+      });
+
+      await expect(
+        getGitAffectedFiles({
+          rootDirectory: fixture.projectPath,
+          baseRef: fixture.headSha,
+          headRef: "-verify",
+          ignoreUncommitted: true,
+        }),
+      ).rejects.toBeInstanceOf(GIT_AFFECTED_ERRORS.InvalidGitRef);
+    });
+
+    test("empty baseRef is rejected", async () => {
+      await using fixture = await createGitFixture({
+        commits: [
+          { message: "init", files: [{ path: "a.txt", content: "1" }] },
+        ],
+      });
+
+      await expect(
+        getGitAffectedFiles({
+          rootDirectory: fixture.projectPath,
+          baseRef: "",
+          headRef: fixture.headSha,
+          ignoreUncommitted: true,
+        }),
+      ).rejects.toBeInstanceOf(GIT_AFFECTED_ERRORS.InvalidGitRef);
+    });
+
     test("handles non-ASCII filenames via NUL-separated parsing", async () => {
       // `日` is a single codepoint with no NFC/NFD decomposition, so macOS
       // APFS storage doesn't perturb the round-trip. Under git's default

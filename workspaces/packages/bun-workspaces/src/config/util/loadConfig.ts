@@ -140,14 +140,34 @@ const LOCATION_FINDERS: Record<
   },
 };
 
+/**
+ * When true, skip discovery of `.ts`/`.js` config locations so that no
+ * executable code is loaded via `require()`. Plain `.jsonc`/`.json` and
+ * the `package.json` `bw` key still resolve. Used by the MCP server,
+ * which can be redirected to arbitrary directories at runtime.
+ */
+export type LoadConfigOptions = {
+  disableExecutableConfigs?: boolean;
+};
+
+const isExecutableLocationType = (locationType: ConfigLocationType): boolean =>
+  locationType === "tsFile" || locationType === "jsFile";
+
 export const getConfigLocation = (
   name: string,
   directory: string,
   fileName: string,
   packageJsonKey: string,
+  loadOptions: LoadConfigOptions = {},
 ): ConfigLocation | null => {
   const locations: ConfigLocation[] = [];
   for (const locationType of CONFIG_LOCATION_TYPES) {
+    if (
+      loadOptions.disableExecutableConfigs &&
+      isExecutableLocationType(locationType)
+    ) {
+      continue;
+    }
     const location = LOCATION_FINDERS[locationType](
       directory,
       fileName,
@@ -175,8 +195,15 @@ export const loadConfig = <ProcessContent extends AnyFunction>(
   fileName: string,
   packageJsonKey: string,
   processContent: ProcessContent,
+  loadOptions: LoadConfigOptions = {},
 ): ReturnType<ProcessContent> | null => {
-  const location = getConfigLocation(name, directory, fileName, packageJsonKey);
+  const location = getConfigLocation(
+    name,
+    directory,
+    fileName,
+    packageJsonKey,
+    loadOptions,
+  );
   if (!location) {
     return null;
   }

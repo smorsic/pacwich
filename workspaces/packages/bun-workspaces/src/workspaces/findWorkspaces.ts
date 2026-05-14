@@ -3,6 +3,7 @@ import path from "path";
 import bun from "bun";
 import type { WorkspacePatternConfigEntry } from "bw-common/config";
 import { createDefaultWorkspaceConfig, loadWorkspaceConfig } from "../config";
+import type { LoadConfigOptions } from "../config/util/loadConfig";
 import { BUN_LOCK_ERRORS, readBunLockfile } from "../internal/bun";
 import { BunWorkspacesError } from "../internal/core";
 import { logger } from "../internal/logger/logger";
@@ -28,6 +29,8 @@ export interface FindWorkspacesOptions {
   includeRootWorkspace?: boolean;
   /** Workspace pattern config entries from the root config to apply after local configs are loaded. */
   workspacePatternConfigs?: WorkspacePatternConfigEntry[];
+  /** Options forwarded to {@link loadWorkspaceConfig} for each workspace. */
+  loadConfigOptions?: LoadConfigOptions;
 }
 
 export const sortWorkspaces = (workspaces: Workspace[]) =>
@@ -85,6 +88,7 @@ export const findWorkspaces = ({
   workspaceGlobs: _workspaceGlobs,
   includeRootWorkspace = false,
   workspacePatternConfigs,
+  loadConfigOptions,
 }: FindWorkspacesOptions) => {
   rootDirectory = path.resolve(rootDirectory);
 
@@ -132,6 +136,7 @@ export const findWorkspaces = ({
 
       const workspaceConfig = loadWorkspaceConfig(
         path.dirname(packageJsonPath),
+        loadConfigOptions,
       );
 
       if (workspaceConfig) {

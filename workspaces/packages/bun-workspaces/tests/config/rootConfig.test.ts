@@ -129,6 +129,55 @@ describe("Test project root config", () => {
     });
   });
 
+  describe("disableExecutableConfigs", () => {
+    test("loadRootConfig skips bw.root.ts when disabled, falling through to jsonc", () => {
+      expect(
+        loadRootConfig(getProjectRoot("rootConfigTsPrecedence"), {
+          disableExecutableConfigs: true,
+        }),
+      ).toEqual({
+        defaults: {
+          parallelMax: 5,
+          shell: resolveScriptShell("default"),
+          includeRootWorkspace: false,
+          affectedBaseRef: "main",
+        },
+        workspacePatternConfigs: [],
+      });
+    });
+
+    test("loadRootConfig still loads jsonc-only fixtures when disabled", () => {
+      expect(
+        loadRootConfig(getProjectRoot("rootConfigJsoncFile"), {
+          disableExecutableConfigs: true,
+        }),
+      ).toEqual({
+        defaults: {
+          parallelMax: 5,
+          shell: "system",
+          includeRootWorkspace: true,
+          affectedBaseRef: "main",
+        },
+        workspacePatternConfigs: [],
+      });
+    });
+
+    test("createFileSystemProject with disableExecutableConfigs ignores bw.root.ts", () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+        disableExecutableConfigs: true,
+      });
+      expect(project.config.root.defaults.parallelMax).toBe(5);
+    });
+
+    test("createFileSystemProject without disableExecutableConfigs honors bw.root.ts", () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("rootConfigTsPrecedence"),
+      });
+      expect(project.config.root.defaults.parallelMax).toBe(3);
+    });
+  });
+
   describe("JavaScript config files", () => {
     test("js config loads as expected", () => {
       expect(loadRootConfig(getProjectRoot("rootConfigJsFile"))).toEqual({

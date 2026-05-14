@@ -6,7 +6,28 @@ import { createSubprocess } from "../runScript/subprocesses";
 export const GIT_AFFECTED_ERRORS = defineErrors(
   "NoGitRepository",
   "GitCommandFailed",
+  "InvalidGitRef",
 );
+
+/**
+ * Reject ref values that look like CLI options to avoid argument injection
+ * (e.g. a ref of `--upload-pack=...` being interpreted as a git option when
+ * passed as a positional argument). Git itself forbids refs starting with
+ * `-` via `git check-ref-format`, so this rejects only inputs that could
+ * never be a real ref.
+ */
+const assertValidGitRef = (ref: string, label: string): void => {
+  if (typeof ref !== "string" || ref.length === 0) {
+    throw new GIT_AFFECTED_ERRORS.InvalidGitRef(
+      `${label} must be a non-empty string`,
+    );
+  }
+  if (ref.startsWith("-")) {
+    throw new GIT_AFFECTED_ERRORS.InvalidGitRef(
+      `${label} cannot start with "-" (got ${JSON.stringify(ref)})`,
+    );
+  }
+};
 
 export const GIT_AFFECTED_FILE_REASONS = [
   "diff",
@@ -129,6 +150,8 @@ export const readProjectFileAtGitRef = async ({
   ref: string;
   projectRelativePath: string;
 }): Promise<string | null> => {
+  assertValidGitRef(ref, "ref");
+
   const gitRoot = fs.realpathSync.native(
     path.resolve(await resolveGitRoot(rootDirectory)),
   );
@@ -183,6 +206,9 @@ export const getGitAffectedFiles = async (
     ignoreUnstaged,
     ignoreUncommitted,
   } = options;
+
+  assertValidGitRef(baseRef, "baseRef");
+  assertValidGitRef(headRef, "headRef");
 
   const gitRoot = fs.realpathSync.native(
     path.resolve(await resolveGitRoot(rootDirectory)),

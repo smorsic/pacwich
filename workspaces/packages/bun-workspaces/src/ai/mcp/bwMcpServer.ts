@@ -1,7 +1,10 @@
 import packageJson from "../../../package.json";
 import { createMcpServer } from "./core";
 import { registerBwResources } from "./resources";
-import { setServerWorkingDirectory } from "./serverState";
+import {
+  setServerEnableExecutableConfigs,
+  setServerWorkingDirectory,
+} from "./serverState";
 import { registerBwTools } from "./tools";
 
 export const SERVER_INSTRUCTIONS = `
@@ -34,11 +37,20 @@ $ bw run lint "alias:my-alias-*" "path:packages/**/*" "not:path:my-path/*" # use
 
 export interface BwMcpServerOptions {
   initialWorkingDirectory: string;
+  /**
+   * When true, allow `bw.root.{ts,js}` and `bw.workspace.{ts,js}` to be
+   * evaluated for every project the server resolves. Defaults to false
+   * because the server can be redirected to arbitrary directories at
+   * runtime via the `set_working_directory` tool, which would otherwise
+   * make config loading a remote-code-execution channel.
+   */
+  enableExecutableConfigs?: boolean;
 }
 
 export const startBwMcpServer = async (
   options: BwMcpServerOptions,
 ): Promise<void> => {
+  setServerEnableExecutableConfigs(options.enableExecutableConfigs ?? false);
   setServerWorkingDirectory(options.initialWorkingDirectory);
 
   const server = createMcpServer({

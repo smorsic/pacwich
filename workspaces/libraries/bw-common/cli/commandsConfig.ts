@@ -175,7 +175,13 @@ export const CLI_COMMANDS_CONFIG = {
     aliases: [],
     description:
       "Start the bun-workspaces MCP (Model Context Protocol) server over stdio",
-    options: {},
+    options: {
+      enableAllConfigFiles: {
+        flags: ["--enable-all-config-files"],
+        description:
+          "Allow the MCP server to evaluate executable config files (bw.root.{ts,js}, bw.workspace.{ts,js}) for resolved projects. Disabled by default because the server can be redirected to arbitrary directories at runtime via the set_working_directory tool.",
+      },
+    },
   },
   listAffected: {
     command: "list-affected",

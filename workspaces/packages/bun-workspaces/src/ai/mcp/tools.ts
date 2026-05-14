@@ -204,7 +204,7 @@ export const registerBwTools = (server: McpServer): void => {
     {
       name: "set_working_directory",
       description:
-        "Set the working directory used by this MCP server. All subsequent project queries will reflect the new directory.",
+        "Set the working directory used by this MCP server. All subsequent project queries will reflect the new directory. By default the server skips executable config files (bw.root.{ts,js}, bw.workspace.{ts,js}) in the target directory so that pointing the server at an unfamiliar project does not evaluate its code; only bw.root.{jsonc,json}, bw.workspace.{jsonc,json}, and the package.json bw key are read. Start the server with --enable-all-config-files to allow executable configs.",
       inputSchema: {
         type: "object",
         properties: {

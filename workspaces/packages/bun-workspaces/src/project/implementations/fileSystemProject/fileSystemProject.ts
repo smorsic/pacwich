@@ -65,6 +65,16 @@ export type CreateFileSystemProjectOptions = {
   name?: string;
   /** Whether to include the root workspace as a normal workspace. This overrides any config or env var settings. */
   includeRootWorkspace?: boolean;
+  /**
+   * When true, skip discovery of `.ts`/`.js` config files (`bw.root.{ts,js}`,
+   * `bw.workspace.{ts,js}`) so no executable code is loaded from the project.
+   * `.jsonc`/`.json` configs and the `package.json` `bw` key still resolve.
+   *
+   * Intended for callers that may load projects from untrusted directories
+   * — most notably the MCP server, which can be redirected to arbitrary
+   * directories at runtime via its `set_working_directory` tool.
+   */
+  disableExecutableConfigs?: boolean;
 };
 
 export type InlineScriptOptions = {
@@ -229,18 +239,19 @@ const serializeArgs = (
     return args
       .map((arg) =>
         quoteArg(
-          interpolateWorkspaceScriptMetadata(arg, metadata, shell),
+          interpolateWorkspaceScriptMetadata({ text: arg, metadata, shell }),
           shell,
         ),
       )
       .join(" ");
   }
 
-  const interpolated = interpolateWorkspaceScriptMetadata(
-    args,
+  const interpolated = interpolateWorkspaceScriptMetadata({
+    text: args,
     metadata,
     shell,
-  );
+    quoteValues: true,
+  });
   // Escape backslashes in interpolated values before POSIX parse on Windows,
   // so that path separators survive parse's escape processing (\\→\)
   const parseInput =
@@ -291,6 +302,11 @@ class _FileSystemProject extends ProjectBase implements Project {
           typeofName: "boolean",
           optional: true,
         },
+        "disableExecutableConfigs option": {
+          value: options.disableExecutableConfigs,
+          typeofName: "boolean",
+          optional: true,
+        },
       },
       { throw: true },
     );
@@ -305,7 +321,11 @@ class _FileSystemProject extends ProjectBase implements Project {
       expandHomePath(options.rootDirectory ?? ""),
     );
 
-    const rootConfig = loadRootConfig(this.rootDirectory);
+    const loadConfigOptions = {
+      disableExecutableConfigs: options.disableExecutableConfigs,
+    };
+
+    const rootConfig = loadRootConfig(this.rootDirectory, loadConfigOptions);
 
     const { workspaces, workspaceMap, rootWorkspace } = findWorkspaces({
       rootDirectory: this.rootDirectory,
@@ -314,6 +334,7 @@ class _FileSystemProject extends ProjectBase implements Project {
         rootConfig.defaults.includeRootWorkspace ??
         getUserEnvVar("includeRootWorkspaceDefault") === "true",
       workspacePatternConfigs: rootConfig.workspacePatternConfigs,
+      loadConfigOptions,
     });
 
     this.rootWorkspace = rootWorkspace;
@@ -435,11 +456,12 @@ class _FileSystemProject extends ProjectBase implements Project {
     const args = serializeArgs(options.args, workspaceScriptMetadata, shell);
 
     const script = options.inline
-      ? interpolateWorkspaceScriptMetadata(
-          options.script,
-          workspaceScriptMetadata,
+      ? interpolateWorkspaceScriptMetadata({
+          text: options.script,
+          metadata: workspaceScriptMetadata,
           shell,
-        ) + (args ? " " + args : "")
+          quoteValues: true,
+        }) + (args ? " " + args : "")
       : options.script;
 
     if (!options.inline && checkIsRecursiveScript(workspace.name, script)) {
@@ -659,11 +681,12 @@ class _FileSystemProject extends ProjectBase implements Project {
         );
 
         const script = options.inline
-          ? interpolateWorkspaceScriptMetadata(
-              options.script,
-              workspaceScriptMetadata,
+          ? interpolateWorkspaceScriptMetadata({
+              text: options.script,
+              metadata: workspaceScriptMetadata,
               shell,
-            ) + (args ? " " + args : "")
+              quoteValues: true,
+            }) + (args ? " " + args : "")
           : options.script;
 
         const scriptCommand = options.inline
