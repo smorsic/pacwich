@@ -8,7 +8,11 @@ import { createFileSystemProject } from "bun-workspaces";
 const defaultProject = createFileSystemProject();
 
 const pathProject = createFileSystemProject({
-  rootDirectory: "./path/to/project/root" // relative from process.cwd()
+  // relative from process.cwd()
+  rootDirectory: "./path/to/project/root",
+
+  // Disable executable configuration files (TS/JS) for untrusted contexts
+  disableExecutableConfigs: true,
 });
 
 // Include the root workspace as a normal workspace (overrides config/env settings)

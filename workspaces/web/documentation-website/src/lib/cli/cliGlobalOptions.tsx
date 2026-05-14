@@ -1,3 +1,4 @@
+import { getUserEnvVarName } from "bw-common";
 import {
   getCliGlobalOptionConfig,
   type CliGlobalOptionConfig,
@@ -61,6 +62,16 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
         "",
         `bw ${mainOption.replace("--", "--no-")} list-workspaces # disable (to override config/env)`,
       ],
+    }),
+  ),
+  disableExecutableConfigs: defineOptionContent(
+    "disableExecutableConfigs",
+    ({ mainOption }) => ({
+      title: "Disable Executable Configs",
+      description:
+        "Disable loading of executable config files (written in TS/JS) for untrusted contexts. " +
+        `This can be set by default using the environment variable ${getUserEnvVarName("disableExecutableConfigsDefault")}=true.`,
+      examples: [`bw ${mainOption} list-workspaces`],
     }),
   ),
   logLevel: defineOptionContent("logLevel", ({ mainOption, shortOption }) => ({

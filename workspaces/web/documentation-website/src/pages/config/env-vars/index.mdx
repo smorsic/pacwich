@@ -24,7 +24,7 @@ and any values set explicitly in CLI or API arguments will take precedence over 
   <li className="env-var-item" key={envVar.envVarName}>
     <code>{envVar.envVarName}</code>
     <div>{envVar.description}</div>
-    <div>If <code>{envVar.rootConfigDefaultsKey}</code> is set in the <Link href="/config/root" className="inline-link">root configuration</Link>, it will take precedence.</div>
+    {envVar.rootConfigDefaultsKey && <div>If <code>{envVar.rootConfigDefaultsKey}</code> is set in the <Link href="/config/root" className="inline-link">root configuration</Link>, it will take precedence.</div>}
   </li>
 </div>)}
 </ul>

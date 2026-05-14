@@ -350,8 +350,15 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
   mcpServer: defineCommandContent("mcpServer", () => ({
     title: "MCP Server",
     description:
-      "Start the bun-workspaces MCP (Model Context Protocol) server over stdio. Set this up with your tooling of choice. See here for more information.",
-    examples: ["bw mcp-server"],
+      "Start the bun-workspaces MCP (Model Context Protocol) server over stdio. Set this up with your tooling of choice. Reading TS/JS config files for project-aware tools is disabled by default for agent security. See here for more information.",
+    examples: [
+      "bw mcp-server",
+      "",
+      "# Allow tool use to read TS/JS config files (not recommended for untrusted dirs)",
+      "# For other CLI commands, executable configs are enabled,",
+      "# but these are disabled for MCP for agent security",
+      "bw mcp-server --no-disable-executable-configs",
+    ],
     descriptionLinks: {
       here: "/ai/mcp",
     },

@@ -16,7 +16,7 @@ export const ENV_VARS_METADATA: Record<
   UserEnvVarName,
   {
     envVarName: string;
-    rootConfigDefaultsKey: `${RootConfigDefaultsPrefix}.${keyof ResolvedRootConfig["defaults"]}`;
+    rootConfigDefaultsKey?: `${RootConfigDefaultsPrefix}.${keyof ResolvedRootConfig["defaults"]}`;
     description: ReactNode;
   }
 > = {
@@ -91,6 +91,15 @@ export const ENV_VARS_METADATA: Record<
       <span>
         The default git base ref for affected workspace resolution. This is{" "}
         <code>main</code> when not overridden.
+      </span>
+    ),
+  },
+  disableExecutableConfigsDefault: {
+    envVarName: getUserEnvVarName("disableExecutableConfigsDefault"),
+    description: (
+      <span>
+        Whether to disable executable configs (TS/JS) for the CLI. This is{" "}
+        <code>false</code> when not overridden.
       </span>
     ),
   },
