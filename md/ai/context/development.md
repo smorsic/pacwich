@@ -130,3 +130,10 @@ Test cases should be written at the very minimum for the following:
   - Cases using real test projects that change behavior or surface potential edge cases
   - There don't need to necessarily be combinations/permutations of every single case requirement described here, just enough for confidence in each situation.
   - Since most features are developed in the API followed by the CLI acting as a wrapper over the API, the API surface can be used to put a feature through the wringer the most, while the CLI should be as complete as described above but can be tested just to the point of confirmation of successful API passthrough of all options.
+
+### Change Workflow
+
+- General implementation precedence for each applicable surface: core utilities (if needed) -> config changes (if needed) -> public API -> CLI wrapper around API
+- Each above stage should include tests before moving on
+- Whether the above stages are planned or implemented separately, in combination, or in smaller chunks of each will be case-by-case depending on complexity
+- When implementing a plan that involves multiple concerns, pause for a commit between each if not instructed to commit yourself
