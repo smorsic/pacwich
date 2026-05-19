@@ -7,7 +7,7 @@ import {
 } from "./output";
 import type { ScriptCommand } from "./scriptCommand";
 import { createScriptExecutor } from "./scriptExecution";
-import { createSubprocess } from "./subprocesses";
+import { createSubprocess, killSubprocessTree } from "./subprocesses";
 
 export type RunScriptExit<ScriptMetadata extends object = object> = {
   exitCode: number;
@@ -119,6 +119,6 @@ export const runScript = <ScriptMetadata extends object = object>({
     output: processOutput,
     exit,
     metadata,
-    kill: (exit) => proc.kill(exit),
+    kill: (exit) => killSubprocessTree(proc, exit ?? "SIGTERM"),
   };
 };

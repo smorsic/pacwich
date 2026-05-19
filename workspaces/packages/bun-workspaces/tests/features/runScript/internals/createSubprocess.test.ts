@@ -13,6 +13,11 @@ const SYSTEM_SHELL_FIXTURE_PATH = path.join(
   "../../../fixtures/testScripts/createSubprocessesSystemShell.ts",
 );
 
+const PGID_ISOLATION_FIXTURE_PATH = path.join(
+  import.meta.dir,
+  "../../../fixtures/testScripts/createSubprocessesPgidIsolation.ts",
+);
+
 /** Returns the direct child PIDs of a process using Linux procfs. */
 const getChildPids = async (ppid: number): Promise<number[]> => {
   try {
@@ -139,6 +144,76 @@ describe("createSubprocess", () => {
 
       for (const pid of [...shPids, ...grandchildPids]) {
         expect(await pidExists(pid)).toBe(false);
+      }
+    },
+    { timeout: 10000 },
+  );
+
+  test(
+    "SIGTERM to a bw-using process does not propagate to its process-group siblings",
+    async () => {
+      // detached: true gives the fixture its own process group. A sibling
+      // spawned inside the fixture (without detached) inherits that pgid,
+      // so it sits in the same group as the fixture's own bw exit handler.
+      const fixtureProcess = Bun.spawn(["bun", PGID_ISOLATION_FIXTURE_PATH], {
+        stdout: "pipe",
+        stderr: "ignore",
+        detached: true,
+      });
+
+      let siblingPid: number | undefined;
+      let workerPid: number | undefined;
+      let ready = false;
+
+      for await (const { chunk } of createProcessOutput(
+        fixtureProcess.stdout,
+        {},
+      ).text()) {
+        for (const rawLine of Bun.stripANSI(chunk).split("\n")) {
+          const line = rawLine.trim();
+          if (line.startsWith("SIBLING:")) {
+            siblingPid = parseInt(line.slice("SIBLING:".length), 10);
+          } else if (line.startsWith("WORKER:")) {
+            workerPid = parseInt(line.slice("WORKER:".length), 10);
+          } else if (line === "READY") {
+            ready = true;
+          }
+        }
+        if (ready) break;
+      }
+
+      expect(siblingPid).toBeGreaterThan(0);
+      expect(workerPid).toBeGreaterThan(0);
+      expect(await pidExists(siblingPid!)).toBe(true);
+      expect(await pidExists(workerPid!)).toBe(true);
+
+      try {
+        // SIGTERM the fixture only — Bun.Subprocess.kill targets the pid,
+        // not the pgid, mirroring what an external runner (e.g. vitest)
+        // does to its workers during shutdown.
+        fixtureProcess.kill("SIGTERM");
+        await fixtureProcess.exited;
+
+        // Allow signal delivery to settle.
+        await Bun.sleep(150);
+
+        // The tracked worker (and its tree) must die — that's the cleanup
+        // guarantee preserved by per-pgid kill in the registry sweep.
+        expect(await pidExists(workerPid!)).toBe(false);
+
+        // The sibling shares the fixture's pgid but is NOT a tracked
+        // subprocess. Pre-fix, kill(0, SIGTERM) inside the exit handler
+        // would have signalled it; post-fix, only the fixture itself is
+        // re-signalled, so the sibling must still be alive.
+        expect(await pidExists(siblingPid!)).toBe(true);
+      } finally {
+        if (siblingPid && (await pidExists(siblingPid))) {
+          try {
+            process.kill(siblingPid, "SIGKILL");
+          } catch {
+            /* already gone */
+          }
+        }
       }
     },
     { timeout: 10000 },
