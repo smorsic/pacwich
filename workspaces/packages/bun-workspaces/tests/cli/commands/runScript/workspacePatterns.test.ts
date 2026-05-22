@@ -219,6 +219,109 @@ describe("CLI Run Script (workspace patterns)", () => {
     });
   });
 
+  describe("negation patterns", () => {
+    test("not: prefix excludes a workspace from a wildcard match", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "*",
+        "not:application-1a",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[application-1b] script for all workspaces
+[library-1a] script for all workspaces
+[library-1b] script for all workspaces
+✅ application-1b: all-workspaces
+✅ library-1a: all-workspaces
+✅ library-1b: all-workspaces
+3 scripts ran successfully`,
+      );
+    });
+
+    test("! short-form prefix excludes a workspace from a wildcard match", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "*",
+        "!application-1a",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[application-1b] script for all workspaces
+[library-1a] script for all workspaces
+[library-1b] script for all workspaces
+✅ application-1b: all-workspaces
+✅ library-1a: all-workspaces
+✅ library-1b: all-workspaces
+3 scripts ran successfully`,
+      );
+    });
+
+    test("not:path: excludes by path glob", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "*",
+        "not:path:applications/**/*",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[library-1a] script for all workspaces
+[library-1b] script for all workspaces
+✅ library-1a: all-workspaces
+✅ library-1b: all-workspaces
+2 scripts ran successfully`,
+      );
+    });
+
+    test("negation works via --workspace-patterns / -W", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "-W",
+        "* not:application-1a",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdout.sanitizedCompactLines,
+        `[application-1b] script for all workspaces
+[library-1a] script for all workspaces
+[library-1b] script for all workspaces
+✅ application-1b: all-workspaces
+✅ library-1a: all-workspaces
+✅ library-1b: all-workspaces
+3 scripts ran successfully`,
+      );
+    });
+
+    test("a sole negation pattern reports no matching workspaces", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "run-script",
+        "all-workspaces",
+        "not:application-1a",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(1);
+      assertOutputMatches(
+        result.stderr.sanitizedCompactLines,
+        `No matching workspaces found with script "all-workspaces"`,
+      );
+    });
+  });
+
   test("errors when both inline patterns and --workspace-patterns used", async () => {
     const { run } = setupCliTest({ testProject: "simple1" });
     const result = await run(

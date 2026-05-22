@@ -1,6 +1,6 @@
 {
   "name": "bun-workspaces",
-  "version": "1.11.1",
+  "version": "1.11.2",
   "exports": {
     ".": "./src/index.ts",
     "./cli": "./src/cli/index.ts",
