@@ -36,6 +36,7 @@ import { checkIsRecursiveScript } from "../../../runScript/recursion";
 import { resolveScriptShell } from "../../../runScript/scriptShellOption";
 import {
   findWorkspaces,
+  parseWorkspacePattern,
   sortWorkspaces,
   type Workspace,
 } from "../../../workspaces";
@@ -594,10 +595,9 @@ class _FileSystemProject extends ProjectBase implements Project {
     }
 
     const matchedWorkspaces = sortWorkspaces(
-      (
-        options.workspacePatterns ??
-        this.workspaces.map((workspace) => workspace.name)
-      ).flatMap((pattern) => this.findWorkspacesByPattern(pattern)),
+      options.workspacePatterns
+        ? this.findWorkspacesByPattern(...options.workspacePatterns)
+        : this.workspaces,
     );
 
     let workspaces = matchedWorkspaces
@@ -624,14 +624,25 @@ class _FileSystemProject extends ProjectBase implements Project {
       });
 
     if (!workspaces.length) {
+      const singlePattern =
+        options.workspacePatterns?.length === 1
+          ? options.workspacePatterns[0]
+          : null;
+      const parsedSingle = singlePattern
+        ? parseWorkspacePattern(singlePattern)
+        : null;
       const isSingleMatchNotFound =
-        options.workspacePatterns?.length === 1 &&
-        !options.workspacePatterns[0].includes("*") &&
+        parsedSingle !== null &&
+        parsedSingle.target === "default" &&
+        !parsedSingle.isNegated &&
+        !parsedSingle.isRegex &&
+        !parsedSingle.isRootSelector &&
+        !parsedSingle.value.includes("*") &&
         !matchedWorkspaces.length;
 
       throw new PROJECT_ERRORS.ProjectWorkspaceNotFound(
         isSingleMatchNotFound
-          ? `Workspace name or alias not found: ${JSON.stringify(options?.workspacePatterns?.[0])}`
+          ? `Workspace name or alias not found: ${JSON.stringify(singlePattern)}`
           : `No matching workspaces found with script ${JSON.stringify(options.script)}`,
       );
     }
