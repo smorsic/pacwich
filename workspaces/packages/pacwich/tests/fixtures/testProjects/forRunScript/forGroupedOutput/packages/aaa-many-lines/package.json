@@ -1,0 +1,6 @@
+{
+  "name": "aaa-many-lines",
+  "scripts": {
+    "test-script": "for i in {1..8}; do echo \"aaa output line $i\"; done && sleep 0.5"
+  }
+}

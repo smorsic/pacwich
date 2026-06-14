@@ -1,0 +1,123 @@
+{
+  "frames": {
+    "anim-blink 0.aseprite": {
+      "frame": { "x": 0, "y": 0, "w": 64, "h": 70 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 70 },
+      "sourceSize": { "w": 64, "h": 70 },
+      "duration": 100
+    },
+    "anim-blink 1.aseprite": {
+      "frame": { "x": 64, "y": 0, "w": 64, "h": 70 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 70 },
+      "sourceSize": { "w": 64, "h": 70 },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "app": "http://www.aseprite.org/",
+    "version": "1.3.17.2-dev",
+    "image": "anim-blink_64x70.png",
+    "format": "RGBA8888",
+    "size": { "w": 128, "h": 70 },
+    "scale": "1",
+    "frameTags": [],
+    "layers": [
+      { "name": "Bottom Bun", "opacity": 255, "blendMode": "normal" },
+      { "name": "Burgers" },
+      { "name": "Burger T", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger R", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger L", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger B", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Top Bun" },
+      {
+        "name": "Top Bun",
+        "group": "Top Bun",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Eye",
+        "group": "Top Bun",
+        "opacity": 255,
+        "blendMode": "normal"
+      }
+    ],
+    "slices": []
+  }
+}

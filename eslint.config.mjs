@@ -9,7 +9,13 @@ import tseslint from "typescript-eslint";
 const ALLOW_UNUSED_VARNAME_PATTERN = "^_";
 
 export default defineConfig([
-  globalIgnores(["**/*.js", "**/*.d.ts", "**/*.mjs", "**/dist/**/*"]),
+  globalIgnores([
+    "**/*.js",
+    "**/*.d.ts",
+    "**/*.mjs",
+    "**/dist/**/*",
+    ".github/**/*",
+  ]),
   {
     name: "rootJs",
     files: ["**/*.{js,mjs,cjs,ts,mts,cts,tsx}"],
@@ -75,10 +81,10 @@ export default defineConfig([
     },
   },
   {
-    name: "bunWorkspacesPackageConfig",
+    name: "pacwichPackageConfig",
     files: [
-      "workspaces/libraries/bw-common/**/*.{js,mjs,cjs,ts,mts,cts,tsx}",
-      "workspaces/packages/bun-workspaces/**/*.{js,mjs,cjs,ts,mts,cts,tsx}",
+      "workspaces/libraries/pacwich-common/**/*.{js,mjs,cjs,ts,mts,cts,tsx}",
+      "workspaces/packages/pacwich/**/*.{js,mjs,cjs,ts,mts,cts,tsx}",
     ],
     rules: {
       "no-console": "error",

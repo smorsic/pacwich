@@ -1,7 +1,7 @@
 ---
 title: API Reference
-titleSuffix: " | bun-workspaces"
-description: "API Reference for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "API Reference for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -12,15 +12,15 @@ import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { ApiHeader } from "../../../lib/api/ApiHeader";
 import { 
   CREATE_FS_PROJECT_EXAMPLE, 
-  CREATE_SCRIPT_COMMAND_EXAMPLE, 
   FIND_WORKSPACE_BY_ALIAS_EXAMPLE, 
   FIND_WORKSPACE_BY_NAME_EXAMPLE, 
   FIND_WORKSPACE_BY_NAME_OR_ALIAS_EXAMPLE, 
   FIND_WORKSPACES_BY_PATTERN_EXAMPLE,
   LIST_WORKSPACES_WITH_SCRIPT_EXAMPLE,
   LIST_WORKSPACES_WITH_TAG_EXAMPLE,
-  MAP_SCRIPTS_TO_WORKSPACES_EXAMPLE,
-  MAP_TAGS_TO_WORKSPACES_EXAMPLE,
+  SCRIPT_MAP_EXAMPLE,
+  API_VERIFY_EXAMPLE,
+  TAG_MAP_EXAMPLE,
   RUN_SCRIPT_ACROSS_WORKSPACES_EXAMPLE,
   RUN_WORKSPACE_SCRIPT_EXAMPLE,
   API_DETERMINE_AFFECTED_GIT_EXAMPLE,
@@ -35,15 +35,16 @@ import {
 
 <ApiHeader />
 
+See the [API quick start here](/api).
+
 ## createFileSystemProject
 `createFileSystemProject(options: CreateFileSystemProjectOptions): FileSystemProject`
 
-Create a [FileSystemProject](/api/reference#filesystemproject), the core of `bun-workspaces`'s functionality, based on a given root directory.
+Create a [FileSystemProject](/api/reference#filesystemproject), the core of `pacwich`'s functionality, based on a given root directory.
 
-This finds [Workspaces](/api/reference#workspace) by reading the project's `bun.lock` file, which means `bun install` must be run to have up-to-date 
-workspace information.
+This will walk up to find the nearest project root if ran from a project's subdirectory.
 
-It will also detect and utilize any [root configuration](/config/root) and [workspace configurations](/config/workspace) found.
+It will also detect and utilize any [project configuration](/config/project) and [workspace configurations](/config/workspace) found.
 
 <SyntaxHighlighter language="typescript">
 {CREATE_FS_PROJECT_EXAMPLE}
@@ -66,12 +67,20 @@ See more on the [root workspace](/concepts/root-workspace).
 
 ## Project
 
-The core of `bun-workspaces`'s functionality. 
+The core of `pacwich`'s functionality. 
 It contains a list of [Workspaces](/api/reference#workspace) and provides 
 several useful methods for working with them. A Project is typically initialized at a git repository's root directory.
 The Project root should contain the `package.json` file in which `"workspaces"` are defined.
 
 Usually created via [createFileSystemProject](/api/reference#createfilesystemproject).
+
+<SyntaxHighlighter language="typescript">
+{`
+import { createFileSystemProject } from "pacwich";
+
+const project = createFileSystemProject();
+`}
+</SyntaxHighlighter>
 
 ### .name
 `type: string`
@@ -158,44 +167,32 @@ Get an array of all [Workspaces](/api/reference#workspace) that have a given scr
 ### .listWorkspacesWithTag
 `listWorkspacesWithTag(tag: string): Workspace[]`
 
-Get an array of all [Workspaces](/api/reference#workspace) that have a given [tag](config/workspace#tags). Tags are defined in a workspace's [configuration](/config/workspace).
+Get an array of all [Workspaces](/api/reference#workspace) that have a given [tag](/config/workspace#tags). Tags are defined in a workspace's [configuration](/config/workspace).
 <SyntaxHighlighter language="typescript">
 {LIST_WORKSPACES_WITH_TAG_EXAMPLE}
 </SyntaxHighlighter>
 
 <hr className="reference-divider"/>
 
-### .mapScriptsToWorkspaces
-`mapScriptsToWorkspaces(): Record<string, WorkspaceScriptMetadata>`
+### .scriptMap
+`scriptMap: Record<string, ScriptDetails>`
 
 Get a mapping of all project script names to the [Workspaces](/api/reference#workspace) that have them in their package.json "scripts" field.
 <SyntaxHighlighter language="typescript">
-{MAP_SCRIPTS_TO_WORKSPACES_EXAMPLE}
+{SCRIPT_MAP_EXAMPLE}
 </SyntaxHighlighter>
 
 <hr className="reference-divider"/>
 
-### .mapTagsToWorkspaces
-`mapTagsToWorkspaces(): Record<string, Workspace[]>`
+### .tagMap
+`tagMap: Record<string, TagDetails>`
 
-Get a mapping of all [tags](config/workspace#tags) to the [Workspaces](/api/reference#workspace) that have them in their respective [workspace configuration](/config/workspace).
+Get a mapping of all [tags](/config/workspace#tags) to the [Workspaces](/api/reference#workspace) that have them in their respective [workspace configuration](/config/workspace).
 <SyntaxHighlighter language="typescript">
-{MAP_TAGS_TO_WORKSPACES_EXAMPLE}
+{TAG_MAP_EXAMPLE}
 </SyntaxHighlighter>
 
 <hr className="reference-divider"/>
-
-### .createScriptCommand
-`createScriptCommand(options: CreateProjectScriptCommandOptions): CreateProjectScriptCommandResult`
-
-Create metadata that can be used to run a [Workspace](/api/reference#workspace)'s script.
-
-The `"method"` option changes what kind of `bun` command is implemented to run the script.
-`"cd"` (the default) is generally recommended over `"filter"` in order to get full stdout/stderr output from the script.
-<SyntaxHighlighter language="typescript">
-{CREATE_SCRIPT_COMMAND_EXAMPLE  }
-</SyntaxHighlighter>
-
 
 ## FileSystemProject
 
@@ -275,8 +272,24 @@ while also taking similar options to [determineAffectedWorkspaces](/api/referenc
 * See more on [affected workspaces](/concepts/affected).
 * See more on [inputs](/config/workspace-inputs) that determine if a workspace is affected.
 
+<hr className="reference-divider"/>
+
+### .verify
+`verify(options: VerifyOptions): VerifyResult`
+
+Verify the project for issues. The result is the same
+as the CLI [`verify`](/cli/commands#verify) command's JSON output.
+
+<SyntaxHighlighter language="typescript">
+{API_VERIFY_EXAMPLE}
+</SyntaxHighlighter>
+
+
 ## createMemoryProject
+<span className="deprecated bold">Experimental</span>
+
 `createMemoryProject(options: CreateMemoryProjectOptions): MemoryProject`
+
 
 Create a [Project](/api/reference#project) from a given array of [Workspaces](/api/reference#workspace). 
 
@@ -284,7 +297,7 @@ Usually used  only for testing purposes to do without the need for a real projec
 in the file system.
 
 Since it doesn't read anything from the file system,
-it isn't affected by [root configuration](/config/root) or [workspace configurations](/config/workspace).
+it isn't affected by [project configuration](/config/project) or [workspace configurations](/config/workspace).
 
 A `MemoryProject` currently does not support running scripts directly, though a means of mocking script execution may be added later, considering demand.
 

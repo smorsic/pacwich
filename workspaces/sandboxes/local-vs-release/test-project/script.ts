@@ -7,9 +7,9 @@
 console.log(process.argv.slice(2));
 
 // All metadata is available as environment variables for use within a script
-console.log(process.env.BW_PROJECT_PATH);
-console.log(process.env.BW_PROJECT_NAME);
-console.log(process.env.BW_WORKSPACE_NAME);
-console.log(process.env.BW_WORKSPACE_PATH);
-console.log(process.env.BW_WORKSPACE_RELATIVE_PATH);
-console.log(process.env.BW_SCRIPT_NAME);
+console.log(process.env.PACWICH_PROJECT_PATH);
+console.log(process.env.PACWICH_PROJECT_NAME);
+console.log(process.env.PACWICH_WORKSPACE_NAME);
+console.log(process.env.PACWICH_WORKSPACE_PATH);
+console.log(process.env.PACWICH_WORKSPACE_RELATIVE_PATH);
+console.log(process.env.PACWICH_SCRIPT_NAME);

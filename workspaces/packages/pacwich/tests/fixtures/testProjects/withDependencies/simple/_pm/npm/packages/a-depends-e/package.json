@@ -1,0 +1,9 @@
+{
+  "name": "a-depends-e",
+  "dependencies": {
+    "e": "*"
+  },
+  "scripts": {
+    "test-script": "echo A"
+  }
+}

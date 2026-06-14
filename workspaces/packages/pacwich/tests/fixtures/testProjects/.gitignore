@@ -1,0 +1,3 @@
+bun.lock
+!withDependencies/withExternalDependenciesCatalog/bun.lock
+!**/_pm/**/bun.lock

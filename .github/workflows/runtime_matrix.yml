@@ -1,0 +1,139 @@
+name: Runtime Matrix
+
+# Runs the pacwich test build against a matrix of Bun and Node versions on
+# Linux, macOS, and Windows. Bun and Node tests run as separate matrix
+# jobs (test_bun, test_node) so each has a uniform shape:
+# - test_bun sweeps Bun versions, Node pinned to devLock
+# - test_node sweeps Node versions, Bun pinned to devLock
+# pnpm is pinned to devLock, npm tracks Node. All pms participate in
+# the in-suite pmMatrix tests.
+#
+# A single prep job emits both matrices so workflow_dispatch axis
+# overrides apply consistently. --bun=X / --node=Y applies to both the
+# swept axis and the pinned-other-runtime value. --runtime=bun|node
+# skips the other test job entirely.
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      bun_version:
+        description: Single Bun version (collapses the bun axis)
+        required: false
+        type: string
+      node_version:
+        description: Single Node version (collapses the node axis)
+        required: false
+        type: string
+      pnpm_version:
+        description: Single pnpm version (defaults to devLock)
+        required: false
+        type: string
+      os:
+        description: Single OS, e.g. ubuntu-latest (collapses the os axis)
+        required: false
+        type: string
+      runtime:
+        description: Single runtime - skips the other test job
+        required: false
+        type: choice
+        options: ["", "bun", "node"]
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  prep:
+    name: Generate matrices
+    runs-on: ubuntu-latest
+    outputs:
+      bun_matrix: ${{ steps.gen.outputs.bun_matrix }}
+      node_matrix: ${{ steps.gen.outputs.node_matrix }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Generate matrix JSON
+        id: gen
+        shell: bash
+        env:
+          BUN_OVERRIDE: ${{ inputs.bun_version }}
+          NODE_OVERRIDE: ${{ inputs.node_version }}
+          PNPM_OVERRIDE: ${{ inputs.pnpm_version }}
+          OS_OVERRIDE: ${{ inputs.os }}
+        run: |
+          set -euo pipefail
+
+          MATRICES=workspaces/packages/meta/ci/matrices.json
+          TOOL_VERSIONS=workspaces/libraries/pacwich-common/toolVersions/toolVersions.json
+
+          # Each axis resolves to both a sweep array (for cartesian product
+          # in its own matrix) and a pinned scalar (for the other runtime's
+          # matrix). An override collapses both to the same value.
+          bunValues=${BUN_OVERRIDE:+"[\"$BUN_OVERRIDE\"]"}
+          bunValues=${bunValues:-$(jq -c '.runtime.bun' "$MATRICES")}
+          bunPinned=${BUN_OVERRIDE:-$(jq -r '.bun.devLock' "$TOOL_VERSIONS")}
+
+          nodeValues=${NODE_OVERRIDE:+"[\"$NODE_OVERRIDE\"]"}
+          nodeValues=${nodeValues:-$(jq -c '.runtime.node' "$MATRICES")}
+          nodePinned=${NODE_OVERRIDE:-$(jq -r '.node.devLock' "$TOOL_VERSIONS")}
+
+          osValues=${OS_OVERRIDE:+"[\"$OS_OVERRIDE\"]"}
+          osValues=${osValues:-$(jq -c '.os' "$MATRICES")}
+
+          pnpm=${PNPM_OVERRIDE:-$(jq -r '.pnpm.devLock' "$TOOL_VERSIONS")}
+
+          bun_include=$(jq -nc \
+            --argjson bun "$bunValues" \
+            --argjson os "$osValues" \
+            --arg node "$nodePinned" \
+            --arg pnpm "$pnpm" \
+            '[ $bun[] as $b | $os[] as $o
+               | {bun:$b, node:$node, pnpm:$pnpm, os:$o} ]')
+
+          node_include=$(jq -nc \
+            --argjson node "$nodeValues" \
+            --argjson os "$osValues" \
+            --arg bun "$bunPinned" \
+            --arg pnpm "$pnpm" \
+            '[ $node[] as $n | $os[] as $o
+               | {bun:$bun, node:$n, pnpm:$pnpm, os:$o} ]')
+
+          bun_matrix="{\"include\":$bun_include}"
+          node_matrix="{\"include\":$node_include}"
+          echo "bun_matrix=$bun_matrix" >> "$GITHUB_OUTPUT"
+          echo "node_matrix=$node_matrix" >> "$GITHUB_OUTPUT"
+          echo "Bun matrix:"
+          jq . <<<"$bun_matrix"
+          echo "Node matrix:"
+          jq . <<<"$node_matrix"
+
+  test_bun:
+    needs: prep
+    if: ${{ !inputs.runtime || inputs.runtime == 'bun' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prep.outputs.bun_matrix) }}
+    uses: ./.github/workflows/test_given_versions.yml
+    with:
+      test_runtime: bun
+      os: ${{ matrix.os }}
+      bun-version: ${{ matrix.bun }}
+      node-version: ${{ matrix.node }}
+      pnpm-version: ${{ matrix.pnpm }}
+      test_args: "tests/packageManagers/"
+
+  test_node:
+    needs: prep
+    if: ${{ !inputs.runtime || inputs.runtime == 'node' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prep.outputs.node_matrix) }}
+    uses: ./.github/workflows/test_given_versions.yml
+    with:
+      test_runtime: node
+      os: ${{ matrix.os }}
+      bun-version: ${{ matrix.bun }}
+      node-version: ${{ matrix.node }}
+      pnpm-version: ${{ matrix.pnpm }}
+      test_args: "tests/packageManagers/"

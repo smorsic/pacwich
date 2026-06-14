@@ -33,3 +33,9 @@ export const GLOSSARY_WORKSPACE_B_PACKAGE_JSON = `
     "my-script": "echo 'My script for workspace B'"
   }
 }`.trim();
+
+export const PNPM_WORKSPACE_YAML = `
+# pnpm-workspace.yaml
+packages:
+  - 'packages/*'
+`.trim();

@@ -1,0 +1,6 @@
+{
+  "name": "lib-b",
+  "dependencies": {
+    "lib-a": "workspace:*"
+  }
+}

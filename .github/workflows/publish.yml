@@ -1,0 +1,102 @@
+name: Publish pacwich to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run only (test publish)"
+        required: false
+        type: boolean
+        default: false
+      npm_tag:
+        description: "npm dist-tag to publish under"
+        required: false
+        default: "next"
+
+permissions:
+  contents: read
+  id-token: write # Required for OIDC
+
+concurrency:
+  group: publish-pacwich
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.dry-run == true && 'pacwich--test' || 'pacwich--prod' }}
+    env:
+      NPM_TAG: ${{ inputs.npm_tag }}
+      DRY_RUN: ${{ inputs.dry-run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Run lint
+        shell: bash
+        run: bun lint
+
+      - name: Run type-check
+        shell: bash
+        run: bun type-check
+
+      - name: Run tests against build
+        shell: bash
+        run: bun pw build-and-test:bun
+
+      - name: Build package
+        shell: bash
+        run: bun pw build
+
+      - name: Setup Node (npm publish registry)
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npm
+        shell: bash
+        run: |
+          cd workspaces/packages/pacwich/dist
+          echo "Publishing with dist-tag: ${NPM_TAG}"
+
+          if [ "$DRY_RUN" = true ]; then
+            echo "Dry run publish"
+            npm publish --tag "${NPM_TAG}" --dry-run
+          else
+            echo "Publishing"
+            npm publish --tag "${NPM_TAG}"
+          fi
+
+      - name: Create Summary
+        shell: bash
+        run: |
+          RELEASE_VERSION=$(jq -r '.version' workspaces/packages/pacwich/package.json)
+          export RELEASE_VERSION
+
+          if [ "$DRY_RUN" = true ]; then
+            echo "‼️ DRY RUN PUBLISH ONLY ‼️" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          {
+            echo "## 📦 pacwich published"
+            echo ""
+            echo "- Package: **pacwich**"
+            echo "- Version: **$RELEASE_VERSION**"
+            echo "- npm tag: **$NPM_TAG**"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          RELEASE_URL=$(bun run workspaces/packages/meta/ci/createReleaseUrl.ts)
+
+          {
+            echo ""
+            echo "- Create a release: **$RELEASE_URL**"
+            echo ""
+            echo "Move to latest:"
+            echo "  - \`npm dist-tag add pacwich@$RELEASE_VERSION latest\`"
+            echo "  - \`npm dist-tag rm pacwich $NPM_TAG # optional\`"
+          } >> "$GITHUB_STEP_SUMMARY"

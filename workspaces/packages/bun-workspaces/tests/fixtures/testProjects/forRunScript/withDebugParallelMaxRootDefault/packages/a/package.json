@@ -1,6 +1,0 @@
-{
-  "name": "a",
-  "scripts": {
-    "test-debug": "echo $_BW_PARALLEL_MAX"
-  }
-}

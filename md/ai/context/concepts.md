@@ -1,4 +1,4 @@
-## Concepts
+## pacwich npm package: Concepts
 
 ### Workspace patterns
 
@@ -17,20 +17,22 @@ Patterns can include a wildcard to match only by workspace name: `my-workspace-*
 - Any pattern can start with `not:` to negate the pattern. (e.g. "not:my-workspace-name", "not:tag:my-tag-\*") This excludes workspaces that match any other present patterns from a result.
 - Regex pattern modifier can be applied before the pattern value: `re:` (e.g. "re:^my-workspace-.+" or "not:alias:re:^my-alias-.+")
 
+Patterns are always resolved as a list against the full workspace set. `not:` patterns only exclude — they need a positive pattern to subtract from. A list containing only `not:` patterns matches nothing. To express "all workspaces except X," pair the negation with an explicit positive like `*`: `pacwich run lint "*" "not:tag:legacy"`.
+
 #### Special selectors
 
 - Special root workspace selector: `@root`. This is a reference to the root workspace, whether it's included in a Project's workspace list or not.
 
 ### Workspace Script Metadata
 
-Scripts ran via bun-workspaces can access metadata about the workspace, script, and project
+Scripts ran via pacwich can access metadata about the workspace, script, and project
 via env vars. This same metadata can also be interpolated into inline scripts and appended args.
 
 ```typescript
-// in a workspace's script invoked by bun-workspaces using a metadata function
-import { getWorkspaceScriptMetadata } from "bun-workspaces/script";
+// in a workspace's script invoked by pacwich using a metadata function
+import { getWorkspaceScriptMetadata } from "pacwich/script";
 
-// Use the helper within a script that was invoked via bun-workspaces
+// Use the helper within a script that was invoked via pacwich
 const projectPath = getWorkspaceScriptMetadata("projectPath");
 const projectName = getWorkspaceScriptMetadata("projectName");
 const workspaceName = getWorkspaceScriptMetadata("workspaceName");
@@ -43,16 +45,16 @@ const scriptName = getWorkspaceScriptMetadata("scriptName");
 
 ```typescript
 // In a script, but accessing the same data via plain environment variables (same values as previous example)
-const projectPath = process.env.BW_PROJECT_PATH;
-const workspaceName = process.env.BW_WORKSPACE_NAME;
-const workspacePath = process.env.BW_WORKSPACE_PATH;
-const workspaceRelativePath = process.env.BW_WORKSPACE_RELATIVE_PATH;
-const scriptName = process.env.BW_SCRIPT_NAME;
+const projectPath = process.env.PACWICH_PROJECT_PATH;
+const workspaceName = process.env.PACWICH_WORKSPACE_NAME;
+const workspacePath = process.env.PACWICH_WORKSPACE_PATH;
+const workspaceRelativePath = process.env.PACWICH_WORKSPACE_RELATIVE_PATH;
+const scriptName = process.env.PACWICH_SCRIPT_NAME;
 ```
 
 ```bash
 # interpolated
-bw run "bun <projectPath>/my-script.ts" --inline \
+pacwich run "bun <projectPath>/my-script.ts" --inline \
   --inline-name="my-script-name" \
   --args="<workspaceName> <workspacePath>"
 ```
@@ -62,8 +64,8 @@ bw run "bun <projectPath>/my-script.ts" --inline \
 A workspace is "affected" when something in its set of **inputs** has changed. Inputs default to:
 
 - Files in the workspace's directory (only git-trackable files; the default file pattern is `"."`)
-- Workspace dependencies — if a workspace dep is affected for any reason, dependents cascade as affected
-- All non-workspace dependencies declared in its `package.json` (across all four maps: `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`). Version changes are detected by diffing resolved versions in `bun.lock`. For `peerDependencies`/`optionalDependencies`, lockfile presence is the gate — an unresolved optional (e.g., a platform-skipped native binding) emits no change.
+- Workspace dependencies. If a workspace dep is affected for any reason, dependents cascade as affected.
+- All non-workspace dependencies declared in its `package.json` (across all four maps: `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`). Version changes are detected by diffing resolved versions in the active package manager's lockfile (`bun.lock`, `pnpm-lock.yaml`, or `package-lock.json`). For `peerDependencies`/`optionalDependencies`, lockfile presence is the gate. An unresolved optional (e.g. a platform-skipped native binding) emits no change.
 
 Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
 
@@ -73,7 +75,9 @@ Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts
 
 There are two diff sources:
 
-- **git** (default): diff `HEAD` against the configured base ref (default `main`, configurable via `affectedBaseRef` in the root config or `BW_AFFECTED_BASE_REF_DEFAULT` env var). Uncommitted changes (staged, unstaged, untracked) are included by default. Gitignored files never participate.
-- **fileList**: pass changed files explicitly (paths, dirs, or globs) — bypasses git entirely.
+- **git** (default): diff `HEAD` against the configured base ref (default `main`, configurable via `defaults.affectedBaseRef` in the project config or `PACWICH_AFFECTED_BASE_REF_DEFAULT` env var). Uncommitted changes (staged, unstaged, untracked) are included by default. Gitignored files never participate.
+- **fileList**: pass changed files explicitly (paths, dirs, or globs). Bypasses git entirely.
 
 Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.
+
+<!--End pacwich concepts-->

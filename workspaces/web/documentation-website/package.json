@@ -1,25 +1,28 @@
 {
-  "name": "documentation-website",
+  "name": "@pacwich/documentation-website",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "BW_DOC_ENV=development rspress dev",
+    "dev": "PACWICH_DOCS_ENV=development portless pacwich-docs rspress dev --host",
     "lint": "eslint src/",
-    "build": "BW_DOC_ENV=production bun run scripts/build.ts",
-    "build:dev": "BW_DOC_ENV=development bun run scripts/build.ts",
-    "preview": "rspress preview",
+    "build": "PACWICH_DOCS_ENV=production bun run scripts/build.ts",
+    "build:dev": "PACWICH_DOCS_ENV=development bun run scripts/build.ts",
+    "preview": "portless pacwich-docs-preview rspress preview",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
     "@fontsource/unifontex": "catalog:web",
     "@rsbuild/plugin-svgr": "catalog:web",
+    "@rspress/core": "catalog:web",
     "@rspress/plugin-client-redirects": "catalog:web",
+    "@rspress/plugin-sitemap": "catalog:web",
     "@types/lodash": "catalog:web",
     "@types/react": "catalog:web",
     "@types/react-syntax-highlighter": "catalog:web",
-    "@types/shell-quote": "catalog:bun-workspaces-dev",
+    "@types/shell-quote": "catalog:pacwich-dev",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
-    "bw-common": "workspace:*",
+    "@pacwich/common": "workspace:*",
     "bw-web-service-shared": "0.2.0",
     "lodash": "catalog:web",
     "react": "catalog:web",
@@ -29,8 +32,7 @@
     "react-router": "catalog:web",
     "react-router-dom": "catalog:web",
     "react-syntax-highlighter": "catalog:web",
-    "rspress": "catalog:web",
-    "shell-quote": "catalog:bun-workspaces-prod",
+    "shell-quote": "catalog:pacwich-prod",
     "zustand": "catalog:web"
   }
 }

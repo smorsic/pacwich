@@ -1,0 +1,83 @@
+{
+  "name": "pacwich",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./cli": "./src/cli/index.ts",
+    "./config": "./src/config/public.ts",
+    "./script": "./src/runScript/public.ts"
+  },
+  "private": true,
+  "type": "module",
+  "description": "Monorepo tooling that works with Bun, pnpm, and npm workspaces and orchestrates package.json scripts, with a CLI and TypeScript library API",
+  "homepage": "https://pacwich.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smorsic/pacwich.git"
+  },
+  "keywords": [
+    "bun",
+    "npm",
+    "pnpm",
+    "workspace",
+    "workspaces",
+    "monorepo",
+    "cli",
+    "orchestration",
+    "package",
+    "package.json",
+    "devops",
+    "scripts",
+    "typescript",
+    "api"
+  ],
+  "bin": {
+    "pacwich": "bin/cliDev.js"
+  },
+  "scripts": {
+    "ajv": "bun run scripts/ajv.ts",
+    "build": "bun run scripts/build.ts",
+    "check-resize": "bun run scripts/checkResize.ts",
+    "build:no-dts": "NO_DTS=true bun run build",
+    "build-for-tests": "IS_TEST_BUILD=true bun run scripts/build.ts",
+    "build-and-test": "bun run build-for-tests && bun run test:build",
+    "build-and-test:bun": "bun build-for-tests && bun test:build:bun",
+    "build-and-test:node": "bun build-for-tests && bun test:build:node",
+    "cli:bun": "bun run dist/bin/cli.js",
+    "cli:bun:dev": "NODE_ENV=development bun run dist/bin/cli.js",
+    "cli:node": "node dist/bin/cli.js",
+    "cli:node:dev": "NODE_ENV=development node dist/bin/cli.js",
+    "create-modules": "bun run ajv && bun run create-public-agent-docs",
+    "create-pnpm-test-fixtures": "bun run scripts/createPnpmTestFixtures.ts",
+    "create-public-agent-docs": "bun run scripts/createPublicAgentDocs.ts",
+    "knip": "knip",
+    "lint": "eslint src",
+    "mcp:inspect": "mcp-inspector bun run bin/cli.js --cwd ../../../ mcp",
+    "test": "bunx --bun vitest",
+    "test:build": "command -v bun && bun run test:build:bun || bun run test:build:node",
+    "test:build:bun": "cd dist.test && IS_BUILD=true bunx --bun vitest",
+    "test:build:node": "cd dist.test && IS_BUILD=true npx vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "catalog:pacwich-dev",
+    "@pacwich/meta": "workspace:*",
+    "@rslib/core": "catalog:pacwich-dev",
+    "@types/semver": "catalog:pacwich-dev",
+    "@types/shell-quote": "catalog:pacwich-dev",
+    "@xterm/headless": "catalog:pacwich-dev",
+    "ajv": "catalog:pacwich-dev",
+    "dts-bundle-generator": "catalog:pacwich-dev",
+    "knip": "catalog:pacwich-dev",
+    "vitest": "catalog:pacwich-dev"
+  },
+  "dependencies": {
+    "@pacwich/common": "workspace:*",
+    "commander": "catalog:pacwich-prod",
+    "jiti": "catalog:pacwich-prod",
+    "semver": "catalog:pacwich-prod",
+    "shell-quote": "catalog:pacwich-prod",
+    "sucrase": "catalog:pacwich-prod",
+    "yaml": "catalog:pacwich-prod"
+  }
+}

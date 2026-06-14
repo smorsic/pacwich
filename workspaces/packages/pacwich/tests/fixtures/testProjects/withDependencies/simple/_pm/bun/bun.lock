@@ -1,0 +1,50 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "test-root",
+    },
+    "packages/a-depends-e": {
+      "name": "a-depends-e",
+      "dependencies": {
+        "e": "workspace:*",
+      },
+    },
+    "packages/b-depends-cd": {
+      "name": "b-depends-cd",
+      "dependencies": {
+        "d-depends-e": "workspace:*",
+      },
+      "optionalDependencies": {
+        "c-depends-e": "workspace:*",
+      },
+    },
+    "packages/c-depends-e": {
+      "name": "c-depends-e",
+      "devDependencies": {
+        "e": "workspace:*",
+      },
+    },
+    "packages/d-depends-e": {
+      "name": "d-depends-e",
+      "peerDependencies": {
+        "e": "workspace:*",
+      },
+    },
+    "packages/e": {
+      "name": "e",
+    },
+  },
+  "packages": {
+    "a-depends-e": ["a-depends-e@workspace:packages/a-depends-e"],
+
+    "b-depends-cd": ["b-depends-cd@workspace:packages/b-depends-cd"],
+
+    "c-depends-e": ["c-depends-e@workspace:packages/c-depends-e"],
+
+    "d-depends-e": ["d-depends-e@workspace:packages/d-depends-e"],
+
+    "e": ["e@workspace:packages/e"],
+  }
+}

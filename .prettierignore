@@ -7,3 +7,5 @@ AGENTS.md
 
 # MDX formatting is very buggy
 **/*.mdx 
+
+/**/bin/**/*

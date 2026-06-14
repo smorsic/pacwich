@@ -1,9 +1,0 @@
-{
-  "name": "library-1a",
-  "bw": {
-    "alias": "libA"
-  },
-  "scripts": {
-    "test-echo": "echo passed args:"
-  }
-}

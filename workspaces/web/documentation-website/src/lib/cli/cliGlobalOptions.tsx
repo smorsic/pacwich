@@ -1,9 +1,9 @@
-import { getUserEnvVarName } from "bw-common";
+import { getUserEnvVarName } from "@pacwich/common";
 import {
   getCliGlobalOptionConfig,
   type CliGlobalOptionConfig,
   type CliGlobalOptionName,
-} from "bw-common/cli";
+} from "@pacwich/common/cli";
 import type { CliGlobalOptionContent, CliGlobalOptionInfo } from "./cliOption";
 
 const defineOptionContent = (
@@ -27,29 +27,16 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
     description:
       "Get the project root from a specific directory. This should be where the root package.json of your project is located.",
     examples: [
-      `bw ${mainOption}=/path/to/your/project list-workspaces`,
-      `bw ${shortOption} /path/to/your/project list-workspaces`,
+      `pacwich ${mainOption}=/path/to/your/project list-workspaces`,
+      `pacwich ${shortOption} /path/to/your/project list-workspaces`,
     ],
   })),
-  workspaceRoot: defineOptionContent(
-    "workspaceRoot",
-    ({ mainOption, shortOption }) => ({
-      title: "Run from Workspace Root",
-      description:
-        "Run from the project root when you are in a workspace subdirectory. This is similar to pnpm's -w option.",
-      examples: [
-        `cd packages/my-workspace`,
-        "",
-        "# Run from the project root",
-        `bw ${mainOption} ls`,
-        `bw ${shortOption} ls`,
-        "",
-        "# Similar to pnpm -w run",
-        '# "@root" references the root package like a workspace',
-        `bw ${shortOption} run my-root-script @root`,
-      ],
-    }),
-  ),
+  pm: defineOptionContent("pm", ({ mainOption }) => ({
+    title: "Package Manager",
+    description:
+      "Expect a specific package manager. This overrides config and environment variable settings.",
+    examples: [`pacwich ${mainOption}=pnpm list-workspaces`],
+  })),
   includeRoot: defineOptionContent(
     "includeRoot",
     ({ mainOption, shortOption }) => ({
@@ -57,10 +44,10 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
       description:
         "Include the root workspace as a normal workspace. This overrides config and environment variable settings.",
       examples: [
-        `bw ${mainOption} list-workspaces`,
-        `bw ${shortOption} list-workspaces`,
+        `pacwich ${mainOption} list-workspaces`,
+        `pacwich ${shortOption} list-workspaces`,
         "",
-        `bw ${mainOption.replace("--", "--no-")} list-workspaces # disable (to override config/env)`,
+        `pacwich ${mainOption.replace("--", "--no-")} list-workspaces # disable (to override config/env)`,
       ],
     }),
   ),
@@ -71,7 +58,7 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
       description:
         "Disable loading of executable config files (written in TS/JS) for untrusted contexts. " +
         `This can be set by default using the environment variable ${getUserEnvVarName("disableExecutableConfigsDefault")}=true.`,
-      examples: [`bw ${mainOption} list-workspaces`],
+      examples: [`pacwich ${mainOption} list-workspaces`],
     }),
   ),
   logLevel: defineOptionContent("logLevel", ({ mainOption, shortOption }) => ({
@@ -79,8 +66,8 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
     description:
       "Set the logging level. For the run-script (run) command, silence output with --output-style=none.",
     examples: [
-      `bw ${mainOption}=debug list-workspaces`,
-      `bw ${shortOption} error list-workspaces`,
+      `pacwich ${mainOption}=debug list-workspaces`,
+      `pacwich ${shortOption} error list-workspaces`,
     ],
   })),
 } as const satisfies Record<CliGlobalOptionName, CliGlobalOptionContent>;

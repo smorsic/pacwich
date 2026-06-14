@@ -1,0 +1,6 @@
+{
+  "name": "fail1",
+  "scripts": {
+    "test-exit": "echo 'fail1 stdout 1' && sleep 0.1 && echo 'fail1 stderr 1' >&2 && sleep 0.1 && echo 'fail1 stdout 2' && exit 1"
+  }
+}

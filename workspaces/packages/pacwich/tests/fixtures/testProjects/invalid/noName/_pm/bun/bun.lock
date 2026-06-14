@@ -1,0 +1,12 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": { "name": "test-root" },
+    "applications/applicationA": { "name": "application-a" },
+    "libraries/libraryA": { "name": "library-a" },
+    "libraries/libraryB": { "name": "library-b-placeholder" },
+    "libraries/nested/libraryC": { "name": "library-c" }
+  },
+  "packages": {}
+}

@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
+import { defineConfig } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
-import { defineConfig } from "rspress/config";
-import packageJson from "../../packages/bun-workspaces/package.json";
+import { pluginSitemap } from "@rspress/plugin-sitemap";
+import packageJson from "../../packages/pacwich/package.json";
 import {
   HEADER_NAV_LINKS,
   GITHUB_REPO_URL,
@@ -11,22 +12,20 @@ import {
   LICENSE_URL,
   DOMAIN,
   NPM_PACKAGE_URL,
-  BW_BLOG_URL,
+  BLOG_URL,
   createSidebar,
 } from "./rspressLinks";
 
-const REQUIRED_BUN_VERSION = packageJson._bwInternal.bunVersion.libraryConsumer;
-
 const TITLE =
-  "bun-workspaces — Enhanced Bun monorepo management | Documentation";
+  "pacwich — Monorepo tooling for Bun, npm, and pnpm workspaces | Documentation";
 const DESCRIPTION =
-  "A tool for managing monorepos using native Bun workspaces, helping you develop JavaScript and TypeScript projects with the bun-workspaces CLI and API.";
+  "Monorepo tooling that works on top of Bun, npm, and pnpm workspaces, with a CLI and TypeScript API.";
 
 const LD_JSON = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "bun-workspaces",
-  alternateName: "bw",
+  name: "pacwich",
+  alternateName: "pacwich",
   applicationCategory: "DeveloperApplication",
   applicationSubCategory: "CLI",
   operatingSystem: "Cross-platform",
@@ -37,7 +36,7 @@ const LD_JSON = {
   sameAs: [GITHUB_REPO_URL, NPM_PACKAGE_URL],
   downloadUrl: NPM_PACKAGE_URL,
   license: LICENSE_URL,
-  thumbnailUrl: `${DOMAIN}/images/png/bwunster-bg-square_300x300.png`,
+  thumbnailUrl: `${DOMAIN}/images/png/bwunster-bg-title_128x128x6.png`,
   accessMode: "textual",
   author: {
     "@type": "Person",
@@ -51,15 +50,7 @@ const LD_JSON = {
   audience: {
     "@type": "Audience",
     audienceType: "Software developers",
-    description:
-      "Developers using the Bun runtime for TypeScript or JavaScript and its workspace feature for monorepo development.",
-  },
-  about: {
-    "@type": "Thing",
-    name: "Bun workspaces",
-    sameAs: "https://bun.sh/docs/pm/workspaces",
-    description:
-      "Native workspace feature in the Bun JavaScript runtime used for managing multi-package monorepos.",
+    description: "Developers of TypeScript or JavaScript monorepos.",
   },
   softwareVersion: packageJson.version,
 };
@@ -77,33 +68,14 @@ export default defineConfig({
   description: DESCRIPTION,
   icon: "/favicon.ico",
   logo: "/images/png/bwunster_64x70.png",
-  logoText: `bun-workspaces`,
+  logoText: `pacwich`,
   search: {
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
+  llms: true,
   plugins: [
     pluginClientRedirects({
       redirects: [
-        {
-          from: "/blog",
-          to: "https://smorsic.io/blog",
-        },
-        {
-          from: "/blog/bun-workspaces-v1",
-          to: "https://smorsic.io/blog/bun-workspaces-v1",
-        },
-        {
-          from: "/blog/bun-workspaces-v1_9",
-          to: "https://smorsic.io/blog/bun-workspaces-v1_9",
-        },
-        {
-          from: "/blog/bun-workspaces-v1_5",
-          to: "https://smorsic.io/blog/bun-workspaces-v1_5",
-        },
-        {
-          from: "/blog/typewriters-to-tokens",
-          to: "https://smorsic.io/blog/typewriters-to-tokens",
-        },
         {
           from: "/concepts/script-runtime-metadata",
           to: "/concepts/workspace-script-metadata",
@@ -114,16 +86,11 @@ export default defineConfig({
         },
       ],
     }),
-    // TODO: This worked briefly with mismatched versions. This will likely not work again until rspress v2 is out of beta.
-    // * In the meantime, manage src/pages/public/sitemap.xml manually.
-    // * And however, be mindful that trailing slashes vs. non-trailing slashes
-    // * are important to the Google Search Console. This site works best with non-trailing links
-    // * and sitemap.xml references.
-    // pluginSitemap({
-    //   siteUrl: new URL(packageJson.homepage).origin,
-    //   defaultChangeFreq: "weekly",
-    //   defaultPriority: "0.8",
-    // }),
+    pluginSitemap({
+      siteUrl: new URL(packageJson.homepage).origin,
+      defaultChangeFreq: "weekly",
+      defaultPriority: "0.8",
+    }),
   ],
   route: {
     cleanUrls: true,
@@ -132,9 +99,10 @@ export default defineConfig({
     dev: {},
     tools: {
       rspack: {
-        // bun-workspaces uses a dynamic require() for loading TS/JS config files
-        // at runtime — it is never executed in the browser bundle context
-        ignoreWarnings: [/Critical dependency/],
+        ignoreWarnings: [
+          // mismatched value stringification across builds
+          /Conflicting values for 'import\.meta\.env\.SSR'/,
+        ],
       },
     },
     plugins: [pluginSvgr()],
@@ -143,23 +111,21 @@ export default defineConfig({
     },
     source: {
       define: {
-        process: `({ 
+        process: `({
           env: {
             YEAR: ${JSON.stringify(new Date().getFullYear())},
             BUILD_ID: ${JSON.stringify(process.env.BUILD_ID ?? "(no build ID)")},
-            REQUIRED_BUN_VERSION: ${JSON.stringify(REQUIRED_BUN_VERSION)},
             BWUNSTER_ASCII: ${JSON.stringify(BWUNSTER_ASCII)},
-            BW_WEB_SERVICE_BASE_URL: ${JSON.stringify(process.env.BW_WEB_SERVICE_BASE_URL ?? "http://localhost:8080")},
-            BW_DOC_ENV: ${JSON.stringify(process.env.BW_DOC_ENV ?? "production")},
-            BW_BLOG_URL: ${JSON.stringify(BW_BLOG_URL)},
+            PACWICH_WEB_SERVICE_BASE_URL: ${JSON.stringify(process.env.PACWICH_WEB_SERVICE_BASE_URL ?? "http://localhost:8080")},
+            PACWICH_DOCS_ENV: ${JSON.stringify(process.env.PACWICH_DOCS_ENV ?? "production")},
+            BLOG_URL: ${JSON.stringify(BLOG_URL)},
           },
-          on: function(){}
         })`,
       },
     },
     html: {
       tags: [
-        ...(process.env.BW_DOC_ENV === "development"
+        ...(process.env.PACWICH_DOCS_ENV === "development"
           ? [
               {
                 tag: "meta",
@@ -178,7 +144,7 @@ export default defineConfig({
           children: JSON.stringify(
             LD_JSON,
             null,
-            process.env.BW_DOC_ENV === "development" ? 2 : 0,
+            process.env.PACWICH_DOCS_ENV === "development" ? 2 : 0,
           ),
         },
         {
@@ -213,7 +179,7 @@ export default defineConfig({
           tag: "meta",
           attrs: {
             name: "og:image",
-            content: `${DOMAIN}/images/png/bwunster-og-title_1200x630.png`,
+            content: `${DOMAIN}/images/png/og.png`,
           },
         },
         {
@@ -234,16 +200,15 @@ export default defineConfig({
           tag: "link",
           attrs: {
             rel: "stylesheet",
-            // ! TODO Remove unused
             href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Jersey+10&family=Lexend:wght@100..900&display=swap",
           },
         },
         {
           tag: "script",
           children: `
-          if(!localStorage.getItem('bw-doc-theme-initialized')) {
+          if(!localStorage.getItem('pacwich-doc-theme-initialized')) {
             window.RSPRESS_THEME = 'dark';
-            localStorage.setItem('bw-doc-theme-initialized', 'true');
+            localStorage.setItem('pacwich-doc-theme-initialized', 'true');
           }
           `.replace(/\s+/g, ""),
         },
@@ -251,8 +216,22 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    llmsUI: false,
     enableScrollToTop: true,
     socialLinks: [
+      {
+        icon: {
+          svg: fs.readFileSync(
+            path.resolve(
+              __dirname,
+              "src/pages/public/images/external/gh-sponsors.svg",
+            ),
+            "utf8",
+          ),
+        },
+        mode: "link",
+        content: "https://github.com/sponsors/smorsic",
+      },
       {
         icon: "github",
         mode: "link",
@@ -269,16 +248,10 @@ export default defineConfig({
           ),
         },
         mode: "link",
-        content: "https://www.npmjs.com/package/bun-workspaces",
+        content: "https://www.npmjs.com/package/pacwich",
       },
     ],
     nav: HEADER_NAV_LINKS,
-    sidebar: {
-      ...createSidebar("cli"),
-      ...createSidebar("api"),
-      ...createSidebar("config"),
-      ...createSidebar("concepts"),
-      ...createSidebar("ai"),
-    },
+    sidebar: createSidebar("combo"),
   },
 });

@@ -1,7 +1,7 @@
 ---
-title:  Inputs
-titleSuffix: " | bun-workspaces"
-description: "Inputs | Configuration | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+title: Inputs
+titleSuffix: " | pacwich"
+description: "Inputs | Configuration | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -15,22 +15,23 @@ import { INPUTS_FILES_EXAMPLE, INPUTS_WORKSPACE_PATTERNS_EXAMPLE, INPUTS_EXTERNA
 
 ## Overview
 
-Inputs are the files and dependencies that are considered inputs for a script.
+See the glossary for the brief [definition of inputs](/concepts/glossary#inputs),
+which are the files and dependencies considered relevant to the result of a script or state of a workspace.
 
 These are set by [workspace config](/config/workspace) options, which can be set at
 the workspace level (`defaultInputs`) or at the script level (`scripts[name].inputs`).
-
-Inputs are used to determine whether changes to files in the project are considered
-changes to a particular workspace, which is used for determining [affected workspaces](/concepts/affected).
 
 ### Defaults
 
 The default inputs when not provided are all git-trackable files in a workspace's directory,
 effectively making `"."` the default input pattern for a workspace's files.
 
-Other implicit inputs by default are all [workspace dependencies](/concepts/workspace-dependencies), 
-and all other dependencies in the workspace's `package.json`.
-There are ways to further customize these implicit inputs, as described below.
+Other implicit inputs are all [workspace dependencies](/concepts/workspace-dependencies), 
+and all other dependencies in the workspace's `package.json`. There is additional
+configuration described below around dependencies.
+
+Features such as those for [affected workspaces](/concepts/affected) may
+offer options to ignore certain inputs.
 
 ## Files
 
@@ -40,7 +41,7 @@ Paths with a leading `/` are relative to the project root.
 
 Prefix with `!` to exclude.
 
-**Only git-trackable files are considered inputs.**
+**Only git-trackable files can be considered inputs.**
 
 [Workspace configuration](/config/workspace) example:
 <SyntaxHighlighter language="json">
@@ -56,7 +57,7 @@ In cases such as determining [affected workspaces](/concepts/affected),
 using `"workspace:*"` in a workspace's `package.json`) are considered
 inputs to a workspace by default.
 
-**`bun-workspaces` does not perform source code analysis.** This keeps determining
+**`pacwich` does not perform source code analysis.** This keeps determining
 the graph of workspaces computationally fast and cheap, relying instead on explicit
 `package.json` dependencies.
 

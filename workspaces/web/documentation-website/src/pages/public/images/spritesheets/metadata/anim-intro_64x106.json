@@ -1,0 +1,203 @@
+{
+  "frames": {
+    "anim-intro 0.aseprite": {
+      "frame": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 1.aseprite": {
+      "frame": { "x": 64, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 2.aseprite": {
+      "frame": { "x": 128, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 3.aseprite": {
+      "frame": { "x": 192, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 4.aseprite": {
+      "frame": { "x": 256, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 5.aseprite": {
+      "frame": { "x": 320, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 6.aseprite": {
+      "frame": { "x": 384, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 7.aseprite": {
+      "frame": { "x": 448, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 8.aseprite": {
+      "frame": { "x": 512, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 9.aseprite": {
+      "frame": { "x": 576, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 10.aseprite": {
+      "frame": { "x": 640, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    },
+    "anim-intro 11.aseprite": {
+      "frame": { "x": 704, "y": 0, "w": 64, "h": 106 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 106 },
+      "sourceSize": { "w": 64, "h": 106 },
+      "duration": 100
+    }
+  },
+  "meta": {
+    "app": "http://www.aseprite.org/",
+    "version": "1.3.17.2-dev",
+    "image": "anim-intro_64x106.png",
+    "format": "RGBA8888",
+    "size": { "w": 768, "h": 106 },
+    "scale": "1",
+    "frameTags": [],
+    "layers": [
+      { "name": "Bottom Bun", "opacity": 255, "blendMode": "normal" },
+      { "name": "Burgers" },
+      { "name": "Burger T", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger T",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger R", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger R",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger L", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger L",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Burger B", "group": "Burgers" },
+      {
+        "name": "Bottom",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Patty",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Top",
+        "group": "Burger B",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      { "name": "Top Bun" },
+      {
+        "name": "Base",
+        "group": "Top Bun",
+        "opacity": 255,
+        "blendMode": "normal"
+      },
+      {
+        "name": "Eye",
+        "group": "Top Bun",
+        "opacity": 255,
+        "blendMode": "normal"
+      }
+    ],
+    "slices": []
+  }
+}

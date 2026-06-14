@@ -1,14 +1,14 @@
 ---
 title: Workspace Configuration
-titleSuffix: " | bun-workspaces"
-description: "Workspace configuration documentation for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Workspace configuration documentation for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { Link } from "rspress/theme";
+import { Link } from "@rspress/core/theme-original";
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { ENV_VARS_METADATA } from "../../../lib/config/envVars";
 
@@ -16,7 +16,7 @@ import { ENV_VARS_METADATA } from "../../../lib/config/envVars";
 
 ## Settable Environment Variables
 
-Set these environment variables to override default values used. The [root configuration](/config/root) will take precedence over environment variables, 
+Set these environment variables to override default values used. The [project configuration](/config/project) will take precedence over environment variables, 
 and any values set explicitly in CLI or API arguments will take precedence over both.
 
 <ul className="env-vars-list">
@@ -24,7 +24,7 @@ and any values set explicitly in CLI or API arguments will take precedence over 
   <li className="env-var-item" key={envVar.envVarName}>
     <code>{envVar.envVarName}</code>
     <div>{envVar.description}</div>
-    {envVar.rootConfigDefaultsKey && <div>If <code>{envVar.rootConfigDefaultsKey}</code> is set in the <Link href="/config/root" className="inline-link">root configuration</Link>, it will take precedence.</div>}
+    {envVar.projectConfigDefaultsKey && <div>If <code>{envVar.projectConfigDefaultsKey}</code> is set in the <Link href="/config/project" className="inline-link">project configuration</Link>, it will take precedence.</div>}
   </li>
 </div>)}
 </ul>

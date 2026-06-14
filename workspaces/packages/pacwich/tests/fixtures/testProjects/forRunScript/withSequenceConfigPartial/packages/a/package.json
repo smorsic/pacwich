@@ -1,0 +1,10 @@
+{
+  "name": "a",
+  "pacwich": {
+    "scripts": {
+    }
+  },
+  "scripts": {
+    "test-echo": "echo a"
+  }
+}

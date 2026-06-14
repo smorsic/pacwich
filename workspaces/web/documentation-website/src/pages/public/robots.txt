@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://bunworkspaces.com/sitemap.xml
+Sitemap: https://pacwich.dev/sitemap.xml

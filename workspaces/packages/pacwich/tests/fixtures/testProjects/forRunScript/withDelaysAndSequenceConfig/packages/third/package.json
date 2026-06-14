@@ -1,0 +1,13 @@
+{
+  "name": "third",
+  "pacwich": {
+    "scripts": {
+      "test-delay": {
+        "order": 3
+      }
+    }
+  },
+  "scripts": {
+    "test-delay": "sleep 0.5 && echo third"
+  }
+}

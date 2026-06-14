@@ -1,7 +1,0 @@
-{
-  "name": "workspace-a",
-  "scripts": {
-    "debug-parallel-max": "echo $_BW_PARALLEL_MAX",
-    "debug-shell": "echo $_BW_SCRIPT_SHELL_OPTION"
-  }
-}

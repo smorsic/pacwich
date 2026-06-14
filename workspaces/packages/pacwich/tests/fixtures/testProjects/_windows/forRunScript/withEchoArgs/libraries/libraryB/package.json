@@ -1,0 +1,9 @@
+{
+  "name": "library-1b",
+  "pacwich": {
+    "alias": "libB"
+  },
+  "scripts": {
+    "test-echo": "echo passed args:"
+  }
+}

@@ -1,40 +1,55 @@
-import { Link } from "rspress/theme";
-import { RequiredBunVersion } from "../components/RequiredBunVersion";
+import { Link } from "@rspress/core/theme-original";
+import { PmTabs } from "../components/PmTabs";
 
 export interface ApiHeaderProps {
+  fullInstallDoc?: boolean;
   divider?: boolean;
 }
 
-export const ApiHeader = ({ divider }: ApiHeaderProps) => {
+export const ApiHeader = ({ fullInstallDoc = false }: ApiHeaderProps) => {
+  const installDescription =
+    "Install the package in your project's devDependencies";
   return (
     <div className="sub-header">
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Install the package via <code>bun add --dev bun-workspaces</code> to use
-        the TypeScript/JavaScript API.
+      {fullInstallDoc && (
+        <>
+          <PmTabs
+            title="Install"
+            sections={{
+              bun: [
+                {
+                  description: installDescription,
+                  code: "bun add -d pacwich",
+                },
+              ],
+              pnpm: [
+                {
+                  description: installDescription,
+                  code: "pnpm add -D pacwich",
+                },
+              ],
+              npm: [
+                {
+                  description: installDescription,
+                  code: "npm install -D pacwich",
+                },
+              ],
+            }}
+          />
+          <br />
+        </>
+      )}
+      See the <Link href="/intro/getting-started">Getting Started</Link> or{" "}
+      <Link href="/concepts/glossary">Glossary</Link> pages for more starting
+      info.
+      <p className="note">
+        <b>Stale workspace data:</b> Note that you need to run your package
+        manager's install for <code>pacwich</code> to have current workspace
+        data available, e.g. via <code>bun install</code>,{" "}
+        <code>pnpm install</code>, or <code>npm install</code>. If you've
+        added/removed/updated any workspace package.json, you'll likely need to
+        run this again.
       </p>
-
-      <p className="note" style={{ marginTop: "1rem" }}>
-        See the{" "}
-        <Link href="/concepts/glossary" style={{ color: "var(--rp-c-link)" }}>
-          Glossary
-        </Link>{" "}
-        for more fundamental concepts.
-      </p>
-      <h4 style={{ marginTop: "1rem" }}>TypeScript</h4>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Ensure you have <code>@types/bun</code> installed for accurate types.
-      </p>
-      <h4 style={{ marginTop: "1rem" }}>Stale Workspace Data</h4>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Note that you need to run <code>bun install</code> in your project for
-        <code>bun-workspaces</code> to find your project's workspaces, and you
-        likely must run this again after you've updated your workspaces, such as
-        changing a name or adding/removing one. This is because{" "}
-        <code>bun.lock</code> lists workspaces and is used as the source of
-        truth.
-      </p>
-      <RequiredBunVersion className="bun-version sub-header-bun-version" />
-      {divider && <hr />}
     </div>
   );
 };

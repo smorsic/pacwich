@@ -4,6 +4,7 @@ import { loadSpritesheet, type Spritesheet } from "./spritesheet";
 export interface AnimatedSpriteProps {
   spritesheetFileName: string;
   width: number;
+  startDelay?: number;
   height?: number;
   onFinish?: () => void;
   loop?: boolean;
@@ -11,11 +12,13 @@ export interface AnimatedSpriteProps {
   frameLengths?: Record<number, number | (() => number)>;
   canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
   reducedMotionFrame: number;
+  forceReduceMotion?: boolean;
 }
 
 export const AnimatedSprite = ({
   spritesheetFileName,
   width,
+  startDelay = 0,
   height,
   onFinish,
   loop,
@@ -23,6 +26,7 @@ export const AnimatedSprite = ({
   frameLengths,
   canvasProps,
   reducedMotionFrame,
+  forceReduceMotion = false,
 }: AnimatedSpriteProps) => {
   const [spritesheetData, setSpritesheetData] = useState<Spritesheet | null>(
     null,
@@ -59,9 +63,9 @@ export const AnimatedSprite = ({
 
     ctx.imageSmoothingEnabled = false;
 
-    const isReducedMotion = window.matchMedia(
-      `(prefers-reduced-motion: reduce)`,
-    ).matches;
+    const isReducedMotion =
+      forceReduceMotion ||
+      window.matchMedia(`(prefers-reduced-motion: reduce)`).matches;
 
     if (isReducedMotion) {
       ctx.drawImage(
@@ -84,7 +88,13 @@ export const AnimatedSprite = ({
     let frameIndex = 0;
     let lastFrameTime: number | undefined = undefined;
     let lastFrameLength = 1;
+    const startTime = performance.now();
     const draw = (time: number) => {
+      if (startDelay > 0 && time < startTime + startDelay) {
+        requestAnimationFrame(draw);
+        return;
+      }
+
       if (!isDrawingRef.current) {
         onFinish?.();
         return;

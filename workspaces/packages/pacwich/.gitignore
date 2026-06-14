@@ -1,0 +1,4 @@
+src/internal/generated/**/*.ts
+src/internal/generated/**/*.js
+AGENTS.md
+agents/

@@ -1,6 +1,6 @@
-import type { CliCommandName } from "bw-common/cli";
+import type { CliCommandName } from "@pacwich/common/cli";
+import { Link } from "@rspress/core/theme-original";
 import { type ReactNode, useId } from "react";
-import { Link } from "rspress/theme";
 import { SyntaxHighlighter } from "../util/highlight";
 import { getCliCommandContent } from "./cliCommandOptions";
 import { getCommandId } from "./searchIds";
@@ -65,11 +65,11 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
     <div className="cli-command-doc">
       <div id={getCommandId(content)} className="cli-doc-section-anchor" />
       <p>
-        Usage: <code>{content.command}</code>
+        <b>Usage</b>: <code>{content.command}</code>
       </p>
       {content.aliases?.length ? (
         <p>
-          Aliases:{" "}
+          <b>Aliases</b>:{" "}
           {content.aliases.map((value) => (
             <code
               key={id + "code-alias-" + value}
@@ -83,6 +83,7 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
         ""
       )}
       <p style={{ marginBottom: "0" }}>
+        <b>Description</b>:{" "}
         {renderDescription({
           description: content.description,
           descriptionLinks: content.descriptionLinks,
@@ -90,13 +91,12 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
       </p>
 
       {Object.values(content.options)?.length ? (
-        <div style={{ marginTop: "1rem" }}>
-          <h5>
-            <em>Options:</em>
-          </h5>
+        <div>
+          <h5>Options:</h5>
           <div className="cli-command-options-container">
             {Object.values(content.options).map((option) => (
-              <div
+              <p
+                className="cli-command-option-flags"
                 key={
                   "cli-command-option-" +
                   content.command +
@@ -104,17 +104,14 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
                   option.flags.join(", ")
                 }
               >
-                <p className="cli-command-option-flags">
-                  <code>{option.flags.join(" | ")}</code>:
-                  <span>{option.description}</span>
-                  {option.values?.length ? (
-                    <span style={{ marginLeft: "0.25rem" }}>
-                      (Values: <span>{option.values.join(" | ")}</span>)
-                    </span>
-                  ) : null}
-                </p>
-                <hr />
-              </div>
+                <code>{option.flags.join(" | ")}</code> :
+                <span>{option.description}</span>
+                {option.values?.length ? (
+                  <span style={{ marginLeft: "0.25rem" }}>
+                    (Values: <span>{option.values.join(" | ")}</span>)
+                  </span>
+                ) : null}
+              </p>
             ))}
           </div>
         </div>

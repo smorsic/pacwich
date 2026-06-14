@@ -1,0 +1,38 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "test-root",
+    },
+    "packages/a": {
+      "name": "a",
+    },
+    "packages/b": {
+      "name": "b",
+      "dependencies": {
+        "a": "workspace:*",
+      },
+    },
+    "packages/c": {
+      "name": "c",
+    },
+    "packages/d": {
+      "name": "d",
+    },
+    "packages/e": {
+      "name": "e",
+    },
+  },
+  "packages": {
+    "a": ["a@workspace:packages/a"],
+
+    "b": ["b@workspace:packages/b"],
+
+    "c": ["c@workspace:packages/c"],
+
+    "d": ["d@workspace:packages/d"],
+
+    "e": ["e@workspace:packages/e"],
+  }
+}

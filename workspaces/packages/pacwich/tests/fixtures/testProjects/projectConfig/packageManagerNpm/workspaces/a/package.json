@@ -1,0 +1,6 @@
+{
+  "name": "workspace-a",
+  "scripts": {
+    "noop": "true"
+  }
+}

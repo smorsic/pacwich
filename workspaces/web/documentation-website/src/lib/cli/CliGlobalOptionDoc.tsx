@@ -1,4 +1,4 @@
-import type { CliGlobalOptionName } from "bw-common/cli";
+import type { CliGlobalOptionName } from "@pacwich/common/cli";
 import { useId } from "react";
 import { SyntaxHighlighter } from "../util/highlight";
 import { getCliGlobalOptionContent } from "./cliGlobalOptions";
@@ -22,7 +22,7 @@ export const CliGlobalOptionDoc = ({
         </div>
       ) : null}
       <p>
-        Usage: <code>{content.mainOption}</code>
+        <b>Usage</b>: <code>{content.mainOption}</code>
         {content.shortOption ? (
           <>
             {" "}
@@ -32,7 +32,7 @@ export const CliGlobalOptionDoc = ({
       </p>
       {content.values?.length ? (
         <p>
-          Values:{" "}
+          <b>Values</b>:{" "}
           {content.values.map((value, i) => (
             <code
               key={id + "code-value-" + i}
@@ -47,12 +47,14 @@ export const CliGlobalOptionDoc = ({
       )}
       {content.defaultValue ? (
         <p>
-          Default Value: <code>{content.defaultValue}</code>
+          <b>Default Value</b>: <code>{content.defaultValue}</code>
         </p>
       ) : (
         ""
       )}
-      <p>{content.description}</p>
+      <p>
+        <b>Description:</b> {content.description}
+      </p>
       <h5>
         <em>Examples:</em>
       </h5>

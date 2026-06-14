@@ -2,30 +2,33 @@ import { ENV_VARS_METADATA } from "../config/envVars";
 export * from "./apiQuickStart";
 
 export const CREATE_FS_PROJECT_EXAMPLE = `
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 // Root directory defaults to process.cwd()
+// Package manager is auto-detected if a lockfile is found
 const defaultProject = createFileSystemProject();
 
 const pathProject = createFileSystemProject({
   // relative from process.cwd()
   rootDirectory: "./path/to/project/root",
 
+  // Specify a package manager, mainly if multiple lockfiles are present
+  packageManager: "bun",
+
+  // (default false) Include the root workspace as a normal workspace
+  includeRootWorkspace: false,
+
   // Disable executable configuration files (TS/JS) for untrusted contexts
   disableExecutableConfigs: true,
-});
-
-// Include the root workspace as a normal workspace (overrides config/env settings)
-const projectWithRoot = createFileSystemProject({
-  includeRootWorkspace: true,
 });
 
 `.trim();
 
 export const CREATE_MEMORY_PROJECT_EXAMPLE = `
-import { createMemoryProject } from "bun-workspaces";
+import { createMemoryProject } from "pacwich";
 
 const testProject = createMemoryProject({
+  packageManager: "npm", // required
   rootDirectory: "test-project-directory", // optional
   name: "test-project", // optional
   workspaces: [
@@ -67,49 +70,21 @@ const workspaces = project.findWorkspacesByPattern(
 export const LIST_WORKSPACES_WITH_SCRIPT_EXAMPLE = `
 // An array of workspaces that have "my-script" 
 // in their package.json "scripts" field
-const workspaces = project.listWorkspacesWithScript("my-script"));`.trim();
+const workspaces = project.listWorkspacesWithScript("my-script");`.trim();
 
 export const LIST_WORKSPACES_WITH_TAG_EXAMPLE = `
 // An array of workspaces that have the tag "my-tag".
 // Tags are defined in a workspace's configuration file.
 const workspaces = project.listWorkspacesWithTag("my-tag");`.trim();
 
-export const MAP_SCRIPTS_TO_WORKSPACES_EXAMPLE = `
-// An object mapping all script names to the workspaces 
-// that have them in their package.json "scripts" field
-const scriptMap = project.mapScriptsToWorkspaces();
-
+export const SCRIPT_MAP_EXAMPLE = `
 // An array of Workspaces
-const { workspaces } = scriptMap["my-script"];
+const { workspaces } = project.scriptMap["my-script"];
 `.trim();
 
-export const MAP_TAGS_TO_WORKSPACES_EXAMPLE = `
-// An object mapping all tags to the workspaces 
-// that have them in their respective configuration.
-const tagMap = project.mapTagsToWorkspaces();
-
+export const TAG_MAP_EXAMPLE = `
 // An array of Workspaces
-const { workspaces } = tagMap["my-tag"];
-`.trim();
-
-export const CREATE_SCRIPT_COMMAND_EXAMPLE = `
-
-// Does not run a script, but provides
-// metadata that can be used to do so.
-const {
-  commandDetails: { command, workingDirectory },
-} = project.createScriptCommand({
-  scriptName: "my-script",
-  workspaceNameOrAlias: "my-workspace",
-  method: "cd", // optional, defaults to "cd" (other option "filter")
-  args: "--my-appended-args", // optional, append args to the command
-});
-
-// A means by which you may actually run the script
-const subprocess = Bun.spawn(["sh", "-c", command], {
-  cwd: workingDirectory,
-});
-
+const { workspaces } = project.tagMap["my-tag"];
 `.trim();
 
 export const WORKSPACE_EXAMPLE = `
@@ -147,14 +122,14 @@ export const WORKSPACE_EXAMPLE = `
     {
       "name": "lodash",
       "version": "^4.17.21",
-      "source": "dependencies" (or "devDependencies", "peerDependencies", "optionalDependencies")
+      "source": "devDependencies"
     },
   ],
 }
 `.trim();
 
 export const SET_LOG_LEVEL_EXAMPLE = `
-import { setLogLevel } from "bun-workspaces";
+import { setLogLevel } from "pacwich";
 
 setLogLevel("debug");
 setLogLevel("info") // default
@@ -181,13 +156,13 @@ project.runWorkspaceScript({
 `.trim();
 
 export const API_PARALLEL_SCRIPTS_EXAMPLE = `
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject();
 
 // Run in parallel with the default limit.
 // Equal to "auto" or value of 
-// the root ${ENV_VARS_METADATA.parallelMaxDefault.rootConfigDefaultsKey} 
+// the project ${ENV_VARS_METADATA.parallelMaxDefault.projectConfigDefaultsKey} 
 // or process.env.${ENV_VARS_METADATA.parallelMaxDefault.envVarName}
 project.runScriptAcrossWorkspaces({
   script: "my-script"
@@ -231,29 +206,31 @@ project.runScriptAcrossWorkspaces({
 `.trim();
 
 export const API_INLINE_SHELL_EXAMPLE = `
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject();
 
-// This will use the Bun shell, 
-// unless the root${ENV_VARS_METADATA.scriptShellDefault.rootConfigDefaultsKey}
-// or process.env.${ENV_VARS_METADATA.scriptShellDefault.envVarName} is set to "system"
+// This will use the system shell (sh in POSIX or cmd in Windows), 
+// unless the project ${ENV_VARS_METADATA.scriptShellDefault.projectConfigDefaultsKey}
+// or process.env.${ENV_VARS_METADATA.scriptShellDefault.envVarName} is set to "bun"
 project.runWorkspaceScript({
   workspaceNameOrAlias: "my-workspace",
   script: "echo 'this is my inline script'",
   inline: true,
 });
 
+// Use the Bun shell to execute a script, a cross-platform bash-like shell,
+// if Bun is available
 project.runWorkspaceScript({
   workspaceNameOrAlias: "my-workspace",
   script: "echo 'this is my inline script'",
   // Takes "bun", "system", or "default", same as the CLI --shell option
-  inline: { shell: "system" },
+  inline: { shell: "bun" },
 });
 `.trim();
 
 export const API_ROOT_SELECTOR_EXAMPLE = `
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject();
 
@@ -319,5 +296,16 @@ const { output, summary } = await project.runAffectedWorkspaceScript({
   scriptOptions: {
     script: "my-script",
   },
+});
+`.trim();
+
+export const API_VERIFY_EXAMPLE = `
+// Analog to the CLI verify command
+const results = await project.verify({
+  // Optional: (default false) When true,
+  // treat warnings as errors
+  strict: false,
+  // Optional: workspace patterns to scope verification to
+  workspacePatterns: ["*"],
 });
 `.trim();

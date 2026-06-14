@@ -1,4 +1,4 @@
-import { type OnSearch } from "rspress/theme";
+import { type OnSearch } from "@rspress/core/theme-original";
 import { getCliGlobalOptionsContent, getCliCommandsContent } from "../lib/cli";
 import { getCommandId, getGlobalOptionId } from "../lib/cli/searchIds";
 

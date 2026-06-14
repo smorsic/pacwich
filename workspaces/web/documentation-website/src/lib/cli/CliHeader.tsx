@@ -1,45 +1,30 @@
-import { Link } from "rspress/theme";
-import { RequiredBunVersion } from "../components/RequiredBunVersion";
+import { Link } from "@/theme";
+import { CliInstall } from "../components/CliInstall";
 
-export const CliHeader = () => {
+export interface CliHeaderProps {
+  fullInstallDoc?: boolean;
+}
+
+export const CliHeader = ({ fullInstallDoc = false }: CliHeaderProps) => {
   return (
     <div className="sub-header">
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Try the{" "}
-        <Link className="inline-link" href="/web-cli">
-          Web CLI demo
-        </Link>{" "}
-        right here in your browser!
+      {fullInstallDoc && (
+        <>
+          <CliInstall />
+          <br />
+        </>
+      )}
+      See the <Link href="/intro/getting-started">Getting Started</Link> or{" "}
+      <Link href="/concepts/glossary">Glossary</Link> pages for more starting
+      info.
+      <p className="note">
+        <b>Stale workspace data:</b> Note that you need to run your package
+        manager's install for <code>pacwich</code> to have current workspace
+        data available, e.g. via <code>bun install</code>,{" "}
+        <code>pnpm install</code>, or <code>npm install</code>. If you've
+        added/removed/updated any workspace package.json, you'll likely need to
+        run this again.
       </p>
-      <h4 style={{ marginTop: "1rem" }}>Running the CLI</h4>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Run the CLI via <code>bunx bun-workspaces</code> or alias it to{" "}
-        <code>bw</code>, such as via <code>alias bw="bunx bun-workspaces"</code>
-        , which can be placed in your shell configuration file, like{" "}
-        <code>.bashrc</code>, <code>.zshrc</code>, or similar.
-      </p>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        You can also invoke <code>bw</code> in your root{" "}
-        <code>package.json</code> scripts directly even without an alias set up.
-      </p>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Examples use an implied <code>bw</code> alias for brevity instead of{" "}
-        <code>bunx bun-workspaces</code>.
-      </p>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Using <code>bunx</code> is preferred over a global install, because it
-        ensures version consistency within projects that have installed it.
-      </p>
-      <h4 style={{ marginTop: "1rem" }}>Stale Workspace Data</h4>
-      <p className="note" style={{ marginTop: "1rem" }}>
-        Note that you need to run <code>bun install</code> in your project for
-        <code>bun-workspaces</code> to find your project's workspaces, and you
-        likely must run this again after you've updated your workspaces, such as
-        changing a name or adding/removing one. This is because{" "}
-        <code>bun.lock</code> lists workspaces and is used as the source of
-        truth.
-      </p>
-      <RequiredBunVersion className="bun-version sub-header-bun-version" />
     </div>
   );
 };

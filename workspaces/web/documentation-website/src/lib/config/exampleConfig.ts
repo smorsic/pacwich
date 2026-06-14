@@ -1,15 +1,13 @@
 import {
   type WorkspaceConfig,
-  type RootConfig,
+  type ProjectConfig,
   WORKSPACE_CONFIG_PACKAGE_JSON_KEY,
-  ROOT_CONFIG_PACKAGE_JSON_KEY,
-} from "bw-common/config";
+  PROJECT_CONFIG_PACKAGE_JSON_KEY,
+} from "@pacwich/common/config";
 
-export const exampleRootConfigSimple1: RootConfig = {
+export const exampleProjectConfigSimple1: ProjectConfig = {
   defaults: {
     parallelMax: 4,
-    shell: "system",
-    includeRootWorkspace: false,
     affectedBaseRef: "my-branch",
   },
   workspacePatternConfigs: [
@@ -22,10 +20,10 @@ export const exampleRootConfigSimple1: RootConfig = {
   ],
 };
 
-export const exampleRootConfigSimple2: RootConfig = {
+export const exampleProjectConfigSimple2: ProjectConfig = {
   defaults: {
     parallelMax: "50%",
-    shell: "system",
+    shell: "bun",
     includeRootWorkspace: true,
     affectedBaseRef: "my-branch",
   },
@@ -73,7 +71,7 @@ export const createPackageJsonExample = (
       : { version: "1.0.0" }),
     [target === "workspace"
       ? WORKSPACE_CONFIG_PACKAGE_JSON_KEY
-      : ROOT_CONFIG_PACKAGE_JSON_KEY]: config,
+      : PROJECT_CONFIG_PACKAGE_JSON_KEY]: config,
   };
 };
 
@@ -82,9 +80,9 @@ export const createTsFileExample = (
   target: "workspace" | "root",
 ) => {
   return `
-import { ${target === "workspace" ? "defineWorkspaceConfig" : "defineRootConfig"} } from "bun-workspaces/config";
+import { ${target === "workspace" ? "defineWorkspaceConfig" : "defineProjectConfig"} } from "pacwich/config";
 
-export default ${target === "workspace" ? "defineWorkspaceConfig" : "defineRootConfig"}(${JSON.stringify(
+export default ${target === "workspace" ? "defineWorkspaceConfig" : "defineProjectConfig"}(${JSON.stringify(
     config,
     null,
     2,
@@ -93,7 +91,7 @@ export default ${target === "workspace" ? "defineWorkspaceConfig" : "defineRootC
 };
 
 export const MERGE_WORKSPACE_CONFIG_EXAMPLE = `
-import { mergeWorkspaceConfig } from "bun-workspaces/config";
+import { mergeWorkspaceConfig } from "pacwich/config";
 
 export default mergeWorkspaceConfig(
   { alias: "a", tags: ["x"] },
@@ -108,23 +106,23 @@ export default mergeWorkspaceConfig(
 );
 `.trim();
 
-export const MERGE_ROOT_CONFIG_EXAMPLE = `
-import { mergeRootConfig } from "bun-workspaces/config";
+export const MERGE_PROJECT_CONFIG_EXAMPLE = `
+import { mergeProjectConfig } from "pacwich/config";
 
-export default mergeRootConfig(
+export default mergeProjectConfig(
   { defaults: { parallelMax: 4 } },
-  { defaults: { shell: "system" } },
+  { defaults: { shell: "bun" } },
   // Factory function receives the accumulated config up to that point
   (prevConfig) => ({ defaults: { includeRootWorkspace: true } }),
 );
 `.trim();
 
 export const WORKSPACE_PATTERN_CONFIGS_EXAMPLE = `
-// bw.root.ts
+// pacwich.root.ts
 
-import { defineRootConfig } from "bun-workspaces/config";
+import { defineProjectConfig } from "pacwich/config";
 
-export default defineRootConfig({
+export default defineProjectConfig({
   workspacePatternConfigs: [
     { 
       // Any matching workspaces under this path

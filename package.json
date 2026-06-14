@@ -1,85 +1,89 @@
 {
-  "name": "bw-root",
+  "name": "pacwich-source-monorepo",
   "private": true,
   "license": "MIT",
   "workspaces": {
     "packages": [
       "workspaces/**/*",
-      "!workspaces/packages/bun-workspaces/**/*",
+      "!workspaces/packages/pacwich/**/*",
       "!workspaces/sandboxes/local-vs-release/**/*"
     ],
     "catalog": {},
     "catalogs": {
-      "bun-workspaces-prod": {
-        "commander": "^12.1.0",
-        "shell-quote": "^1.8.3"
+      "pacwich-prod": {
+        "commander": "12.1.0",
+        "jiti": "2.7.0",
+        "semver": "7.8.0",
+        "shell-quote": "1.8.3",
+        "sucrase": "3.35.1",
+        "yaml": "2.9.0"
       },
-      "bun-workspaces-dev": {
+      "pacwich-dev": {
         "@modelcontextprotocol/inspector": "^0.21.1",
         "@rslib/core": "^0.21.2",
+        "@types/semver": "^7.7.1",
         "@types/shell-quote": "^1.7.5",
         "@xterm/headless": "^6.0.0",
         "ajv": "^8.17.1",
-        "dts-bundle-generator": "^9.5.1"
+        "knip": "^6.15.0",
+        "dts-bundle-generator": "^9.5.1",
+        "vitest": "^4.1.6"
       },
       "web": {
         "@fontsource/unifontex": "^5.2.6",
         "@rsbuild/plugin-svgr": "^1.3.1",
-        "@rspress/plugin-client-redirects": "^1.47.1",
+        "@rspress/core": "^2.0.12",
+        "@rspress/plugin-client-redirects": "^2.0.12",
+        "@rspress/plugin-sitemap": "^2.0.12",
         "@types/lodash": "^4.17.24",
-        "@types/react": "^19.2.14",
+        "@types/react": "^19.2.15",
         "@types/react-syntax-highlighter": "^15.5.13",
-        "lodash": "^4.17.23",
-        "react": "^19.2.4",
-        "react-arborist": "^3.4.3",
-        "react-dom": "^19.2.4",
+        "lodash": "^4.18.1",
+        "react": "^19.2.6",
+        "react-arborist": "^3.7.0",
+        "react-dom": "^19.2.6",
         "react-icons": "^5.6.0",
-        "react-router": "^7.13.2",
-        "react-router-dom": "^7.13.2",
+        "react-router": "^7.15.1",
+        "react-router-dom": "^7.15.1",
         "react-syntax-highlighter": "^16.1.1",
-        "rspress": "^1.47.1",
-        "zustand": "^5.0.12"
+        "zustand": "^5.0.13"
       }
     }
   },
   "scripts": {
-    "cli": "bw",
-    "bw": "bw run -o plain -W bw --script=",
-    "bw:test": "bw run -o plain test bw --",
-    "bw:lint": "bw run -o plain lint bw --",
-    "bw:build": "bw run -o plain build bw --",
-    "bw:build:test": "bw run -o plain build:test bw --",
-    "mcp-server": "bw mcp-server",
-    "docs": "bw run -o plain -W docs",
-    "docs:lint": "bw run -o plain lint docs --",
-    "docs:dev": "bw run -o plain dev docs --",
-    "docs:build": "bw run -o plain build docs --",
-    "docs:build:dev": "bw run -o plain build:dev docs --",
-    "docs:preview": "bw run -o plain preview docs --",
-    "sandbox": "bw run -o plain -W sandbox",
-    "sandbox:cli:local": "bun --cwd=./workspaces/sandboxes/local-vs-release run cli:local",
-    "sandbox:cli:release": "bun --cwd=./workspaces/sandboxes/local-vs-release run cli:release",
-    "sandbox:api:local": "bw run api:local local-vs-release -o plain --",
-    "sandbox:api:release": "bw run api:release local-vs-release -o plain --",
-    "lint": "bw run lint",
+    "cli:bun": "pacwich -l silent run -o plain -W pw --script=cli:bun -- --cwd=$PWD",
+    "cli:node": "pacwich -l silent run -o plain -W pw --script=cli:node -- --cwd=$PWD",
+    "pw": "pacwich run -o plain -W pw --script=",
+    "docs": "pacwich run -o plain -W docs",
+    "sandbox": "pacwich run -o plain -W sandbox",
+    "lint": "pacwich run lint",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
-    "test": "bw run test && bw run build:test",
-    "type-check": "bw run type-check -P --",
-    "create-agents-md": "bw -l warn run create-agents-md meta -o plain",
-    "create-readme": "bw -l warn run create-readme meta -o plain",
-    "init-bw-package": "BW_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/bun-workspaces run create-modules && bun --cwd=workspaces/libraries/bw-common run build:dts",
-    "init-repo": "bun init-bw-package && bun create-readme && bun create-agents-md",
+    "test": "pacwich run -o plain test pw --",
+    "type-check": "pacwich run type-check -P --",
+    "mcp-server": "pacwich mcp-server",
+    "create-agents-md": "pacwich -l warn run create-agents-md meta -o plain",
+    "create-pnpm-workspace-yaml": "pacwich -l warn run create-pnpm-workspace-yaml meta -o plain",
+    "create-readme": "pacwich -l warn run create-readme meta -o plain",
+    "create-mise-toml": "pacwich -l warn run create-mise-toml meta -o plain",
+    "print-dev-bun-version": "pacwich -l silent run -o plain print-dev-tool-version -- bun",
+    "print-dev-node-version": "pacwich -l silent run -o plain print-dev-tool-version -- node",
+    "mise": "./mise.sh",
+    "portless-start": "portless proxy start --no-tls",
+    "portless-stop": "portless proxy stop",
+    "init-pacwich-package": "PACWICH_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/pacwich run create-modules && bun --cwd=workspaces/libraries/pacwich-common run build:dts",
+    "init-repo": "bun init-repo.sh",
+    "preinstall": "mv node_modules node_modules.ignore-me.backup && pnpm install --ignore-scripts && sleep 1 && mv node_modules.ignore-me.backup node_modules",
     "prepare": "bun init-repo"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@pacwich/meta": "workspace:*",
     "@types/bun": "^1.3.14",
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
-    "@typescript-eslint/parser": "^8.59.3",
-    "bun-workspaces": "workspace:*",
-    "bw-meta": "workspace:*",
+    "@types/node": "^25.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
     "eslint": "^9.39.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
@@ -87,11 +91,16 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "json-schema-to-ts": "^3.1.1",
+    "pacwich": "workspace:*",
+    "portless": "^0.13.1",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.3"
+    "typescript-eslint": "^8.59.4"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx,json,css,md,mdx,yaml,yml}": "prettier --write"
+    "*.{js,ts,jsx,tsx,json,css,md,mdx,yaml,yml}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

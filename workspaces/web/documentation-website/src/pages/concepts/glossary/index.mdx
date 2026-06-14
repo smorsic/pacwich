@@ -1,7 +1,7 @@
 ---
 title: Concepts > Glossary
-titleSuffix: " | bun-workspaces"
-description: "Glossary | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Glossary | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -9,50 +9,80 @@ footer: false
 ---
 
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
-import { GLOSSARY_FILE_TREE, GLOSSARY_ROOT_PACKAGE_JSON, GLOSSARY_WORKSPACE_A_PACKAGE_JSON, GLOSSARY_WORKSPACE_B_PACKAGE_JSON } from "../../../lib/concepts/conceptsExamples";
+import { GLOSSARY_FILE_TREE, GLOSSARY_ROOT_PACKAGE_JSON, GLOSSARY_WORKSPACE_A_PACKAGE_JSON, GLOSSARY_WORKSPACE_B_PACKAGE_JSON, PNPM_WORKSPACE_YAML } from "../../../lib/concepts/conceptsExamples";
 
 # Glossary
 
-Learn some of the basic terms and primitives of `bun-workspaces` here.
+Learn some of the basic terms and primitives of `pacwich` here.
 
 ## Terms
 
 #### Project
 
-This is typically the same as the root of your git repository for your monorepo. This is where your top-level `package.json` 
-file is located, which contains the `"workspaces"` field. 
+A **project** is typically the same as the root of your git repository for your monorepo. This is where your top-level `package.json` 
+file is located and where you've defined workspaces for your package manager, whether via the `"workspaces"` field in
+package.json (for Bun or npm) or `pnpm-workspace.yaml` (for pnpm).
 
-See [Bun's documentation](https://bun.sh/docs/install/workspaces) for more information on setting up workspaces via package.json.
+`pacwich` recognizes a project by a root `package.json` living alongside a lockfile (`package-lock.json`, `bun.lock`, `pnpm-lock.yaml`), since the 
+lockfile is the best source of truth for workspace-related data, so a project and its workspace data aren't recognized or current until you run your install command.
 
 #### Workspace
 
-This is the same conceptually as a workspace in Bun. `bun-workspaces` simply allows enriching and working with workspaces in various ways.
+A **workspace** is simply a nested package within your project that has its own `package.json` file and is matched by the workspaces
+you declare at the root of your project with your package manager's config. 
 
-A nested package within a project. The root of a workspace is always a nested directory within the project 
-that contains its own `package.json` file. 
-
-A workspace's directory must be matched by the globs in the project root `package.json`'s `"workspaces"` field.
+`pacwich` simply builds its features to enrich and work with plain workspaces.
 
 #### Script
 
-In the context of `bun-workspaces`, a "script" generally refers to an entry in the `"scripts"` field in a workspace's `package.json` file by default. 
+In the context of `pacwich`, a **script** generally refers to an entry in the `"scripts"` field in a workspace's `package.json` file by default. 
 
-However, bun-workspaces also supports running ["inline scripts"](/concepts/inline-scripts), one-off shell commands executed from a respective workspace's directory.
+However, pacwich also supports running ["inline scripts"](/concepts/inline-scripts), one-off shell commands executed from a respective workspace's directory.
+
+#### Inputs
+
+**Inputs** are values considered to affect the result of a script or state of a workspace.
+
+These include git-trackable files, other workspaces, and external dependencies (npm packages).
+
+By default, all input files are simply the git-trackable files found in a workspace's directory,
+workspace inputs are explicit [workspace dependencies](/concepts/workspace-dependencies),
+and external dependencies are tracked via lockfiles.
+
+These are currently used to determine [affected workspaces](/concepts/affected) (where features
+generally accept options for ignoring some inputs), and input files specifically are used by the 
+[`verify` feature](/cli/commands#verify) to check for missing workspace dependencies by analyzing imports/exports
+in JS/TS input files.
+
+These are configurable in the optional workspace config. See the general [workspace config page](/config/workspace)
+or the 
 
 ## Terms in Action
 
-This is a minimal example of a project structure. 
+This is a minimal example of a project structure for a `Bun` or `npm` monorepo.
 
 Placing workspaces in the `packages/` directory is a common convention but not required.
+
+#### File Tree
 
 <SyntaxHighlighter language="bash">
 {GLOSSARY_FILE_TREE}
 </SyntaxHighlighter>
 
-The root package.json:
+#### Top-level files
+
+The root `package.json`, using the `"workspaces"` field if using `Bun` or `npm`:
 <SyntaxHighlighter language="json">
 {GLOSSARY_ROOT_PACKAGE_JSON}
 </SyntaxHighlighter>
+
+If using `pnpm`, you would have a `pnpm-workspace.yaml` file instead of using the `"workspaces"` field in the root `package.json` above:
+
+<SyntaxHighlighter language="yaml">
+{PNPM_WORKSPACE_YAML}
+</SyntaxHighlighter>
+
+#### Workspaces
 
 The workspaces' package.json files:
 <SyntaxHighlighter language="json">
@@ -63,3 +93,4 @@ The workspaces' package.json files:
 {GLOSSARY_WORKSPACE_B_PACKAGE_JSON}
 </SyntaxHighlighter>
 
+If you have the above in your project and have ran your install command, `pacwich` commands should work right away.

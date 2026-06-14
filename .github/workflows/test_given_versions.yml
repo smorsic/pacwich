@@ -1,0 +1,87 @@
+name: Test Given Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_runtime:
+        required: true
+        type: string
+        default: node
+      os:
+        required: true
+        type: string
+      bun-version:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+      pnpm-version:
+        required: true
+        type: string
+      test_args:
+        required: false
+        type: string
+        default: ""
+  workflow_call:
+    inputs:
+      test_runtime:
+        required: true
+        type: string
+        default: node
+      os:
+        required: true
+        type: string
+      bun-version:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+      pnpm-version:
+        required: true
+        type: string
+      test_args:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  test_given_versions:
+    name: Test Build - ${{ inputs.test_runtime }} (bun ${{ inputs.bun-version }}, node ${{ inputs.node-version }}, pnpm ${{ inputs.pnpm-version }}, ${{ inputs.os }})
+    runs-on: ${{ inputs.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Windows-only: Defender real-time scanning of every spawned
+      # bun/node/pnpm/npm subprocess and every fixture write dominates
+      # CI wall time. Exclude the workspace, temp dirs, and the runtime
+      # binaries before any installs so the savings also cover bootstrap.
+      - name: Disable Defender for CI paths
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $paths = @(
+            $env:GITHUB_WORKSPACE,
+            $env:RUNNER_TEMP,
+            $env:TEMP,
+            $env:TMP,
+            "$env:USERPROFILE\.bun"
+          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+          $processes = @('bun.exe', 'node.exe', 'npm.cmd', 'pnpm.cmd', 'git.exe')
+          foreach ($p in $paths)     { Add-MpPreference -ExclusionPath    $p -ErrorAction SilentlyContinue }
+          foreach ($p in $processes) { Add-MpPreference -ExclusionProcess $p -ErrorAction SilentlyContinue }
+          Write-Host "Defender exclusion paths:"
+          (Get-MpPreference).ExclusionPath
+          Write-Host "Defender exclusion processes:"
+          (Get-MpPreference).ExclusionProcess
+
+      - uses: ./.github/actions/bootstrap
+        with:
+          bun-version: ${{ inputs.bun-version }}
+          node-version: ${{ inputs.node-version }}
+          pnpm-version: ${{ inputs.pnpm-version }}
+
+      - name: Test Build - ${{ inputs.test_runtime }}
+        shell: bash
+        run: bun pw build-and-test:${{ inputs.test_runtime }} -- ${{ inputs.test_args }}

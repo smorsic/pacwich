@@ -1,0 +1,6 @@
+{
+  "name": "workspace-a",
+  "scripts": {
+    "echo-hello": "echo hello-from-a"
+  }
+}

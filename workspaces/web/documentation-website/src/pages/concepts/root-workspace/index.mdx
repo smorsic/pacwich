@@ -1,7 +1,7 @@
 ---
 title: Concepts > Root Workspace
-titleSuffix: " | bun-workspaces"
-description: "Root Workspace | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Root Workspace | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -13,7 +13,7 @@ import { CLI_RUN_SCRIPT_ROOT_SELECTOR_EXAMPLE } from '../../../lib/cli/cliExampl
 import { API_ROOT_SELECTOR_EXAMPLE } from '../../../lib/api/apiExamples';
 import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
 import { getCliGlobalOptionContent } from '../../../lib/cli/cliGlobalOptions';
-import { ROOT_WORKSPACE_SELECTOR } from 'bw-common/project';
+import { ROOT_WORKSPACE_SELECTOR } from '@pacwich/common/project';
 
 # Concept: Root Workspace
 
@@ -28,7 +28,7 @@ are ways to either modify or override the default, and it is always possible to 
 
 ### Including by Default
 
-You can set the default value to include the root workspace to `true` in the [root configuration](/config/root) defaults or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.includeRootWorkspaceDefault.envVarName}</code> to include the root workspace by default.
+You can set the default value to include the root workspace to `true` in the [project configuration](/config/project) defaults or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.includeRootWorkspaceDefault.envVarName}</code> to include the root workspace by default.
 
 ### Including Explicitly
 

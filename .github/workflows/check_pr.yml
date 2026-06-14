@@ -3,10 +3,16 @@ name: Check PR
 on:
   - pull_request
 
+permissions:
+  contents: read
+
+# Cancel in-flight runs for a PR when new commits land - prevents stale
+# runs from racing the latest commit's results.
+concurrency:
+  group: check-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
-  validate_code:
-    name: Validate Code
-    uses: ./.github/workflows/validate_code.yml
-  test_bun_versions:
-    name: Test Bun Versions and OS
-    uses: ./.github/workflows/test_bun_versions.yml
+  validate:
+    name: Validate
+    uses: ./.github/workflows/validate.yml

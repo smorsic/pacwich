@@ -1,0 +1,7 @@
+packages:
+  - "applications/*"
+  - "libraries/libraryA"
+  - "libraries/libraryB/"
+  - "packageA/"
+  - "packageB"
+  - "packageC//"

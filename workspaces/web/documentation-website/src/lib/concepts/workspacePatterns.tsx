@@ -1,5 +1,5 @@
-import { type WorkspacePatternTarget } from "bw-common/workspaces";
-import { Link } from "rspress/theme";
+import { type WorkspacePatternTarget } from "@pacwich/common/workspaces";
+import { Link } from "@rspress/core/theme-original";
 import { SyntaxHighlighter } from "../util/highlight";
 
 export const WORKSPACE_PATTERN_CONTENT: Record<
@@ -15,8 +15,8 @@ export const WORKSPACE_PATTERN_CONTENT: Record<
     description:
       "Match by the workspace name (from package.json). Accepts wildcards.",
     cliExamples: [
-      'bw ls name:my-workspace "name:my-workspace-*"',
-      `bw run lint "name:my-workspace-*"`,
+      'pacwich ls name:my-workspace "name:my-workspace-*"',
+      `pacwich run lint "name:my-workspace-*"`,
     ],
   },
   alias: {
@@ -30,15 +30,18 @@ export const WORKSPACE_PATTERN_CONTENT: Record<
         . Accepts wildcards.
       </span>
     ),
-    cliExamples: ['bw ls "alias:my-alias-*"', `bw run lint "alias:my-alias-b"`],
+    cliExamples: [
+      'pacwich ls "alias:my-alias-*"',
+      `pacwich run lint "alias:my-alias-b"`,
+    ],
   },
   path: {
     title: "Path",
     description:
       "Match by the relative workspace path, with glob syntax supported.",
     cliExamples: [
-      'bw ls "path:packages/**/*"',
-      `bw run lint "path:packages/**/*"`,
+      'pacwich ls "path:packages/**/*"',
+      `pacwich run lint "path:packages/**/*"`,
     ],
   },
   tag: {
@@ -56,12 +59,15 @@ export const WORKSPACE_PATTERN_CONTENT: Record<
         .
       </span>
     ),
-    cliExamples: ['bw ls "tag:my-tag"', `bw run lint "tag:my-tag-pattern-*"`],
+    cliExamples: [
+      'pacwich ls "tag:my-tag"',
+      `pacwich run lint "tag:my-tag-pattern-*"`,
+    ],
   },
 };
 
 export const WORKSPACE_PATTERN_API_EXAMPLE = `
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject();
 
@@ -81,7 +87,7 @@ project.runScriptAcrossWorkspaces({
     "path:packages/**/*",
     "tag:my-tag",
   ],
-  script: "bun lint",
+  script: "lint",
 });
 `.trim();
 

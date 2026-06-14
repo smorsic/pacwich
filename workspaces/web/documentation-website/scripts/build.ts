@@ -1,14 +1,25 @@
-import { writeFileSync, rmSync, readFileSync } from "fs";
+import {
+  writeFileSync,
+  rmSync,
+  readFileSync,
+  readdirSync,
+  mkdirSync,
+} from "fs";
 import path from "path";
 import { $ } from "bun";
-import packageJson from "../../../packages/bun-workspaces/package.json";
+import { createFileSystemProject } from "pacwich";
+import packageJson from "../../../packages/pacwich/package.json";
 
 export const runBuild = async () => {
+  const project = createFileSystemProject();
+
   const outputPath = path.resolve("__dirname", "..", "doc_build");
+
+  await $`bunx pacwich run build:no-dts pacwich`;
 
   await $`bunx rspress build`;
 
-  if (process.env.BW_DOC_ENV === "development") {
+  if (process.env.PACWICH_DOCS_ENV === "development") {
     rmSync(path.resolve(outputPath, "sitemap.xml"), {
       recursive: true,
       force: true,
@@ -16,6 +27,26 @@ export const runBuild = async () => {
     writeFileSync(
       path.resolve(outputPath, "robots.txt"),
       "User-agent: *\nDisallow: /\n",
+    );
+  }
+
+  const pacwichBuildDir = path.resolve(
+    project.rootDirectory,
+    project.findWorkspaceByName("pacwich")?.path ?? "",
+    "dist",
+  );
+
+  writeFileSync(
+    path.resolve(outputPath, "AGENTS.md"),
+    readFileSync(path.join(pacwichBuildDir, "AGENTS.md")).toString(),
+  );
+
+  mkdirSync(path.resolve(outputPath, "agents"));
+
+  for (const agentsFile of readdirSync(path.join(pacwichBuildDir, "agents"))) {
+    writeFileSync(
+      path.resolve(outputPath, "agents", agentsFile),
+      readFileSync(path.join(pacwichBuildDir, "agents", agentsFile)).toString(),
     );
   }
 

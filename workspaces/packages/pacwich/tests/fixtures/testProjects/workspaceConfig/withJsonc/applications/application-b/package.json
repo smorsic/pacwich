@@ -1,0 +1,8 @@
+{
+  "name": "application-1b",
+  "scripts": {
+    "all-workspaces": "echo 'script for all workspaces'",
+    "b-workspaces": "echo 'script for b workspaces'",
+    "application-b": "echo 'script for application-b'"
+  }
+}

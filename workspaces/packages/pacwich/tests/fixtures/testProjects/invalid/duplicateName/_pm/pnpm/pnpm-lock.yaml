@@ -1,0 +1,16 @@
+lockfileVersion: "9.0"
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .: {}
+
+  applications/applicationA: {}
+
+  libraries/libraryA: {}
+
+  libraries/libraryB: {}
+
+  libraries/nested/libraryC: {}

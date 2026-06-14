@@ -1,23 +1,23 @@
 ---
 title: Workspace Configuration
-titleSuffix: " | bun-workspaces"
-description: "Workspace configuration documentation for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Workspace configuration documentation for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath } from 'bw-common/config';
+import { WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath } from '@pacwich/common/config';
 import {  exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple, createPackageJsonExample, createTsFileExample, MERGE_WORKSPACE_CONFIG_EXAMPLE } from "../../../lib/config/exampleConfig";
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
-import { ROOT_CONFIG_TYPE, WORKSPACE_CONFIG_TYPE } from "../../../lib/config/configTypes";
+import { PROJECT_CONFIG_TYPE, WORKSPACE_CONFIG_TYPE } from "../../../lib/config/configTypes";
 
 # Configuration: Workspace Config File
 
 The optional configuration for a workspace is defined in a file such as <code>{createConfigLocationPath("tsFile", WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY)}</code> in its directory or in its `package.json` file.
 
-You can also use the root config to set workspace configs in bulk by using workspace patterns.
+You can also use the project config to set workspace configs in bulk by using workspace patterns.
 See the [**workspace pattern configs**](/config/workspace-pattern-configs) page for more information.
 
 ## Type Definition

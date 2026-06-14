@@ -1,0 +1,7 @@
+{
+  // Pins the project to the (currently stub) npm backend at the
+  // top-level config field. Tests use this fixture to verify that
+  // higher-precedence sources (--pm flag, factory option) can
+  // override the pinned value.
+  "packageManager": "npm"
+}

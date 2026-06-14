@@ -1,4 +1,4 @@
-import { createFileSystemProject } from "bun-workspaces_release";
+import { createFileSystemProject } from "pacwich_release";
 
 const project = createFileSystemProject({
   rootDirectory: "test-project",

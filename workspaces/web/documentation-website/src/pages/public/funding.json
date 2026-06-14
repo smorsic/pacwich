@@ -1,0 +1,70 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.0.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Scott Morse",
+    "email": "scott@smorsic.io",
+    "phone": "",
+    "description": "An independent software engineer with a diverse career and formal background as a professional musician.",
+    "webpageUrl": {
+      "url": "https://github.com/ScottMorse",
+      "wellKnown": ""
+    }
+  },
+  "projects": [
+    {
+      "guid": "pacwich",
+      "name": "pacwich",
+      "description": "A monorepo management tool that interoperates with Bun's native workspaces to provide an enhanced developer experience, providing a Bun-based CLI and a TypeScript API.",
+      "webpageUrl": {
+        "url": "https://pacwich.dev"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/smorsic/pacwich",
+        "wellKnown": ""
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": [
+        "bun",
+        "workspaces",
+        "monorepo",
+        "cli",
+        "api",
+        "javascript",
+        "npm",
+        "typescript"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "my-bank",
+        "type": "bank",
+        "address": "",
+        "description": "Will accept direct bank transfers. Please e-mail me for details."
+      },
+      {
+        "guid": "gh-sponsors",
+        "type": "payment-provider",
+        "address": "https://github.com/sponsors/smorsic",
+        "description": "Support the project through GitHub Sponsors."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "developer-time",
+        "status": "active",
+        "name": "Developer compensation",
+        "description": "This will help cover the cost of working near full-time on the project.",
+        "amount": 1000,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["my-bank", "gh-sponsors"]
+      }
+    ],
+    "history": []
+  }
+}

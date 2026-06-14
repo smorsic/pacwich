@@ -1,0 +1,11 @@
+{
+  "name": "package-b",
+  "pacwich": {
+    "alias": "pb"
+  },
+  "scripts": {
+    "all-workspaces": "echo 'script for all workspaces'",
+    "b-workspaces": "echo 'script for b workspaces'",
+    "package-b": "echo 'script for package-b'"
+  }
+}

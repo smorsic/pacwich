@@ -1,7 +1,7 @@
 ---
 title: AGENTS.md | AI
-titleSuffix: " | bun-workspaces"
-description: "AGENTS.md integration for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "AGENTS.md integration for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -12,14 +12,37 @@ import { SyntaxHighlighter } from '../../../lib/util/highlight';
 
 # AI Integrations: AGENTS.md
 
-`bun-workspaces` provides an **AGENTS.md** file that can be used to provide context to AI tools about the package, which
-can be found at `node_modules/bun-workspaces/AGENTS.md` after you install `bun-workspaces`.
+`pacwich` provides an **AGENTS.md** file that can be used to provide context to AI tools about the package, which
+can be found at `node_modules/pacwich/AGENTS.md` after you install `pacwich`.
 
-The content of this file is the same as the combined contents of the [MCP](/ai/mcp) server's documentation resources.
+The content of this file is the same as the the [skills](/ai/skills) files or [MCP](/ai/mcp) server's resources.
 
-You can use this file to provide immediate knowledge of `bun-workspaces` to an agent.
+You can use this file to provide immediate knowledge of `pacwich` to an agent.
 
-## CLAUDE.md
+## Split files
+
+You can also access partial files from `node_modules/pacwich/agents/` for more targeted context.
+
+These include:
+* `OVERVIEW.md` (encouraged to link first, includes a manifest of the other files below)
+* `CLI.md`
+* `API.md`
+* `CONFIG.md`
+* `CONCEPTS.md`
+
+<hr/>
+
+## Web-served Files
+
+The documentation website serves the same files from latest found in the same structure at:
+* `https://pacwich.dev/AGENTS.md`
+* `https://pacwich.dev/agents/OVERVIEW.md`
+* `https://pacwich.dev/agents/CLI.md`
+* `https://pacwich.dev/agents/API.md`
+* `https://pacwich.dev/agents/CONFIG.md`
+* `https://pacwich.dev/agents/CONCEPTS.md`
+
+## Example: Usage in CLAUDE.md
 
 Since CLAUDE.md supports importing other files, you can easily integrate this file into your context by adding the following line to your CLAUDE.md file:
 
@@ -27,14 +50,29 @@ Since CLAUDE.md supports importing other files, you can easily integrate this fi
 {`
 <!-- CLAUDE.md contents -->
 
-@./node_modules/bun-workspaces/AGENTS.md
+@node_modules/pacwich/AGENTS.md
 `.trim()}
 </SyntaxHighlighter>
 
+Using the split files:
+<SyntaxHighlighter language="markdown">
+{`
+@node_modules/pacwich/agents/OVERVIEW.md
+@node_modules/pacwich/agents/CLI.md
+`.trim()}
+</SyntaxHighlighter>
+
+Simply suggesting to read directly from the doc website in a prompt or AGENTS.md:
+
+> This project uses the npm package pacwich for monorepo tooling
+that enhances native workspaces. Get the latest full docs 
+from `https://pacwich.dev/AGENTS.md`, or read the shorter 
+`https://pacwich.dev/agents/OVERVIEW.md` which includes
+a manifest of targeted slices of docs for more token efficiency.
+
 ## Other Tooling
 
-If your tool does not support imports like CLAUDE.md, you can manually copy the contents of `node_modules/bun-workspaces/AGENTS.md` into your tool's context
+If your tool does not support imports like CLAUDE.md, you can manually copy the contents of `node_modules/pacwich/AGENTS.md` into your tool's context
 or create a symlink to the file in your tool's config.
 
-You might also simply instruct your agent to read `node_modules/bun-workspaces/AGENTS.md` via a prompt.
-
+You might also simply instruct your agent to read `node_modules/pacwich/AGENTS.md` via a prompt.

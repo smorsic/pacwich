@@ -1,7 +1,7 @@
 ---
 title: Concepts > Workspace Patterns
-titleSuffix: " | bun-workspaces"
-description: "Workspace Patterns | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Workspace Patterns | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -21,6 +21,7 @@ and they are also used in some [configuration](/config) options.
 
 [Regular expressions](#regex-modifier) are supported by prefixing any pattern value with `re:`.
 
+The [`@root` special selector](/concepts/root-workspace#referencing-the-root-workspace) matches the [root workspace](/concepts/root-workspace).
 
 <SyntaxHighlighter>
   {`
@@ -46,7 +47,10 @@ Workspace Pattern Syntax:
 `.trim()}
 </SyntaxHighlighter>
 
-The [`@root` special selector](/concepts/root-workspace#referencing-the-root-workspace) matches the [root workspace](/concepts/root-workspace).
+
+**Workspace patterns are always accepted as a list, and every list is resolved the same way to prevent ambiguity: You need to provide a set of workspaces, and negation only subtracts from the given set.** 
+
+This means that `["not:my-workspace"]` on its own matches **nothing**, but `["*", "not:my-workspace"]` would match **all workspaces except "my-workspace"**.
 
 ## Default Matching
 
@@ -55,7 +59,7 @@ By default, normal strings match a workspace name or alias.
 However, if a wildcard is provided, it will only match against workspace names, to prevent ambiguity.
 
 <SyntaxHighlighter language="bash">
-  {`bw run lint my-name-or-alias "my-name-pattern-*"`}
+  {`pacwich run lint my-name-or-alias "my-name-pattern-*"`}
 </SyntaxHighlighter>
 
 See below for how you can use wildcards with aliases.
@@ -88,10 +92,10 @@ a "all workspaces except my-workspace" requires two patterns: `"*"` and `"not:my
 <SyntaxHighlighter language="bash">
   {`
 # All workspaces except the name or alias "my-name-or-alias"
-bw ls "*" "not:my-name-or-alias"
+pacwich ls "*" "not:my-name-or-alias"
 
 # All workspaces except those with the tag "my-tag"
-bw ls "*" "not:tag:my-tag"`.trim()}
+pacwich ls "*" "not:tag:my-tag"`.trim()}
 </SyntaxHighlighter>
 
 ## Regex Modifier
@@ -100,10 +104,10 @@ You can use the `re:` modifier to match patterns using regular expressions.
 <SyntaxHighlighter language="bash">
   {`
 # All workspaces with names that start with "app-"
-bw ls "re:^app-.*"
+pacwich ls "re:^app-.*"
 
 # All workspaces except those with tags that start with "my-tag-"
-bw ls "*" "not:tag:re:^my-tag-.*"
+pacwich ls "*" "not:tag:re:^my-tag-.*"
 `.trim()}
 </SyntaxHighlighter>
 

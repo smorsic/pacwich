@@ -1,4 +1,4 @@
-import { Link } from "rspress/theme";
+import { Link } from "@rspress/core/theme-original";
 const LINKS = {
   glossary: "/concepts/glossary",
   workspaceAliases: "/concepts/workspace-aliases",

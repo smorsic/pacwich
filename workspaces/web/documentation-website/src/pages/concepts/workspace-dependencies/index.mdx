@@ -1,64 +1,37 @@
 ---
 title: Concepts > Workspace Dependencies
-titleSuffix: " | bun-workspaces"
-description: "Workspace Dependencies | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Workspace Dependencies | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { getWorkspaceScriptMetadataConfig } from 'bw-common/runScript';
+import { getWorkspaceScriptMetadataConfig } from '@pacwich/common/runScript';
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
 import { exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple } from '../../../lib/config/exampleConfig';
+import { WorkspaceDependencyExample } from '../../../lib/concepts/WorkspaceDependencyExample';
 
 # Concept: Workspace Dependencies
 
 ## Overview
 
-[Workspaces](/concepts/glossary#workspace) can depend on other workspaces and import/export code between them. This is a native capability of workspaces in Bun.
+[Workspaces](/concepts/glossary#workspace) can depend on other workspaces and import/export code between them.
 
-**`bun-workspaces` does not perform source code analysis.** This keeps determining
+**`pacwich` does not perform source code analysis to determine dependencies.** This makes creating
 the graph of workspaces computationally fast and cheap, relying instead on explicit
-`package.json` dependencies (using `"workspace:*"`) seen below:
+`package.json` dependencies (using `"workspace:*"` for `bun` and `pnpm` or `"*"` for `npm`).
+
+In **Bun** and **pnpm**, workspaces must declare each other as dependencies to share code, which is ideal,
+but **npm** does not require this. The [`verify`](/cli/commands#verify) command can help identify missing dependencies
+for **npm** by attempting to find imports/exports that reference other workspaces.
 
 ### Setting up Dependencies - Example
 
-For example, this might be some workspace's `package.json` file, where `my-workspace-b` depends on `my-workspace-a`:
+Here is the basic structure of workspace dependencies:
 
-`my-workspace-a/package.json`:
-<SyntaxHighlighter language="json">
-  {JSON.stringify({
-    "name": "my-workspace-a",
-    "main": "index.ts"
-  }, null, 2)}
-</SyntaxHighlighter>
-
-`my-workspace-b/package.json`:
-<SyntaxHighlighter language="json">
-    {JSON.stringify({
-    "name": "my-workspace-b",
-    "dependencies": {
-      "my-workspace-a": "workspace:*"
-    }
-  }, null, 2)}
-</SyntaxHighlighter>
-
-Code in `my-workspace-a` can then import code from `my-workspace-b` like any other dependency.
-
-`my-workspace-a/index.ts`:
-<SyntaxHighlighter language="typescript">
-  {`export const myFunction = () => {
-  \ \ console.log("Hello from my-workspace-a");
-}`}
-</SyntaxHighlighter>
-
-`my-workspace-b/index.ts`:
-<SyntaxHighlighter language="typescript">
-  {`import { myFunction } from "my-workspace-a";
-
-myFunction();`}
-</SyntaxHighlighter>
+<WorkspaceDependencyExample />
 
 ## Workspace Dependency Rules
 
@@ -68,31 +41,31 @@ set by [workspace patterns](/concepts/workspace-patterns).
 Use `allowPatterns` to define which dependencies are permitted or `denyPatterns` to forbid specific ones. When both are present,
 `denyPatterns` will further filter the subset already permitted by `allowPatterns`.
 
-For example, you may disallow dependencies with the [tag](config/workspace#tags) "backend" for a frontend workspace with `denyPatterns: ["tag:backend"]`.
+For example, you may disallow dependencies with the [tag](/config/workspace#tags) "backend" for a frontend workspace with `denyPatterns: ["tag:backend"]`.
 
 ## Running Scripts in Dependency Order
 
 When running scripts via the [CLI](/cli/commands#run-script) or [API](/api/reference#runscriptacrossworkspaces), workspaces can be run in dependency order.
 
 This means that a workspace's script will wait until any workspaces it depends on have completed. 
-This is similar to how Bun's [`--filter` flag](https://bun.com/docs/pm/filter#dependency-order) works, though for `bun-workspaces`,
+This is similar to how Bun's [`--filter` flag](https://bun.com/docs/pm/filter#dependency-order) works, though for `pacwich`,
 this behavior is opt-in.
 
 This can be useful in situations where one workspace depends on another workspace's output, such as a build script's output.
 
 ### CLI Example
 <SyntaxHighlighter language="bash">
-  {`bw run my-script --dep-order
+  {`pacwich run my-script --dep-order
 
 # Run all scripts even if a dependency fails
-bw run my-script --dep-order --ignore-dep-failure
+pacwich run my-script --dep-order --ignore-dep-failure
   `}
 </SyntaxHighlighter>
 
 ### API Example
 <SyntaxHighlighter language="typescript">
   {`
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject();
 

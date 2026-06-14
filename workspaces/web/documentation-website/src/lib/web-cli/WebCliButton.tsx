@@ -1,4 +1,4 @@
-import { Link } from "rspress/theme";
+import { Link } from "@rspress/core/theme-original";
 
 export const WebCliButton = () => {
   return (

@@ -1,0 +1,74 @@
+---
+title: Overview
+titleSuffix: " | pacwich"
+description: "Overview | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+import { CliInstall } from "../../../lib/components/CliInstall";
+
+`pacwich` is an npm package that works with your package manager's workspace functionality.
+`pacwich` supports [Bun](https://bun.sh/docs/pm/workspaces), [npm](https://docs.npmjs.com/cli/v10/using-npm/workspaces), and [pnpm](https://pnpm.io/workspaces) workspaces.
+
+We take [package security](/security) seriously.
+
+Read below on reasons to use `pacwich`, or go straight to the [Getting Started](/intro/getting-started) page for more information.
+
+## Easy, Zero-Config
+
+`pacwich`'s main goal is to provide a straightforward monorepo tooling layer that
+uses as much data from your package manager as it can, not requiring special configuration to get started,
+though accepting [optional config](/config) for more advanced usage.
+
+It works with your workspaces' `package.json` scripts directly instead of defining a new mental model for
+defining your processes.
+
+<hr/>
+
+## A CLI and TS/JS API
+
+`pacwich` provides both a [CLI](/cli) and a [TS/JS API](/api) for interacting with your monorepo.
+
+Since the CLI is developed via TypeScript, providing the API is natural, since the
+CLI needs a TypeScript core underneath it anyway.
+
+The API is held in close parity with the CLI. This means that you can write scripts 
+for your repo's automation tasks that involve `pacwich` for getting metadata or running
+scripts in either shell code or TypeScript/JavaScript.
+
+<hr/>
+
+## Decoupling from Your Package Manager
+
+The top package managers for JavaScript provide their own monorepo functionality, but there are several reasons to decouple your monorepo tooling from your package manager of choice.
+
+### Scope and Development Process of PMs
+
+Every package manager comes with various advantages and disadvantages. Package manager directions can change, and
+they compete on a variety of fronts, not just monorepo features. One can be the hot favorite one day and fall out 
+of favor the next. One may have the best monorepo support but stall its progress as priorities shift.
+
+Package managers' surfaces are large and cover many different concerns, which can often mean
+that monorepo features are more expensive to add, especially if a CLI is already crowded with various concerns,
+and some advanced monorepo features may never be in scope for these tools.
+
+### `pacwich`'s Answer
+
+`pacwich` has the advantage of being able to focus scope entirely on monorepo features and develop quickly
+ as a straightforward TypeScript package, free of package managers' red tape.
+
+`pacwich` seeks to provide a unified layer for your monorepo tooling, so that you're free to swap package managers
+without losing your monorepo metadata or script orchestration, with little to no friction when doing so.
+
+<hr/>
+
+## A Lightweight Project Graph
+
+`pacwich` is aware of how your [workspaces depend on each other](/concepts/workspace-dependencies), opting to read dependencies from
+package.json files instead of relying on analysis your JavaScript/TypeScript files. This makes
+analyzing your project graph simple and fast.
+
+Since declaring workspaces as dependencies in package.json files isn't required in all package managers, 
+`pacwich` includes a [`verify`](/cli/commands#verify) feature to help detect missing dependencies via simple code analysis.

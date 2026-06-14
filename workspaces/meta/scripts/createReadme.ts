@@ -3,12 +3,12 @@ import path from "path";
 import {
   CLI_QUICKSTART,
   API_QUICKSTART,
-  ROOT_CONFIG_QUICKSTART,
+  PROJECT_CONFIG_QUICKSTART,
   WORKSPACE_CONFIG_QUICKSTART,
-} from "bw-common/docs";
+} from "@pacwich/common/docs";
 import { createScriptLogger } from "../util";
 
-const root = process.env.BW_PROJECT_PATH as string;
+const root = process.env.PACWICH_PROJECT_PATH as string;
 
 const logger = createScriptLogger({ name: "README.md" });
 
@@ -23,7 +23,7 @@ if (import.meta.main) {
   const content = readmeTemplate
     .replace(/<<CLI_QUICKSTART>>/gm, CLI_QUICKSTART)
     .replace(/<<API_QUICKSTART>>/gm, API_QUICKSTART)
-    .replace(/<<ROOT_CONFIG_QUICKSTART>>/gm, ROOT_CONFIG_QUICKSTART)
+    .replace(/<<PROJECT_CONFIG_QUICKSTART>>/gm, PROJECT_CONFIG_QUICKSTART)
     .replace(/<<WORKSPACE_CONFIG_QUICKSTART>>/gm, WORKSPACE_CONFIG_QUICKSTART);
 
   const readmePath = path.resolve(root, "README.md");

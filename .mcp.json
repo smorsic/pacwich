@@ -1,11 +1,8 @@
 {
   "mcpServers": {
-    "bun-workspaces--development": {
-      "command": "/bin/sh",
-      "args": [
-        "-c",
-        "PATH=\"$HOME/.bun/bin:$PATH\" exec bun --silent run mcp-server"
-      ]
+    "pacwich--development": {
+      "command": "npx",
+      "args": ["pacwich", "mcp-server"]
     }
   }
 }

@@ -1,4 +1,4 @@
-import { createFileSystemProject } from "bun-workspaces_local";
+import { createFileSystemProject } from "pacwich_local";
 
 const project = createFileSystemProject();
 

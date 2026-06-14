@@ -1,5 +1,6 @@
 import throttle from "lodash/throttle";
 import { useEffect, useState } from "react";
+import { useOnMount } from "./useOnMount";
 
 export const FOOTER_HEIGHT_PX = 50;
 
@@ -11,13 +12,22 @@ export const useLayout = () => {
     height: win?.innerHeight ?? 0,
   });
 
-  useEffect(() => {
-    const listener = throttle(() => {
+  useOnMount(() => {
+    const resizeListener = throttle(() => {
       setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     }, 100);
-    window.addEventListener("resize", listener);
-    return () => window.removeEventListener("resize", listener);
-  }, []);
+
+    const scrollListener = () => {
+      document.body.classList.toggle("scrolled", window.scrollY > 20);
+    };
+
+    window.addEventListener("resize", resizeListener);
+    window.addEventListener("scroll", scrollListener);
+    return () => {
+      window.removeEventListener("resize", resizeListener);
+      window.removeEventListener("scroll", scrollListener);
+    };
+  });
 
   useEffect(() => {
     const rspressNav = document.querySelector(".rspress-nav") as HTMLElement;

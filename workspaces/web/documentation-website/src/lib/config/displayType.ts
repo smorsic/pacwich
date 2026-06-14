@@ -6,7 +6,7 @@ import {
   type JSONObject,
   type JSONPrimitive,
   type JSONPrimitiveToName,
-} from "bw-common/types";
+} from "@pacwich/common/types";
 
 type PlainStringValueToDisplay = {
   value: string;

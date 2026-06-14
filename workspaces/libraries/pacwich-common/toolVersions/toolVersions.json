@@ -1,0 +1,14 @@
+{
+  "bun": {
+    "endUserRequirement": "^1.2.0",
+    "devLock": "1.3.14"
+  },
+  "node": {
+    "endUserRequirement": ">=22.0.0 <=26.x",
+    "devLock": "24.15.0"
+  },
+  "pnpm": {
+    "endUserRequirement": ">=10.0.0 <=11.x",
+    "devLock": "11.2.2"
+  }
+}

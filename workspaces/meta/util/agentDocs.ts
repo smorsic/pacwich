@@ -1,10 +1,10 @@
 import path from "path";
 import { createScriptLogger } from ".";
 
-const BW_PROJECT_PATH = process.env.BW_PROJECT_PATH as string;
+const PACWICH_PROJECT_PATH = process.env.PACWICH_PROJECT_PATH as string;
 
-if (!BW_PROJECT_PATH) {
-  throw new Error("BW_PROJECT_PATH must be set");
+if (!PACWICH_PROJECT_PATH) {
+  throw new Error("PACWICH_PROJECT_PATH must be set");
 }
 
 export interface CreateAgentDocsOptions {
@@ -37,7 +37,7 @@ export const createAgentDocs = async (options: CreateAgentDocsOptions) => {
 
   if (options.includeDevDocs) {
     contextFiles.push({
-      path: "md/ai/context/development.md",
+      path: "md/ai/context/_development.md",
       name: "development",
     });
   }
@@ -49,7 +49,10 @@ export const createAgentDocs = async (options: CreateAgentDocsOptions) => {
 
   let combinedContent = "";
   for (const contextFile of contextFiles) {
-    const contextFilePath = path.resolve(BW_PROJECT_PATH, contextFile.path);
+    const contextFilePath = path.resolve(
+      PACWICH_PROJECT_PATH,
+      contextFile.path,
+    );
     logger.info(`Reading ${contextFile.path}`);
     combinedContent +=
       (combinedContent ? "\n" : "") + (await Bun.file(contextFilePath).text());

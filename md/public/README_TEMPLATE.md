@@ -1,55 +1,52 @@
-## ⚠️ Deprecated Package
+<a href="https://pacwich.dev">
+<img src="./workspaces/web/documentation-website/src/pages/public/images/png/bwunster-pacwich-subtitled-wide_2000x462.png" alt="pacwich logo" width="100%" />
+</a>
 
-bun-workspaces has been **deprecated** and **is now developed as [`pacwich`](https://pacwich.dev)**, which supports Bun, npm, and pnpm workspaces, with a mostly backwards compatible CLI and API.
+<br/>
 
-Users can expect little to no disruption beyond the package name change and config file name changes.
-Config files rename to `pacwich.workspace.{ts,js,json,jsonc}` and `pacwich.project.{ts,js,json,jsonc}` (instead of `bw.root.{ts,js,json,jsonc}`).
+Full Documentation: [https://pacwich.dev](https://pacwich.dev)
 
-A full migration guide covering all differences between the packages is available at [https://pacwich.dev/intro/bun-workspaces-migration](https://pacwich.dev/intro/bun-workspaces-migration).
+Changelog: [GitHub Releases](https://github.com/smorsic/pacwich/releases)
 
-You can also instruct an LLM agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
-to assist with migration.
+# pacwich
 
-[Read the launch blog post](https://smorsic.io/blog/pacwich-launch) about the motivations and development strategy.
+Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
-`bun-workspaces` will not receive further releases save for critical security patches if necessary.
+To get started, all you need is a repo using workspaces for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
 
-# bun-workspaces
+Start running some [CLI commands](https://pacwich.dev/cli) right away in your repo, or take full advantage of the [TypeScript API](https://pacwich.dev/api) and its features.
 
-[Full Documentation](https://bunworkspaces.com)
+Note this is the continuation of the `bun-workspaces` package that only worked with Bun.
+See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
+Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity
+to a degree.
 
-A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhances native [Bun workspaces](https://bun.sh/docs/install/workspaces).
-
-- Works right away, with **no boilerplate required** 🍽️
-- Get **rich metadata** about your monorepo 🤖
-- **Orchestrate** your workspaces' package.json scripts 🎻
-- Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚
-- Use with Bun as your package manager for **Node** projects 🎁
-- Determine **affected workspaces** based on changed files 🕸️
-- AI: Provides an [AGENTS.md](https://bunworkspaces.com/ai/agents) file and an [MCP server](https://bunworkspaces.com/ai/mcp)! 🛠️
-
-To get started, all you need is a repo using Bun's workspaces feature for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
-
-Start running some [CLI commands](https://bunworkspaces.com/cli) right away in your repo, or take full advantage of the [TypeScript API](https://bunworkspaces.com/api) and its features.
-
-This package is unopinionated and works with any project structure you want. Think of this as a power suit you can snap onto native workspaces, rather than whole new monorepo framework.
+[Overview page](https://pacwich.dev/intro/overview)
 
 ## Quick Start
+
+[Full Getting Started Guide](https://pacwich.dev/intro/getting-started)
 
 Installation:
 
 ```bash
-$ # Install to use the API and/or lock your CLI version for your project
-$ bun add --dev bun-workspaces
-$ # Start using the CLI with or without the installation step
-$ bunx bun-workspaces --help
+# Global install with your preferred package manager
+# The pacwich command will use a local install if available
+bun add -g pacwich
+pnpm add -g pacwich
+npm install -g pacwich
+
+# Local install in your project
+bun add -d pacwich
+pnpm add -D pacwich
+npm install -D pacwich
 ```
 
-Note that you need to run `bun install` in your project for `bun-workspaces` to find your project's workspaces. This is because it reads `bun.lock`. This also means that if you update your workspaces, such as changing their name, you must run `bun install` for the change to reflect.
+Note that you need to run your package manager's install for pacwich to have current workspace data available, e.g. via `bun install`, `pnpm install`, or `npm install`. If you've added/removed/updated any workspace package.json, you'll likely need to run this again.
 
 ### CLI
 
-[Full CLI documentation here](https://bunworkspaces.com/cli)
+[Full CLI documentation here](https://pacwich.dev/cli)
 
 ```bash
 <<CLI_QUICKSTART>>
@@ -57,7 +54,7 @@ Note that you need to run `bun install` in your project for `bun-workspaces` to 
 
 ### API
 
-[Full API documentation here](https://bunworkspaces.com/api)
+[Full API documentation here](https://pacwich.dev/api)
 
 ```typescript
 <<API_QUICKSTART>>
@@ -65,35 +62,27 @@ Note that you need to run `bun install` in your project for `bun-workspaces` to 
 
 ### Configuration
 
-`bun-workspaces` has no required configuration, but there are optional config files.
+`pacwich` has no required configuration, but there are optional config files.
 
 #### Workspace Config
 
-Workspace configs can be placed in a workspace's directory at `bw.workspace.ts`.
+Workspace configs can be placed in a workspace's directory at `pacwich.workspace.ts`.
 
-[Workspace configuration documentation here](https://bunworkspaces.com/config/workspace)
+[Workspace configuration documentation here](https://pacwich.dev/config/workspace)
 
 ```typescript
 <<WORKSPACE_CONFIG_QUICKSTART>>
 ```
 
-#### Root Config
+#### Project Config
 
-A root config can be placed in the project root directory at `bw.root.ts`,
+A project-level config can be placed in the project root directory at `pacwich.project.ts`,
 which can also apply workspace configs in bulk by using workspace patterns.
 
-[Root configuration documentation here](https://bunworkspaces.com/config/root)
+[Project configuration documentation here](https://pacwich.dev/config/project)
 
-[More on workspace pattern configs here](https://bunworkspaces.com/config/workspace-pattern-configs)
+[More on workspace pattern configs here](https://pacwich.dev/config/workspace-pattern-configs)
 
 ```typescript
-<<ROOT_CONFIG_QUICKSTART>>
+<<PROJECT_CONFIG_QUICKSTART>>
 ```
-
-_`bun-workspaces` is independent from the [Bun](https://bun.sh) project and is not affiliated with or endorsed by Anthropic. This project aims to enhance the experience of Bun for its users._
-
-Developed By:
-
-<a href="https://smorsic.io" target="_blank" rel="noopener noreferrer">
-  <img src="./workspaces/web/documentation-website/src/pages/public/images/png/smorsic-banner_light_803x300.png" alt="Smorsic Labs logo" width="280" />
-</a>

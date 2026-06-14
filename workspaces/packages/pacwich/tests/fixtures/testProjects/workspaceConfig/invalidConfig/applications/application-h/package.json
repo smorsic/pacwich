@@ -1,0 +1,9 @@
+{
+  "name": "application-h",
+  "pacwich":{
+    "alias": "valid",
+    "scripts": {
+      "invalid": []
+    }
+  }
+}

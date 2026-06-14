@@ -1,0 +1,6 @@
+{
+  "name": "app-c",
+  "dependencies": {
+    "lib-a": "workspace:*"
+  }
+}

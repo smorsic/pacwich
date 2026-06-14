@@ -1,31 +1,58 @@
-## Root config
+## pacwich npm package: Configuration files
 
-Optional project config can be placed in `bw.root.ts`/`bw.root.js`/`bw.root.jsonc`/`bw.root.json` in the root directory, or in the `"bw"` key of `package.json`.
+`pacwich` is a package that is zero-config by default but accepts optional configuration files for project-level and workspace-level settings.
+
+### Project config
+
+Optional project config can be placed in `pacwich.project.ts`/`pacwich.project.js`/`pacwich.project.jsonc`/`pacwich.project.json` in the root directory, or in the `"pacwich-project"` key of the root `package.json`.
 
 Config defaults here take precedence over environment variables. Explicit CLI arguments or API options take precedence over all other settings.
 
 ```jsonc
 {
+  // Pin the package manager backend explicitly. When omitted, pacwich
+  // auto-detects from the lockfiles in the project root. The CLI `--pm`
+  // flag (and the API `packageManager` option) take precedence over this
+  // field, which in turn takes precedence over the `PACWICH_PACKAGE_MANAGER`
+  // env var. Not nested under "defaults" because it identifies the
+  // project, not a per-invocation preference.
+  "packageManager": "auto", // "auto" | "bun" | "pnpm" | "npm"
   "defaults": {
     "parallelMax": 5, // same options as seen in CLI examples above
-    "shell": "system", // "bun" or "system" (default "bun")
+    "shell": "system", // "bun" or "system" (default "system")
     "includeRootWorkspace": true, // treat root package.json as a normal workspace
-    "affectedBaseRef": "main", // default git base ref for affected resolution (env: BW_AFFECTED_BASE_REF_DEFAULT)
+    "affectedBaseRef": "main", // default git base ref for affected resolution (env: PACWICH_AFFECTED_BASE_REF_DEFAULT)
+    // Default output style for `run-script` / `run-affected` when no
+    // --output-style flag is passed. CLI-only (ignored by API callers).
+    // "grouped" is still downgraded to "prefixed" when stdout is not a
+    // TTY. Env override: PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT.
+    "cliScriptOutputStyle": "prefixed", // "grouped" | "prefixed" | "plain" | "none"
   },
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
   ],
+  "verify": {
+    "workspaceDependencies": {
+      // Project-relative globs to skip during `pacwich verify` scanning.
+      // Single project-level escape hatch (no per-workspace verify config).
+      // Negation prefixes (`!`) are not honored here, since this is an
+      // exception list rather than an inputs list.
+      "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+    },
+  },
 }
 ```
 
-### mergeRootConfig
+> Note: pnpm projects place their workspace globs in `pnpm-workspace.yaml`'s top-level `packages:` key (and catalogs under `catalog:` / `catalogs:`), not in `package.json.workspaces`. pacwich reads them transparently for the pnpm backend.
 
-`mergeRootConfig` merges multiple root configs left to right. Later configs take precedence for scalar fields. `workspacePatternConfigs` entries are concatenated. Any argument may be a factory function `(prev: RootConfig) => RootConfig`.
+### mergeProjectConfig
+
+`mergeProjectConfig` merges multiple project configs left to right. Later configs take precedence for scalar fields. `workspacePatternConfigs` entries are concatenated. Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`.
 
 ```ts
-import { mergeRootConfig } from "bun-workspaces/config";
+import { mergeProjectConfig } from "pacwich/config";
 
-export default mergeRootConfig(
+export default mergeProjectConfig(
   { defaults: { parallelMax: 4 } },
   { defaults: { shell: "system" } },
   (prevConfig) => ({ defaults: { includeRootWorkspace: true } }),
@@ -34,11 +61,11 @@ export default mergeRootConfig(
 
 ## Workspace config
 
-Optional config can be placed in `bw.workspace.ts`/`bw.workspace.js`/`bw.workspace.jsonc`/`bw.workspace.json` in a workspace directory, or in the `"bw"` key of `package.json`.
+Optional config can be placed in `pacwich.workspace.ts`/`pacwich.workspace.js`/`pacwich.workspace.jsonc`/`pacwich.workspace.json` in a workspace directory, or in the `"pacwich"` key of the workspace's `package.json`.
 
 Aliases must be unique to each workspace and must not clash with other workspaces' `package.json` names.
 
-Tags are strings to group workspaces together; they do not need to be unique.
+Tags are strings to group workspaces together. They do not need to be unique.
 
 ```jsonc
 {
@@ -83,7 +110,9 @@ The `defaultInputs` field (and the per-script `scripts[name].inputs` field) cont
 - `workspacePatterns` — workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep edge).
 - `externalDependencies` — allowlist of package names that participate in lockfile-change detection. Omitted = all external deps participate; `[]` = none participate; non-empty list = only listed names participate (intersected with the workspace's actual external deps from `package.json`).
 
-Per-script `inputs` fully replaces `defaultInputs` for that script — the two are not merged. If a script has its own `inputs` field, `defaultInputs` is ignored for that script.
+Per-script `inputs` fully replaces `defaultInputs` for that script. The two are not merged. If a script has its own `inputs` field, `defaultInputs` is ignored for that script.
+
+The `pacwich verify` command also reuses each workspace's `defaultInputs.files` to scope which files it scans for implicit workspace dependencies.
 
 ### Workspace Dependency Rules
 
@@ -98,7 +127,7 @@ Workspace Patterns are used to match workspaces.
 `mergeWorkspaceConfig` merges multiple workspace configs left to right. Arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`) are concatenated and deduplicated. Scalar fields later wins. `scripts` are deep-merged per key. Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`.
 
 ```ts
-import { mergeWorkspaceConfig } from "bun-workspaces/config";
+import { mergeWorkspaceConfig } from "pacwich/config";
 
 export default mergeWorkspaceConfig(
   { alias: "a", tags: ["x"] },
@@ -110,16 +139,16 @@ export default mergeWorkspaceConfig(
 
 ## Workspace Pattern Configs
 
-The root config's `workspacePatternConfigs` field applies workspace configs to groups of workspaces matched by [workspace patterns](/concepts/workspace-patterns). Entries are applied in order, left to right.
+The project config's `workspacePatternConfigs` field applies workspace configs to groups of workspaces matched by [workspace patterns](/concepts/workspace-patterns). Entries are applied in order, left to right.
 
-Each entry's `config` is merged into the accumulated config of all matching workspaces using the same semantics as `mergeWorkspaceConfig`. The local workspace config (from `bw.workspace.*` or `package.json`) is always the starting base.
+Each entry's `config` is merged into the accumulated config of all matching workspaces using the same semantics as `mergeWorkspaceConfig`. The local workspace config (from `pacwich.workspace.*` or the `pacwich` key in `package.json`) is always the starting base.
 
 Pattern matching reflects the accumulated state: aliases and tags added by earlier entries are visible to later entries' patterns.
 
 ```ts
-import { defineRootConfig } from "bun-workspaces/config";
+import { defineProjectConfig } from "pacwich/config";
 
-export default defineRootConfig({
+export default defineProjectConfig({
   workspacePatternConfigs: [
     {
       patterns: ["path:packages/apps/**/*"],
@@ -134,7 +163,7 @@ export default defineRootConfig({
     },
     {
       patterns: ["tag:app"],
-      // Factory form: JS/TS only — receives static workspace data and accumulated config
+      // Factory form: JS/TS only. Receives static workspace data and accumulated config.
       config: (workspace, prevConfig) => ({
         alias: workspace.name.replace(/^@my-scope\//, ""),
       }),
@@ -150,7 +179,7 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 - `workspace.name` — package name from package.json
 - `workspace.isRoot` — whether this is the root workspace
 - `workspace.path` — relative path from project root
-- `workspace.matchPattern` — glob from root package.json `workspaces` field that matched
+- `workspace.matchPattern` — glob from the project's workspaces declaration that matched (root `package.json.workspaces`, or `pnpm-workspace.yaml` under pnpm)
 - `workspace.scripts` — sorted list of script names from package.json
 - `workspace.dependencies` — names of workspace dependencies
 - `workspace.dependents` — names of workspaces that depend on this one
@@ -161,10 +190,10 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 
 ### TypeScript
 
-`bw.workspace.ts`
+`pacwich.workspace.ts`
 
 ```ts
-import { defineWorkspaceConfig } from "bun-workspaces/config";
+import { defineWorkspaceConfig } from "pacwich/config";
 
 export default defineWorkspaceConfig({
   alias: "my-alias",
@@ -172,14 +201,17 @@ export default defineWorkspaceConfig({
 });
 ```
 
-`bw.root.ts`
+`pacwich.project.ts`
 
 ```ts
-import { defineRootConfig } from "bun-workspaces/config";
+import { defineProjectConfig } from "pacwich/config";
 
-export default defineRootConfig({
+export default defineProjectConfig({
+  packageManager: "pnpm",
   defaults: {
     parallelMax: 5,
   },
 });
 ```
+
+<!--End pacwich config-->

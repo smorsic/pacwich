@@ -1,0 +1,11 @@
+{
+  "name": "application-e",
+  "pacwich":{
+    "alias": "valid",
+    "scripts": {
+      "all-workspaces": {
+        "order": {}
+      }
+    }
+  }
+}

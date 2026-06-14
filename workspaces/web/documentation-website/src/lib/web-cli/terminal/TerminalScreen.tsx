@@ -1,7 +1,7 @@
+import { useThemeState } from "@rspress/core/theme-original";
 import { FitAddon } from "@xterm/addon-fit";
 import { type Terminal as XTermTerminal, type ITheme } from "@xterm/xterm";
 import { useEffect, useRef, useState } from "react";
-import { useThemeState } from "rspress/theme";
 import "@xterm/xterm/css/xterm.css";
 import {
   useSetWebCliTerminalSelection,

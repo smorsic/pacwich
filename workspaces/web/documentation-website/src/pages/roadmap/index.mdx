@@ -1,7 +1,7 @@
 ---
 title: Roadmap
-titleSuffix: " | bun-workspaces"
-description: "Roadmap | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Roadmap | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: false
 outline: true
@@ -30,17 +30,8 @@ We aim to preserve these goals and values for the life of this project.
 * No artificial paywalls for the local features of the package
 
 ## Goals
-#### An "affected workspaces" feature
-  * This refers to the ability to detect which workspaces are affected by code changes
-  * This feature will likely be released as experimental
-  * The workspace dependency graph will be used to determine which workspaces are implicitly affected by another's change
-  * It should be possible to pass git refs as the basis of comparison for changes or a simple list of files
-#### A type generation feature
-  * The ability to generate TypeScript types specific to your project, similar to [Chakra UI's](https://www.chakra-ui.com/docs/get-started/cli#chakra-typegen) typegen feature, such as for workspace and script names
 #### A local cache
-  * The ability to cache the outputs of scripts based on given inputs, for performance
+  * The ability to cache the output and result of workspace scripts
 #### More advanced script orchestration
-  * The ability to flexibly compose subsets of workspaces and scripts into more complex workflows
-
-<br/>
-<br/>
+  * The ability to flexibly compose various workspace scripts into arbitrarily complex workflows,
+  rather than only running one script across workspaces in parallel or series as currently is possible.

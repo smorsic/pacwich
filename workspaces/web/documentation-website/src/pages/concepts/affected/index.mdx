@@ -1,7 +1,7 @@
 ---
 title: Concepts > Affected Workspaces
-titleSuffix: " | bun-workspaces"
-description: "Affected Workspaces | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Affected Workspaces | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -26,7 +26,7 @@ By default, a workspace is considered to have a set of **inputs**, the sources o
 When not [configured](/config/workspace-inputs), the default inputs are:
 * All git-trackable files in the workspace's directory
 * All [workspace dependencies](/concepts/workspace-dependencies). If a workspace dependency is affected for any reason, its dependents are also considered affected.
-* The version resolved in `bun.lock` for all other dependencies in a workspace's `package.json`.
+* The version resolved in your package manager's lockfile for all other dependencies in a workspace's `package.json`.
 
 Inputs can be configured per script as well. See the [inputs](/config/workspace-inputs) page for more information.
 
@@ -38,7 +38,7 @@ There are two main ways to determine affected workspaces:
 
 The default behavior of affected features is to use the git diff between the current HEAD and the default base ref in git.
 
-The default base ref is `main` except when overridden via [root configuration](/config/root) or an [environment variable](/config/env-vars).
+The default base ref is `main` except when overridden via [project configuration](/config/project) or an [environment variable](/config/env-vars).
 
 Uncommitted changes (staged, unstaged, untracked) are considered a part of the diff by default. 
 Files that are gitignored are never considered a part of the diff.
@@ -46,25 +46,25 @@ Files that are gitignored are never considered a part of the diff.
 <SyntaxHighlighter language="bash">
 {`
 # Uses diff of current HEAD against the default base ref (main when not configured)
-bw ls-affected
+pacwich ls-affected
 
 # Compare specific refs (can also pass commit SHA, tag, etc.)
-bw ls-affected --base=my-branch-a --head=my-branch-b
+pacwich ls-affected --base=my-branch-a --head=my-branch-b
 
 # Ignore uncommitted changes
-bw ls-affected --ignore-uncommitted # (staged, unstaged and untracked)
-bw ls-affected --ignore-untracked
-bw ls-affected --ignore-unstaged
-bw ls-affected --ignore-staged
+pacwich ls-affected --ignore-uncommitted # (staged, unstaged and untracked)
+pacwich ls-affected --ignore-untracked
+pacwich ls-affected --ignore-unstaged
+pacwich ls-affected --ignore-staged
 
 # Ignore changes to workspace dependencies derived from package.json files
-bw ls-affected --ignore-workspace-deps
+pacwich ls-affected --ignore-workspace-deps
 
 # Ignore changes to external dependencies (e.g. npm packages)
-bw ls-affected --ignore-external-deps
+pacwich ls-affected --ignore-external-deps
 
 # Run script across affected workspaces with similar options
-bw run-affected my-script --base=my-branch --ignore-uncommitted
+pacwich run-affected my-script --base=my-branch --ignore-uncommitted
 `.trim()}
 </SyntaxHighlighter>
 
@@ -77,10 +77,10 @@ You can bypass using git entirely and simply pass a list of changed files that m
 
 <SyntaxHighlighter language="bash">
 {`
-bw ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+pacwich ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
 
 # Paths with leading / are relative to the project root
-bw run-affected --files="/tsconfig.json packages/example/**/*.ts"
+pacwich run-affected --files="/tsconfig.json packages/example/**/*.ts"
 `.trim()}
 </SyntaxHighlighter>
 
@@ -91,10 +91,10 @@ You can use the `--explain` flag to get detailed reasoning for the affected work
 <SyntaxHighlighter language="bash">
 {`
 # Summary for each affected workspaces
-bw ls-affected --explain
+pacwich ls-affected --explain
 
 # More detailed output about every changed file and dependency
-bw ls-affected --explain --detailed
+pacwich ls-affected --explain --detailed
 `.trim()}
 </SyntaxHighlighter>
 

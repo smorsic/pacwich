@@ -1,116 +1,97 @@
 ---
-pageType: doc
+pageType: custom
 sidebar: false
 outline: false
 ---
-
-import { Bwunster } from "../lib/components/Bwunster";
-import { SyntaxHighlighter } from "../lib/util/highlight";
-import { API_QUICKSTART } from '../lib/api/apiExamples';
-import { CLI_QUICKSTART } from '../lib/cli/cliExamples';
-import { Footer } from "../lib/components/Footer";
-import { AnimatedSprite, PixelArtImage } from "../lib/util/pixelArt";
-import { RequiredBunVersion } from "../lib/components/RequiredBunVersion";
-import { SmorsicBanner } from "../lib/components/SmorsicBanner";
-import { WebCliButton } from "../lib/web-cli/WebCliButton";
-import { Banner } from "../lib/components/Banner";
+import { IntroAnimation } from "../lib/components/IntroAnimation";
+import { BiLogoTypescript } from "react-icons/bi";
+import { FaShuttleSpace } from "react-icons/fa6";
+import { GiViolin } from "react-icons/gi";
+import { VscDebugDisconnect } from "react-icons/vsc";
+import { GoLaw } from "react-icons/go";
+import { IoMdInformationCircleOutline } from "react-icons/io";
+import { FaToolbox } from "react-icons/fa";
+import { Link } from "@rspress/core/theme-original";
+import { PiGraphFill } from "react-icons/pi";
+import { GrDocumentConfig } from "react-icons/gr";
+import { CliInstall } from "../lib/components/CliInstall";
+import { FeatureBun } from "../lib/components/FeatureBun";
 import { BlogLink } from "../lib/components/BlogLink";
 
-<Bwunster/>
+<div className="home">
+<IntroAnimation />
 
-<h1 className="home-title" id="home-title">
-  bun-workspaces
-</h1>
-
-<h2 className="home-subtitle">
-  A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhances native [Bun
-  workspaces](https://bun.sh/docs/install/workspaces)
-</h2>
-
-<div className="home-list-container">
-  <ul className="home-list">
-    <li>🍽️ Works right away, with **no boilerplate required** 🍽️</li>
-    <li>🤖 Get **rich metadata** about your monorepo 🤖</li>
-    <li>🎻 **Orchestrate** your workspaces' `package.json` scripts 🎻</li>
-    <li>🐚 Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚</li>
-    <li>🎁 Use with Bun as your package manager for **Node** projects 🎁</li>
-    <li>🕸️ Determine **affected workspaces** based on changed files 🕸️</li>
-    <li>🛠️ AI: Provides an [AGENTS.md](/ai/agents) file and an [MCP server](/ai/mcp)! 🛠️</li>
-  </ul>
+<div className="features">
+  <FeatureBun kind="top" />
+  <div className="features-list">
+    <Link href="/intro/getting-started" className="feature">
+      <FaShuttleSpace className="feature-icon" style={{ color: 'var(--feature-shuttle-color)'}} />
+      <p><b>Zero config</b> required to get started</p>
+    </Link>
+    <Link href="/cli/commands#run-script" className="feature">
+      <GiViolin className="feature-icon" style={{ color: 'var(--feature-violin-color)', transform: 'rotate(-45deg)'}} />
+      <p><b>Orchestrate</b> plain old package.json scripts in workspaces</p>
+    </Link>
+    <Link href="/api" className="feature">
+      <BiLogoTypescript className="feature-icon" style={{ color: 'var(--feature-typescript-color)'}} />
+      <p>Includes a <b>TypeScript</b> API</p>
+    </Link>
+    <Link href="/intro/overview#decoupling-from-your-package-manager" className="feature">
+      <VscDebugDisconnect className="feature-icon" style={{ color: 'var(--feature-decouple-color)', transform: 'rotate(45deg)'}} />
+      <p><b>Decouple</b> monorepo tooling from your package manager</p>
+    </Link>
+    <Link href="/concepts/affected" className="feature">
+      <PiGraphFill className="feature-icon" style={{ color: 'var(--feature-graph-color)'}} />
+      <p>A <b>debuggable</b>, configurable affected graph</p>
+    </Link>
+    <Link href="/config/workspace" className="feature">
+      <GoLaw className="feature-icon" style={{ color: 'var(--feature-law-color)'}} />
+      <p>Enforce <b>rules</b> for workspace code sharing</p>
+    </Link>
+    <Link href="/config" className="feature">
+      <GrDocumentConfig className="feature-icon" style={{ color: 'var(--feature-config-color)'}} />
+      <p>Write optional config files in <b>JSON or TypeScript/JavaScript</b> </p>
+    </Link>
+    <Link href="/ai" className="feature">
+      <FaToolbox className="feature-icon" style={{ color: 'var(--feature-toolbox-color)'}} />
+      <p>AI integrations: <b>Skills</b>, <b>AGENTS.md</b>, an <b>MCP Server</b>, and <b>/llms.txt</b></p>
+    </Link>
+  </div>
+  <FeatureBun kind="bottom" />
 </div>
 
-To get started, all you need is a repo using [Bun's workspaces feature](https://bun.sh/docs/install/workspaces) for nested JavaScript/TypeScript packages.
-This adds enhanced features on top of plain workspaces.
-
-Start running some [CLI commands](/cli) right away in your repo, or take full advantage of the [TypeScript API](/api) and its features.
-
-This package is unopinionated and works with any project structure you want. Think of this as a power suit you can snap onto native workspaces, rather than whole new monorepo framework.
-
-<br/>
-<hr />
-
-<h2 className="whats-new-title">What's New</h2>
-
-<h2 className="whats-new-subtitle">Notable recent updates 📦</h2>
-<div className="whats-new-list">
-- v1.9: New features for **affected workspaces** based on changed files. See the [Affected Workspaces](/concepts/affected) concept for more details or the <BlogLink path="bun-workspaces-v1_9">release blog post</BlogLink>.
-- v1.6: Workspace configs can be set in bulk via workspace patterns in the root config's [workspace pattern configs](/config/workspace-pattern-configs).
-- See the recent <BlogLink path="bun-workspaces-v1_5">blog post</BlogLink> on features up to v1.5, including [dependency rules](/concepts/workspace-dependencies#workspace-dependency-rules), [tags](/config/workspace#tags), and the [MCP server](/ai/mcp).
-- <BlogLink>The `bun-workspaces` Blog</BlogLink> is now live! The <BlogLink path="bun-workspaces-v1">first post</BlogLink> covers the v1 release.
-- <span style={{ fontWeight: "500", fontSize: "1.05em"}}><span style={{ fontWeight: "800"}}>Version 1.0</span> is now here after the initial alpha! 🍔🍔👁️🍔🍔</span>
-- New CLI [output style](/cli/commands#run-script) for running scripts. `--no-prefix` is now <span className="deprecated">deprecated</span> in favor of `--output-style=plain`.
-- You can now run scripts in dependency order, similar to Bun's [`--filter` behavior](https://bun.com/docs/pm/filter#dependency-order). See more on [workspace dependencies](/concepts/workspace-dependencies).
+<div className="home-bw">
+  <IoMdInformationCircleOutline className="home-bw-icon" />
+  <div className="home-bw-content">
+    <p>
+      This package is the continuation of the original,<span className="deprecated"> now <b>deprecated</b>, <code>bun-workspaces</code></span>
+      package. `bun-workspaces` users can expect minimal to no changes on average.
+    </p>
+    <p>
+      See the <Link className="inline-link" href="/intro/bun-workspaces-migration">migration guide</Link> or
+      <BlogLink path="pacwich-launch">read the launch blog post</BlogLink> covering the reasoning and development strategy.
+    </p>
+  </div>
 </div>
 
-## Quick Start
-
-See the [CLI Quick Start](/cli) and [API Quick Start](/api) for starting examples. See the [Glossary](/concepts/glossary) for more fundamental concepts.
-
-## Installation
-
-<RequiredBunVersion className="home-bun-version bun-version" />
-
-
-You can install the package in your project or simply use `bunx bun-workspaces` to immediately use the latest version of the [CLI](/cli). Installation is required to use the [API](/api).
-
-<SyntaxHighlighter language="bash">
-{`# Install to use the API and/or lock your CLI version for your project
-bun add --dev bun-workspaces
-
-# Start using the CLI with or without the installation step
-bunx bun-workspaces --help`}
-
-</SyntaxHighlighter>
-
-If you use the CLI frequently, you might consider using a shell alias:
-
-<SyntaxHighlighter language="bash">
-  {`# Add this to .bashrc, .zshrc, or similar 
-# to make it available by default in your shell
-alias bw="bunx bun-workspaces"`}
-</SyntaxHighlighter>
-
-Examples in these docs will use the alias `bw` for `bunx bun-workspaces` for brevity.
-
-#### Stale Workspace Data
-
-Note that you need to run <code>bun install</code> in your project for
-<code>bun-workspaces</code> to find your project's workspaces, and you
-likely must run this again after you've updated your workspaces, such as
-changing a name or adding/removing one. This is because <code>bun.lock</code> 
-lists workspaces and is used as the source of truth.
-
-#### Why not a global install?
-
-It's possible to add `bw` to your shell's PATH to make it available globally via `bun add -g bun-workspaces`.
-However, `bunx` is recommended instead in order to ensure version consistency within projects. With the
-alias using `bunx` above, `bw` will use the locked version of `bun-workspaces` for a project that installed it.
-
-<br/>
-_`bun-workspaces` is independent from the [Bun](https://bun.sh) project and is not affiliated with or endorsed by Anthropic. This project aims to enhance the experience of Bun for its users._
-
-<div className="home-smorsic-banner">
-  <span className="home-smorsic-banner-text">Developed By:</span>
-  <SmorsicBanner width="280px" />
+<div className="home-pm-tabs-container">
+  <CliInstall docLinks />
 </div>
 
+
+<div className="intro-links-container" style={{ margin: 0, marginTop: "-2rem", marginBottom: "4rem"}}>
+<Link
+  href="/intro/overview"
+  className="intro-overview"
+>
+  Overview
+</Link>
+<Link
+  href="/intro/getting-started"
+  className="intro-getting-started"
+>
+  Getting Started
+</Link>
+</div>
+
+</div>

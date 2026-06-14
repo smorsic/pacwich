@@ -1,7 +1,7 @@
 ---
 title: Concepts > Inline Scripts
-titleSuffix: " | bun-workspaces"
-description: "Inline Scripts | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Inline Scripts | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -13,23 +13,24 @@ import { SyntaxHighlighter } from '../../../lib/util/highlight';
 import { CLI_INLINE_NAME_EXAMPLE, CLI_INLINE_SHELL_EXAMPLE } from '../../../lib/cli/cliExamples';
 import { API_INLINE_NAME_EXAMPLE, API_INLINE_SHELL_EXAMPLE } from '../../../lib/api/apiExamples';
 import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
-import { Link } from 'rspress/theme';
+import { Link } from 'rspress/core/theme';
 
 # Concept:  Inline Scripts
 
 ## Overview
 
-Normally, a ["script"](/concepts/glossary#script) in bun-workspaces references one of the entries found in a workspace's `"scripts"` field in its `package.json` file.
+Normally, a ["script"](/concepts/glossary#script) in pacwich references one of the entries found in a workspace's `"scripts"` field in its `package.json` file.
 
-However, it's possible to run a one-off shell command from a workspace's directory, an "inline script", such as via `bw run "echo 'hello'" --inline` in the CLI.
+However, it's possible to run a one-off shell command from a workspace's directory, an "inline script", such as via `pacwich run "echo 'hello'" --inline` in the CLI.
 
-## Shell
+## Using the Bun Shell
 
-Normally, inline scripts are executed using the [Bun shell](https://bun.com/docs/runtime/shell), a bash-like, cross-platform shell, the same as the utility `import { $ } from 'bun'`.
+Normally, inline scripts are executed using your system shell. In POSIX systems (Linux, macOS, etc.), `sh -c` is called, while in Windows, `cmd /d /s /c` is called.
 
-You can pass `--shell=system` to use the native shell instead. In POSIX systems (Linux, macOS, etc.), `sh -c` is called, while in Windows, `cmd /d /s /c` is called.
+You can also use the [Bun shell](https://bun.com/docs/runtime/shell), a bash-like, cross-platform shell, the same as the utility `import { $ } from 'bun'` by passing `--shell=bun`,
+if the `bun` command is available.
 
-You can also set the [root](/config/root) <code>{ENV_VARS_METADATA.scriptShellDefault.rootConfigDefaultsKey}</code> or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.scriptShellDefault.envVarName}</code> to `"system"` to use the native shell by default.
+You can also set the [root](/config/project) <code>{ENV_VARS_METADATA.scriptShellDefault.projectConfigDefaultsKey}</code> or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.scriptShellDefault.envVarName}</code> to `"bun"` to use the Bun shell by default.
 
 ### Examples
 

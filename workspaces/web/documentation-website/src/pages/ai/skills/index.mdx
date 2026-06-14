@@ -1,0 +1,32 @@
+---
+title: Skills | AI
+titleSuffix: " | pacwich"
+description: "Skills integration for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+
+import { SyntaxHighlighter } from '../../../lib/util/highlight';
+
+# AI Integrations: Skills
+
+You can create skill files that provide context to AI tools about the package.
+
+These skills have the same information as the [`AGENTS.md` files](/ai/agents)
+and [MCP](/ai/mcp) resources.
+
+You own these files, and they are not included in ambient context automatically until
+invoked.
+
+## Adding to your project
+
+The CLI includes an [`add-skills`](/cli/commands#add-skills) command to add skill files to your repo.
+
+
+Below is an example of how to use it:
+
+<SyntaxHighlighter language="bash">
+{`pacwich add-skills --dir=.claude/skills`}
+</SyntaxHighlighter>

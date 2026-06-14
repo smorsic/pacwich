@@ -1,7 +1,7 @@
 ---
 title: Concepts > Parallel Scripts
-titleSuffix: " | bun-workspaces"
-description: "Parallel Scripts | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Parallel Scripts | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -29,7 +29,7 @@ to the parallel max option.
 * A plain number sets the limit to the exact number of concurrent scripts. Setting the max to `2` then only allows two scripts to run at the same time.
 
 * A value of `"auto"` sets the limit to [`os.availableParallelism()`](https://bun.com/reference/node/os/availableParallelism), which generally corresponds to the number of available logical CPUs.
-This is the default value when [configuration](/config/root) doesn't override a default.
+This is the default value when [configuration](/config/project) doesn't override a default.
 
 * A value of `"unbounded"` allows all scripts to run in parallel, but use this with caution, as it can overwhelm a machine and cause instability.
 
@@ -39,7 +39,7 @@ This is the default value when [configuration](/config/root) doesn't override a 
 
 A value of `"default"` explicitly references the default limit. 
 
-When the [root](/config/root) <code>{ENV_VARS_METADATA.parallelMaxDefault.rootConfigDefaultsKey}</code> or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.parallelMaxDefault.envVarName}</code> is not set, it is equal to `"auto"`. You can set <code>{ENV_VARS_METADATA.parallelMaxDefault.rootConfigDefaultsKey}</code> or <code>{ENV_VARS_METADATA.parallelMaxDefault.envVarName}</code> to any of the valid values listed above.
+When the [root](/config/project) <code>{ENV_VARS_METADATA.parallelMaxDefault.projectConfigDefaultsKey}</code> or [environment variable](/config/env-vars) <code>{ENV_VARS_METADATA.parallelMaxDefault.envVarName}</code> is not set, it is equal to `"auto"`. You can set <code>{ENV_VARS_METADATA.parallelMaxDefault.projectConfigDefaultsKey}</code> or <code>{ENV_VARS_METADATA.parallelMaxDefault.envVarName}</code> to any of the valid values listed above.
 
 ## Examples
 

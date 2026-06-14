@@ -1,0 +1,10 @@
+{
+  "name": "application-f",
+  "pacwich":{
+    "scripts": {
+      "all-workspaces": {
+        "order": 100
+      }
+    }
+  }
+}

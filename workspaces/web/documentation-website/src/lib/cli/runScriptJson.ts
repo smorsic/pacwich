@@ -1,4 +1,4 @@
-import { type RunScriptAcrossWorkspacesResult } from "bun-workspaces";
+import { type RunScriptAcrossWorkspacesResult } from "pacwich";
 
 const start = new Date("1999-12-31T23:59:59.999Z");
 const end = new Date(start.getTime() + 5136);

@@ -1,6 +1,0 @@
-{
-  "name": "application-a",
-  "scripts": {
-    "test-echo": "echo $BW_PROJECT_PATH $BW_PROJECT_NAME $BW_WORKSPACE_NAME $BW_WORKSPACE_PATH $BW_WORKSPACE_RELATIVE_PATH $BW_SCRIPT_NAME"
-  }
-}

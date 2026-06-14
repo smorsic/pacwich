@@ -1,0 +1,6 @@
+{
+  // Project config sets the CLI's default script output style to "plain"
+  "defaults": {
+    "cliScriptOutputStyle": "plain",
+  },
+}

@@ -1,15 +1,15 @@
 {
-  "name": "bw-sandbox--local-vs-release",
+  "name": "@pacwich/sandbox--local-vs-release",
   "private": true,
   "scripts": {
     "api:local": "bun run src/local.ts",
-    "cli:local": "bun node_modules/bun-workspaces_local/bin/cli.js --cwd=test-project",
+    "cli:local": "bun node_modules/pacwich_local/bin/cli.js --cwd=test-project",
     "api:release": "bun run src/release.ts",
-    "cli:release": "bun node_modules/bun-workspaces_release/bin/cli.js --cwd=test-project",
+    "cli:release": "bun node_modules/pacwich_release/bin/cli.js --cwd=test-project",
     "prepare": "cd test-project && bun install"
   },
   "devDependencies": {
-    "bun-workspaces_local": "file:../../packages/bun-workspaces",
-    "bun-workspaces_release": "npm:bun-workspaces@1.11.1"
+    "pacwich_local": "file:../../packages/pacwich",
+    "pacwich_release": "npm:pacwich@latest"
   }
 }

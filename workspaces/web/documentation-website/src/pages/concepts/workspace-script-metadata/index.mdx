@@ -1,14 +1,14 @@
 ---
 title: Concepts > Workspace Script Metadata
-titleSuffix: " | bun-workspaces"
-description: "Workspace Script Metadata | Concepts | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Workspace Script Metadata | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { getWorkspaceScriptMetadataConfig } from 'bw-common/runScript';
+import { getWorkspaceScriptMetadataConfig } from '@pacwich/common/runScript';
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
 
 # Concept:  Workspace Script Metadata
@@ -19,7 +19,7 @@ When running scripts via the API or CLI, metadata is available via either enviro
 in an [inline script](/concepts/inline-scripts) or appended args.
 
 The environment variables allow scripts to introspect metadata about the project, workspace, and script info to get
-context about its execution by `bun-workspaces`.
+context about its execution by `pacwich`.
 
 This same metadata can be referenced within inline script commands and/or appended script args.
 
@@ -30,7 +30,7 @@ In this command, all workspaces will run the same `my-script.ts` file found at t
 and the workspace name and path will be passed to the script as arguments.
 
 <SyntaxHighlighter language="bash">
-{`bw run "bun <projectPath>/my-script.ts" --inline \\
+{`pacwich run "bun <projectPath>/my-script.ts" --inline \\
 \ \ --inline-name="my-script-name" \\
 \ \ --args="<workspaceName> <workspacePath>"`}
 </SyntaxHighlighter>
@@ -42,7 +42,7 @@ its behavior based on the workspace context passed to it:
 The same as the above CLI example using the TypeScript API:
 <SyntaxHighlighter language="typescript">
 {`
-import { createFileSystemProject } from 'bun-workspaces';
+import { createFileSystemProject } from 'pacwich';
 
 const project = createFileSystemProject();
 
@@ -55,14 +55,14 @@ ${"  "}inline: { scriptName: "my-script-name" },
 
 #### Accessing in a script via environment variables
 
-You can access metadata from within a script that was invoked via `bun-workspaces` via 
+You can access metadata from within a script that was invoked via `pacwich` via 
 environment variables directly or the `getWorkspaceScriptMetadata` helper.
 
 <SyntaxHighlighter language="typescript">
 {`
-import { getWorkspaceScriptMetadata } from 'bun-workspaces/script';
+import { getWorkspaceScriptMetadata } from 'pacwich/script';
 
-// Use the helper within a script that was invoked via bun-workspaces
+// Use the helper within a script that was invoked via pacwich
 const projectPath = getWorkspaceScriptMetadata("projectPath");
 const projectName = getWorkspaceScriptMetadata("projectName");
 const workspaceName = getWorkspaceScriptMetadata("workspaceName");

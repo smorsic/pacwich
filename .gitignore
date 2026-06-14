@@ -1,8 +1,12 @@
 # Generated file
 AGENTS.md
+mise.toml
 
-# For local/temp user instructions
+#  Local files
+mise.local.toml
 CLAUDE.local.md
+.claude/*
+!.claude/skills/
 
 # generic personal ignored files
 *ignore-me*
@@ -19,8 +23,11 @@ test-output
 # Enforce bun lockfile
 !bun.lock
 package-lock.json
+# Allow curated test fixture package-lock files (committed npm overlay)
+!**/_pm/npm/package-lock.json
 yarn.lock
-pnpm-lock.yaml
+# Allow curated test fixture pnpm overlay files (committed pnpm overlay)
+!**/_pm/pnpm/pnpm-lock.yaml
 # Outdated lock file format
 bun.lockb
 

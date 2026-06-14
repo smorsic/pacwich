@@ -140,7 +140,7 @@ export const EXAMPLE_COMMANDS = [
   },
   {
     name: "Version",
-    description: "Show the bun-workspaces version",
+    description: "Show the pacwich version",
     command: "--version",
   },
 ] satisfies ExampleCommand[];

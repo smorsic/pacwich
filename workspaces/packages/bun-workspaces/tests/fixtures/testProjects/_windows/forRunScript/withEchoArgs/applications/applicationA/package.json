@@ -1,9 +1,0 @@
-{
-  "name": "application-1a",
-  "bw": {
-    "alias": "appA"
-  },
-  "scripts": {
-    "test-echo": "echo passed args:"
-  }
-}

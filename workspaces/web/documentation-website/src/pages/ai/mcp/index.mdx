@@ -1,83 +1,33 @@
 ---
 title: MCP | AI
-titleSuffix: " | bun-workspaces"
-description: "MCP server integration for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "MCP server integration for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { CURSOR_MCP_CONFIG, CLAUDE_DESKTOP_MCP_CONFIG, CLAUDE_CODE_MCP_CONFIG, MCP_SERVER_ENTRY_TERMINAL, MCP_SERVER_ENTRY_GUI } from '../../../lib/ai/mcpIntegrations';
+import { MCP_CONFIG } from '../../../lib/ai/mcpIntegrations';
 import { SyntaxHighlighter } from '../../../lib/util/highlight';
 
-# AI Tool Integration: MCP Server
+# AI Integrations: MCP Server
 
-`bun-workspaces` provides its own MCP server via `bunx bun-workspaces mcp-server`. This can be used with any tooling that supports MCP.
+`pacwich` provides its own MCP server via `npx pacwich mcp-server`. This can be used with any tooling that supports MCP.
 
-When you set up the MCP server with your tool, an agent has access to the server's **tools** that 
-can get project metadata and **resources** that provide it complete documentation.
+When you set up the MCP server with your tool, an agent has access to the server's **resources** that provide it complete documentation,
+the same documentation also available via [AGENTS.md files](/ai/agents) or [skills](/ai/skills).
 
-Agents that read the server instructions on initialization will automatically have knowledge of `bun-workspaces`
+Agents that read the server instructions on initialization will automatically have knowledge of `pacwich`
 as a package with a brief overview and introduction to the CLI, kept very brief due to tools' propensity to
 truncate these instructions.
 
-## Using AGENTS.md Instead
+## Example Integration for Claude Code or Cursor
 
-If you want your agent to know how to use `bun-workspaces` in full right away, you
-may prefer to use the AGENTS.md file `bun-workspaces` provides instead. [Read more](/ai/agents)
+**Claude Code**: Add below to `.mcp.json`
 
-## The MCP vs. CLI Debate
-
-You may have heard or read the idea that CLIs are often preferable over MCP servers for AI tooling,
-something `bun-workspaces` obviously already provides.
-
-AI tools like Claude Code can definitely explore the CLI's usage and use it plainly
-to get project metadata or run scripts, etc. without relying on MCP tools.
-
-#### Complementary, not Contradictory
-
-However, the MCP server setup can still be worth it in order for tools to be aware 
-of `bun-workspaces` in the first place, without needing to be prompted about its existence or 
-the entry into the CLI, especially if the tool reads the initial server instructions, like Claude.
-
-The **resources** also provide a quick path for an agent to explore more complete documentation if needed for deeper work
- with the CLI, TS API, or optional config files, something not possibly from merely the CLI's usage.
-
-## Example Integrations
-
-#### Command
-
-Some tools work with a limited `PATH` that may not include `bun`, so you may need to use: <code>{MCP_SERVER_ENTRY_GUI.command} {MCP_SERVER_ENTRY_GUI.args.join(" ")}</code><br/> instead
-of a plain `bunx bun-workspaces mcp-server`. 
-
-If Bun is installed somewhere else, you'll need to adjust the command to include the path to the Bun executable instead 
-of `$HOME/.bun/bin`.
-
-#### Project Root
-
-If your project root is in a different directory than the one you're working in with your tool, you can add the working directory 
-for `bun-workspaces` to the command as: `bunx bun-workspaces --cwd=path/to/project/root mcp-server`.
-
-### Cursor
-
-Add the following to your `.cursor/mcp.json` file for the project you're working in.
+**Cursor**: Add below to your `.cursor/mcp.json`
 
 <SyntaxHighlighter language="json">
-{JSON.stringify(CURSOR_MCP_CONFIG, null, 2)}
+{JSON.stringify(MCP_CONFIG, null, 2)}
 </SyntaxHighlighter>
-
-### Claude Code
-
-Add the following to your `.mcp.json` file for a directory you're working in.
-
-<SyntaxHighlighter language="json">
-{JSON.stringify(CLAUDE_CODE_MCP_CONFIG, null, 2)}
-</SyntaxHighlighter>
-
-#### Executable Config Files (TS/JS)
-
-By default, the MCP server does not load TS/JS configuration files (e.g. `bw.workspace.ts`) for agent security reasons,
-preventing executing TS/JS in untrusted contexts on CLI initialization if an agent was pointed to a compromised repository.
-
-If you want to enable this feature, add `--no-disable-executable-configs` after the `mcp-server` command.

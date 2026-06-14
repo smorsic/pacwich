@@ -1,0 +1,6 @@
+{
+  "name": "a",
+  "scripts": {
+    "test-debug": "echo $_PACWICH_PARALLEL_MAX"
+  }
+}

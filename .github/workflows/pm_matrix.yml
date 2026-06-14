@@ -1,0 +1,109 @@
+name: Package Manager Matrix
+
+# Sweep of non-runtime package manager versions (pnpm today, add yarn /
+# etc. as supported). Bun, Node, and OS are pinned to devLock + ubuntu.
+# Only the pnpm axis varies. Tests scope to the pnpm + pmMatrix folders
+# with PACWICH_TEST_PM=pnpm so the pmMatrix conformance tests run their
+# pnpm variants only.
+#
+# Tests run under Node by default (npm is the typical pairing); flip to
+# Bun via the `runtime` workflow_dispatch input when validating Bun's
+# behavior against a specific pnpm version is needed.
+#
+# npm versions are intentionally not swept here: npm ships with Node, so
+# the runtime matrix already covers that axis.
+
+on:
+  workflow_call:
+    inputs:
+      runtime:
+        description: Runtime used to execute the tests (bun or node)
+        required: false
+        type: string
+        default: node
+  workflow_dispatch:
+    inputs:
+      pnpm_version:
+        description: Single pnpm version (collapses the pnpm axis)
+        required: false
+        type: string
+      bun_version:
+        description: Single Bun version (defaults to devLock)
+        required: false
+        type: string
+      node_version:
+        description: Single Node version (defaults to devLock)
+        required: false
+        type: string
+      os:
+        description: Single OS (defaults to ubuntu-latest)
+        required: false
+        type: string
+      runtime:
+        description: Runtime used to execute the tests
+        required: false
+        type: choice
+        options: [node, bun]
+        default: node
+
+permissions:
+  contents: read
+
+jobs:
+  prep:
+    name: Generate matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Generate matrix JSON
+        id: gen
+        shell: bash
+        env:
+          BUN_OVERRIDE: ${{ inputs.bun_version }}
+          NODE_OVERRIDE: ${{ inputs.node_version }}
+          PNPM_OVERRIDE: ${{ inputs.pnpm_version }}
+          OS_OVERRIDE: ${{ inputs.os }}
+        run: |
+          set -euo pipefail
+
+          MATRICES=workspaces/packages/meta/ci/matrices.json
+          TOOL_VERSIONS=workspaces/libraries/pacwich-common/toolVersions/toolVersions.json
+
+          # pnpm is the swept axis; override collapses it.
+          pnpm=${PNPM_OVERRIDE:+"[\"$PNPM_OVERRIDE\"]"}
+          pnpm=${pnpm:-$(jq -c '.pm.pnpm' "$MATRICES")}
+
+          # bun / node default to devLock; override wins.
+          bun=${BUN_OVERRIDE:-$(jq -r '.bun.devLock' "$TOOL_VERSIONS")}
+          node=${NODE_OVERRIDE:-$(jq -r '.node.devLock' "$TOOL_VERSIONS")}
+          os=${OS_OVERRIDE:-ubuntu-latest}
+
+          include=$(jq -nc \
+            --argjson pnpm "$pnpm" \
+            --arg bun "$bun" \
+            --arg node "$node" \
+            --arg os "$os" \
+            '[ $pnpm[] as $p | {bun:$bun, node:$node, pnpm:$p, os:$os} ]')
+
+          matrix="{\"include\":$include}"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "Matrix:"
+          jq . <<<"$matrix"
+
+  test:
+    needs: prep
+    name: "pnpm ${{ matrix.pnpm }} via ${{ inputs.runtime || 'node' }} (bun ${{ matrix.bun }}, node ${{ matrix.node }}, ${{ matrix.os }})"
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prep.outputs.matrix) }}
+    uses: ./.github/workflows/test_given_versions.yml
+    with:
+      test_runtime: node
+      os: ${{ matrix.os }}
+      bun-version: ${{ matrix.bun }}
+      node-version: ${{ matrix.node }}
+      pnpm-version: ${{ matrix.pnpm }}
+      test_args: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"

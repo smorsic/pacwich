@@ -1,0 +1,38 @@
+lockfileVersion: "9.0"
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .: {}
+
+  packages/a-depends-e:
+    dependencies:
+      e:
+        specifier: workspace:*
+        version: link:../e
+
+  packages/b-depends-cd:
+    dependencies:
+      d-depends-e:
+        specifier: workspace:*
+        version: link:../d-depends-e
+    optionalDependencies:
+      c-depends-e:
+        specifier: workspace:*
+        version: link:../c-depends-e
+
+  packages/c-depends-e:
+    devDependencies:
+      e:
+        specifier: workspace:*
+        version: link:../e
+
+  packages/d-depends-e:
+    dependencies:
+      e:
+        specifier: workspace:*
+        version: link:../e
+
+  packages/e: {}

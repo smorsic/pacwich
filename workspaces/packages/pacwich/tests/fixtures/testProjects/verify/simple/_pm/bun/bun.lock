@@ -1,0 +1,41 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "test-root",
+    },
+    "packages/lib-a": {
+      "name": "lib-a",
+    },
+    "packages/lib-b": {
+      "name": "lib-b",
+      "dependencies": {
+        "lib-a": "workspace:*",
+      },
+    },
+    "packages/app-c": {
+      "name": "app-c",
+      "dependencies": {
+        "lib-a": "workspace:*",
+      },
+    },
+    "packages/app-d": {
+      "name": "app-d",
+    },
+    "packages/app-e": {
+      "name": "app-e",
+    },
+  },
+  "packages": {
+    "lib-a": ["lib-a@workspace:packages/lib-a"],
+
+    "lib-b": ["lib-b@workspace:packages/lib-b"],
+
+    "app-c": ["app-c@workspace:packages/app-c"],
+
+    "app-d": ["app-d@workspace:packages/app-d"],
+
+    "app-e": ["app-e@workspace:packages/app-e"],
+  }
+}

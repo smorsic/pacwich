@@ -33,7 +33,12 @@
     "bunx",
     "bwunster",
     "eastasianwidth",
+    "fontsource",
+    "jiti",
+    "llms",
+    "lockfiles",
     "modelcontextprotocol",
+    "pacwich",
     "pids",
     "rsbuild",
     "rslib",
@@ -42,6 +47,8 @@
     "smorsic",
     "Spritesheet",
     "spritesheets",
-    "unifontex"
+    "svgr",
+    "unifontex",
+    "zustand"
   ]
 }

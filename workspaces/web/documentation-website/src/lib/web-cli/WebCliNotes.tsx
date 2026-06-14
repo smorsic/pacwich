@@ -1,4 +1,4 @@
-import { Link } from "rspress/theme";
+import { Link } from "@rspress/core/theme-original";
 
 export const WebCliNotes = () => {
   return (
@@ -13,14 +13,14 @@ export const WebCliNotes = () => {
           .
         </li>
         <li>
-          <code>bw</code> is an alias for <code>bunx bun-workspaces</code>.
-          However, you can use <code>bw</code> in your root{" "}
+          <code>pacwich</code> is an alias for <code>bunx pacwich</code>.
+          However, you can use <code>pacwich</code> in your root{" "}
           <code>package.json</code> scripts without setting up a shell alias
-          when <code>bun-workspaces</code> is installed.
+          when <code>pacwich</code> is installed.
         </li>
         <li>
           This isn't a full bash shell, so shell operations beyond providing
-          args to <code>bw</code> aren't supported.
+          args to <code>pacwich</code> aren't supported.
         </li>
         <li>
           <Link className="inline-link" href="/concepts/inline-scripts">

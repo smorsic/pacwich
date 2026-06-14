@@ -1,7 +1,7 @@
 ---
 title: CLI Commands
-titleSuffix: " | bun-workspaces"
-description: "Commands documentation for bun-workspaces CLI | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Commands documentation for pacwich CLI | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -18,13 +18,14 @@ import { CliHeader } from "../../../lib/cli/CliHeader";
 
 <CliHeader />
 
+See also [all CLI global options here](/cli/global-options) or the [CLI quick start](/cli).
+
 ## All Commands
 
 ### List Workspaces
 <CliCommandDoc command={"listWorkspaces"} />
 #### More Info
 See more on [workspace patterns](/concepts/workspace-patterns).
-<br/>
 <hr />
 ### Workspace Info
 <CliCommandDoc command={"workspaceInfo"} />
@@ -41,9 +42,11 @@ See more on [workspace patterns](/concepts/workspace-patterns).
 ### Tag Info
 <CliCommandDoc command={"tagInfo"} />
 <hr />
+### Verify
+<CliCommandDoc command={"verify"} />
+<hr />
 ### Run Script
 <CliCommandDoc command={"runScript"} />
-
 #### More Info
 
 * See more on [workspace patterns](/concepts/workspace-patterns) for selecting workspaces to run.
@@ -51,7 +54,7 @@ See more on [workspace patterns](/concepts/workspace-patterns).
 * See more on running [inline scripts](/concepts/inline-scripts).
 * See more on [workspace script metadata](/concepts/workspace-script-metadata), such as environment variables available in scripts and interpolating values in inline scripts and args such as `<workspaceName>`.<br/>
 * See more on [workspace aliases](/concepts/workspace-aliases) for referencing workspaces via shorthands.
-* See more on [tags](config/workspace#tags) for grouping workspaces together.
+* See more on [tags](/config/workspace#tags) for grouping workspaces together.
 * See more on running [parallel scripts](/concepts/parallel-scripts).
 
 #### JSON Output
@@ -66,11 +69,18 @@ This is the same data as would be returned by the equivalent API, [`FileSystemPr
   {JSON.stringify(RUN_SCRIPT_EXAMPLE_JSON_OUTPUT, null, 2)}
 </SyntaxHighlighter>
 
+<hr />
 ### List Affected
 <CliCommandDoc command={"listAffected"} />
+<hr />
 ### Run Affected
 <CliCommandDoc command={"runAffected"} />
+<hr />
+### Add Skills
+<CliCommandDoc command={"addSkills"} />
+<hr />
 ### MCP Server
 <CliCommandDoc command={"mcpServer"} />
+<hr />
 ### Doctor
 <CliCommandDoc command={"doctor"} />

@@ -1,0 +1,20 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "test-root",
+    },
+    "packages/lib-a": {
+      "name": "lib-a",
+    },
+    "packages/app-b": {
+      "name": "app-b",
+    },
+  },
+  "packages": {
+    "lib-a": ["lib-a@workspace:packages/lib-a"],
+
+    "app-b": ["app-b@workspace:packages/app-b"],
+  }
+}

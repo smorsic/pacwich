@@ -1,34 +1,34 @@
 ---
 title: Overview | Configuration
-titleSuffix: " | bun-workspaces"
-description: "Configuration documentation for bun-workspaces, such as the bw.json config file | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Configuration documentation for pacwich, such as the pacwich.json config file | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
 
-import { ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY, WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath, createConfigLocationDescription } from 'bw-common/config';
-import {  exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple, createTsFileExample, exampleRootConfigSimple1 } from "../../lib/config/exampleConfig";
+import { PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY, WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath, createConfigLocationDescription } from '@pacwich/common/config';
+import {  exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple, createTsFileExample, exampleProjectConfigSimple1 } from "../../lib/config/exampleConfig";
 import { SyntaxHighlighter } from "../../lib/util/highlight";
-import { ROOT_CONFIG_TYPE } from "../../lib/config/configTypes";
+import { PROJECT_CONFIG_TYPE } from "../../lib/config/configTypes";
 
 # Configuration: Overview
 
 Configuration is set by JSON. Config files can be written in TypeScript, JavaScript, JSON, or JSONC.
 
-See [Root Configuration](/config/root) and [Workspace Configuration](/config/workspace) for more information on the purpose of each field.
+See [Project Configuration](/config/project) and [Workspace Configuration](/config/workspace) for more information on the purpose of each field.
 
 ## Quick Examples
 
-### Project Root Configuration
+### Project Configuration
 
-The [root configuration](/config/root) is for project-wide settings.
+The [project configuration](/config/project) is for project-wide settings.
 
 <SyntaxHighlighter language="typescript">
-{`// path/to/your/project/${createConfigLocationPath("tsFile", ROOT_CONFIG_FILE_NAME, ROOT_CONFIG_PACKAGE_JSON_KEY)}
+{`// path/to/your/project/${createConfigLocationPath("tsFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}
 
-${createTsFileExample(exampleRootConfigSimple1, "root")}`}
+${createTsFileExample(exampleProjectConfigSimple1, "root")}`}
 </SyntaxHighlighter>
 
 ### Workspace Configuration
@@ -47,7 +47,7 @@ ${createTsFileExample(exampleWorkspaceConfigSimple, "workspace")}`}
 
 Configuration files can be read from the following location. The first to be resolved in this order will be used:
 <ol className="config-location-list">
-{CONFIG_LOCATION_TYPES.map(type => <li key={type}><b>{createConfigLocationDescription(type)}</b>: <code>{createConfigLocationPath(type, "bw.<name>", "<key>")}</code></li>)}
+{CONFIG_LOCATION_TYPES.map(type => <li key={type}><b>{createConfigLocationDescription(type)}</b>: <code>{createConfigLocationPath(type, "pacwich.<name>", "<key>")}</code></li>)}
 </ol>
 
 ### Value Resolution

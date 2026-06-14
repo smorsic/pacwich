@@ -34,10 +34,21 @@ export interface Spritesheet {
 export const loadSpritesheetMetadata = async (
   fileName: string,
 ): Promise<SpritesheetMetadata> => {
-  const response = await fetch(
-    `/images/spritesheets/metadata/${fileName}.json`,
-  );
-  const data = (await response.json()) as RawSpritesheetMetadata;
+  let data: RawSpritesheetMetadata;
+  try {
+    const response = await fetch(
+      `/images/spritesheets/metadata/${fileName}.json`,
+    );
+    data = (await response.json()) as RawSpritesheetMetadata;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to load spritesheet metadata for ${fileName}`, error);
+    return {
+      frames: [],
+      width: 0,
+      height: 0,
+    };
+  }
   return {
     frames: Object.values<{ frame: SpritesheetFrame }>(data.frames).map(
       (rawFrame) => rawFrame.frame,

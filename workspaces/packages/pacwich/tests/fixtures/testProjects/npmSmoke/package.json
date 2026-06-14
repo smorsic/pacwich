@@ -1,0 +1,5 @@
+{
+  "name": "npm-smoke-root",
+  "private": true,
+  "workspaces": ["workspaces/*"]
+}

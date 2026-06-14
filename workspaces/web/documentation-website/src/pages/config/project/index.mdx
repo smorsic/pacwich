@@ -1,0 +1,80 @@
+---
+title: Project Configuration
+titleSuffix: " | pacwich"
+description: "Project Configuration documentation for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+
+import { PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath } from '@pacwich/common/config';
+import { exampleProjectConfigSimple1, exampleProjectConfigSimple2, createPackageJsonExample, createTsFileExample, MERGE_PROJECT_CONFIG_EXAMPLE } from "../../../lib/config/exampleConfig";
+import { SyntaxHighlighter } from "../../../lib/util/highlight";
+import { PROJECT_CONFIG_TYPE } from "../../../lib/config/configTypes";
+import { CONFIG_DEFAULTS_KEY } from "../../../lib/config/envVars";
+import { ENV_VARS_METADATA } from '../../../lib/config/envVars';
+
+# Configuration: Project Config File
+ 
+The optional project configuration is the general configuration for a [project](/concepts/glossary#project) at a file such as <code>{createConfigLocationPath("jsonFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}</code> or in its `package.json` file.
+
+## Type Definition
+
+<SyntaxHighlighter language="typescript">
+  {PROJECT_CONFIG_TYPE}
+</SyntaxHighlighter>
+
+### Defaults
+
+The values in <code>{CONFIG_DEFAULTS_KEY}</code> can also be set by [environment variables](/config/env-vars). Configuration values take precedence over environment variables.
+
+* <code>{ENV_VARS_METADATA.cliScriptOutputStyleDefault.projectConfigDefaultsKey}</code>: The [output style](/cli/commands#run-script) to use for workspace scripts. The default is "grouped" when on a TTY, which always falls back to "prefixed" on non-TTY terminals. Otherwise, it is "prefixed". Other options are "plain" and "none".
+* <code>{ENV_VARS_METADATA.parallelMaxDefault.projectConfigDefaultsKey}</code>: The [parallel max value](/concepts/parallel-scripts#parallel-max-value)
+* <code>{ENV_VARS_METADATA.scriptShellDefault.projectConfigDefaultsKey}</code>: The [shell option for inline scripts](/concepts/inline-scripts#shell)
+* <code>{ENV_VARS_METADATA.includeRootWorkspaceDefault.projectConfigDefaultsKey}</code>: Whether to include the [root workspace](/concepts/root-workspace) in the project's workspaces list
+* <code>{ENV_VARS_METADATA.affectedBaseRefDefault.projectConfigDefaultsKey}</code>: The default git base ref for [affected workspaces](/concepts/affected) resolution
+  (this is <code>main</code> when not overridden)
+
+### Workspace Pattern Configs
+
+You can set workspace configs in bulk by using workspace patterns in `workspacePatternConfigs`.
+
+See the [workspace pattern configs](/config/workspace-pattern-configs) page for more information.
+
+## Examples:
+### 1. TypeScript/JavaScript file
+
+<span className="config-path"><code>path/to/your/project/{createConfigLocationPath("tsFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
+or
+<span className="config-path"><code>path/to/your/project/{createConfigLocationPath("jsFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
+
+<SyntaxHighlighter language="typescript">
+  {createTsFileExample(exampleProjectConfigSimple1, "root")}
+</SyntaxHighlighter>
+
+#### `mergeProjectConfig` Utility
+You can use the `mergeProjectConfig` function to merge multiple project configurations left to right, with each subsequent config taking precedence. 
+Objects are merged deeply.
+
+<SyntaxHighlighter language="typescript">
+  {MERGE_PROJECT_CONFIG_EXAMPLE}
+</SyntaxHighlighter>
+
+### 2. JSON/JSONC file
+
+<span className="config-path"><code>path/to/your/project/{createConfigLocationPath("jsonFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
+or
+<span className="config-path"><code>path/to/your/project/{createConfigLocationPath("jsoncFile", PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY)}</code></span>
+
+<SyntaxHighlighter language="json">
+  {JSON.stringify(exampleProjectConfigSimple1, null, 2)}
+</SyntaxHighlighter>
+
+### 3. package.json
+
+<span className="config-path"><code>path/to/your/project/package.json</code></span>
+
+<SyntaxHighlighter language="json">
+  {JSON.stringify(createPackageJsonExample(exampleProjectConfigSimple2, "root"), null, 2)}
+</SyntaxHighlighter>

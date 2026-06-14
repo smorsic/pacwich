@@ -1,0 +1,25 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "semver-workspace-link-root",
+    },
+    "packages/pkg-a": {
+      "name": "pkg-a",
+      "version": "1.2.3",
+    },
+    "packages/pkg-b": {
+      "name": "pkg-b",
+      "version": "1.0.0",
+      "dependencies": {
+        "pkg-a": "^1.0.0",
+      },
+    },
+  },
+  "packages": {
+    "pkg-a": ["pkg-a@workspace:packages/pkg-a"],
+
+    "pkg-b": ["pkg-b@workspace:packages/pkg-b"],
+  }
+}

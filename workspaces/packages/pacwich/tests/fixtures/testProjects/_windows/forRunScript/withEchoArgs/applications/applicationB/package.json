@@ -1,0 +1,9 @@
+{
+  "name": "application-1b",
+  "pacwich": {
+    "alias": "appB"
+  },
+  "scripts": {
+    "test-echo": "echo passed args:"
+  }
+}

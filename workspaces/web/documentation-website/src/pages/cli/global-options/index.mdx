@@ -1,7 +1,7 @@
 ---
 title: CLI > Global Options
-titleSuffix: " | bun-workspaces"
-description: "Global options documentation for bun-workspaces CLI | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "Global options documentation for pacwich CLI | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
@@ -16,22 +16,25 @@ import { CliHeader } from "../../../lib/cli/CliHeader";
 
 <CliHeader />
 
+See also [all CLI commands here](/cli/commands) or the [CLI quick start](/cli).
+
 ## All Global Options
 
 Global options should come before any commands.
 
 ### Working Directory
 <CliGlobalOptionDoc option="cwd" />
-<hr />
-### Run from Workspace Root
-<CliGlobalOptionDoc option="workspaceRoot" />
+<hr/>
+### Package Manager
+<CliGlobalOptionDoc option="pm" />
+<hr/>
 ### Include Root
 <CliGlobalOptionDoc option="includeRoot" />
+See more on the [Root Workspace](/concepts/root-workspace).
+<hr/>
 ### Disable Executable Configs
 <CliGlobalOptionDoc option="disableExecutableConfigs" />
 
-See more on the [Root Workspace](/concepts/root-workspace).
-<br/>
 <hr />
 ### Log Level
 <CliGlobalOptionDoc option="logLevel" />

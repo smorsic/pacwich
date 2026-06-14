@@ -1,0 +1,35 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "test-root",
+    },
+    "applications/applicationA": {
+      "name": "application-a",
+    },
+    "applications/applicationB": {
+      "name": "application-b",
+    },
+    "libraries/libraryA": {
+      "name": "library-a",
+    },
+    "libraries/libraryB": {
+      "name": "library-b",
+    },
+    "libraries/nested/libraryC": {
+      "name": "library-c",
+    },
+  },
+  "packages": {
+    "application-a": ["application-a@workspace:applications/applicationA"],
+
+    "application-b": ["application-b@workspace:applications/applicationB"],
+
+    "library-a": ["library-a@workspace:libraries/libraryA"],
+
+    "library-b": ["library-b@workspace:libraries/libraryB"],
+
+    "library-c": ["library-c@workspace:libraries/nested/libraryC"],
+  }
+}

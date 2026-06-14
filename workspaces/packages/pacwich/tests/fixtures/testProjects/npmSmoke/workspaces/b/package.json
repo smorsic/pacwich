@@ -1,0 +1,10 @@
+{
+  "name": "workspace-b",
+  "version": "1.0.0",
+  "scripts": {
+    "noop": "node -e \"process.stdout.write('b ok')\""
+  },
+  "dependencies": {
+    "workspace-a": "*"
+  }
+}

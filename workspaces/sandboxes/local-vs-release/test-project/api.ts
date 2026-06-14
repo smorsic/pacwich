@@ -1,7 +1,7 @@
-import { createFileSystemProject } from "bun-workspaces";
-import { createMemoryProject } from "bun-workspaces_local";
+import { createFileSystemProject } from "pacwich";
+import { createMemoryProject } from "pacwich_local";
 
-// A Project contains the core functionality of bun-workspaces.
+// A Project contains the core functionality of Pacwich.
 // Below defaults to process.cwd() for the project root directory
 // Pass { rootDirectory: "path/to/your/project" } to use a different root directory
 const project = createFileSystemProject({

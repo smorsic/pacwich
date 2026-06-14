@@ -1,0 +1,9 @@
+{
+  "name": "c-depends-e",
+  "devDependencies": {
+    "e": "*"
+  },
+  "scripts": {
+    "test-script": "echo C"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "d",
+  "pacwich": {
+    "scripts": {
+      "test-echo": {
+        "order": 200
+      }
+    }
+  },
+  "scripts": {
+    "test-echo": "echo d"
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "name": "application-h",
-  "bw":{
-    "alias": "valid",
-    "scripts": {
-      "invalid": []
-    }
-  }
-}

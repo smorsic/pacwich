@@ -1,0 +1,26 @@
+lockfileVersion: "9.0"
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  .: {}
+
+  workspaces/a: {}
+
+  workspaces/b:
+    dependencies:
+      workspace-a:
+        specifier: "*"
+        version: 1.0.0
+
+packages:
+  workspace-a@1.0.0:
+    resolution:
+      {
+        integrity: sha512-/qOdvsIvtRPoLysEOdFk+aGXS3fGHD0zTor59GQQdS5/nQ1iAmOTPtNtiN12/dY/UHva8d75Xe3d+5l7p5vL4g==,
+      }
+
+snapshots:
+  workspace-a@1.0.0: {}

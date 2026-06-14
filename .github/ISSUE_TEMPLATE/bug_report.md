@@ -6,7 +6,7 @@ labels: needs review
 assignees: ScottMorse
 ---
 
-### ⚠️ Please paste the output of `bunx bun-workspaces doctor` here, or if this isn't possible, let us know which operating system (and version), Bun version, and bun-workspaces version you're using, at minimum, and anything else about your system that might be relevant:
+### ⚠️ Please paste the output of `pacwich doctor` here, or if this isn't possible, let us know which operating system (and version), package manager version, Bun or Node version, and pacwich version you're using, at minimum, and anything else about your system that might be relevant:
 
 <hr>
 

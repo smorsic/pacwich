@@ -1,25 +1,74 @@
 ---
 title: AI
-titleSuffix: " | bun-workspaces"
-description: "AI Integrations for bun-workspaces | Documentation for bun-workspaces: A CLI and API to help manage Bun monorepos"
+titleSuffix: " | pacwich"
+description: "AI Integrations for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
 pageType: doc
 sidebar: true
 outline: true
 footer: false
 ---
+import { SyntaxHighlighter } from '../../lib/util/highlight';
 
 # AI Integrations
 
-`bun-workspaces` provides several AI integrations to help you manage your Bun monorepo.
+`pacwich` provides several AI integrations that serve to provide agents
+with documentation to understand how to use `pacwich`.
+
+Most of these integrations provide the same sets of documentation,
+but in different forms you can choose at your discretion.
 
 ## AGENTS.md
 
-`bun-workspaces` provides an **AGENTS.md** file that documents the package for AI agents,
-which can be integrated into CLAUDE.md or other AI agent configuration files for immediate 
-context.
+`pacwich` provides an **AGENTS.md** file that documents the package for AI agents,
+which can be integrated into CLAUDE.md or other AI agent configuration files
+to use in context.
+
+When you [install](/intro/getting-started) `pacwich` locally, you can
+find the file at `node_modules/pacwich/AGENTS.md`.
+
+There are also split versions of this file under `node_modules/pacwich/agents/` for smaller
+context usage.
 
 See the [page on AGENTS.md](/ai/agents) for more information.
 
+## Skills
+
+The CLI includes an `add-skills` command to add skill files to your repo.
+
+These skills have the same information as the `AGENTS.md` and `agents/` files above.
+You own these files, and they are not included in ambient context automatically until
+invoked.
+
+Below is an example of how to use it:
+
+<SyntaxHighlighter language="bash">
+{`pacwich add-skills --dir=.claude/skills`}
+</SyntaxHighlighter>
+
+{/* See the [page on skills](/ai/skills) for more information. */}
+
 ## MCP Server
 
+The MCP server provides the same documentation as AGENTS.md and skills as
+described above. With MCP, the docs are accessed as MCP resources.
+
+The MCP server can be ran with:
+
+<SyntaxHighlighter language="bash">
+{`pacwich mcp-server`}
+</SyntaxHighlighter>
+
 See the [page on the MCP server](/ai/mcp) for more information.
+
+## /llms.txt
+
+This is an **experimental** feature of this documentation website.
+
+Markdown files are generated via the [rspress](https://rspress.dev/) framework for agents to 
+have a streamlined access to the same docs as the website.
+
+Instructing an agent to read `https://pacwich.dev/llms.txt` will provide a manifest for
+consuming markdown files of the same content as this documentation website.
+
+This is potentially a more token-heavy solution for providing docs to an agent, but may give the 
+most complete context about features and concepts.

@@ -1,7 +1,0 @@
-{
-  "name": "package-b",
-  "scripts": {
-    "test-script": "echo 'hello from package-b'",
-    "test-scripts": "bw --cwd=../../ run test-script"
-  }
-}

@@ -42,7 +42,7 @@ const parseArgv = (input: string) => {
   }
 
   return {
-    argv: argv.filter((entry, i) => !(i === 0 && entry.trim() === "bw")),
+    argv: argv.filter((entry, i) => !(i === 0 && entry.trim() === "pacwich")),
     operations,
   };
 };
@@ -80,7 +80,7 @@ export const TerminalInput = () => {
 
   const setNewPlaceholderExample = useCallback(() => {
     setPlaceholderText(
-      ` Enter a command (like: ${getRandomExampleCommand(placeholderText).replace("bw ", "")})`,
+      ` Enter a command (like: ${getRandomExampleCommand(placeholderText).replace("pacwich ", "")})`,
     );
   }, [placeholderText]);
 
@@ -196,13 +196,13 @@ export const TerminalInput = () => {
           }
         }}
       >
-        <span className="web-cli-input-label">$ bw</span>
+        <span className="web-cli-input-label">$ pacwich</span>
         {isError ? (
           <div className="web-cli-input-error">
             Something went wrong! Try reloading or try again later. <br />
             Report recurring issues on{" "}
             <a
-              href="https://github.com/smorsic/bun-workspaces_deprecated"
+              href="https://github.com/smorsic/pacwich"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -242,7 +242,7 @@ export const TerminalInput = () => {
           <>
             Warning: Shell operations like{" "}
             <code>{operations.join(" or ")}</code> are not supported. This only
-            passes arguments to <code>bw</code>.
+            passes arguments to <code>pacwich</code>.
           </>
         )}
       </div>

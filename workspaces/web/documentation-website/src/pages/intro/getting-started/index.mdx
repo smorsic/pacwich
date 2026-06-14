@@ -1,0 +1,120 @@
+---
+title: Getting Started
+titleSuffix: " | pacwich"
+description: "Getting Started | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+import { CliInstall } from "../../../lib/components/CliInstall";
+import { SyntaxHighlighter } from "../../../lib/util/highlight";
+import { RequiredVersions } from "../../../lib/components/RequiredVersions";
+
+
+<div className="doc-pm-tabs-container">
+  <CliInstall />
+</div>
+
+<br/>
+
+<RequiredVersions/>
+
+## First commands
+
+If you have a project with workspaces set up and dependencies installed, `pacwich` works right away.
+Otherwise, [read below](#package-manager-selection) on package manager requirements.
+
+Whether using the global install of the CLI `pacwich` or invoking it with `bunx pacwich` or `npx pacwich`, 
+you can run the following commands to get started:
+
+<SyntaxHighlighter language="bash">
+{`
+# See usage
+pacwich --help
+
+# List workspace data
+pacwich ls
+
+# Get JSON metadata
+pacwich ls --json
+
+# Run all workspaces' package.json script "my-script" in parallel
+pacwich run my-script
+
+# Get help for a specific command
+pacwich help run
+`}
+</SyntaxHighlighter>
+
+See more starter code in the [CLI Quickstart](/cli) or [TS/JS API Quickstart](/api).
+
+<hr/>
+
+## Using the Verify Command
+
+You can use the `verify` command just to check for issues with your project. This is especially useful for **npm** users.
+
+When using **Bun** or **pnpm**, workspaces must declare each other as dependencies in their `package.json` files for imports/exports
+to work between them. See the [page on workspace dependencies](/concepts/workspace-dependencies) for more information.
+
+When using **npm**, workspaces do not need to declare each other as dependencies to use each other's code.
+
+This is an issue, since `pacwich` uses package.json files to determine dependencies, so you are encouraged to always declare
+workspaces as dependencies in package.json files explicitly.
+
+Adding the [`verify` command](/cli/commands#verify) to your root `package.json`'s `"prepare"` script or as a pre-commit hook can help catch issues with your Project setup
+and will attempt to detect workspaces that import/export other workspaces' code without declaring them as dependencies:
+
+<SyntaxHighlighter language="json">
+{`
+// your project's root package.json:
+{
+\ \ "scripts": {
+\ \ \ \ "prepare": "pacwich verify --strict"
+\ \ }
+}
+`}
+</SyntaxHighlighter>
+
+<hr/>
+
+## Package Manager Selection
+
+`pacwich` supports Bun, npm, and pnpm as package managers.
+
+### Auto Detect
+
+`pacwich` attempts to automatically detect your package manager by looking for a lockfile in the project,
+such as `package-lock.json`, `pnpm-lock.yaml`, or `bun.lock`.
+
+#### When No Lockfile is Found
+
+`pacwich` requires a lockfile to read workspace data, so you must run your install command
+to use the package: `npm install`, `pnpm install`, or `bun install`.
+
+#### Multiple Lockfiles
+
+If you have multiple lockfiles in your project, such as both `bun.lock` and `pnpm-lock.yaml`,
+`pacwich` will default automatically in the order of detection: Bun, pnpm, then npm.
+
+### Specify with Config
+
+To explicitly choose a package manager, add [`pacwich.project.ts`](/config/project) to your project root with the following content:
+
+<SyntaxHighlighter language="typescript">
+{`// pacwich.project.ts
+
+import { defineProjectConfig } from "pacwich/config";
+
+export default defineProjectConfig({
+\ \ packageManager: "pnpm", // or "bun" or "npm"
+});`}
+</SyntaxHighlighter>
+
+Note that you can also use a plain JSON file (`pacwich.project.json`) simply with the content `{ "packageManager": "bun" }` instead.
+
+### Specify with Flag
+
+With the CLI, it's also possible to pass a value to the global [`--pm` flag](/cli/global-options#package-manager) to explicitly choose a package manager or pass a `packageManager` 
+option to [`createFileSystemProject`](/api/reference#createfilesystemproject) when using the [TS API](/api).

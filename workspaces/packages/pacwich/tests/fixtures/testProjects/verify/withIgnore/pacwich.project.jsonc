@@ -1,0 +1,11 @@
+{
+  // The codegen script intentionally references workspace names by string;
+  // it doesn't actually import them at runtime, so verify should ignore it.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": [
+        "packages/app-b/scripts/codegen/**/*"
+      ]
+    }
+  }
+}

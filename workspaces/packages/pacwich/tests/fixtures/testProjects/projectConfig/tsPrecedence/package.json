@@ -1,0 +1,11 @@
+{
+  "name": "test-root",
+  "workspaces": [
+    "workspaces/*"
+  ],
+  "pacwich-project": {
+    "defaults": {
+      "parallelMax": 7
+    }
+  }
+}

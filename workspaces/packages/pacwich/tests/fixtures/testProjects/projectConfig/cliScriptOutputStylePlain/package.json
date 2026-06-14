@@ -1,0 +1,4 @@
+{
+  "name": "test-root",
+  "workspaces": ["workspaces/*"]
+}

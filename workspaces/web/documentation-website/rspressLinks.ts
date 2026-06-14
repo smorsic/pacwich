@@ -1,23 +1,63 @@
-import { type NavItem, type SidebarGroup } from "rspress/core";
-import packageJson from "../../packages/bun-workspaces/package.json";
-import { TAG_ICONS } from "./tagIcons";
+import fs from "fs";
+import path from "path";
+import { type NavItem, type SidebarGroup, type Sidebar } from "@rspress/core";
+import packageJson from "../../packages/pacwich/package.json";
 
-export const DOMAIN = "https://bunworkspaces.com";
-export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/bun-workspaces";
-export const GITHUB_REPO_URL =
-  "https://github.com/smorsic/bun-workspaces_deprecated";
-export const BW_BLOG_URL = "https://smorsic.io/blog";
+export const DOMAIN = "https://pacwich.dev";
+export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/pacwich";
+export const GITHUB_REPO_URL = packageJson.repository.url.replace(".git", "");
+export const BLOG_URL = process.env.BLOG_URL || "https://smorsic.io/blog";
 export const CHANGELOG_URL = `${GITHUB_REPO_URL}/releases`;
 export const LICENSE_URL = GITHUB_REPO_URL + "/blob/main/LICENSE.md";
 
+// Inline an SVG file as a nav-item `tag` string. Comments are stripped
+// because rspress v2's Tag component checks for comma-separated arrays
+// before checking for SVG strings, so any comma in the SVG (commonly a
+// vendor comment like "Fonticons, Inc.") sends it down the wrong path.
+const navIconSvg = (relativePath: string) =>
+  fs
+    .readFileSync(
+      path.resolve(__dirname, "src/pages/public/images/svg", relativePath),
+      "utf8",
+    )
+    .replace(/<!--[\s\S]*?-->/g, "");
+
 export const HEADER_NAV_LINKS: NavItem[] = [
+  {
+    text: "Intro",
+    link: "/intro/overview",
+    position: "left",
+    items: [
+      {
+        text: "Overview",
+        link: "/intro/overview",
+        activeMatch: "/intro/overview$",
+      },
+      {
+        text: "Getting Started",
+        link: "/intro/getting-started",
+        activeMatch: "/intro/getting-started$",
+      },
+      {
+        text: "bun-workspaces Migration Guide",
+        link: "/intro/bun-workspaces-migration",
+        activeMatch: "/intro/bun-workspaces-migration$",
+      },
+    ],
+  },
   {
     text: "CLI",
     link: "/cli",
     position: "left",
     activeMatch: "/cli|web-cli",
-    tag: TAG_ICONS.cli,
+    tag: navIconSvg("cli-nav-icon.svg"),
     items: [
+      // ! Reenable when supported
+      // {
+      //   text: "Web CLI (Demo)",
+      //   link: "/web-cli",
+      //   activeMatch: "/web-cli$",
+      // },
       {
         text: "Quick Start",
         link: "/cli",
@@ -38,7 +78,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/api",
     position: "left",
     activeMatch: "/api",
-    tag: TAG_ICONS.api,
+    tag: navIconSvg("api-nav-icon.svg"),
     items: [
       {
         text: "Quick Start",
@@ -56,7 +96,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/config",
     position: "left",
     activeMatch: "/config",
-    tag: TAG_ICONS.config,
+    tag: navIconSvg("config-nav-icon.svg"),
     items: [
       {
         text: "Overview",
@@ -64,8 +104,8 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         activeMatch: "/config$",
       },
       {
-        text: "Project Root Configuration",
-        link: "/config/root",
+        text: "Project Configuration",
+        link: "/config/project",
       },
       {
         text: "Workspace Configuration",
@@ -90,7 +130,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/concepts/glossary",
     position: "left",
     activeMatch: "/concepts",
-    tag: TAG_ICONS.concepts,
+    tag: navIconSvg("concepts-nav-icon.svg"),
     items: [
       {
         text: "Glossary",
@@ -138,7 +178,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     text: "AI",
     link: "/ai",
     position: "left",
-    tag: TAG_ICONS.ai,
+    tag: navIconSvg("ai-nav-icon.svg"),
     items: [
       {
         text: "Overview",
@@ -151,20 +191,40 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         activeMatch: "/ai/agents",
       },
       {
+        text: "Skills",
+        link: "/ai/skills",
+        activeMatch: "/ai/skills",
+      },
+      {
         text: "MCP Server",
         link: "/ai/mcp",
+        activeMatch: "/ai/mcp",
+      },
+      {
+        text: "/llms.txt",
+        link: "/ai/llms-txt",
+        activeMatch: "/ai/llms-txt",
       },
     ],
   },
   {
     text: "More",
     position: "left",
-    tag: TAG_ICONS.more,
+    tag: navIconSvg("more-nav-icon.svg"),
     items: [
       {
         text: "Blog",
-        link: BW_BLOG_URL,
+        link: BLOG_URL,
       },
+      {
+        text: "Security",
+        link: "/security",
+      },
+      // ! TODO: Re-enable when we have example projects
+      // {
+      //   text: "Example Projects",
+      //   link: "https://github.com/smorsic/pacwich-examples",
+      // },
       {
         text: "Roadmap",
         link: "/roadmap",
@@ -174,7 +234,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         link: CHANGELOG_URL,
       },
       {
-        text: "Bwunster Lore",
+        text: "Lore",
         link: "/lore",
       },
     ],
@@ -182,12 +242,32 @@ export const HEADER_NAV_LINKS: NavItem[] = [
   {
     text: "Blog",
     position: "right",
-    link: BW_BLOG_URL,
-    tag: TAG_ICONS.blog,
+    link: BLOG_URL,
+    tag: navIconSvg("blog-nav-icon.svg"),
   },
 ];
 
 const SIDEBAR_GROUPS = {
+  intro: {
+    path: "/intro",
+    group: {
+      text: "Introduction",
+      items: [
+        {
+          text: "Overview",
+          link: "/intro/overview",
+        },
+        {
+          text: "Getting Started",
+          link: "/intro/getting-started",
+        },
+        {
+          text: "Migrating from bun-workspaces",
+          link: "/intro/bun-workspaces-migration",
+        },
+      ],
+    },
+  },
   cli: {
     path: "/cli",
     group: {
@@ -197,66 +277,14 @@ const SIDEBAR_GROUPS = {
           text: "Quick Start",
           link: "/cli",
         },
+
         {
-          text: "Reference",
-          collapsible: false,
-          items: [
-            {
-              text: "Global Options",
-              link: "/cli/global-options",
-            },
-            {
-              text: "Commands",
-              link: "/cli/commands",
-              collapsed: false,
-              items: [
-                {
-                  text: "list-workspaces (ls)",
-                  link: "/cli/commands#list-workspaces",
-                },
-                {
-                  text: "workspace-info (info)",
-                  link: "/cli/commands#workspace-info",
-                },
-                {
-                  text: "list-scripts (ls-scripts)",
-                  link: "/cli/commands#list-scripts",
-                },
-                {
-                  text: "script-info",
-                  link: "/cli/commands#script-info",
-                },
-                {
-                  text: "list-tags (ls-tags)",
-                  link: "/cli/commands#list-tags",
-                },
-                {
-                  text: "tag-info",
-                  link: "/cli/commands#tag-info",
-                },
-                {
-                  text: "run-script (run)",
-                  link: "/cli/commands#run-script",
-                },
-                {
-                  text: "list-affected (ls-affected)",
-                  link: "/cli/commands#list-affected",
-                },
-                {
-                  text: "run-affected",
-                  link: "/cli/commands#run-affected",
-                },
-                {
-                  text: "mcp-server",
-                  link: "/cli/commands#mcp-server",
-                },
-                {
-                  text: "doctor",
-                  link: "/cli/commands#doctor",
-                },
-              ],
-            },
-          ],
+          text: "Global Options",
+          link: "/cli/global-options",
+        },
+        {
+          text: "Commands",
+          link: "/cli/commands",
         },
       ],
     },
@@ -273,33 +301,6 @@ const SIDEBAR_GROUPS = {
         {
           text: "Reference",
           link: "/api/reference",
-          collapsed: false,
-          items: [
-            {
-              text: "Workspace",
-              link: "/api/reference#workspace",
-            },
-            {
-              text: "Project",
-              link: "/api/reference#project",
-            },
-            {
-              text: "FileSystemProject",
-              link: "/api/reference#filesystemproject",
-            },
-            {
-              text: "createFileSystemProject",
-              link: "/api/reference#createfilesystemproject",
-            },
-            {
-              text: "createMemoryProject",
-              link: "/api/reference#creatememoryproject",
-            },
-            {
-              text: "setLogLevel",
-              link: "/api/reference#setloglevel",
-            },
-          ],
         },
       ],
     },
@@ -329,11 +330,11 @@ const SIDEBAR_GROUPS = {
         },
         {
           text: "Project Configuration",
-          link: "/config/root",
+          link: "/config/project",
           items: [
             {
-              text: "Root Config File",
-              link: "/config/root",
+              text: "Project Config File",
+              link: "/config/project",
             },
             {
               text: "More: Workspace Pattern Configs",
@@ -416,26 +417,66 @@ const SIDEBAR_GROUPS = {
           link: "/ai",
         },
         {
-          text: "AGENTS.md",
-          link: "/ai/agents",
-        },
-        {
-          text: "MCP Server",
-          link: "/ai/mcp",
+          text: "Integrations",
+          items: [
+            {
+              text: "AGENTS.md",
+              link: "/ai/agents",
+            },
+            {
+              text: "Skills",
+              link: "/ai/skills",
+            },
+            {
+              text: "/llms.txt",
+              link: "/ai/llms-txt",
+            },
+            {
+              text: "MCP Server",
+              link: "/ai/mcp",
+            },
+          ],
         },
       ],
     },
   },
 } as const satisfies Record<string, { path: string; group: SidebarGroup }>;
 
-type SidebarGroupKey = keyof typeof SIDEBAR_GROUPS;
+const createScopedSidebar = (): Sidebar =>
+  Object.entries(SIDEBAR_GROUPS).reduce(
+    (acc, [key, { path }]) => {
+      acc[path] = Object.entries(SIDEBAR_GROUPS).map(
+        ([innerKey, { path: groupPath, group: groupData }]) => {
+          return {
+            link: groupPath,
+            ...(key !== innerKey && { collapsed: true }),
+            ...groupData,
+          };
+        },
+      );
+      return acc;
+    },
+    { "/": [] } as Sidebar,
+  );
 
-export const createSidebar = (groupKey: SidebarGroupKey) => ({
-  [SIDEBAR_GROUPS[groupKey].path]: Object.entries(SIDEBAR_GROUPS).map(
-    ([key, { path, group }]) => ({
-      link: path,
-      collapsed: key !== groupKey,
-      ...group,
+const createComboSidebar = () => {
+  const result: Sidebar = {
+    "/": Object.values(SIDEBAR_GROUPS).map<SidebarGroup>((group) => {
+      return {
+        collapsed: true,
+        ...group.group,
+      };
     }),
-  ),
-});
+  };
+  return result;
+};
+
+/**
+ *  @todo
+ * Scoped sidebar collapses the top level groups not selected,
+ * but at time of writing is too awkward thanks to Rspress
+ * storing previously expanded menus that are then re-expanded
+ * when the user navigates away and back.
+ */
+export const createSidebar = (behavior: "scoped" | "combo") =>
+  behavior === "scoped" ? createScopedSidebar() : createComboSidebar();

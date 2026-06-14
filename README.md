@@ -1,156 +1,180 @@
-## ⚠️ Deprecated Package
+<a href="https://pacwich.dev">
+<img src="./workspaces/web/documentation-website/src/pages/public/images/png/bwunster-pacwich-subtitled-wide_2000x462.png" alt="pacwich logo" width="100%" />
+</a>
 
-bun-workspaces has been **deprecated** and **is now developed as [`pacwich`](https://pacwich.dev)**, which supports Bun, npm, and pnpm workspaces, with a mostly backwards compatible CLI and API.
+<br/>
 
-Users can expect little to no disruption beyond the package name change and config file name changes.
-Config files rename to `pacwich.workspace.{ts,js,json,jsonc}` and `pacwich.project.{ts,js,json,jsonc}` (instead of `bw.root.{ts,js,json,jsonc}`).
+Full Documentation: [https://pacwich.dev](https://pacwich.dev)
 
-A full migration guide covering all differences between the packages is available at [https://pacwich.dev/intro/bun-workspaces-migration](https://pacwich.dev/intro/bun-workspaces-migration).
+Changelog: [GitHub Releases](https://github.com/smorsic/pacwich/releases)
 
-You can also instruct an LLM agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
-to assist with migration.
+# pacwich
 
-[Read the launch blog post](https://smorsic.io/blog/pacwich-launch) about the motivations and development strategy.
+Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
-`bun-workspaces` will not receive further releases save for critical security patches if necessary.
+To get started, all you need is a repo using workspaces for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
 
-# bun-workspaces
+Start running some [CLI commands](https://pacwich.dev/cli) right away in your repo, or take full advantage of the [TypeScript API](https://pacwich.dev/api) and its features.
 
-[Full Documentation](https://bunworkspaces.com)
+Note this is the continuation of the `bun-workspaces` package that only worked with Bun.
+See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
+Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity
+to a degree.
 
-A [monorepo](http://sonarsource.com/resources/library/monorepo/) tool that enhances native [Bun workspaces](https://bun.sh/docs/install/workspaces).
-
-- Works right away, with **no boilerplate required** 🍽️
-- Get **rich metadata** about your monorepo 🤖
-- **Orchestrate** your workspaces' package.json scripts 🎻
-- Run one-off [**Bun Shell**](https://bun.com/docs/runtime/shell) commands in your workspaces 🐚
-- Use with Bun as your package manager for **Node** projects 🎁
-- Determine **affected workspaces** based on changed files 🕸️
-- AI: Provides an [AGENTS.md](https://bunworkspaces.com/ai/agents) file and an [MCP server](https://bunworkspaces.com/ai/mcp)! 🛠️
-
-To get started, all you need is a repo using Bun's workspaces feature for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
-
-Start running some [CLI commands](https://bunworkspaces.com/cli) right away in your repo, or take full advantage of the [TypeScript API](https://bunworkspaces.com/api) and its features.
-
-This package is unopinionated and works with any project structure you want. Think of this as a power suit you can snap onto native workspaces, rather than whole new monorepo framework.
+[Overview page](https://pacwich.dev/intro/overview)
 
 ## Quick Start
+
+[Full Getting Started Guide](https://pacwich.dev/intro/getting-started)
 
 Installation:
 
 ```bash
-$ # Install to use the API and/or lock your CLI version for your project
-$ bun add --dev bun-workspaces
-$ # Start using the CLI with or without the installation step
-$ bunx bun-workspaces --help
+# Global install with your preferred package manager
+# The pacwich command will use a local install if available
+bun add -g pacwich
+pnpm add -g pacwich
+npm install -g pacwich
+
+# Local install in your project
+bun add -d pacwich
+pnpm add -D pacwich
+npm install -D pacwich
 ```
 
-Note that you need to run `bun install` in your project for `bun-workspaces` to find your project's workspaces. This is because it reads `bun.lock`. This also means that if you update your workspaces, such as changing their name, you must run `bun install` for the change to reflect.
+Note that you need to run your package manager's install for pacwich to have current workspace data available, e.g. via `bun install`, `pnpm install`, or `npm install`. If you've added/removed/updated any workspace package.json, you'll likely need to run this again.
 
 ### CLI
 
-[Full CLI documentation here](https://bunworkspaces.com/cli)
+[Full CLI documentation here](https://pacwich.dev/cli)
 
 ```bash
-# You can add this to .bashrc, .zshrc, or similar.
-# You can also invoke "bw" in your root package.json scripts.
-alias bw="bunx bun-workspaces"
-
-# List all workspaces in your project
-bw list-workspaces
-
-# ls is an alias for list-workspaces
-bw ls --json --pretty # Output as formatted JSON
-
-# Get info about a workspace
-bw workspace-info my-workspace
-bw info my-workspace --json --pretty # info is alias for workspace-info
-
-# Get info about a script, such as the workspaces that have it
-bw script-info my-script
-
-# Run the lint script for all workspaces
-# that have it in their package.json "scripts" field
-bw run-script lint
-
-# run is an alias for run-script
-bw run lint my-workspace # Run for a single workspace
-bw run lint my-workspace-a my-workspace-b # Run for multiple workspaces
-bw run lint my-alias-a my-alias-b # Run by alias (set by optional config)
-
-# A workspace's script will wait until any workspaces it depends on have completed
-# Similar to Bun's --filter behavior
-bw run lint --dep-order
-
-# Continue running scripts even if a dependency fails
-bw run lint --dep-order --ignore-dep-failure
-
-bw run lint "my-workspace-*" # Run for matching workspace names
-bw run lint "alias:my-alias-*" "path:my-glob/**/*" "tag:my-tag" # Use matching specifiers
-bw run lint "*" "not:path:my-path/*" # Run for all workspaces not in my-path/
-
-bw run lint --args="--my-appended-args" # Add args to each script call
-bw run lint --args="--my-arg=<workspaceName>" # Use the workspace name in args
-
-bw run "bun build" --inline # Run an inline command via the Bun shell
-
-# Scripts run in parallel by default
-bw run lint --parallel=false # Run in series
-bw run lint --parallel=2 # Run in parallel with a max of 2 concurrent scripts
-bw run lint --parallel=auto # Default, based on number of available logical CPUs
-bw run lint --parallel=50% # Run in parallel with a max of 50% of the "auto" limit
-
-# Use the grouped output style (default when on a TTY)
-bw run my-script --output-style=grouped
-
-# Set the max preview lines for script output in grouped output style
-bw run my-script --output-style=grouped --grouped-lines=auto
-bw run my-script --output-style=grouped --grouped-lines=10
-
-# Use simple script output with workspace prefixes (default when not on a TTY)
-bw run my-script --output-style=prefixed
-
-# Use the plain output style (no workspace prefixes)
-bw run my-script --output-style=plain
-
-# List affected workspaces based on git diff (main vs. HEAD when not configured)
-bw list-affected
-
-# Set the git base and head for comparison
-bw list-affected --base=my-branch-a --head=my-branch-b
-
-# See detailed reasons for affected workspaces
-bw list-affected --explain --detailed
-
-# Run a script across the workspaces affected by a change
-bw run-affected my-script
-
-# Silence all output of the run command
-bw --log-level=silent run my-script --output-style=none
+##########
+# Global #
+##########
 
 # Show usage (you can pass --help to any command)
-bw help
-bw --help
+pacwich --help
 
 # Show version
-bw --version
+pacwich --version
 
 # Pass --cwd to any command
-bw --cwd=/path/to/your/project ls
-bw --cwd=/path/to/your/project run my-script
+pacwich --cwd=/path/to/your/project ls
+pacwich --cwd=/path/to/your/project run my-script
+
+# Specify package manager, if you have multiple lockfiles
+pacwich --pm=pnpm ls
 
 # Pass --log-level to any command (debug, info, warn, error, or silent)
-bw --log-level=debug ls
+pacwich --log-level=debug ls
+
+####################
+# Getting metadata #
+####################
+
+# List all workspaces in your project
+pacwich list-workspaces
+
+# ls is an alias for list-workspaces
+pacwich ls --json --pretty # Output as formatted JSON
+
+# Get info about a workspace
+pacwich workspace-info my-workspace
+pacwich info my-workspace --json --pretty # info is alias for workspace-info
+
+# Get info about a script, such as the workspaces that have it
+pacwich script-info my-script
+
+##########
+# Verify #
+##########
+
+# Check for issues with your project
+# Can be useful as your root package.json "prepare" script
+# or as a pre-commit hook
+pacwich verify
+
+# Fails if workspaces detected that import/export from each other
+# without explicit dependency declared in package.json
+pacwich verify --strict
+
+###################
+# Running scripts #
+###################
+
+# Run the lint script for all workspaces in parallel
+# that have it in their package.json "scripts" field
+pacwich run lint
+pacwich run lint my-workspace # Run for a single workspace
+pacwich run lint my-workspace-a my-workspace-b # Run for multiple workspaces
+pacwich run lint my-alias-a my-alias-b # Run by alias (set by optional config)
+
+# A workspace's script will wait until 
+# any workspaces it depends on have completed
+pacwich run lint --dep-order
+pacwich run lint --dep-order --ignore-dep-failure
+
+# Workspace patterns
+pacwich run lint "my-workspace-*" # Run for matching workspace names
+pacwich run lint "alias:my-alias-*" "path:my-glob/**/*" "tag:my-tag"
+pacwich run lint "re:my-name-regex.*" "path:re:my-path-regex.*"
+pacwich run lint "*" "not:path:my-path/*" # Run for all workspaces not in my-path/
+
+pacwich run lint --args="--my-appended-args" # Add args to each script call
+pacwich run lint --args="--my-arg=<workspaceName>" # Use the workspace name in args
+
+pacwich run "cat package.json" --inline # Run an inline shell command
+
+# Inline scripts can use the Bun shell if Bun is available,
+# which is a cross-platform Bash-like shell
+# This can be helpful for multi-OS support
+pacwich run "cat package.json" --inline --shell=bun
+
+# Scripts run in parallel by default
+pacwich run lint --parallel=auto # Default, based on available logical CPUs
+pacwich run lint --parallel=false # Run sequentially
+pacwich run lint --parallel=2 # 2 max scripts run concurrently
+pacwich run lint --parallel=50% # half of available logical CPUs
+
+# Set the max preview lines for script output
+# when "grouped" output style is used (the default on TTY)
+pacwich run my-script --output-style=grouped --grouped-lines=10
+
+# Use simple script output with workspace prefixes (default when not on a TTY)
+pacwich run my-script --output-style=prefixed
+
+# Use the plain output style (no workspace prefixes)
+pacwich run my-script --output-style=plain
+
+# Silence all output
+pacwich --log-level=silent run my-script --output-style=none
+
+#####################
+# Affected Features #
+#####################
+
+# List affected workspaces based on git diff (main vs. HEAD by default)
+pacwich list-affected
+
+# Set the git base and head for comparison
+pacwich list-affected --base=my-branch-a --head=my-branch-b
+
+# See detailed reasons for affected workspaces
+pacwich list-affected --explain --detailed
+
+# Run a script across the workspaces affected by a change
+pacwich run-affected my-script
 ```
 
 ### API
 
-[Full API documentation here](https://bunworkspaces.com/api)
+[Full API documentation here](https://pacwich.dev/api)
 
 ```typescript
-import { createFileSystemProject } from "bun-workspaces";
+import { createFileSystemProject } from "pacwich";
 
-// A Project contains the core functionality of bun-workspaces.
+// A Project contains the core functionality of pacwich.
 // Below defaults to process.cwd() for the project root directory
 // Pass { rootDirectory: "path/to/your/project" } to use a different root directory
 const project = createFileSystemProject();
@@ -183,7 +207,7 @@ const runSingleScript = async () => {
   // Get a stream of the script subprocess's output
   for await (const { chunk, metadata } of output.text()) {
     // console.log(chunk); // The output chunk's content (string)
-    // console.log(metadata.streamName); // The output stream, "stdout" or "stderr"
+    // console.log(metadata.streamName); // "stdout" or "stderr"
     // console.log(metadata.workspace); // The target Workspace
   }
 
@@ -199,7 +223,7 @@ const runSingleScript = async () => {
   // exitResult.metadata.workspace // The target workspace (Workspace)
 };
 
-// Run a script in all workspaces that have it in their package.json "scripts" field
+// Run a script in all workspaces that have it in their package.json "scripts"
 const runManyScripts = async () => {
   const { output, summary } = project.runScriptAcrossWorkspaces({
     // Optional. This will run in all matching workspaces that have my-script
@@ -238,10 +262,10 @@ const runManyScripts = async () => {
   for await (const { chunk, metadata } of output.text()) {
     // console.log(chunk); // the output chunk's content (string)
     // console.log(metadata.streamName); // "stdout" or "stderr"
-    // console.log(metadata.workspace); // the Workspace that the output came from
+    // console.log(metadata.workspace); // the Workspace of the output
   }
 
-  // Get final summary data and script exit details after all scripts have completed
+  // Get final summary data and script exit details
   const summaryResult = await summary;
 
   // summaryResult.totalCount // Total number of scripts
@@ -267,21 +291,21 @@ const runManyScripts = async () => {
 
 ### Configuration
 
-`bun-workspaces` has no required configuration, but there are optional config files.
+`pacwich` has no required configuration, but there are optional config files.
 
 #### Workspace Config
 
-Workspace configs can be placed in a workspace's directory at `bw.workspace.ts`.
+Workspace configs can be placed in a workspace's directory at `pacwich.workspace.ts`.
 
-[Workspace configuration documentation here](https://bunworkspaces.com/config/workspace)
+[Workspace configuration documentation here](https://pacwich.dev/config/workspace)
 
 ```typescript
-// bw.workspace.ts — place in a workspace directory
+// pacwich.workspace.ts — place in a workspace directory
 
-// Also supported: bw.workspace.js, bw.workspace.json, bw.workspace.jsonc,
-// or a "bw" key in package.json
+// Also supported: pacwich.workspace.js, pacwich.workspace.json, pacwich.workspace.jsonc,
+// or a "pacwich" key in package.json
 
-import { defineWorkspaceConfig } from "bun-workspaces/config";
+import { defineWorkspaceConfig } from "pacwich/config";
 
 export default defineWorkspaceConfig({
   alias: "my-web-app", // shorthand name; use array for multiple
@@ -319,21 +343,21 @@ export default defineWorkspaceConfig({
 });
 ```
 
-#### Root Config
+#### Project Config
 
-A root config can be placed in the project root directory at `bw.root.ts`,
+A project-level config can be placed in the project root directory at `pacwich.project.ts`,
 which can also apply workspace configs in bulk by using workspace patterns.
 
-[Root configuration documentation here](https://bunworkspaces.com/config/root)
+[Project configuration documentation here](https://pacwich.dev/config/project)
 
-[More on workspace pattern configs here](https://bunworkspaces.com/config/workspace-pattern-configs)
+[More on workspace pattern configs here](https://pacwich.dev/config/workspace-pattern-configs)
 
 ```typescript
-// bw.root.ts — place in your project root directory
-// Also supported: bw.root.js, bw.root.json, bw.root.jsonc,
-// or a "bw-root" key in package.json
+// pacwich.project.ts — place in your project root directory
+// Also supported: pacwich.project.js, pacwich.project.json, pacwich.project.jsonc,
+// or a "pacwich-root" key in package.json
 
-import { defineRootConfig } from "bun-workspaces/config";
+import { defineRootConfig } from "pacwich/config";
 
 export default defineRootConfig({
   defaults: {
@@ -383,11 +407,3 @@ export default defineRootConfig({
   ],
 });
 ```
-
-_`bun-workspaces` is independent from the [Bun](https://bun.sh) project and is not affiliated with or endorsed by Anthropic. This project aims to enhance the experience of Bun for its users._
-
-Developed By:
-
-<a href="https://smorsic.io" target="_blank" rel="noopener noreferrer">
-  <img src="./workspaces/web/documentation-website/src/pages/public/images/png/smorsic-banner_light_803x300.png" alt="Smorsic Labs logo" width="280" />
-</a>

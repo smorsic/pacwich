@@ -1,0 +1,9 @@
+packages:
+  - "workspaces/*"
+
+catalog:
+  some-default: "1.0.0"
+
+catalogs:
+  named:
+    some-pinned: "2.0.0"

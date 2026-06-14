@@ -1,0 +1,145 @@
+---
+title: Security
+titleSuffix: " | pacwich"
+description: "Security | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: false
+outline: true
+footer: false
+---
+
+Security is becoming an increasing concern with open source software, especially in this ecosystem.
+
+Our goal is to be aware of the risks and attack vectors being used on npm packages and protect against
+these as much as practically possible.
+
+## Dependencies
+
+On npm, `pacwich` reports having 0 dependencies. This is technically true but isn't the whole picture.
+
+In reality, `pacwich` uses `commander` for CLI parsing, `jiti` and `sucrase`for loading TypeScript/JavaScript config 
+files, `yaml` for parsing **pnpm** config files, `shell-quote` for shell string parsing and preventing shell injection,
+and `semver` for version string parsing. Of these, `sucrase` is the only of these that has sub-dependencies.
+
+The code of these dependencies is bundled into `pacwich`, so they are not installed as separate dependencies
+when `pacwich` is installed. This is why the package appears as having 0 dependencies.
+
+### Why bundle?
+
+One practical reason to bundle dependencies is so that they're isolated in the package so
+that there's no chance of conflict with other dependencies in a project.
+
+Security-wise, we've recently seen several attacks on npm packages that use [lifecycle scripts](https://docs.npmjs.com/cli/v8/using-npm/scripts?v=true#pre--post-scripts)
+such as `postinstall` to run arbitrary code on install.
+
+Bundled dependencies cannot introduce surprise lifecycle scripts to `pacwich` installers
+and provide code locked to `pacwich`'s release. In general, this approach prevents
+ surprise attacks from a dependency's patch version bump.
+
+#### Tradeoff Mitigation
+
+The main tradeoff with bundling is that an insecure dependency bundled into `pacwich` does not trigger
+something like `npm audit` in consumers that installed `pacwich`, and consumers can't just
+receive a patch/minor bump for a bundled dependency directly, meaning `pacwich` itself would need 
+its own security issue declared and patched if one arises with a bundled dependency that 
+is relevant to users.
+
+Due to this, care is put into choosing dependencies with positive reputation and maturity.
+On top of this, these bundled dependencies are locked to a specific patch version.
+Vetted upgrades are **only** performed on `pacwich`'s side if a fix or feature is needed
+from one of these, so stability is prioritized over potential frequent bumps to latest.
+
+GitHub's Dependabot is also used on the source repository to help catch issues with
+the current dependencies, mitigating the risk of an insecure bundled dependency going unnoticed.
+
+## GitHub Actions
+
+### Publishing to npm
+
+`pacwich` is published with OIDC trusted publishing to npm for provenance attestation via Actions. 
+
+Long-lived legacy npm tokens are never used for publishing, something seen in recent attacks.
+
+### No Insecure Context for Forks
+
+We avoid using any triggers where a fork's code may run in the main repo's security context.
+
+For example, the `pull_request_target` is often exploited when a fork's code is checked out
+to perform PR checks, in which case the fork's code may substitute a malicious script
+for something like a `lint` command defined in the repo.
+
+While it's possible to use `pull_request_target` securely, we simply avoid workflows
+where forks are ever checked out in the main repo's security context.
+
+### SHA-pinned Actions
+
+We use standard external actions for purposes like installing Bun, Node, etc., and these 
+should be treated like dependencies themselves that if compromised introduce great risk
+to the publishing process or repository otherwise.
+
+We pin the version of each action used to a specific SHA to prevent supply chain attacks
+from this surface. This is enforced in the repository's settings so that this pattern cannot
+be neglected.
+
+Dependabot is used again here to validate the security of currently used action versions.
+
+## AI Development
+
+I'm Scott, the creator and sole regular maintainer of this package. 
+Here I feel the need to speak more directly about AI use in development of this package
+instead of my formal royal "we."
+
+It's more difficult to guarantee my trustworthiness in the same way that the other claims
+above can actually be proven via source code and public platforms, but I can be transparent
+about my stances and practices.
+
+### The Importance of Code Hygiene and Code Knowledge
+
+I spent most of my career before AI caring deeply about code hygiene,
+and over 8 years of writing TypeScript I developed a personal style 
+that I used to write the core of `bun-workspaces` (the original Bun-centric package 
+I repurposed into `pacwich`) almost entirely manually while caring about every module 
+and dir structure, and `pacwich` actually retains most of this structure.
+
+I believe for a project like this in particular, having high knowledge of the codebase and a care
+for code quality is non-negotiable for me to be a steward of the package. I can say that I have
+high familiarity with `pacwich`'s source code.
+
+This documentation website as a whole is written mostly directly by myself, sticking to my own words for 
+text content and even writing almost all code examples entirely by hand. This only feels natural that my 
+knowledge of the spec should be good enough to document it fully, trusting myself more than an agent. 
+I very much desire to feel like I'm the true leader and owner of `pacwich`, not an LLM.
+
+### My Tools and Philosophy
+
+I do use tools such as Claude Code and an AI-itegrated IDE. The main goal of agents' code for me is 
+to write the code I would have wanted to exist to begin with.
+
+My opinionated coding style has helped agentic output be more predictable, streamlining agent decision making
+and my review of its work. I work with the philosophy that the true fundamental principles of clean code 
+and good engineering are just as relevant and useful today as they were years ago, for both the benefit of
+people and agents.
+
+If I generate a larger amount of code, I won't release it until I've digested its structure with a real review, where I almost
+always end up performing refactor passes, naming improvements, and more.
+
+### Risk in Open Source
+
+I don't believe in giving AI the "scan and stamp" treatment that is only appropriate at a job where 
+consequences are low. 
+
+I'm not naive enough to think that this package that orchestrates shell scripts
+and runs in DevOps processes doesn't require deep critical review.
+
+I am well aware that software engineers do not want risky vibe-coded open source, and neither do I, but 
+I also think that most engineers recognize that the quality of AI-assisted engineering is not black-or-white.
+
+### In Conclusion
+
+If I develop a feature quickly, it will be because I naturally hit my required standards and 
+confidence levels quickly. I don't feel the need to rush releases just to show off my potential 
+agentic output speed. Not every use of water demands a fire hose.
+
+As I said, I can't prove it, but I can at least promise to work to remain a true driver of
+AI tooling rather than dependent on it when it comes to `pacwich`'s processes and source code,
+preserving the right parts of traditional engineering hand-in-hand with new innovations.

@@ -1,7 +1,7 @@
 import {
   type CliCommandConfig,
   type CliGlobalOptionConfig,
-} from "bw-common/cli";
+} from "@pacwich/common/cli";
 
 export type CliExample = {
   bashLines: string[];

@@ -1,17 +1,27 @@
 import {
   type WorkspaceInputsConfig,
-  type RootConfig,
+  type ProjectConfig,
   type WorkspaceConfig,
-} from "bw-common/config";
+} from "@pacwich/common/config";
 import {
   PARALLEL_MAX_VALUES,
   SCRIPT_SHELL_OPTIONS,
-} from "bw-common/parameters";
-import { type RequiredDeep } from "bw-common/types";
+} from "@pacwich/common/parameters";
+import { type RequiredDeep } from "@pacwich/common/types";
 import { formatSimpleTypeToDisplay, type ValueToDisplay } from "./displayType";
 
-const rootDisplay: ValueToDisplay<RequiredDeep<RootConfig>> = {
+const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
+  packageManager: {
+    comment: "The package manager to use for the project",
+    primitive: true,
+    types: ["string"],
+  },
   defaults: {
+    cliScriptOutputStyle: {
+      comment: "The default output style for CLI scripts",
+      primitive: true,
+      types: ["string"],
+    },
     parallelMax: {
       comment: "The default maximum number of scripts that can run in parallel",
       primitive: true,
@@ -29,9 +39,19 @@ const rootDisplay: ValueToDisplay<RequiredDeep<RootConfig>> = {
     },
     affectedBaseRef: {
       comment:
-        "The default git base ref for affected workspace resolution (default: main)",
+        "The default git base ref for affected workspaces (default: main)",
       primitive: true,
       types: ["string"],
+    },
+  },
+  verify: {
+    workspaceDependencies: {
+      ignoreInputFiles: {
+        comment:
+          "Ignore these input files for verification of workspace dependencies",
+        array: true,
+        item: { primitive: true, types: ["string"] },
+      },
     },
   },
   workspacePatternConfigs: {
@@ -49,8 +69,8 @@ const rootDisplay: ValueToDisplay<RequiredDeep<RootConfig>> = {
   },
 };
 
-export const ROOT_CONFIG_TYPE =
-  "type RootConfig = " +
+export const PROJECT_CONFIG_TYPE =
+  "type ProjectConfig = " +
   formatSimpleTypeToDisplay(rootDisplay)
     .replace(
       "parallelMax?: number | string",

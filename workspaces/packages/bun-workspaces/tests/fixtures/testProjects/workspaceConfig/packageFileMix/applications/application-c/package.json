@@ -1,9 +1,0 @@
-{
-  "name": "application-1c",
-  "bw": {},
-  "scripts": {
-    "all-workspaces": "echo 'script for all workspaces'",
-    "c-workspaces": "echo 'script for c workspaces'",
-    "application-c": "echo 'script for application-c'"
-  }
-}

@@ -1,16 +1,21 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json
-
 name: On Main Branch Update
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
-  validate_code:
-    name: Validate Code
-    uses: ./.github/workflows/validate_code.yml
-  test_bun_versions:
-    name: Test Bun Versions
-    uses: ./.github/workflows/test_bun_versions.yml
+  validate:
+    name: Validate
+    uses: ./.github/workflows/validate.yml
+  runtime_matrix:
+    name: Runtime Matrix
+    uses: ./.github/workflows/runtime_matrix.yml
+  pm_matrix:
+    name: Package Manager Matrix
+    uses: ./.github/workflows/pm_matrix.yml

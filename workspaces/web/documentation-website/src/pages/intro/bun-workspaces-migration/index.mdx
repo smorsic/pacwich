@@ -1,0 +1,121 @@
+---
+title: Migrating from bun-workspaces
+titleSuffix: " | pacwich"
+description: "Migrating from bun-workspaces | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+import { SyntaxHighlighter } from '../../../lib/util/highlight';
+
+`pacwich` is essentially the direct continuation of the package `bun-workspaces`, a very similar package that was built only to work
+on top of Bun as a package manager.
+
+If you are a `bun-workspaces` user, you can expect minimal to no changes on average beyond the name change, thanks to the fact
+that `pacwich` auto-detects Bun as your package manager from `bun.lock` and has almost the same CLI and API as `bun-workspaces`.
+
+There's a high chance you can simply treat this as a name swap only without issue.
+
+However, a few small breakages/removals have occurred, highlighted below, and config files have naming changes, including that "root config" will 
+now be generally referred to as "project config". [Jump to config changes](#config-changes)
+
+You can also browse some of the feature additions below.
+
+## Agent Assistance
+
+You can have an LLM agent assist with migration by simply instructing it to read this page as `https://pacwich.dev/intro/bun-workspaces-migration/index.md`.
+
+<hr/>
+
+## Install
+
+You can globally and/or locally install `pacwich` with Bun, npm or pnpm. The global `pacwich` command provides a convenient binary that will run the CLI from a local install if found.
+
+## General Changes
+
+* <span className="deprecated"><b>Change</b> (potentially breaking)</span>: The [shell option for inline scripts](/concepts/inline-scripts#using-the-bun-shell) now defaults to `"system"` instead of `"bun"`, due to this no longer being a Bun-specific package. You can still
+use "bun" as your shell with any package manager, though it will fail if the `bun` command is not available.
+* <span className="deprecated"><b>Change</b> (breaking)</span>: All [environment variables](/config/env-vars) used for settings which started with `BW_` now start with `PACWICH_`.
+* <span className="primary bold">Support</span>: `pacwich` runs via Node 22 or higher and Bun 1.2 or higher. `npx pacwich` and `bunx pacwich` can both be used to invoke the CLI.
+* <span className="primary bold">Addition</span>: Along with `node_modules/pacwich/AGENTS.md`, you can access smaller agent files for more specific usage docs under `node_modules/pacwich/agents/`. [Read more](/ai/agents)
+
+## CLI Changes
+
+* <span className="deprecated"><b>Removal</b> (warning message temporarily logged)</span>: The global option `-w|--workspace-root` has been removed. This was a pnpm-inspired feature, but this is now `pacwich`'s default behavior, so the flag is not needed. `pacwich` always walks
+up your directory tree to find a project root.
+* <span className="primary bold">Addition</span>: A new [global option `--pm`](/cli/global-options#package-manager) to explicitly set a package manager, though default auto-detection or using project config is generally preferred.
+* <span className="primary bold">Addition</span>: [Project config](/config/project) can now set `defaults.cliScriptOutputStyle` to set the default `--output-style` of the [`run` command](/cli/commands#run-script), `"grouped"` only available on a TTY, which falls back to `"prefixed"`.
+* <span className="primary bold">Addition</span>: A CLI command [`add-skills`](/cli/commands#add-skills) to add agent skill files to your project
+* <span className="primary bold">Addition</span>: A [`verify` command](/cli/commands#verify) for the new verify feature described above.
+
+
+## API Changes
+* <span className="deprecated"><b>Removal</b> (breaking)</span>: `Project.createScriptCommand()` was removed. This was a lower level utility never alluded to in examples and was dependent on Bun-specific details.
+* <span className="deprecated"><b>Change</b> (deprecation)</span>: `Project.config.root` is renamed to `Project.config.project` (reference to config such as defined in `pacwich.project.ts`).
+* <span className="deprecated"><b>Change</b> (deprecation)</span>: `Project.mapScriptsToWorkspaces()` is deprecated in favor of the new `Project.scriptMap` property of the same type as the method's return value.
+* <span className="deprecated"><b>Change</b> (deprecation)</span>: `Project.mapTagsToWorkspaces()` is deprecated in favor of the new `Project.tagMap` property of the same type as the method's return value.
+* <span className="primary bold">Addition</span>: [`createFileSystemProject()`](/api/reference#createfilesystemproject) accepts a `packageManager` option, similar to the new `--pm` CLI option, though default auto-detection or using project config is generally preferred.
+* <span className="primary bold">Addition</span>: [`Project.verify()`](/api/reference#verify) is the API equivalent of the new CLI `verify` command.
+
+
+## MCP Changes
+* <span className="deprecated"><b>Removal (breaking)</b></span>. Project tools have been removed due to being redundant with the CLI. 
+Agents should instead simply read the [documentation resources](/ai/mcp) provided and use the CLI for <code>pacwich</code> operations.
+
+## Config Changes
+
+The names of your [config files](/config) have changed, but the new config files **are currently backwards compatible** with `bun-workspaces` config files,
+though some utility names have been deprecated for the root config (see below).
+
+Of course, for TS/JS files, you'll import utils from `"pacwich/config"` instead of `"bun-workspaces/config"`.
+
+### Workspace Config
+
+[Workspace config](/config/workspace) is **fully backwards compatible**. 
+
+* **Rename**: `bw.workspace.{ts,js,json,jsonc}` → `pacwich.workspace.{ts,js,json,jsonc}`
+
+
+### Root Config, now "Project Config"
+
+What was called "root config" in `bun-workspaces` is now called ["project config"](/config/project) in `pacwich`, to keep the naming simple and consistent
+with the package's primitives.
+
+**The actual config object value is backwards compatible, with only optional properties added.**
+
+* **Rename**: `bw.root.{ts,js,json,jsonc}` → `pacwich.project.{ts,js,json,jsonc}`
+* <span className="deprecated"><b>Deprecation (imported util)</b></span>: `defineRootConfig` is deprecated in favor of `defineProjectConfig`.
+* <span className="deprecated"><b>Deprecation (imported util)</b></span>: `mergeRootConfig` is deprecated in favor of `mergeProjectConfig`.
+* <span className="deprecated"><b>Deprecation (imported type)</b></span>: The `RootConfig` type is deprecated in favor of `ProjectConfig`. Similar types using "Root" have the same name change to use "Project".
+* <span className="primary bold">Addition (config value)</span>: The `packageManager` value sets the expected package manager, mainly for when multiple lockfiles are present
+* <span className="primary bold">Addition (config value)</span>: `defaults.cliScriptOutputStyle` sets the default `--output-style` argument for running scripts
+* <span className="primary bold">Addition (config value):</span>: New `verify` property sets options for the `verify` feature
+
+##### Notes on Deprecated Utilities
+
+When using a TS/JS file, utility and type names are temporarily backwards compatible, but you're encouraged to move to the new "project" names over
+the <span className="deprecated">deprecated</span> "root" names:
+
+<SyntaxHighlighter language="typescript">
+{`
+// Old: bw.root.ts
+import { defineRootConfig, type RootConfig } from 'bun-workspaces/config';
+
+export default defineRootConfig({
+\ \ // ... your config
+})
+`}
+</SyntaxHighlighter>
+
+<SyntaxHighlighter language="typescript">
+{`
+// New: pacwich.project.ts
+import { defineProjectConfig, type ProjectConfig } from 'pacwich/config';
+
+export default defineProjectConfig({
+\ \ // ... your config
+})
+`}
+</SyntaxHighlighter>
+
