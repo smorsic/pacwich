@@ -4,7 +4,8 @@ import { TAG_ICONS } from "./tagIcons";
 
 export const DOMAIN = "https://bunworkspaces.com";
 export const NPM_PACKAGE_URL = "https://www.npmjs.com/package/bun-workspaces";
-export const GITHUB_REPO_URL = packageJson.repository.url.replace(".git", "");
+export const GITHUB_REPO_URL =
+  "https://github.com/smorsic/bun-workspaces_deprecated";
 export const BW_BLOG_URL = "https://smorsic.io/blog";
 export const CHANGELOG_URL = `${GITHUB_REPO_URL}/releases`;
 export const LICENSE_URL = GITHUB_REPO_URL + "/blob/main/LICENSE.md";
