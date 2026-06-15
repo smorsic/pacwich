@@ -7,18 +7,25 @@ sidebar: true
 outline: true
 footer: false
 ---
-import { CliInstall } from "../../../lib/components/CliInstall";
-import { SyntaxHighlighter } from "../../../lib/util/highlight";
-import { RequiredVersions } from "../../../lib/components/RequiredVersions";
+import { CliInstall, CliInstallAlt } from "@/lib/cli/CliInstall";
+import { SyntaxHighlighter } from "@/lib/util/highlight";
+import { RequiredVersions } from "@/lib/components/RequiredVersions";
 
 
 <div className="doc-pm-tabs-container">
   <CliInstall />
 </div>
+<CliInstallAlt />
 
 <br/>
 
 <RequiredVersions/>
+
+**Stale workspace data:** Note that you need to run your package
+manager's install for `pacwich` to have current workspace data available,
+e.g. via `bun install`, `pnpm install`, or `npm install`. If you've
+added/removed/updated any workspace `package.json`, you'll likely need to
+run this again.
 
 ## First commands
 
@@ -78,6 +85,7 @@ and will attempt to detect workspaces that import/export other workspaces' code 
 </SyntaxHighlighter>
 
 <hr/>
+
 
 ## Package Manager Selection
 

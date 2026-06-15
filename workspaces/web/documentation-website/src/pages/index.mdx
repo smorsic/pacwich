@@ -3,7 +3,7 @@ pageType: custom
 sidebar: false
 outline: false
 ---
-import { IntroAnimation } from "../lib/components/IntroAnimation";
+import { IntroAnimation } from "@/lib/components/IntroAnimation";
 import { BiLogoTypescript } from "react-icons/bi";
 import { FaShuttleSpace } from "react-icons/fa6";
 import { GiViolin } from "react-icons/gi";
@@ -14,9 +14,9 @@ import { FaToolbox } from "react-icons/fa";
 import { Link } from "@rspress/core/theme-original";
 import { PiGraphFill } from "react-icons/pi";
 import { GrDocumentConfig } from "react-icons/gr";
-import { CliInstall } from "../lib/components/CliInstall";
-import { FeatureBun } from "../lib/components/FeatureBun";
-import { BlogLink } from "../lib/components/BlogLink";
+import { CliInstall, CliInstallAlt } from "@/lib/cli/CliInstall";
+import { FeatureBun } from "@/lib/components/FeatureBun";
+import { BlogLink } from "@/lib/components/BlogLink";
 
 <div className="home">
 <IntroAnimation />
@@ -77,7 +77,7 @@ import { BlogLink } from "../lib/components/BlogLink";
 <div className="home-pm-tabs-container">
   <CliInstall docLinks />
 </div>
-
+<CliInstallAlt />
 
 <div className="intro-links-container" style={{ margin: 0, marginTop: "-2rem", marginBottom: "4rem"}}>
 <Link

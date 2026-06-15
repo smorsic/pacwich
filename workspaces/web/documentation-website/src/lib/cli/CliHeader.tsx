@@ -1,5 +1,5 @@
+import { CliInstall, CliInstallAlt } from "@/lib/cli/CliInstall";
 import { Link } from "@/theme";
-import { CliInstall } from "../components/CliInstall";
 
 export interface CliHeaderProps {
   fullInstallDoc?: boolean;
@@ -11,6 +11,7 @@ export const CliHeader = ({ fullInstallDoc = false }: CliHeaderProps) => {
       {fullInstallDoc && (
         <>
           <CliInstall />
+          <CliInstallAlt />
           <br />
         </>
       )}

@@ -72,7 +72,14 @@ export default defineConfig({
   search: {
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
-  llms: true,
+  llms: {
+    remarkSplitMdxOptions: {
+      excludes: [
+        [["CliInstall"], "@/lib/cli/CliInstall"],
+        [["ApiInstall"], "@/lib/api/ApiInstall"],
+      ],
+    },
+  },
   plugins: [
     pluginClientRedirects({
       redirects: [

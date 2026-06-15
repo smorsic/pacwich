@@ -1,8 +1,8 @@
 import { Link } from "@rspress/core/theme-original";
 import { type PackageManagerName } from "pacwich";
-import { PmTabs } from "./PmTabs";
+import { PmTabs } from "../components/PmTabs";
 
-const PM_COMMANDS: Record<
+export const PM_COMMANDS: Record<
   PackageManagerName,
   {
     globalInstall: string;
@@ -18,7 +18,7 @@ const PM_COMMANDS: Record<
   pnpm: {
     globalInstall: "pnpm add -g pacwich",
     localInstall: "pnpm add -D pacwich",
-    localCall: "npx pacwich",
+    localCall: "pnpm exec pacwich",
   },
   bun: {
     globalInstall: "bun add -g pacwich",
@@ -103,5 +103,40 @@ ${PM_COMMANDS[pm].localCall}
         ],
       }}
     />
+  );
+};
+
+/** Separate from CliInstall to provide hidden text used for markdown generation in place of dynamic display component */
+export const CliInstallAlt = () => {
+  return (
+    <div
+      style={{
+        visibility: "hidden",
+        position: "absolute",
+        left: "-9999px",
+      }}
+    >
+      <div>
+        Alt install instructions for .md page in place of {`<CliInstall />`}{" "}
+        above:
+      </div>
+      <div>Installing:</div>
+      {Object.entries(PM_COMMANDS).map(([pm, commands]) => (
+        <div key={`cli-install-${pm}`}>
+          <h3>{pm}:</h3>
+          <div>
+            Global install: <code>{commands.globalInstall}</code>
+            <br />
+            Local install: <code>{commands.localInstall}</code>
+            <br />
+            Local/one-off execution: <code>{commands.localCall}</code>
+          </div>
+        </div>
+      ))}
+      <div>
+        Note that the global install will delegate to the local install when
+        available.
+      </div>
+    </div>
   );
 };

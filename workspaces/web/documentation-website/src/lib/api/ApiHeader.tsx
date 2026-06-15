@@ -1,5 +1,5 @@
 import { Link } from "@rspress/core/theme-original";
-import { PmTabs } from "../components/PmTabs";
+import { ApiInstall, ApiInstallAlt } from "./ApiInstall";
 
 export interface ApiHeaderProps {
   fullInstallDoc?: boolean;
@@ -7,35 +7,12 @@ export interface ApiHeaderProps {
 }
 
 export const ApiHeader = ({ fullInstallDoc = false }: ApiHeaderProps) => {
-  const installDescription =
-    "Install the package in your project's devDependencies";
   return (
     <div className="sub-header">
       {fullInstallDoc && (
         <>
-          <PmTabs
-            title="Install"
-            sections={{
-              bun: [
-                {
-                  description: installDescription,
-                  code: "bun add -d pacwich",
-                },
-              ],
-              pnpm: [
-                {
-                  description: installDescription,
-                  code: "pnpm add -D pacwich",
-                },
-              ],
-              npm: [
-                {
-                  description: installDescription,
-                  code: "npm install -D pacwich",
-                },
-              ],
-            }}
-          />
+          <ApiInstall />
+          <ApiInstallAlt />
           <br />
         </>
       )}

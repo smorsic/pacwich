@@ -783,6 +783,12 @@ a code {
   font-weight: bold;
   padding: 0.4rem;
   border-right: 2px solid var(--rp-c-bg);
+  cursor: pointer;
+}
+
+.pm-tabs-tabs button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .pm-tabs-tabs button:first-child {
