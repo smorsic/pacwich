@@ -60,7 +60,7 @@ pacwich run lint my-workspace # Run for a single workspace
 pacwich run lint my-workspace-a my-workspace-b # Run for multiple workspaces
 pacwich run lint my-alias-a my-alias-b # Run by alias (set by optional config)
 
-# A workspace's script will wait until 
+# A workspace's script will wait until
 # any workspaces it depends on have completed
 pacwich run lint --dep-order
 pacwich run lint --dep-order --ignore-dep-failure

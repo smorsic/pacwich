@@ -1,5 +1,5 @@
 <a href="https://pacwich.dev">
-<img src="./workspaces/web/documentation-website/src/pages/public/images/png/bwunster-pacwich-subtitled-wide_2000x462.png" alt="pacwich logo" width="100%" />
+<img src="./workspaces/web/documentation-website/src/pages/public/images/png/bwunster-pacwich-subtitled-wide_1400x400.png" alt="pacwich logo" width="100%" />
 </a>
 
 <br/>
