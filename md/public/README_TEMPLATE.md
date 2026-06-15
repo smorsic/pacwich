@@ -27,22 +27,44 @@ to a degree.
 
 [Full Getting Started Guide](https://pacwich.dev/intro/getting-started)
 
-Installation:
+### Installation
+
+Note that the global install
 
 ```bash
-# Global install with your preferred package manager
-# The pacwich command will use a local install if available
+# Use the global install command of choice below
 bun add -g pacwich
+# or
 pnpm add -g pacwich
+# or
 npm install -g pacwich
 
-# Local install in your project
+# And/or local install in your project
 bun add -d pacwich
+# or
 pnpm add -D pacwich
+# or
 npm install -D pacwich
 ```
 
+#### Stale workspace data
+
 Note that you need to run your package manager's install for pacwich to have current workspace data available, e.g. via `bun install`, `pnpm install`, or `npm install`. If you've added/removed/updated any workspace package.json, you'll likely need to run this again.
+
+#### Calling the CLI
+
+You might optionally [alias](https://www.geeksforgeeks.org/linux-unix/alias-command-in-linux-with-examples/) your most used invocation to `pw`,
+especially if you area `bun-workspaces` user that had a `bw` alias.
+
+```bash
+# Use the global command if installed
+pacwich --help
+
+# Or use a one-off/local invocation
+npx pacwich --help
+bunx pacwich --help
+pnpm exec pacwich --help
+```
 
 ### CLI
 
