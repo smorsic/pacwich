@@ -14,8 +14,8 @@ describe("CLI Run Script (runtime metadata)", () => {
     expect(result.exitCode).toBe(0);
     assertOutputMatches(
       result.stdoutAndErr.sanitizedCompactLines,
-      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} ${withWindowsPath("applications/application-a")} test-echo
-[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} ${withWindowsPath("applications/application-b")} test-echo
+      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} applications/application-a test-echo
+[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} applications/application-b test-echo
 ✅ application-a: test-echo
 ✅ application-b: test-echo
 2 scripts ran successfully`,
@@ -35,8 +35,8 @@ describe("CLI Run Script (runtime metadata)", () => {
     expect(result.exitCode).toBe(0);
     assertOutputMatches(
       result.stdoutAndErr.sanitizedCompactLines,
-      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} ${withWindowsPath("applications/application-a")} test-echo --arg1=${projectRoot} --arg2=test-root --arg3=application-a --arg4=${withWindowsPath(projectRoot + "/applications/application-a")} --arg5=${withWindowsPath("applications/application-a")} --arg6=test-echo
-[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} ${withWindowsPath("applications/application-b")} test-echo --arg1=${projectRoot} --arg2=test-root --arg3=application-b --arg4=${withWindowsPath(projectRoot + "/applications/application-b")} --arg5=${withWindowsPath("applications/application-b")} --arg6=test-echo
+      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} applications/application-a test-echo --arg1=${projectRoot} --arg2=test-root --arg3=application-a --arg4=${withWindowsPath(projectRoot + "/applications/application-a")} --arg5=applications/application-a --arg6=test-echo
+[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} applications/application-b test-echo --arg1=${projectRoot} --arg2=test-root --arg3=application-b --arg4=${withWindowsPath(projectRoot + "/applications/application-b")} --arg5=applications/application-b --arg6=test-echo
 ✅ application-a: test-echo
 ✅ application-b: test-echo
 2 scripts ran successfully`,
@@ -56,8 +56,8 @@ describe("CLI Run Script (runtime metadata)", () => {
     expect(result.exitCode).toBe(0);
     assertOutputMatches(
       result.stdoutAndErr.sanitizedCompactLines,
-      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} ${withWindowsPath("applications/application-a")}
-[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} ${withWindowsPath("applications/application-b")}
+      `[application-a] ${projectRoot} test-root application-a ${withWindowsPath(projectRoot + "/applications/application-a")} applications/application-a
+[application-b] ${projectRoot} test-root application-b ${withWindowsPath(projectRoot + "/applications/application-b")} applications/application-b
 ✅ application-a: (inline)
 ✅ application-b: (inline)
 2 scripts ran successfully`,

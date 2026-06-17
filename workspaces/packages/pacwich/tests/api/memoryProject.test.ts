@@ -3,7 +3,6 @@ import { createMemoryProject } from "../../src/project";
 import { WORKSPACE_ERRORS, type Workspace } from "../../src/workspaces";
 import { makeTestWorkspace } from "../util/testData";
 import { expect, test, describe } from "../util/testFramework";
-import { withWindowsPath } from "../util/windows";
 
 describe("createMemoryProject - type validation", () => {
   test("throws for non-array workspaces", () => {
@@ -128,9 +127,7 @@ describe("MemoryProject", () => {
   test("creates project with workspaces and properties", () => {
     const projectWithData = createTestProject();
     expect(projectWithData.sourceType).toEqual("memory");
-    expect(projectWithData.rootDirectory).toEqual(
-      withWindowsPath("test-project-directory"),
-    );
+    expect(projectWithData.rootDirectory).toEqual("test-project-directory");
     expect(projectWithData.workspaces).toEqual([testWs1, testWs2]);
     expect(projectWithData.name).toEqual("test-project");
   });

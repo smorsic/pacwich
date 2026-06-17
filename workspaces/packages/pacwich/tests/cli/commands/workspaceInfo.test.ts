@@ -4,11 +4,10 @@ import {
   listCommandAndAliases,
 } from "../../util/cliTestUtils";
 import { test, expect, describe } from "../../util/testFramework";
-import { withWindowsPath } from "../../util/windows";
 
 const APPLICATION_1A_PLAIN_OUTPUT = `Workspace: application-1a
  - Aliases: appA
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -19,7 +18,7 @@ const EXPECTED_APPLICATION_1A_JSON = {
   name: "application-1a",
   isRoot: false,
   matchPattern: "applications/*",
-  path: withWindowsPath("applications/applicationA"),
+  path: "applications/applicationA",
   scripts: ["a-workspaces", "all-workspaces", "application-a"],
   aliases: ["appA"],
   tags: [],
@@ -106,7 +105,7 @@ describe("Workspace Info", () => {
       result.stdout.raw,
       `Workspace: d-depends-e
  - Aliases: 
- - Path: ${withWindowsPath("packages/d-depends-e")}
+ - Path: packages/d-depends-e
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 

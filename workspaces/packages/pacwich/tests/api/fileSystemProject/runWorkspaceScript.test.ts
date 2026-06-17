@@ -564,7 +564,7 @@ describe("FileSystemProject runWorkspaceScript", () => {
     for await (const { metadata, chunk } of plainResult.output.text()) {
       expect(metadata.streamName).toBe("stdout");
       expect(chunk.trim()).toBe(
-        `${project.rootDirectory} test-root application-a ${project.rootDirectory}${withWindowsPath("/applications/application-a")} ${withWindowsPath("applications/application-a")} test-echo`,
+        `${project.rootDirectory} test-root application-a ${project.rootDirectory}/applications/application-a applications/application-a test-echo`,
       );
     }
 
@@ -577,7 +577,7 @@ describe("FileSystemProject runWorkspaceScript", () => {
     for await (const { metadata, chunk } of argsResult.output.text()) {
       expect(metadata.streamName).toBe("stdout");
       expect(chunk.trim()).toBe(
-        `${project.rootDirectory} test-root application-a ${project.rootDirectory}${withWindowsPath("/applications/application-a")} ${withWindowsPath("applications/application-a")} test-echo --arg1=${project.rootDirectory} --arg2=test-root --arg3=application-a --arg4=${project.rootDirectory}${withWindowsPath("/applications/application-a")} --arg5=${withWindowsPath("applications/application-a")} --arg6=test-echo`,
+        `${project.rootDirectory} test-root application-a ${project.rootDirectory}/applications/application-a applications/application-a test-echo --arg1=${project.rootDirectory} --arg2=test-root --arg3=application-a --arg4=${project.rootDirectory}/applications/application-a --arg5=applications/application-a --arg6=test-echo`,
       );
     }
   });
@@ -600,7 +600,7 @@ describe("FileSystemProject runWorkspaceScript", () => {
     } of anonymousScriptResult.output.text()) {
       expect(metadata.streamName).toBe("stdout");
       expect(chunk.trim()).toBe(
-        `${project.rootDirectory} test-root application-a ${project.rootDirectory}${withWindowsPath("/applications/application-a")} ${withWindowsPath("applications/application-a")}`,
+        `${project.rootDirectory} test-root application-a ${project.rootDirectory}/applications/application-a applications/application-a`,
       );
     }
 
@@ -614,7 +614,7 @@ describe("FileSystemProject runWorkspaceScript", () => {
     for await (const { metadata, chunk } of namedScriptResult.output.text()) {
       expect(metadata.streamName).toBe("stdout");
       expect(chunk.trim()).toBe(
-        `${project.rootDirectory} test-root application-a ${project.rootDirectory}${withWindowsPath("/applications/application-a")} ${withWindowsPath("applications/application-a")} my-named-script`,
+        `${project.rootDirectory} test-root application-a ${project.rootDirectory}/applications/application-a applications/application-a my-named-script`,
       );
     }
   });
