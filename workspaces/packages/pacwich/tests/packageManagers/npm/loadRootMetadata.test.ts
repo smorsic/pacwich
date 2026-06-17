@@ -1,3 +1,4 @@
+import path from "path";
 import { resolvePackageManagerAdapter } from "../../../src/packageManager/adapter";
 import { describe, expect, test } from "../../util/testFramework";
 
@@ -13,7 +14,7 @@ import { describe, expect, test } from "../../util/testFramework";
 
 describe("npm adapter: loadRootMetadata", () => {
   const adapter = resolvePackageManagerAdapter("npm");
-  const rootDirectory = "/abs/project";
+  const rootDirectory = path.resolve("/abs/project");
 
   const load = (workspaces: unknown) =>
     adapter.loadRootMetadata({
