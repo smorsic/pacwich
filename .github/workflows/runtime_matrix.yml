@@ -64,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          MATRICES=workspaces/packages/meta/ci/matrices.json
+          MATRICES=workspaces/meta/ci/matrices.json
           TOOL_VERSIONS=workspaces/libraries/pacwich-common/toolVersions/toolVersions.json
 
           # Each axis resolves to both a sweep array (for cartesian product

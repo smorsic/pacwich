@@ -69,7 +69,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          MATRICES=workspaces/packages/meta/ci/matrices.json
+          MATRICES=workspaces/meta/ci/matrices.json
           TOOL_VERSIONS=workspaces/libraries/pacwich-common/toolVersions/toolVersions.json
 
           # pnpm is the swept axis; override collapses it.
