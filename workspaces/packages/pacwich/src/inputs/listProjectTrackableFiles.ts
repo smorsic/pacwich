@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { text } from "stream/consumers";
+import { toPosixPath } from "../internal/core";
 import { createSubprocess } from "../runScript/subprocesses";
-import { toPosixPath } from "./matchWorkspaceInputFiles";
 
 const SKIPPED_DIR_NAMES = new Set(["node_modules", ".git"]);
 

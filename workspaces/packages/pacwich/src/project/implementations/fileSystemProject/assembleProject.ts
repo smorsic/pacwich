@@ -6,7 +6,7 @@ import {
   loadWorkspaceConfig,
 } from "../../../config";
 import type { LoadConfigOptions } from "../../../config/util/loadConfig";
-import { toPosixPath } from "../../../inputs";
+import { toPosixPath } from "../../../internal/core";
 import { logger } from "../../../internal/logger/logger";
 import type { PackageManagerAdapter } from "../../../packageManager/adapter";
 import { applyWorkspacePatternConfigs } from "../../../workspaces/applyWorkspacePatternConfigs";

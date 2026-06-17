@@ -1,5 +1,5 @@
 import path from "path";
-import { toPosixPath } from "../../../src/inputs";
+import { toPosixPath } from "../../../src/internal/core";
 import { parsePnpmLockWorkspaceLinks } from "../../../src/packageManager/backends/pnpm/pnpmLock";
 import { describe, expect, test } from "../../util/testFramework";
 

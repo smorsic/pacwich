@@ -3,10 +3,12 @@ import path from "path";
 import {
   listProjectTrackableFiles,
   matchWorkspaceInputFiles,
+} from "../../../inputs";
+import {
   stripLeadingSlashes,
   stripTrailingSlashes,
   toPosixPath,
-} from "../../../inputs";
+} from "../../../internal/core";
 import { logger } from "../../../internal/logger";
 import type { PackageManagerAdapter } from "../../../packageManager/adapter";
 import {

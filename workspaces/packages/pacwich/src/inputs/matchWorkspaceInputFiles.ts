@@ -1,4 +1,9 @@
 import path from "path";
+import {
+  stripLeadingSlashes,
+  stripTrailingSlashes,
+  toPosixPath,
+} from "../internal/core";
 import { logger } from "../internal/logger";
 
 const FILE_PATTERN_NEGATION_PREFIX = "!";
@@ -8,14 +13,6 @@ const GLOB_CHARACTER_REGEX = /[*?[{]/;
 const PROJECT_RELATIVE_PREFIX = "/";
 
 const PARENT_SEGMENT = "..";
-
-export const toPosixPath = (filePath: string) => filePath.replaceAll("\\", "/");
-
-export const stripTrailingSlashes = (filePath: string) =>
-  filePath.replace(/\/+$/, "");
-
-export const stripLeadingSlashes = (filePath: string) =>
-  filePath.replace(/^\/+/, "");
 
 /**
  * Resolve a single input pattern (relative to a workspace, or to the

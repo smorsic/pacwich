@@ -1,9 +1,6 @@
 import path from "path";
-import {
-  matchWorkspaceInputFiles,
-  stripTrailingSlashes,
-  toPosixPath,
-} from "../inputs";
+import { matchWorkspaceInputFiles } from "../inputs";
+import { stripTrailingSlashes, toPosixPath } from "../internal/core";
 import { matchWorkspacesByPatterns, type Workspace } from "../workspaces";
 import type {
   ExternalDependencyChange,
