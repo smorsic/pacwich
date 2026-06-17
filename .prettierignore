@@ -2,7 +2,8 @@
 **/tests/**/*.jsonc
 **/*.d.ts
 AGENTS.md
-pnpm-lock.yaml
+**/agents/**/*.md
+pnpm*.yaml
 
 **/generated/**/*.js
 
