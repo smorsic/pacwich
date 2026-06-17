@@ -1,5 +1,5 @@
 name: Bootstrap
-description: Install bun, node, and pnpm; install deps and run init-repo
+description: Install tooling and dependencies
 
 inputs:
   bun-version:
@@ -54,7 +54,7 @@ runs:
       with:
         node-version: ${{ steps.versions.outputs.node }}
 
-    - name: Install deps and run init-repo
+    - name: Install deps
       shell: bash
       run: |
         set -euo pipefail
@@ -76,4 +76,7 @@ runs:
         else
           bun install --frozen-lockfile --ignore-scripts
         fi
-        bun init-repo
+
+    - name: Run prepare
+      shell: bash
+      run: bun prepare
