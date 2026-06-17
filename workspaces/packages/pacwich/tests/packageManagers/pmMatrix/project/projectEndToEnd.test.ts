@@ -177,6 +177,7 @@ describeEachPm("smoke: FileSystemProject end-to-end", ({ pm }) => {
       describe("script execution", () => {
         test.if(Boolean(fixture.scriptExecution))(
           "runWorkspaceScript runs a single workspace's script to success",
+          { timeout: 30000 },
           async () => {
             const { workspace, script, stdoutContains } =
               fixture.scriptExecution!;

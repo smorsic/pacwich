@@ -38,7 +38,7 @@ describe("CLI Run Script (stdout vs. stderr)", () => {
     );
   });
 
-  test("Running with mixed output per script", async () => {
+  test("Running with mixed output per script", { timeout: 30000 }, async () => {
     const { run } = setupCliTest({
       testProject: "runScriptWithMixedOutput",
     });

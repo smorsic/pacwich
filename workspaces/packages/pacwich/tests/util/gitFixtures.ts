@@ -183,7 +183,15 @@ export const createGitFixture = async (
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
-    fs.rmSync(repoPath, { force: true, recursive: true });
+    // On Windows the git index may still be held open briefly when this
+    // disposes, producing EPERM on the first unlink attempt. maxRetries
+    // lets the OS release the handle before we retry.
+    fs.rmSync(repoPath, {
+      force: true,
+      recursive: true,
+      maxRetries: 5,
+      retryDelay: 50,
+    });
   };
 
   return {

@@ -362,11 +362,19 @@ describe("Run Scripts", () => {
 
       let didMaxRun = false;
       for await (const { chunk } of result.output.text()) {
-        const count = parseInt(chunk.trim());
-        if (count === max) {
-          didMaxRun = true;
+        // chunks can arrive with CRLF noise or be split across the line
+        // boundary on Windows; iterate per line and skip non-numeric ones
+        // so a stray blank chunk doesn't fail the assertion as NaN.
+        for (const line of chunk.split(/\r?\n/)) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          const count = parseInt(trimmed);
+          if (Number.isNaN(count)) continue;
+          if (count === max) {
+            didMaxRun = true;
+          }
+          expect(count).toBeLessThanOrEqual(max);
         }
-        expect(count).toBeLessThanOrEqual(max);
       }
 
       expect(didMaxRun).toBe(true);
