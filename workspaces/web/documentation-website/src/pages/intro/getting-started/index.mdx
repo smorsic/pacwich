@@ -126,3 +126,15 @@ Note that you can also use a plain JSON file (`pacwich.project.json`) simply wit
 
 With the CLI, it's also possible to pass a value to the global [`--pm` flag](/cli/global-options#package-manager) to explicitly choose a package manager or pass a `packageManager` 
 option to [`createFileSystemProject`](/api/reference#createfilesystemproject) when using the [TS API](/api).
+
+## Note: Windows Support
+
+`pacwich` is primarily supported for POSIX systems (Linux, macOS).
+
+Windows users using cmd.exe are supported. Our CI runs tests
+in Windows servers to help confirm support for all package managers
+via Node or Bun. However, stability for cmd.exe is lowest priority.
+
+Windows users are encouraged to use the Windows Subsystem for Linux (WSL) 
+for the best experience, which is generally encouraged for users of Bun and
+Node anyway.

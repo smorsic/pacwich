@@ -52,6 +52,13 @@ from one of these, so stability is prioritized over potential frequent bumps to 
 GitHub's Dependabot is also used on the source repository to help catch issues with
 the current dependencies, mitigating the risk of an insecure bundled dependency going unnoticed.
 
+#### Auditability:
+* [See pacwich's "dependencies" field](https://github.com/smorsic/pacwich/blob/main/workspaces/packages/pacwich/package.json),
+before the rslib bundle process, all resolved from the `pacwich-prod` catalog  defined in the [root `package.json`](https://github.com/smorsic/pacwich/blob/main/package.json)
+where all versions are locked to specific patch versions.
+* See the [package npm page](https://www.npmjs.com/package/pacwich?activeTab=dependencies) to confirm 0 dependencies.
+*  See the existence of [dependabot.yml](https://github.com/smorsic/pacwich/blob/main/.github/dependabot.yml) for dependency scanning.
+
 ## GitHub Actions
 
 ### Publishing to npm
@@ -59,6 +66,19 @@ the current dependencies, mitigating the risk of an insecure bundled dependency 
 `pacwich` is published with OIDC trusted publishing to npm for provenance attestation via Actions. 
 
 Long-lived legacy npm tokens are never used for publishing, something seen in recent attacks.
+
+**Auditability**: [Publish workflow](https://github.com/smorsic/pacwich/blob/main/.github/workflows/publish.yml)
+
+### No lifecycle scripts from dependencies
+
+As described above, bundling `pacwich`'s dependencies helps prevent users from 
+being exposed to insecure lifecycle scripts.
+
+We also prevent lifecycle script injection within the GitHub Actions workflows by using a 
+dedicated bootstrap action to set up all jobs, which disables all lifecycle scripts when 
+installing dependencies, preventing CI from being injected itself by devDependencies and the like.
+
+**Auditability**: [Bootstrap action](https://github.com/smorsic/pacwich/blob/main/.github/actions/bootstrap/action.yml)
 
 ### No Insecure Context for Forks
 
@@ -71,6 +91,8 @@ for something like a `lint` command defined in the repo.
 While it's possible to use `pull_request_target` securely, we simply avoid workflows
 where forks are ever checked out in the main repo's security context.
 
+**Auditability**: [All workflows](https://github.com/smorsic/pacwich/tree/main/.github/workflows)
+
 ### SHA-pinned Actions
 
 We use standard external actions for purposes like installing Bun, Node, etc., and these 
@@ -82,6 +104,9 @@ from this surface. This is enforced in the repository's settings so that this pa
 be neglected.
 
 Dependabot is used again here to validate the security of currently used action versions.
+
+**Auditability**: [All workflows](https://github.com/smorsic/pacwich/tree/main/.github/workflows), and the [dependabot config](https://github.com/smorsic/pacwich/blob/main/.github/dependabot.yml) includes
+`github-actions`.
 
 ## AI Development
 

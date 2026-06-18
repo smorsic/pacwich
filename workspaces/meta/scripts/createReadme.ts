@@ -6,6 +6,7 @@ import {
   PROJECT_CONFIG_QUICKSTART,
   WORKSPACE_CONFIG_QUICKSTART,
 } from "@pacwich/common/docs";
+import { PACWICH_VERSION } from "@pacwich/common/version";
 import { createScriptLogger } from "../util";
 
 const root = process.env.PACWICH_PROJECT_PATH as string;
@@ -24,7 +25,8 @@ if (import.meta.main) {
     .replace(/<<CLI_QUICKSTART>>/gm, CLI_QUICKSTART)
     .replace(/<<API_QUICKSTART>>/gm, API_QUICKSTART)
     .replace(/<<PROJECT_CONFIG_QUICKSTART>>/gm, PROJECT_CONFIG_QUICKSTART)
-    .replace(/<<WORKSPACE_CONFIG_QUICKSTART>>/gm, WORKSPACE_CONFIG_QUICKSTART);
+    .replace(/<<WORKSPACE_CONFIG_QUICKSTART>>/gm, WORKSPACE_CONFIG_QUICKSTART)
+    .replace(/<<PACWICH_VERSION>>/gm, PACWICH_VERSION);
 
   const readmePath = path.resolve(root, "README.md");
 
