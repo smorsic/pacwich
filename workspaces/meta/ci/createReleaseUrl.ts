@@ -10,19 +10,21 @@ console.log(
     "/releases/new?tag=pacwich-v" +
     releaseVersion +
     "&title=" +
-    releaseVersion +
+    encodeURIComponent("pacwich " + releaseVersion) +
     "&target=" +
     commit +
     "&body=" +
     encodeURIComponent(`
-# Pacwich v${releaseVersion}
-
 ### Added
+* 
 
 ### Changed
+* 
 
 ### Fixed
+* 
 
 ### Removed
+*
 `),
 );
