@@ -14,7 +14,6 @@ import {
   spyOn,
   test,
 } from "../util/testFramework";
-import { withWindowsPath } from "../util/windows";
 
 const createDefaultProject = () =>
   createFileSystemProject({
@@ -96,9 +95,7 @@ describe("Test Project utilities", () => {
       const project = createDefaultProject();
       const workspace = project.findWorkspaceByName("application-a");
       expect(workspace?.name).toEqual("application-a");
-      expect(workspace?.path).toEqual(
-        withWindowsPath("applications/applicationA"),
-      );
+      expect(workspace?.path).toEqual("applications/applicationA");
       expect(workspace?.scripts).toEqual([
         "a-workspaces",
         "all-workspaces",
@@ -111,9 +108,7 @@ describe("Test Project utilities", () => {
       const project = createDefaultProject();
       const workspace = project.findWorkspaceByName("library-c");
       expect(workspace?.name).toEqual("library-c");
-      expect(workspace?.path).toEqual(
-        withWindowsPath("libraries/nested/libraryC"),
-      );
+      expect(workspace?.path).toEqual("libraries/nested/libraryC");
       expect(workspace?.scripts).toEqual([
         "all-workspaces",
         "c-workspaces",

@@ -43,12 +43,8 @@ const pidExists = async (pid: number): Promise<boolean> => {
   }
 };
 
-describe("createSubprocess", () => {
-  if (IS_WINDOWS) {
-    /** @todo Windows support for Bun.Subprocess.kill is needed */
-    return;
-  }
-
+// @todo Windows support for Bun.Subprocess.kill is needed
+describe.skipIf(IS_WINDOWS)("createSubprocess", () => {
   test(
     "kills registered subprocesses when main process exits via signal",
     async () => {

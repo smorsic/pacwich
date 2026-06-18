@@ -1,15 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { text } from "stream/consumers";
+import { toPosixPath } from "../internal/core";
 import { createSubprocess } from "../runScript/subprocesses";
 
 const SKIPPED_DIR_NAMES = new Set(["node_modules", ".git"]);
 
 const parseNullSeparated = (output: string): string[] =>
   output.split("\0").filter(Boolean);
-
-const toPosixPath = (filePath: string): string =>
-  filePath.split(path.sep).join("/");
 
 const runGit = async (
   args: string[],

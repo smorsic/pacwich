@@ -10,7 +10,6 @@ import { assembleProject } from "../../src/project/implementations/fileSystemPro
 import { getProjectRoot } from "../fixtures/testProjects";
 import { makeTestWorkspace, makeWorkspaceMapEntry } from "../util/testData";
 import { expect, test, describe } from "../util/testFramework";
-import { withWindowsPath } from "../util/windows";
 
 const adapter = resolvePackageManagerAdapter("bun");
 
@@ -31,7 +30,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("applications/application-a"),
+          "applications/application-a",
         ),
       );
       expect(config).toEqual({
@@ -50,7 +49,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("applications/application-b"),
+          "applications/application-b",
         ),
       );
       expect(config).toEqual({
@@ -72,7 +71,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("libraries/library-a"),
+          "libraries/library-a",
         ),
       );
       expect(config).toEqual({
@@ -87,7 +86,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("libraries/library-b"),
+          "libraries/library-b",
         ),
       );
       expect(config).toEqual({
@@ -109,7 +108,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("libraries/library-c"),
+          "libraries/library-c",
         ),
       );
       expect(config).toEqual({
@@ -124,7 +123,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigPackageFileMix"),
-          withWindowsPath("applications/application-c"),
+          "applications/application-c",
         ),
       );
       expect(config).toEqual({
@@ -139,7 +138,7 @@ describe("workspace config", () => {
       const config = loadWorkspaceConfig(
         path.join(
           getProjectRoot("workspaceConfigFileOnly"),
-          withWindowsPath("applications/application-a"),
+          "applications/application-a",
         ),
       );
       expect(config).toEqual({
@@ -161,7 +160,7 @@ describe("workspace config", () => {
         loadWorkspaceConfig(
           path.join(
             getProjectRoot("workspaceConfigInvalidJson"),
-            withWindowsPath("applications/application-a"),
+            "applications/application-a",
           ),
         ),
       ).toThrow(LOAD_CONFIG_ERRORS.InvalidJSON);
@@ -172,7 +171,7 @@ describe("workspace config", () => {
         loadWorkspaceConfig(
           path.join(
             getProjectRoot("workspaceConfigInvalidJson"),
-            withWindowsPath("applications/application-b"),
+            "applications/application-b",
           ),
         ),
       ).toThrow(LOAD_CONFIG_ERRORS.InvalidJSON);
@@ -330,7 +329,7 @@ describe("workspace config", () => {
         loadWorkspaceConfig(
           path.join(
             getProjectRoot("workspaceConfigInvalidConfig"),
-            withWindowsPath(`applications/${appName}`),
+            `applications/${appName}`,
           ),
         ),
       ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);

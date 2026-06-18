@@ -4,11 +4,10 @@ import {
   listCommandAndAliases,
 } from "../../util/cliTestUtils";
 import { test, expect, describe } from "../../util/testFramework";
-import { withWindowsPath } from "../../util/windows";
 
 const PLAIN_OUTPUT_SIMPLE1 = `Workspace: application-1a
  - Aliases: appA
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -16,7 +15,7 @@ const PLAIN_OUTPUT_SIMPLE1 = `Workspace: application-1a
  - Dependents: 
 Workspace: application-1b
  - Aliases: appB
- - Path: ${withWindowsPath("applications/applicationB")}
+ - Path: applications/applicationB
  - Glob Match: applications/*
  - Scripts: all-workspaces, application-b, b-workspaces
  - Tags: 
@@ -24,7 +23,7 @@ Workspace: application-1b
  - Dependents: 
 Workspace: library-1a
  - Aliases: libA
- - Path: ${withWindowsPath("libraries/libraryA")}
+ - Path: libraries/libraryA
  - Glob Match: libraries/*
  - Scripts: a-workspaces, all-workspaces, library-a
  - Tags: 
@@ -32,7 +31,7 @@ Workspace: library-1a
  - Dependents: 
 Workspace: library-1b
  - Aliases: libB
- - Path: ${withWindowsPath("libraries/libraryB")}
+ - Path: libraries/libraryB
  - Glob Match: libraries/*
  - Scripts: all-workspaces, b-workspaces, library-b
  - Tags: 
@@ -49,7 +48,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     name: "application-1a",
     isRoot: false,
     matchPattern: "applications/*",
-    path: withWindowsPath("applications/applicationA"),
+    path: "applications/applicationA",
     scripts: ["a-workspaces", "all-workspaces", "application-a"],
     aliases: ["appA"],
     tags: [],
@@ -61,7 +60,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     name: "application-1b",
     isRoot: false,
     matchPattern: "applications/*",
-    path: withWindowsPath("applications/applicationB"),
+    path: "applications/applicationB",
     scripts: ["all-workspaces", "application-b", "b-workspaces"],
     aliases: ["appB"],
     tags: [],
@@ -73,7 +72,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     name: "library-1a",
     isRoot: false,
     matchPattern: "libraries/*",
-    path: withWindowsPath("libraries/libraryA"),
+    path: "libraries/libraryA",
     scripts: ["a-workspaces", "all-workspaces", "library-a"],
     aliases: ["libA"],
     tags: [],
@@ -85,7 +84,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
     name: "library-1b",
     isRoot: false,
     matchPattern: "libraries/*",
-    path: withWindowsPath("libraries/libraryB"),
+    path: "libraries/libraryB",
     scripts: ["all-workspaces", "b-workspaces", "library-b"],
     aliases: ["libB"],
     tags: [],
@@ -97,7 +96,7 @@ const EXPECTED_WORKSPACES_JSON_SIMPLE1 = [
 
 const PATTERN_OUTPUT_APPLICATION_AND_LIBRARY_1B = `Workspace: application-1a
  - Aliases: appA
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -105,7 +104,7 @@ const PATTERN_OUTPUT_APPLICATION_AND_LIBRARY_1B = `Workspace: application-1a
  - Dependents: 
 Workspace: application-1b
  - Aliases: appB
- - Path: ${withWindowsPath("applications/applicationB")}
+ - Path: applications/applicationB
  - Glob Match: applications/*
  - Scripts: all-workspaces, application-b, b-workspaces
  - Tags: 
@@ -113,7 +112,7 @@ Workspace: application-1b
  - Dependents: 
 Workspace: library-1b
  - Aliases: libB
- - Path: ${withWindowsPath("libraries/libraryB")}
+ - Path: libraries/libraryB
  - Glob Match: libraries/*
  - Scripts: all-workspaces, b-workspaces, library-b
  - Tags: 
@@ -142,7 +141,7 @@ describe("List Workspaces", () => {
         result.stdout.raw,
         `Workspace: a-depends-e
  - Aliases: 
- - Path: ${withWindowsPath("packages/a-depends-e")}
+ - Path: packages/a-depends-e
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 
@@ -150,7 +149,7 @@ describe("List Workspaces", () => {
  - Dependents: 
 Workspace: b-depends-cd
  - Aliases: 
- - Path: ${withWindowsPath("packages/b-depends-cd")}
+ - Path: packages/b-depends-cd
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 
@@ -158,7 +157,7 @@ Workspace: b-depends-cd
  - Dependents: 
 Workspace: c-depends-e
  - Aliases: 
- - Path: ${withWindowsPath("packages/c-depends-e")}
+ - Path: packages/c-depends-e
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 
@@ -166,7 +165,7 @@ Workspace: c-depends-e
  - Dependents: b-depends-cd
 Workspace: d-depends-e
  - Aliases: 
- - Path: ${withWindowsPath("packages/d-depends-e")}
+ - Path: packages/d-depends-e
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 
@@ -174,7 +173,7 @@ Workspace: d-depends-e
  - Dependents: b-depends-cd
 Workspace: e
  - Aliases: 
- - Path: ${withWindowsPath("packages/e")}
+ - Path: packages/e
  - Glob Match: packages/*
  - Scripts: test-script
  - Tags: 

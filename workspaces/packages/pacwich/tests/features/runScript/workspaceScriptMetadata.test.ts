@@ -272,9 +272,7 @@ describe("getWorkspaceScriptMetadata (integration)", () => {
     expect(result.workspacePath).toBe(
       withWindowsPath(path.join(projectRoot, "packages/workspace-a")),
     );
-    expect(result.workspaceRelativePath).toBe(
-      withWindowsPath("packages/workspace-a"),
-    );
+    expect(result.workspaceRelativePath).toBe("packages/workspace-a");
     expect(result.workspaceName).toBe("workspace-a");
     expect(result.scriptName).toBe("get-metadata");
   });

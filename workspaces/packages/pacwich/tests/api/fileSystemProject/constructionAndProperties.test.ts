@@ -198,7 +198,7 @@ describe("Test FileSystemProject", () => {
 test-root
 application-a
 ${project.rootDirectory}${withWindowsPath("/applications/applicationA")}
-${withWindowsPath("applications/applicationA")}
+applications/applicationA
 test-script-metadata-env
 `);
 
@@ -216,7 +216,7 @@ test-script-metadata-env
 test-root
 application-b
 ${project.rootDirectory}${withWindowsPath("/applications/applicationB")}
-${withWindowsPath("applications/applicationB")}
+applications/applicationB
 test-script-metadata-env-b
 `);
   });

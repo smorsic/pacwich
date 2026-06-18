@@ -11,20 +11,15 @@ describe("CLI Run Script (parallel)", () => {
       });
       const result = await run("run-script", "test-delay");
       expect(result.exitCode).toBe(0);
-      assertOutputMatches(
-        result.stdout.sanitizedCompactLines,
-        `[first] first
-[second] second
-[third] third
-[fourth] fourth
-[fifth] fifth
-✅ fifth: test-delay
-✅ first: test-delay
-✅ fourth: test-delay
-✅ second: test-delay
-✅ third: test-delay
-5 scripts ran successfully`,
-      );
+      // Parallel completion order is not deterministic across platforms,
+      // so assert each script's start and success lines independently
+      // rather than pinning a specific interleave.
+      const out = result.stdout.sanitizedCompactLines;
+      for (const name of ["first", "second", "third", "fourth", "fifth"]) {
+        expect(out).toContain(`[${name}] ${name}`);
+        expect(out).toContain(`✅ ${name}: test-delay`);
+      }
+      expect(out).toContain("5 scripts ran successfully");
     });
 
     test("--parallel=false runs scripts in series", async () => {

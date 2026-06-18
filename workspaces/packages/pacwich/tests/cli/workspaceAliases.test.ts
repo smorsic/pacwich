@@ -1,6 +1,5 @@
 import { setupCliTest, assertOutputMatches } from "../util/cliTestUtils";
 import { test, expect, describe } from "../util/testFramework";
-import { withWindowsPath } from "../util/windows";
 
 describe("CLI Workspace Aliases", () => {
   describe("workspace-info", () => {
@@ -14,7 +13,7 @@ describe("CLI Workspace Aliases", () => {
         result.stdout.raw,
         `Workspace: application-1a
  - Aliases: appA
- - Path: ${withWindowsPath("applications/application-a")}
+ - Path: applications/application-a
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -33,7 +32,7 @@ describe("CLI Workspace Aliases", () => {
         result.stdout.raw,
         `Workspace: application-1b
  - Aliases: appB_file
- - Path: ${withWindowsPath("applications/application-b")}
+ - Path: applications/application-b
  - Glob Match: applications/*
  - Scripts: all-workspaces, application-b, b-workspaces
  - Tags: 
@@ -52,7 +51,7 @@ describe("CLI Workspace Aliases", () => {
         result.stdout.raw,
         `Workspace: application-1a
  - Aliases: appA
- - Path: ${withWindowsPath("applications/application-a")}
+ - Path: applications/application-a
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 

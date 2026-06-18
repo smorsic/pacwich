@@ -20,7 +20,7 @@ describe("FileSystemProject runScriptAcrossWorkspaces - runtime metadata", () =>
     expect(plainChunks.map((c) => c.text)).toEqual(
       ["a", "b"].map(
         (appLetter) =>
-          `${project.rootDirectory} test-root application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} ${withWindowsPath(`applications/application-${appLetter}`)} test-echo`,
+          `${project.rootDirectory} test-root application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} applications/application-${appLetter} test-echo`,
       ),
     );
 
@@ -35,7 +35,7 @@ describe("FileSystemProject runScriptAcrossWorkspaces - runtime metadata", () =>
     expect(argsChunks.map((c) => c.text)).toEqual(
       ["a", "b"].map(
         (appLetter) =>
-          `${project.rootDirectory} test-root application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} ${withWindowsPath(`applications/application-${appLetter}`)} test-echo --arg1=${project.rootDirectory} --arg2=test-root --arg3=application-${appLetter} --arg4=${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} --arg5=${withWindowsPath(`applications/application-${appLetter}`)} --arg6=test-echo`,
+          `${project.rootDirectory} test-root application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} applications/application-${appLetter} test-echo --arg1=${project.rootDirectory} --arg2=test-root --arg3=application-${appLetter} --arg4=${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} --arg5=applications/application-${appLetter} --arg6=test-echo`,
       ),
     );
   });
@@ -57,7 +57,7 @@ describe("FileSystemProject runScriptAcrossWorkspaces - runtime metadata", () =>
     expect(anonymousChunks.map((c) => c.text)).toEqual(
       ["a", "b"].map(
         (appLetter) =>
-          `${project.rootDirectory} application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} ${withWindowsPath(`applications/application-${appLetter}`)}`,
+          `${project.rootDirectory} application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} applications/application-${appLetter}`,
       ),
     );
 
@@ -73,7 +73,7 @@ describe("FileSystemProject runScriptAcrossWorkspaces - runtime metadata", () =>
     expect(namedChunks.map((c) => c.text)).toEqual(
       ["a", "b"].map(
         (appLetter) =>
-          `${project.rootDirectory} application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} ${withWindowsPath(`applications/application-${appLetter}`)} my-named-script`,
+          `${project.rootDirectory} application-${appLetter} ${project.rootDirectory}${withWindowsPath(`/applications/application-${appLetter}`)} applications/application-${appLetter} my-named-script`,
       ),
     );
   });

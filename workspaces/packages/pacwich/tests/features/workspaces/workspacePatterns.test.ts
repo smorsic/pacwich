@@ -209,26 +209,6 @@ describe("matchWorkspacesByPatterns - regex behavior", () => {
     ).toEqual(["application-1b", "library-1b"]);
   });
 
-  test("path:re: normalizes backslashes so forward-slash regex works cross-platform", () => {
-    // Bypass makeTestWorkspace's withWindowsPath helper to assert the
-    // normalization directly, regardless of the host platform.
-    const winLikeWorkspaces: Workspace[] = [
-      {
-        ...workspaces[0]!,
-        path: "applications\\applicationA",
-      },
-      {
-        ...workspaces[2]!,
-        path: "libraries\\libraryA",
-      },
-    ];
-    expect(
-      names(
-        matchWorkspacesByPatterns(["path:re:^libraries/"], winLikeWorkspaces),
-      ),
-    ).toEqual(["library-1a"]);
-  });
-
   test("tag:re: matches against any tag", () => {
     expect(
       names(matchWorkspacesByPatterns(["tag:re:^front"], workspaces)),

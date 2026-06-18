@@ -155,16 +155,8 @@ describe("List Affected", () => {
       expect(out).toContain("Workspace: a");
       expect(out).toContain("Workspace: b");
       // Path line is rendered directly under each workspace header
-      expect(out).toMatch(
-        new RegExp(
-          `Workspace: a\\s*\\nPath: ${withWindowsPath("packages/a").replace(/\\/g, "\\\\")}`,
-        ),
-      );
-      expect(out).toMatch(
-        new RegExp(
-          `Workspace: b\\s*\\nPath: ${withWindowsPath("packages/b").replace(/\\/g, "\\\\")}`,
-        ),
-      );
+      expect(out).toMatch(new RegExp(`Workspace: a\\s*\\nPath: packages/a`));
+      expect(out).toMatch(new RegExp(`Workspace: b\\s*\\nPath: packages/b`));
       // 'a' has its own changed file; 'b' is reached through a dep cascade
       expect(out).toMatch(/Workspace: a[\s\S]*Changed input files: 1/);
       expect(out).toMatch(/Workspace: b[\s\S]*Affected dependencies:.*a/);
@@ -213,11 +205,7 @@ describe("List Affected", () => {
       // The path is rendered with the OS-native separator, like
       // list-workspaces output, so wrap with `withWindowsPath`.
       expect(out).toContain("Workspace: a");
-      expect(out).toMatch(
-        new RegExp(
-          `Workspace: a\\s*\\nPath: ${withWindowsPath("packages/a").replace(/\\/g, "\\\\")}`,
-        ),
-      );
+      expect(out).toMatch(new RegExp(`Workspace: a\\s*\\nPath: packages/a`));
       expect(out).toContain(withWindowsPath("src/index.ts"));
       expect(out).toContain('(input: "src/**/*")');
       // 'b' has chain that traces back to 'a' via the package edge

@@ -1,7 +1,6 @@
 import { setupCliTest, assertOutputMatches } from "../util/cliTestUtils";
 import { makeTestWorkspace } from "../util/testData";
 import { test, describe, expect } from "../util/testFramework";
-import { withWindowsPath } from "../util/windows";
 
 const expectedOneWorkspace = makeTestWorkspace({
   name: "application-a",
@@ -32,7 +31,7 @@ describe("CLI Log Level", () => {
         (await run("--log-level=silent", "ls")).stdoutAndErr.raw,
         `Workspace: application-a
  - Aliases: 
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -64,7 +63,7 @@ describe("CLI Log Level", () => {
           .raw,
         `Workspace: application-a
  - Aliases: 
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -209,7 +208,7 @@ application-a`,
         (await run("--log-level=error", "ls")).stdoutAndErr.raw,
         `Workspace: application-a
  - Aliases: 
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 
@@ -241,7 +240,7 @@ application-a`,
           .raw,
         `Workspace: application-a
  - Aliases: 
- - Path: ${withWindowsPath("applications/applicationA")}
+ - Path: applications/applicationA
  - Glob Match: applications/*
  - Scripts: a-workspaces, all-workspaces, application-a
  - Tags: 

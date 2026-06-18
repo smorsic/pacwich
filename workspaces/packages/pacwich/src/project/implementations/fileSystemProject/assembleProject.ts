@@ -6,6 +6,7 @@ import {
   loadWorkspaceConfig,
 } from "../../../config";
 import type { LoadConfigOptions } from "../../../config/util/loadConfig";
+import { toPosixPath } from "../../../internal/core";
 import { logger } from "../../../internal/logger/logger";
 import type { PackageManagerAdapter } from "../../../packageManager/adapter";
 import { applyWorkspacePatternConfigs } from "../../../workspaces/applyWorkspacePatternConfigs";
@@ -135,9 +136,8 @@ export const assembleProject = ({
         }
       }
 
-      const relativePath = path.relative(
-        rootDirectory,
-        path.dirname(packageJsonPath),
+      const relativePath = toPosixPath(
+        path.relative(rootDirectory, path.dirname(packageJsonPath)),
       );
 
       const matchPattern =
@@ -155,7 +155,7 @@ export const assembleProject = ({
         name: packageJsonContent.name ?? "",
         isRoot: isRootWorkspace,
         matchPattern: workspacePath === rootDirectory ? "" : matchPattern,
-        path: path.relative(rootDirectory, path.dirname(packageJsonPath)),
+        path: relativePath,
         scripts: Object.keys(packageJsonContent.scripts ?? {}).sort(),
         aliases: [
           ...new Set(

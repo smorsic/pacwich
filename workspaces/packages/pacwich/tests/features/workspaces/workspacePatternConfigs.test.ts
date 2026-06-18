@@ -8,7 +8,6 @@ import { assembleProject } from "../../../src/project/implementations/fileSystem
 import { WORKSPACE_ERRORS } from "../../../src/workspaces/errors";
 import { getProjectRoot } from "../../fixtures/testProjects";
 import { describe, expect, test } from "../../util/testFramework";
-import { withWindowsPath } from "../../util/windows";
 
 const adapter = resolvePackageManagerAdapter("bun");
 
@@ -297,7 +296,7 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
       expect(contexts[0]).toEqual({
         name: "application-1a",
         isRoot: false,
-        path: withWindowsPath("applications/applicationA"),
+        path: "applications/applicationA",
         matchPattern: "applications/*",
         scripts: expect.arrayContaining(["application-a", "all-workspaces"]),
         dependencies: [],

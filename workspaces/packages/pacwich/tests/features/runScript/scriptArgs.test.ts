@@ -4,7 +4,6 @@ import { getProjectRoot } from "../../fixtures/testProjects";
 import { setupCliTest } from "../../util/cliTestUtils";
 import { collectStdout } from "../../util/collectOutput";
 import { describe, expect, test } from "../../util/testFramework";
-import { withWindowsPath } from "../../util/windows";
 
 const TEST_PROJECT = "runScriptWithDebugArgv" as const;
 
@@ -109,7 +108,7 @@ describe("Script args", () => {
       const text = await collectOutputText(output);
       expect(parseArgvLines(text)).toContainEqual([
         "--name=workspace-a",
-        `--rel=${withWindowsPath("packages/workspace-a")}`,
+        `--rel=packages/workspace-a`,
       ]);
     });
 
@@ -122,7 +121,7 @@ describe("Script args", () => {
       const text = await collectOutputText(output);
       expect(parseArgvLines(text)).toContainEqual([
         "--name=workspace-a",
-        `--rel=${withWindowsPath("packages/workspace-a")}`,
+        `--rel=packages/workspace-a`,
       ]);
     });
 
@@ -295,7 +294,7 @@ describe("Script args", () => {
       for (const { text, metadata } of chunks) {
         expect(JSON.parse(text)).toEqual([
           `--name=${metadata.workspace.name}`,
-          `--rel=${withWindowsPath(metadata.workspace.path)}`,
+          `--rel=${metadata.workspace.path}`,
         ]);
       }
     });
@@ -436,10 +435,7 @@ describe("Script args", () => {
       expect(result.exitCode).toBe(0);
       expect(
         parseArgvLines(result.stdout.sanitizedCompactLines),
-      ).toContainEqual([
-        "--name=workspace-a",
-        `--rel=${withWindowsPath("packages/workspace-a")}`,
-      ]);
+      ).toContainEqual(["--name=workspace-a", `--rel=packages/workspace-a`]);
     });
 
     testNonWindows("mix: quoted string and metadata", async () => {
@@ -584,10 +580,7 @@ describe("Script args", () => {
       expect(result.exitCode).toBe(0);
       expect(
         parseArgvLines(result.stdout.sanitizedCompactLines),
-      ).toContainEqual([
-        "--name=workspace-a",
-        `--rel=${withWindowsPath("packages/workspace-a")}`,
-      ]);
+      ).toContainEqual(["--name=workspace-a", `--rel=packages/workspace-a`]);
     });
 
     testNonWindows("mix: arg with space and metadata", async () => {

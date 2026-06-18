@@ -4,6 +4,11 @@ import {
   listProjectTrackableFiles,
   matchWorkspaceInputFiles,
 } from "../../../inputs";
+import {
+  stripLeadingSlashes,
+  stripTrailingSlashes,
+  toPosixPath,
+} from "../../../internal/core";
 import { logger } from "../../../internal/logger";
 import type { PackageManagerAdapter } from "../../../packageManager/adapter";
 import {
@@ -29,15 +34,6 @@ const SCANNABLE_EXTENSIONS = new Set([
 const FILE_PATTERN_NEGATION_PREFIX = "!";
 
 const GLOB_CHARACTER_REGEX = /[*?[{]/;
-
-const toPosixPath = (filePath: string): string =>
-  filePath.replaceAll("\\", "/");
-
-const stripLeadingSlashes = (filePath: string): string =>
-  filePath.replace(/^\/+/, "");
-
-const stripTrailingSlashes = (filePath: string): string =>
-  filePath.replace(/\/+$/, "");
 
 /**
  * Normalize a project-relative ignore glob to match the same path shape

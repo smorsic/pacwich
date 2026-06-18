@@ -325,65 +325,84 @@ describe("Run Scripts", () => {
       }
       fs.mkdirSync(outputDir, { recursive: true });
 
-      const getRunningFile = (scriptName: string) =>
-        path.join(outputDir, `${scriptName}.txt`);
+      // Floor at 300 ms so the script body outlasts Bun's startup cost on
+      // Windows. Without that floor a script can finish before later peers
+      // even begin, hiding peak overlap from the post-hoc interval math.
+      const getRandomSleepMs = () =>
+        Math.floor(Math.max(0.3, Math.random() * 0.4 + 0.3) * 1000);
 
-      const getRandomSleepTime = () => Math.max(0.075, Math.random() + 0.025);
+      const helperPath = path.join(__dirname, "parallelMaxHelper.ts");
+      const getOutputPath = (scriptName: string) =>
+        path.join(outputDir, `${scriptName}.json`);
 
       const createScript = (scriptName: string) => ({
         metadata: { name: scriptName },
         scriptCommand: {
-          command: IS_WINDOWS
-            ? `echo test-script ${scriptName} > ${getRunningFile(scriptName)}  && ` +
-              `dir /b ${outputDir} | find /c /v "" && ` +
-              `ping 127.0.0.1 -n 2 -w ${Math.floor(getRandomSleepTime() * 1000)} >nul && ` +
-              `del ${getRunningFile(scriptName)}`
-            : `echo 'test-script ${scriptName}' > ${getRunningFile(
-                scriptName,
-              )} && ls ${outputDir} | wc -l && sleep ${getRandomSleepTime()} && rm ${getRunningFile(
-                scriptName,
-              )}`,
+          // Bun's argv parsing is cross-platform; quoting handles spaces
+          // on both cmd.exe and POSIX shells the same way. No `IS_WINDOWS`
+          // branch needed — that branch is what kept tripping the test.
+          command: `bun "${helperPath}" "${getOutputPath(scriptName)}" ${getRandomSleepMs()}`,
           workingDirectory: "",
         },
         env: {},
       });
 
+      const scriptNames = [
+        "test-script-1",
+        "test-script-2",
+        "test-script-3",
+        "test-script-4",
+      ];
+
       const result = await runScripts({
-        parallel: {
-          max,
-        },
-        scripts: [
-          createScript("test-script-1"),
-          createScript("test-script-2"),
-          createScript("test-script-3"),
-          createScript("test-script-4"),
-        ],
+        parallel: { max },
+        scripts: scriptNames.map(createScript),
       });
 
-      let didMaxRun = false;
-      for await (const { chunk } of result.output.text()) {
-        const count = parseInt(chunk.trim());
-        if (count === max) {
-          didMaxRun = true;
-        }
-        expect(count).toBeLessThanOrEqual(max);
+      // Drain output so summary resolves. We do not parse the chunks —
+      // peak concurrency comes from the timestamps the helper wrote.
+      for await (const _ of result.output.text()) {
+        /* drain */
       }
-
-      expect(didMaxRun).toBe(true);
 
       const summary = await result.summary;
       expect(summary).toEqual(
         makeExitSummary({
           totalCount: 4,
           successCount: 4,
-          scriptResults: [
-            makeScriptExit({ metadata: { name: "test-script-1" } }),
-            makeScriptExit({ metadata: { name: "test-script-2" } }),
-            makeScriptExit({ metadata: { name: "test-script-3" } }),
-            makeScriptExit({ metadata: { name: "test-script-4" } }),
-          ],
+          scriptResults: scriptNames.map((name) =>
+            makeScriptExit({ metadata: { name } }),
+          ),
         }),
       );
+
+      // Sweep-line over [start, end) intervals to find the maximum
+      // number of scripts whose run windows overlapped at any instant.
+      // Ties at the same timestamp resolve "end before start" so
+      // back-to-back intervals don't artificially inflate the count.
+      const intervals = scriptNames.map((name) => {
+        const data = JSON.parse(
+          fs.readFileSync(getOutputPath(name), "utf8"),
+        ) as { start: number; end: number };
+        return data;
+      });
+      const events = intervals.flatMap(({ start, end }) => [
+        { time: start, delta: 1 },
+        { time: end, delta: -1 },
+      ]);
+      events.sort((a, b) => a.time - b.time || a.delta - b.delta);
+
+      let maxOverlap = 0;
+      let current = 0;
+      for (const event of events) {
+        current += event.delta;
+        if (current > maxOverlap) maxOverlap = current;
+      }
+
+      expect(maxOverlap).toBeLessThanOrEqual(max);
+      // 4 scripts, max ∈ [1..4] — scheduler should saturate to `max`
+      // at some point during the run.
+      expect(maxOverlap).toBe(max);
     },
   );
 

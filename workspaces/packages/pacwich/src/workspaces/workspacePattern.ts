@@ -181,11 +181,7 @@ const PATTERN_TARGET_HANDLERS: Record<
   path: (pattern, workspaces) => {
     if (pattern.isRegex) {
       const regex = new RegExp(pattern.value);
-      // Normalize backslashes so regex sources stay portable: a single
-      // forward-slash-based regex works on both Windows and POSIX paths.
-      return workspaces.filter((workspace) =>
-        regex.test(workspace.path.replaceAll("\\", "/")),
-      );
+      return workspaces.filter((workspace) => regex.test(workspace.path));
     }
     return workspaces.filter((workspace) =>
       path.matchesGlob(workspace.path, pattern.value.replace(/\/+$/, "")),
