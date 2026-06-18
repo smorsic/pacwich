@@ -84,7 +84,7 @@ jobs:
             echo "- Commit: \`${GITHUB_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-          RELEASE_URL=$(bun run workspaces/packages/meta/ci/createReleaseUrl.ts)
+          RELEASE_URL=$(bun run workspaces/meta/ci/createReleaseUrl.ts)
 
           {
             echo ""
