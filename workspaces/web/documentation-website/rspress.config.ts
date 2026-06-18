@@ -17,7 +17,7 @@ import {
 } from "./rspressLinks";
 
 const TITLE =
-  "pacwich — Monorepo tooling for Bun, npm, and pnpm workspaces | Documentation";
+  "pacwich: Monorepo tooling for Bun, npm, and pnpm workspaces | Documentation";
 const DESCRIPTION =
   "Monorepo tooling that works on top of Bun, npm, and pnpm workspaces, with a CLI and TypeScript API.";
 
