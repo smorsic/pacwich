@@ -214,7 +214,7 @@ export default defineConfig({
           tag: "script",
           children: `
           if(!localStorage.getItem('pacwich-doc-theme-initialized')) {
-            window.RSPRESS_THEME = 'dark';
+            localStorage.setItem('rspress-theme-appearance', 'dark');
             localStorage.setItem('pacwich-doc-theme-initialized', 'true');
           }
           `.replace(/\s+/g, ""),
