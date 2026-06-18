@@ -60,29 +60,6 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-      # Windows-only: Defender real-time scanning of every spawned
-      # bun/node/pnpm/npm subprocess and every fixture write dominates
-      # CI wall time. Exclude the workspace, temp dirs, and the runtime
-      # binaries before any installs so the savings also cover bootstrap.
-      # - name: Disable Defender for CI paths
-      #   if: runner.os == 'Windows'
-      #   shell: pwsh
-      #   run: |
-      #     $paths = @(
-      #       $env:GITHUB_WORKSPACE,
-      #       $env:RUNNER_TEMP,
-      #       $env:TEMP,
-      #       $env:TMP,
-      #       "$env:USERPROFILE\.bun"
-      #     ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
-      #     $processes = @('bun.exe', 'node.exe', 'npm.cmd', 'pnpm.cmd', 'git.exe')
-      #     foreach ($p in $paths)     { Add-MpPreference -ExclusionPath    $p -ErrorAction SilentlyContinue }
-      #     foreach ($p in $processes) { Add-MpPreference -ExclusionProcess $p -ErrorAction SilentlyContinue }
-      #     Write-Host "Defender exclusion paths:"
-      #     (Get-MpPreference).ExclusionPath
-      #     Write-Host "Defender exclusion processes:"
-      #     (Get-MpPreference).ExclusionProcess
-
       - uses: ./.github/actions/bootstrap
         with:
           bun-version: ${{ inputs.bun-version }}
