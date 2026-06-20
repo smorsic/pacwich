@@ -11,35 +11,38 @@ footer: false
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { INPUTS_FILES_EXAMPLE, INPUTS_WORKSPACE_PATTERNS_EXAMPLE, INPUTS_EXTERNAL_DEPENDENCIES_EXAMPLE } from "../../../lib/config/exampleConfig";
 
-# Workspace Configuration: Inputs
+# Inputs
 
-## Overview
+## What is an Input? 
 
-See the glossary for the brief [definition of inputs](/concepts/glossary#inputs),
-which are the files and dependencies considered relevant to the result of a script or state of a workspace.
+**Inputs** are values considered to affect the state of a [workspace](/concepts/glossary#workspace) or the result of a [script](/concepts/glossary#script).
+
+A workspace's input can be one of the following:
+ * A **file**, which must be git-trackable (not ignored and within your repo)
+ * Another **workspace** (a dependency or may be explicitly configured as an input)
+   * Note: When a workspace is an input, what determines if it affects the current workspace is whether it is affected itself
+ * The **version** of an external **dependency** (e.g. an npm package)
+
 
 These are set by [workspace config](/config/workspace) options, which can be set at
 the workspace level (`defaultInputs`) or at the script level (`scripts[name].inputs`).
 
 ### Defaults
 
-The default inputs when not provided are all git-trackable files in a workspace's directory,
-effectively making `"."` the default input pattern for a workspace's files.
+The default inputs for a workspace are:
+* **Files**: all git-trackable files in a workspace's directory
+* **Workspace dependencies**: all explicit dependencies that are a workspace (via its `package.json`)
+* **External dependencies**: all dependencies in a workspace's `package.json`
 
-Other implicit inputs are all [workspace dependencies](/concepts/workspace-dependencies), 
-and all other dependencies in the workspace's `package.json`. There is additional
-configuration described below around dependencies.
+## Configuration
 
-Features such as those for [affected workspaces](/concepts/affected) may
-offer options to ignore certain inputs.
+A workspace's inputs are can be set via [workspace config](/config/workspace).
 
-## Files
+### Files
 
 Files are specified as paths relative to the workspace's directory.
 
-Paths with a leading `/` are relative to the project root.
-
-Prefix with `!` to exclude.
+Paths with a leading `/` are relative to the project root. Prefix with `!` to exclude.
 
 **Only git-trackable files can be considered inputs.**
 
@@ -50,16 +53,11 @@ Prefix with `!` to exclude.
   }
 </SyntaxHighlighter>
 
-## Workspace Patterns
+### Workspace Patterns
 
 In cases such as determining [affected workspaces](/concepts/affected),
-[workspace dependencies](/concepts/workspace-dependencies) (dependencies
-using `"workspace:*"` in a workspace's `package.json`) are considered
+any explicit [workspace dependencies](/concepts/workspace-dependencies) are considered
 inputs to a workspace by default.
-
-**`pacwich` does not perform source code analysis.** This keeps determining
-the graph of workspaces computationally fast and cheap, relying instead on explicit
-`package.json` dependencies.
 
 When you need to treat other workspaces like dependencies, 
 you can also specify [workspace patterns](/concepts/workspace-patterns) to be considered inputs to a workspace via the inputs.
@@ -71,7 +69,7 @@ you can also specify [workspace patterns](/concepts/workspace-patterns) to be co
   }
 </SyntaxHighlighter>
 
-## External Dependencies
+### External Dependencies
 
 By default, all other dependencies in a workspace's `package.json` are considered
 inputs to a workspace. The resolved version in `bun.lock` is used to determine if

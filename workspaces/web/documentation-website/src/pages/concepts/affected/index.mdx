@@ -23,12 +23,12 @@ DevOps tasks, such as running builds for only those changed workspaces.
 
 By default, a workspace is considered to have a set of **inputs**, the sources of potential chang to a workspace.
 
-When not [configured](/config/workspace-inputs), the default inputs are:
+When not [configured](/concepts/inputs), the default inputs are:
 * All git-trackable files in the workspace's directory
 * All [workspace dependencies](/concepts/workspace-dependencies). If a workspace dependency is affected for any reason, its dependents are also considered affected.
 * The version resolved in your package manager's lockfile for all other dependencies in a workspace's `package.json`.
 
-Inputs can be configured per script as well. See the [inputs](/config/workspace-inputs) page for more information.
+Inputs can be configured per script as well. See the [inputs](/concepts/inputs) page for more information.
 
 ### How is an affected workspace determined?
 

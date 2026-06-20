@@ -172,6 +172,10 @@ h6 {
   font-weight: 600;
 }
 
+ul {
+  line-height: 1.5 !important;
+}
+
 a {
   font-weight: 400 !important;
 }
@@ -459,12 +463,6 @@ hr {
 
 .config-path {
   margin-top: 0.5rem;
-}
-
-.whats-new-list ul {
-  line-height: 1.4;
-  margin-bottom: 0;
-  margin-top: 0.5rem !important;
 }
 
 .deprecated {

@@ -116,10 +116,6 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         link: "/config/workspace-pattern-configs",
       },
       {
-        text: "Inputs",
-        link: "/config/workspace-inputs",
-      },
-      {
         text: "Environment Variables",
         link: "/config/env-vars",
       },
@@ -135,6 +131,10 @@ export const HEADER_NAV_LINKS: NavItem[] = [
       {
         text: "Glossary",
         link: "/concepts/glossary",
+      },
+      {
+        text: "Inputs",
+        link: "/concepts/inputs",
       },
       {
         text: "Workspace Aliases",
@@ -321,10 +321,6 @@ const SIDEBAR_GROUPS = {
               text: "Workspace Config File",
               link: "/config/workspace",
             },
-            {
-              text: "More: Inputs",
-              link: "/config/workspace-inputs",
-            },
           ],
         },
         {
@@ -360,6 +356,10 @@ const SIDEBAR_GROUPS = {
         {
           text: "Workspaces",
           items: [
+            {
+              text: "Inputs",
+              link: "/concepts/inputs",
+            },
             {
               text: "Workspace Aliases",
               link: "/concepts/workspace-aliases",

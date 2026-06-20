@@ -15,7 +15,9 @@ export const runBuild = async () => {
 
   const outputPath = path.resolve("__dirname", "..", "doc_build");
 
-  await $`bunx pacwich run build:no-dts pacwich`;
+  if (process.env.SKIP_PACWICH_BUILD !== "true") {
+    await $`bunx pacwich run build:no-dts pacwich`;
+  }
 
   await $`bunx rspress build`;
 

@@ -41,21 +41,10 @@ However, pacwich also supports running ["inline scripts"](/concepts/inline-scrip
 
 #### Inputs
 
-**Inputs** are values considered to affect the result of a script or state of a workspace.
+Inputs define what items are considered to affect the state of a workspace or the result of a script
+and are used in [determining affected workspaces](/concepts/affected) and the [`verify` feature](/cli/commands#verify).
 
-These include git-trackable files, other workspaces, and external dependencies (npm packages).
-
-By default, all input files are simply the git-trackable files found in a workspace's directory,
-workspace inputs are explicit [workspace dependencies](/concepts/workspace-dependencies),
-and external dependencies are tracked via lockfiles.
-
-These are currently used to determine [affected workspaces](/concepts/affected) (where features
-generally accept options for ignoring some inputs), and input files specifically are used by the 
-[`verify` feature](/cli/commands#verify) to check for missing workspace dependencies by analyzing imports/exports
-in JS/TS input files.
-
-These are configurable in the optional workspace config. See the general [workspace config page](/config/workspace)
-or the 
+Read more on the [Inputs](/concepts/inputs) page.
 
 ## Terms in Action
 

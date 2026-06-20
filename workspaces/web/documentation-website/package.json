@@ -7,6 +7,7 @@
     "lint": "eslint src/",
     "build": "PACWICH_DOCS_ENV=production bun run scripts/build.ts",
     "build:dev": "PACWICH_DOCS_ENV=development bun run scripts/build.ts",
+    "build:rspress-only": "SKIP_PACWICH_BUILD=true bunx rspress build",
     "preview": "portless pacwich-docs-preview rspress preview",
     "type-check": "tsc --noEmit"
   },
