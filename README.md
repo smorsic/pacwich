@@ -6,7 +6,7 @@
 
 # pacwich
 
-<sub>Latest: 0.1.1</sub>
+<sub>Latest: 0.1.2</sub>
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
