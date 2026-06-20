@@ -225,6 +225,10 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         link: "/lore",
       },
       {
+        text: "How Are These Docs Maintained?",
+        link: "/how",
+      },
+      {
         text: "Blog",
         link: BLOG_URL,
       },
@@ -455,6 +459,10 @@ const SIDEBAR_GROUPS = {
         {
           text: "Lore",
           link: "/lore",
+        },
+        {
+          text: "How Are These Docs Maintained?",
+          link: "/how",
         },
         {
           text: "Blog",

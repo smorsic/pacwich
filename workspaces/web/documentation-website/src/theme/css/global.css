@@ -176,6 +176,12 @@ ul {
   line-height: 1.5 !important;
 }
 
+.rp-nav-screen-menu-item__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 a {
   font-weight: 400 !important;
 }
