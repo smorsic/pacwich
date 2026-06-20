@@ -27,6 +27,18 @@ e.g. via `bun install`, `pnpm install`, or `npm install`. If you've
 added/removed/updated any workspace `package.json`, you'll likely need to
 run this again.
 
+### Terminology
+
+The definition of **workspace** and **project** differs between package managers and monorepo tooling.
+
+In `pacwich`, the word **workspace** is closer to how it's used in **npm** and **Bun**, a **workspace** being a **nested package** in a monorepo. Not necessarily all packages are workspaces, but all workspaces are packages.
+
+The **project** is synonymous with your root where workspaces are defined, often the root of your git repository as well.
+
+This means you have a root **project** that has some number of **workspaces**. The root package is not considered a workspace by default, but [it optionally can be](/concepts/root-workspace).
+
+See: [Glossary page](/concepts/glossary)
+
 ## First commands
 
 If you have a project with workspaces set up and dependencies installed, `pacwich` works right away.

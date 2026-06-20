@@ -10,7 +10,7 @@
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
-To get started, all you need is a repo using workspaces for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces.
+To get started, all you need is a repo using workspaces for nested JavaScript/TypeScript packages. This adds enhanced features on top of plain workspaces, like getting metadata about the monorepo and running scripts across workspaces.
 
 Start running some [CLI commands](https://pacwich.dev/cli) right away in your repo, or take full advantage of the [TypeScript API](https://pacwich.dev/api) and its features.
 
@@ -30,13 +30,24 @@ to assist with migration.
 
 Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
 
+### Terminology
+
+The definition of **workspace** and **project** differs between package managers and monorepo tooling.
+
+In `pacwich`, the word **workspace** is closer to how it's used in **npm** and **Bun**, a **workspace** being a **nested package** in a monorepo. Not necessarily all packages are workspaces, but all workspaces are packages.
+
+The **project** is synonymous with your root where workspaces are defined, often the root of your git repository as well.
+
+This means you have a root **project** that has some number of **workspaces**. The root package is not considered a workspace by default, but [it optionally can be](https://pacwich.dev/concepts/root-workspace).
+
+[Docs: Glossary page](https://pacwich.dev/concepts/glossary)
+
 ## Quick Start
 
 ### Installation
 
 Use the global install and/or local install. The global install gives you a convenient
-`pacwich` binary, which will still delegate to a local install's CLI, if available,
-while the local install locks the version for your project.
+`pacwich` binary, which will still delegate to a local install's CLI, if available.
 
 If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
 you need in your project.
@@ -77,7 +88,7 @@ bunx pacwich --help
 pnpm exec pacwich --help
 ```
 
-### CLI
+### CLI Quickstart
 
 [Full CLI documentation here](https://pacwich.dev/cli)
 
@@ -85,7 +96,7 @@ pnpm exec pacwich --help
 <<CLI_QUICKSTART>>
 ```
 
-### API
+### API Quickstart
 
 [Full API documentation here](https://pacwich.dev/api)
 
@@ -93,7 +104,7 @@ pnpm exec pacwich --help
 <<API_QUICKSTART>>
 ```
 
-### Configuration
+### Configuration Overview
 
 `pacwich` has no required configuration, but there are optional config files.
 

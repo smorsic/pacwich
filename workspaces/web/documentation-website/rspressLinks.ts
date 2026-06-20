@@ -213,29 +213,28 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     tag: navIconSvg("more-nav-icon.svg"),
     items: [
       {
-        text: "Blog",
-        link: BLOG_URL,
-      },
-      {
         text: "Security",
         link: "/security",
       },
-      // ! TODO: Re-enable when we have example projects
-      // {
-      //   text: "Example Projects",
-      //   link: "https://github.com/smorsic/pacwich-examples",
-      // },
       {
         text: "Roadmap",
         link: "/roadmap",
+      },
+      {
+        text: "Lore",
+        link: "/lore",
+      },
+      {
+        text: "Blog",
+        link: BLOG_URL,
       },
       {
         text: "Changelog",
         link: CHANGELOG_URL,
       },
       {
-        text: "Lore",
-        link: "/lore",
+        text: "License",
+        link: LICENSE_URL,
       },
     ],
   },
@@ -436,6 +435,38 @@ const SIDEBAR_GROUPS = {
               link: "/ai/mcp",
             },
           ],
+        },
+      ],
+    },
+  },
+  more: {
+    path: "/",
+    group: {
+      text: "More",
+      items: [
+        {
+          text: "Security",
+          link: "/security",
+        },
+        {
+          text: "Roadmap",
+          link: "/roadmap",
+        },
+        {
+          text: "Lore",
+          link: "/lore",
+        },
+        {
+          text: "Blog",
+          link: BLOG_URL,
+        },
+        {
+          text: "Changelog",
+          link: CHANGELOG_URL,
+        },
+        {
+          text: "License",
+          link: LICENSE_URL,
         },
       ],
     },

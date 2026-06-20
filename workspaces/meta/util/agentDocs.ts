@@ -1,4 +1,5 @@
 import path from "path";
+import { TOOL_VERSIONS } from "@pacwich/common/toolVersions";
 import { createScriptLogger } from ".";
 
 const PACWICH_PROJECT_PATH = process.env.PACWICH_PROJECT_PATH as string;
@@ -19,6 +20,27 @@ export type AgentDocFileName =
   | "apiExamples"
   | "config"
   | "development";
+
+const OVERVIEW_END_MARKER = "<!--End pacwich overview-->";
+
+const renderRequiredVersions = (): string => {
+  const lines = Object.entries(TOOL_VERSIONS).map(
+    ([toolName, { endUserRequirement }]) =>
+      `- **${toolName}:** ${endUserRequirement}`,
+  );
+  return ["## Version requirements", "", ...lines].join("\n");
+};
+
+const injectOverviewExtras = (overviewText: string): string => {
+  const versionsBlock = renderRequiredVersions();
+  if (overviewText.includes(OVERVIEW_END_MARKER)) {
+    return overviewText.replace(
+      OVERVIEW_END_MARKER,
+      `${versionsBlock}\n\n${OVERVIEW_END_MARKER}`,
+    );
+  }
+  return `${overviewText.replace(/\s+$/, "")}\n\n${versionsBlock}\n`;
+};
 
 export const createAgentDocs = async (options: CreateAgentDocsOptions) => {
   const logger = createScriptLogger({
@@ -54,9 +76,12 @@ export const createAgentDocs = async (options: CreateAgentDocsOptions) => {
       contextFile.path,
     );
     logger.info(`Reading ${contextFile.path}`);
-    combinedContent +=
-      (combinedContent ? "\n" : "") + (await Bun.file(contextFilePath).text());
-    contents[contextFile.name] = await Bun.file(contextFilePath).text();
+    let text = await Bun.file(contextFilePath).text();
+    if (contextFile.name === "overview") {
+      text = injectOverviewExtras(text);
+    }
+    combinedContent += (combinedContent ? "\n" : "") + text;
+    contents[contextFile.name] = text;
   }
 
   logger.info("All files read");
