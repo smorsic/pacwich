@@ -32,7 +32,7 @@ Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich
 
 ### Terminology
 
-The definition of **workspace** and **project** differs between package managers and monorepo tooling.
+The definitions of **workspace** and **project** differ between package managers and monorepo tooling.
 
 In `pacwich`, the word **workspace** is closer to how it's used in **npm** and **Bun**, a **workspace** being a **nested package** in a monorepo. Not necessarily all packages are workspaces, but all workspaces are packages.
 
