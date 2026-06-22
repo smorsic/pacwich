@@ -1,6 +1,10 @@
 {
-  "include": ["**/*"],
+  "include": [
+    "workspaces/packages/pacwich/src/**/*.ts",
+    "workspaces/libraries/pacwich-common/**/*.ts"
+  ],
   "exclude": [
+    "**/*/index.ts",
     ".git/**",
     "**/*.{md,txt,log,csv,tsv,pdf,docx,xlsx,pptx,sqlite,db,snap,wasm,pyc,pyo,class,jar,war,exe,dll,so,dylib,o,a,zip,tar,gz,bz2,xz,rar,7z,tgz,zst,lz4,png,jpg,jpeg,gif,svg,ico,webp,avif,bmp,tiff,tif,heic,heif,mp4,webm,mov,mkv,m4v,ogg,mp3,wav,flac,m4a,opus,aac,woff,woff2,ttf,otf,eot,map}",
     "**/*.min.{js,css}",
