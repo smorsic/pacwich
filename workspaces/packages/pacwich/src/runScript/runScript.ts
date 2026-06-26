@@ -7,6 +7,7 @@ import {
   type OutputStreamName,
 } from "./output";
 import { createScriptExecutor } from "./scriptExecution";
+import { resolveRunScriptExit } from "./scriptExit";
 import { createSubprocess } from "./subprocesses";
 
 /** The exit outcome of a single script run: status, signal, timing, and the run's metadata. */
@@ -38,15 +39,6 @@ export type RunScriptOptions<ScriptMetadata extends object = object> = {
   /** Set to `true` to ignore all output from the script. This saves memory when you don't need script output. */
   ignoreOutput?: boolean;
 };
-
-const SIGNAL_MAP = {
-  130: "SIGINT",
-  143: "SIGTERM",
-  129: "SIGHUP",
-  131: "SIGQUIT",
-  138: "SIGUSR1",
-  140: "SIGUSR2",
-} as const;
 
 /**
  * Run some script and get an async output stream of
@@ -100,21 +92,7 @@ export const runScript = <ScriptMetadata extends object = object>({
     ),
   ]);
 
-  const exit = proc.exited.then<RunScriptExit<ScriptMetadata>>((exitCode) => {
-    const endTime = new Date();
-    return {
-      exitCode,
-      signal:
-        proc.signalCode ??
-        SIGNAL_MAP[exitCode as keyof typeof SIGNAL_MAP] ??
-        null,
-      success: exitCode === 0,
-      startTimeISO: startTime.toISOString(),
-      endTimeISO: endTime.toISOString(),
-      durationMs: endTime.getTime() - startTime.getTime(),
-      metadata,
-    };
-  });
+  const exit = resolveRunScriptExit({ proc, startTime, metadata });
 
   return {
     output: processOutput,
