@@ -14,7 +14,7 @@ import {
 } from "./handleSimpleCommands";
 import { listAffected } from "./listAffected";
 import { mcpServer } from "./mcp";
-import { runAffected, runScript } from "./runScript";
+import { runAffected, runInteractive, runScript } from "./runScript";
 import { verify } from "./verify";
 
 export const defineGlobalCommands = (context: GlobalCommandContext) => {
@@ -33,5 +33,6 @@ export const defineProjectCommands = (context: ProjectCommandContext) => {
   runScript(context);
   listAffected(context);
   runAffected(context);
+  runInteractive(context);
   verify(context);
 };

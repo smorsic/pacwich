@@ -340,7 +340,7 @@ export const CLI_COMMANDS_CONFIG = {
   runAffected: {
     command: "run-affected [script]",
     isGlobal: false,
-    aliases: [],
+    aliases: ["ra"],
     description:
       "Run a script across the workspaces affected by a set of changed files (git or file list)",
     options: {
@@ -440,6 +440,42 @@ export const CLI_COMMANDS_CONFIG = {
       jsonOutfile: {
         flags: ["-j", "--json-outfile <file>"],
         description: "Output results in a JSON file",
+      },
+    },
+  },
+  runInteractive: {
+    command: "run-interactive [script]",
+    isGlobal: false,
+    aliases: ["ri"],
+    description:
+      "Run a single script in a single workspace with stdio inherited, so the script can read user input. Acts as a passthrough: no extra output besides pacwich warnings and errors",
+    options: {
+      workspace: {
+        flags: ["-W", "--workspace <workspace>"],
+        description:
+          "The workspace to run the script in, resolved by name or alias (required)",
+      },
+      script: {
+        flags: ["-S", "--script <script>"],
+        description: "The script to run. (Alternative to positional argument)",
+      },
+      args: {
+        flags: ["-a", "--args <args>"],
+        description: "Args to append to the script command",
+      },
+      inline: {
+        flags: ["-i", "--inline"],
+        description:
+          "Run the script as an inline command from the workspace directory",
+      },
+      inlineName: {
+        flags: ["-I", "--inline-name <name>"],
+        description: "An optional name for the script when --inline is passed",
+      },
+      shell: {
+        flags: ["-s", "--shell <shell>"],
+        values: [...SCRIPT_SHELL_OPTIONS, "default"],
+        description: `When using --inline, the shell to use to run the script`,
       },
     },
   },
