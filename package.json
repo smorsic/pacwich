@@ -51,8 +51,8 @@
     }
   },
   "scripts": {
-    "cli:bun": "pacwich -l silent run -o plain -W pw --script=cli:bun -- --cwd=$PWD",
-    "cli:node": "pacwich -l silent run -o plain -W pw --script=cli:node -- --cwd=$PWD",
+    "cli:bun": "bun workspaces/packages/pacwich/dist/bin/cli.js",
+    "cli:node": "node workspaces/packages/pacwich/dist/bin/cli.js",
     "pw": "pacwich run -o plain -W pw --script=",
     "docs": "pacwich run -o plain -W docs",
     "sandbox": "pacwich run -o plain -W sandbox",
