@@ -12,6 +12,10 @@ export type CreateSubprocessOptions = {
   stdin?: SubprocessStdio;
   stdout?: SubprocessStdio;
   stderr?: SubprocessStdio;
+  /**
+   * Whether to lead a fresh process group for the child (POSIX only).
+   */
+  detached?: boolean;
 };
 
 export type Subprocess = {
@@ -88,6 +92,8 @@ export const createSubprocess = (
 ): Subprocess => {
   const [command, ...args] = argv;
 
+  const detached = !IS_WINDOWS && (options.detached ?? true);
+
   const child = spawn(command, args, {
     cwd: options.cwd,
     env: options.env,
@@ -96,13 +102,7 @@ export const createSubprocess = (
       options.stdout ?? "pipe",
       options.stderr ?? "pipe",
     ],
-    /**
-     * Lead a fresh process group per child so grandchildren (e.g. commands
-     * inside a temp shell script) can be reached via `kill(-pid)` on
-     * shutdown. sh/bash doesn't forward SIGTERM to children, so signaling
-     * the shell alone would orphan whatever it spawned.
-     */
-    detached: !IS_WINDOWS,
+    detached,
   } satisfies SpawnOptions);
 
   if (typeof child.pid !== "number") {
@@ -139,7 +139,10 @@ export const createSubprocess = (
     kill: (signal) => {
       const resolvedSignal: NodeJS.Signals =
         typeof signal === "string" ? signal : "SIGTERM";
-      if (IS_WINDOWS) {
+      // When not detached the child shares our process group and is not a
+      // group leader, so `kill(-pid)` would target the wrong group (or
+      // fail). Signal the child directly instead.
+      if (IS_WINDOWS || !detached) {
         child.kill(signal as NodeJS.Signals | number | undefined);
         return;
       }

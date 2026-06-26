@@ -1,4 +1,5 @@
 export * from "./runScript";
+export * from "./runScriptInteractive";
 export * from "./runScripts";
 export * from "./output";
 export * from "./parallel";
