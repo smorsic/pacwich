@@ -191,6 +191,12 @@ pacwich run my-script --output-style=prefixed
 # Use the plain output style (no workspace prefixes)
 pacwich run my-script --output-style=plain
 
+# Run an interactive script with full stdio, for user input etc.
+# Requires a script and one workspace name or alias
+pacwich run-interactive my-interactive-script my-workspace-name-or-alias
+# ri is an alias for run-interactive
+pacwich ri my-interactive-script my-workspace-name-or-alias
+
 # Silence all output
 pacwich --log-level=silent run my-script --output-style=none
 
@@ -209,6 +215,8 @@ pacwich list-affected --explain --detailed
 
 # Run a script across the workspaces affected by a change
 pacwich run-affected my-script
+# ra is an alias for run-affected
+pacwich ra my-script --base=my-branch-a --head=my-branch-b
 ```
 
 ### API Quickstart
@@ -243,9 +251,14 @@ const runSingleScript = async () => {
     // If string, the argv will be parsed POSIX-style
     args: ["--my", "--appended", "--args"],
 
-    // Optional. Whether to ignore all output from the script.
+    // Optional (default false). Whether to ignore all output from the script.
     // This saves memory when you don't need script output.
     ignoreOutput: false,
+
+    // Optional (default false). Run the script interactively to accept user input.
+    // When true, the script will have access to stdin, stdout, and stderr,
+    // and script output cannot be captured.
+    interactive: false,
   });
 
   // Get a stream of the script subprocess's output
@@ -281,10 +294,10 @@ const runManyScripts = async () => {
     // Optional. Arguments to add to the command (same as for runWorkspaceScript)
     args: ["--my", "--appended", "--args"],
 
-    // Optional. Whether to run the scripts in parallel (default: true)
+    // Optional (default true). Whether to run the scripts in parallel
     parallel: true,
 
-    // Optional. When true, a workspace's script will wait
+    // Optional (default false). When true, a workspace's script will wait
     // until any workspaces it depends on have completed
     dependencyOrder: false,
 
@@ -292,7 +305,7 @@ const runManyScripts = async () => {
     // continue running scripts even if a dependency fails
     ignoreDependencyFailure: false,
 
-    // Optional. Whether to ignore all output from the scripts.
+    // Optional (default false). Whether to ignore all output from the scripts.
     // This saves memory when you don't need script output.
     ignoreOutput: false,
 
