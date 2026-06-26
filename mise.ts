@@ -1,12 +1,10 @@
-import { $ } from "bun";
-
 if (process.env.CI === "true") {
   console.log("CI=true, skipping mise install");
   process.exit(0);
 }
 
 if (Bun.which("mise")) {
-  await $`mise install`;
+  console.log("Run mise install to sync dev tool versions (bun, node, etc.)");
 } else {
   console.log(
     "\n\x1b[0;93mInstall mise (https://mise.jdx.dev/getting-started.html#activate-mise) and run \x1b[1;93mmise install\x1b[0;93m to sync dev tool versions (bun, node, etc.).\x1b[0m",
