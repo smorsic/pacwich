@@ -1,8 +1,5 @@
 import { IS_WINDOWS } from "../../../../src/internal/core";
-import {
-  createCliSubprocess,
-  setupCliTest,
-} from "../../../util/cliTestUtils";
+import { createCliSubprocess, setupCliTest } from "../../../util/cliTestUtils";
 import { describe, expect, test } from "../../../util/testFramework";
 
 describe("run-interactive CLI", () => {
@@ -31,14 +28,23 @@ describe("run-interactive CLI", () => {
 
   test("runs a named package.json script", async () => {
     const { run } = setupCliTest({ testProject: "default" });
-    const result = await run("run-interactive", "a-workspaces", "-W", "application-a");
+    const result = await run(
+      "run-interactive",
+      "a-workspaces",
+      "-W",
+      "application-a",
+    );
     expect(result.exitCode).toBe(0);
     expect(result.stdout.sanitized).toContain("script for a workspaces");
   });
 
   test("accepts the workspace as a second positional argument", async () => {
     const { run } = setupCliTest({ testProject: "default" });
-    const result = await run("run-interactive", "a-workspaces", "application-a");
+    const result = await run(
+      "run-interactive",
+      "a-workspaces",
+      "application-a",
+    );
     expect(result.exitCode).toBe(0);
     expect(result.stdout.sanitized).toContain("script for a workspaces");
   });
