@@ -14,7 +14,8 @@ const { output, exit } = project.runWorkspaceScript({
 
   // Optional (default false). Run the script interactively to accept user input.
   // When true, the script will have access to stdin, stdout, and stderr,
-  // and script output cannot be captured.
+  // and script output cannot be captured. Note that a script only gets a TTY
+  // if the caller is a TTY (i.e. not piped or redirected)
   interactive: false,
 });
 

@@ -70,18 +70,22 @@ This is the same data as would be returned by the equivalent API, [`FileSystemPr
 </SyntaxHighlighter>
 
 <hr />
+
+### Run Interactive
+<CliCommandDoc command={"runInteractive"} />
+#### More Info
+
+* A script only gets a TTY if the caller is a TTY (i.e. not piped or redirected).
+* See more on running [inline scripts](/concepts/inline-scripts).
+* See more on [workspace script metadata](/concepts/workspace-script-metadata).
+
+<hr />
+
 ### List Affected
 <CliCommandDoc command={"listAffected"} />
 <hr />
 ### Run Affected
 <CliCommandDoc command={"runAffected"} />
-<hr />
-### Run Interactive
-<CliCommandDoc command={"runInteractive"} />
-#### More Info
-* See more on running [inline scripts](/concepts/inline-scripts)
-* See more on [workspace script metadata](/concepts/workspace-script-metadata).
-
 <hr />
 ### Add Skills
 <CliCommandDoc command={"addSkills"} />
