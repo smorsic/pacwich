@@ -322,7 +322,7 @@ export const CLI_COMMANDS_CONFIG = {
         description: `When using --inline, the shell to use to run the script`,
       },
       depOrder: {
-        flags: ["-d", "--dep-order"],
+        flags: ["-D", "--dep-order"],
         description:
           "Scripts for dependent workspaces run only after their dependencies",
       },
@@ -428,7 +428,7 @@ export const CLI_COMMANDS_CONFIG = {
         description: `When using --inline, the shell to use to run the script`,
       },
       depOrder: {
-        flags: ["-d", "--dep-order"],
+        flags: ["-D", "--dep-order"],
         description:
           "Scripts for dependent workspaces run only after their dependencies",
       },
