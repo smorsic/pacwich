@@ -42,6 +42,7 @@ use "bun" as your shell with any package manager, though it will fail if the `bu
 
 ## CLI Changes
 
+* <span className="deprecated"><b>Fix</b> (possibly breaking)</span>: The `run` and `run-affected` `-d` option (short for `--dep-order`) clashed with the global option `-d` (short for `--cwd`). The `--dep-order` short form is now `-D`.
 * <span className="deprecated"><b>Removal</b> (warning message temporarily logged)</span>: The global option `-w|--workspace-root` has been removed. This was a pnpm-inspired feature, but this is now `pacwich`'s default behavior, so the flag is not needed. `pacwich` always walks
 up your directory tree to find a project root.
 * <span className="primary bold">Addition</span>: A new [global option `--pm`](/cli/global-options#package-manager) to explicitly set a package manager, though default auto-detection or using project config is generally preferred.
