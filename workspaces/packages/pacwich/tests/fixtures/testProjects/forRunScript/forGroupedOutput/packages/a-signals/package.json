@@ -1,6 +1,6 @@
 {
   "name": "a-signals",
   "scripts": {
-    "test-script": "sleep 0.25 && echo 'test-script a' && kill -TERM $$"
+    "test-script": "sleep $([ -n \"$CI\" ] && echo 0.35 || echo 0.20) && echo 'test-script a' && kill -TERM $$"
   }
 }

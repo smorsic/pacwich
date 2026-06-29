@@ -1,6 +1,6 @@
 {
   "name": "a-succeeds",
   "scripts": {
-    "test-script": "sleep 0.25 && echo 'test-script a'"
+    "test-script": "sleep $([ -n \"$CI\" ] && echo 0.45 || echo 0.25) && echo 'test-script a'"
   }
 }

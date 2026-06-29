@@ -1,6 +1,6 @@
 {
   "name": "c-fails",
   "scripts": {
-    "test-script": "sleep 0.25 && echo 'test-script c' && exit 1"
+    "test-script": "sleep $([ -n \"$CI\" ] && echo 0.65 || echo 0.35) && echo 'test-script c' && exit 1"
   }
 }
