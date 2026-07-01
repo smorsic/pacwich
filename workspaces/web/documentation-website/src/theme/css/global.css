@@ -2,6 +2,8 @@
   --color-primary: #018f6e;
   --color-secondary: #f67b3d;
 
+  --rp-nav-height: 5rem !important;
+
   --rp-font-family-base: "IBM Plex Sans", sans-serif;
   --rp-font-family-mono: "UnifontEx", monospace;
   --rp-font-family-terminal: "Kode Mono", monospace;
