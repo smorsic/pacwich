@@ -72,7 +72,7 @@
     "workspaces/sandboxes/web-cli": {
       "name": "@pacwich/sandbox--web-cli",
       "dependencies": {
-        "pacwich": "workspace:*",
+        "pacwich": "file:../../packages/pacwich",
       },
       "devDependencies": {
         "@rsbuild/core": "^2.0.8",

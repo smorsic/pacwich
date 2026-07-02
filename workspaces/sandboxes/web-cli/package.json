@@ -24,6 +24,6 @@
     "react-dom": "catalog:web"
   },
   "dependencies": {
-    "pacwich": "workspace:*"
+    "pacwich": "file:../../packages/pacwich"
   }
 }
