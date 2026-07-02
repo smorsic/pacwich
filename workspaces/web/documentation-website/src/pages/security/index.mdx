@@ -54,15 +54,15 @@ On top of this, these bundled dependencies are locked to a specific patch versio
 Vetted upgrades are **only** performed on `pacwich`'s side if a fix or feature is needed
 from one of these, so stability is prioritized over potential frequent bumps to latest.
 
-GitHub's Dependabot is also used on the source repository to help catch issues with
-the current dependencies, mitigating the risk of an insecure bundled dependency going unnoticed.
+Renovate is also used on the source repository to help catch issues with
+the current dependencies, mitigating the risk of an insecure bundled dependency 
+going unnoticed.
 
 #### Auditability:
 * [See pacwich's "dependencies" field](https://github.com/smorsic/pacwich/blob/main/workspaces/packages/pacwich/package.json),
 before the rslib bundle process, all resolved from the `pacwich-prod` catalog  defined in the [root `package.json`](https://github.com/smorsic/pacwich/blob/main/package.json)
 where all versions are locked to specific patch versions.
 * See the [package npm page](https://www.npmjs.com/package/pacwich?activeTab=dependencies) to confirm 0 dependencies.
-*  See the existence of [dependabot.yml](https://github.com/smorsic/pacwich/blob/main/.github/dependabot.yml) for dependency scanning.
 
 ## GitHub Actions
 
@@ -109,10 +109,9 @@ We pin the version of each action used to a specific SHA to prevent supply chain
 from this surface. This is enforced in the repository's settings so that this pattern cannot
 be neglected.
 
-Dependabot is used again here to validate the security of currently used action versions.
+Renovate is used again here to validate the security of currently used action versions.
 
-**Auditability**: [All workflows](https://github.com/smorsic/pacwich/tree/main/.github/workflows), and the [dependabot config](https://github.com/smorsic/pacwich/blob/main/.github/dependabot.yml) includes
-`github-actions`.
+**Auditability**: [All workflows](https://github.com/smorsic/pacwich/tree/main/.github/workflows)
 
 ## AI Development
 
