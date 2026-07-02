@@ -1,0 +1,35 @@
+name: Dependency Automation (via Renovate)
+
+on:
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Renovate log level"
+        default: "info"
+        type: choice
+        options:
+          - debug
+          - info
+          - warn
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-automation
+  cancel-in-progress: false
+
+jobs:
+  dependency-automation:
+    name: "Run Renovate"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: renovatebot/github-action@dd5302ec17783b2fc721b19ae7209b57b1587765 # v46.1.17
+        env:
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }} # PAT
+          RENOVATE_REPOSITORIES: ${{ github.repository }}
+          LOG_LEVEL: ${{ inputs.logLevel || 'info' }}

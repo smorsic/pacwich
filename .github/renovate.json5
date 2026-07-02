@@ -1,0 +1,36 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":dependencyDashboard",
+  ],
+  packageRules: [
+    {
+      // pacwich-prod catalog: these ship bundled in pacwich's released code, so
+      // we prioritize stability over churn and do NOT auto-bump them. Bump by
+      // hand when intentionally revving the runtime deps.
+      matchPackageNames: [
+        "commander",
+        "jiti",
+        "semver",
+        "shell-quote",
+        "sucrase",
+        "yaml",
+      ],
+      enabled: false,
+    },
+    {
+      matchDepTypes: ["devDependencies"],
+      matchUpdateTypes: ["minor", "patch"],
+      groupName: "dev dependencies (non-major)",
+    },
+    {
+      matchManagers: ["github-actions"],
+      groupName: "github actions",
+    },
+  ],
+  lockFileMaintenance: {
+    enabled: true,
+  },
+}
