@@ -64,7 +64,6 @@
     "type-check": "pacwich run type-check -P --",
     "mcp-server": "pacwich mcp-server",
     "create-agents-md": "pacwich -l warn ri create-agents-md meta",
-    "create-pnpm-workspace-yaml": "pacwich -l warn ri create-pnpm-workspace-yaml meta",
     "create-readme": "pacwich -l warn ri create-readme meta",
     "create-mise-toml": "pacwich -l warn ri create-mise-toml meta",
     "print-dev-bun-version": "pacwich -l silent ri print-dev-tool-version -- bun",
