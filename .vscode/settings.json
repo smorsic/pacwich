@@ -52,5 +52,11 @@
     "unifontex",
     "zustand"
   ],
-  "js/ts.tsdk.path": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "json5.schemaDownload.trustedDomains": {
+    "https://docs.renovatebot.com": true
+  },
+  "json.schemaDownload.trustedDomains": {
+    "https://renovatebot.com": true
+  }
 }
