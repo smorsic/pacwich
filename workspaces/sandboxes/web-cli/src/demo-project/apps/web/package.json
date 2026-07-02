@@ -1,0 +1,13 @@
+{
+  "name": "@demo/web",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rsbuild build",
+    "dev": "rsbuild dev",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@demo/core": "*",
+    "@demo/utils": "*"
+  }
+}

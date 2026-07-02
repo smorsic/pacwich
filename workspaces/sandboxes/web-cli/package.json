@@ -1,0 +1,29 @@
+{
+  "name": "@pacwich/sandbox--web-cli",
+  "private": true,
+  "type": "module",
+  "description": "Sandbox: run the pacwich CLI in the browser over an in-memory filesystem (memfs), with an xterm terminal UI.",
+  "scripts": {
+    "dev": "bunx rsbuild dev",
+    "build": "bunx rsbuild build",
+    "preview": "bunx rsbuild preview",
+    "lint": "bunx eslint src",
+    "type-check": "bunx tsc --noEmit"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "^2.0.8",
+    "@rsbuild/plugin-node-polyfill": "^1.4.6",
+    "@rsbuild/plugin-react": "^2.0.0",
+    "@types/react": "catalog:web",
+    "@types/react-dom": "^19.2.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "memfs": "^4.17.0",
+    "path-browserify": "^1.0.1",
+    "react": "catalog:web",
+    "react-dom": "catalog:web"
+  },
+  "dependencies": {
+    "pacwich": "workspace:*"
+  }
+}
