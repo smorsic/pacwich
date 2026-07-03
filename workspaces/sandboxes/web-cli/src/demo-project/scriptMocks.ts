@@ -36,7 +36,10 @@ export const SCRIPT_MOCKS: Record<string, ScriptMock> = {
     delayMsPerLine: 120,
   },
   "*:lint": {
-    output: ["$ linting {workspace}…", "✓ {workspace}: no lint problems (mock)"],
+    output: [
+      "$ linting {workspace}…",
+      "✓ {workspace}: no lint problems (mock)",
+    ],
     delayMsPerLine: 80,
   },
   "*:test": {

@@ -165,14 +165,22 @@ test("run-affected --files runs the mocked script on affected workspaces", async
 // The guards reject unsupported features up front, before the CLI runs, with a
 // friendly one-line message and a non-zero exit (never a stack trace).
 const blocked: [string, string, RegExp][] = [
-  ["inline scripts", "run 'echo hi' --inline", /inline scripts.*aren't supported/i],
+  [
+    "inline scripts",
+    "run 'echo hi' --inline",
+    /inline scripts.*aren't supported/i,
+  ],
   ["inline (short)", "run build -i", /inline scripts.*aren't supported/i],
   ["doctor", "doctor", /doctor.*isn't available/i],
   ["--cwd", "list-workspaces --cwd /elsewhere", /--cwd.*fixed/i],
   ["--cwd short", "list-workspaces -d /elsewhere", /--cwd.*fixed/i],
   ["git base", "list-affected --base main", /use `--files` instead/i],
   ["git head", "run-affected build --head HEAD", /use `--files` instead/i],
-  ["shell pipe", "list-workspaces | grep demo", /Shell operations aren't supported/i],
+  [
+    "shell pipe",
+    "list-workspaces | grep demo",
+    /Shell operations aren't supported/i,
+  ],
 ];
 
 for (const [name, command, pattern] of blocked) {

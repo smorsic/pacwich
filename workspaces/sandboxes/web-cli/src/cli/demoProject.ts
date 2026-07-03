@@ -97,7 +97,9 @@ export const resolveScriptMock = (
     SCRIPT_MOCKS["*:*"];
 
   const substitute = (line: string) =>
-    line.replaceAll("{workspace}", workspaceName).replaceAll("{script}", scriptName);
+    line
+      .replaceAll("{workspace}", workspaceName)
+      .replaceAll("{script}", scriptName);
 
   return {
     output: (mock?.output ?? [`$ ${scriptName} (${workspaceName})`]).map(

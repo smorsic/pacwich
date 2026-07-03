@@ -45,7 +45,7 @@ seeded per workspace so `--files` globs have something to match.
 ### Running scripts (mocked)
 
 The browser has no processes, so pacwich can't actually spawn anything. pacwich
-funnels *every* spawn — package.json scripts, inline scripts, and `git` — through
+funnels _every_ spawn — package.json scripts, inline scripts, and `git` — through
 a single `createSubprocess()` in its `runScript/subprocesses.ts`. We replace only
 that one module (`src/cli/mockSubprocess.ts`, wired via a
 `NormalModuleReplacementPlugin` in `rsbuild.config.ts`).
@@ -66,7 +66,10 @@ export const SCRIPT_MOCKS: Record<string, ScriptMock> = {
     output: ["$ building {workspace}…", "✓ {workspace} built (mock)"],
     delayMsPerLine: 120,
   },
-  "@demo/web:build": { output: ["$ rsbuild build", /* … */], delayMsPerLine: 120 },
+  "@demo/web:build": {
+    output: ["$ rsbuild build" /* … */],
+    delayMsPerLine: 120,
+  },
 };
 ```
 

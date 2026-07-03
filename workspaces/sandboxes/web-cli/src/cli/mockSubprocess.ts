@@ -66,8 +66,7 @@ let nextPid = 4000;
  * Exposed for tests to assert scheduling behavior (e.g. `--dep-order`), since
  * the mock completes instantly and output is rendered in discovery order.
  */
-export const runLog: { workspace: string | null; script: string | null }[] =
-  [];
+export const runLog: { workspace: string | null; script: string | null }[] = [];
 
 const makeSubprocess = (
   stdout: string[],
@@ -82,7 +81,9 @@ const makeSubprocess = (
       ? Math.max(stdout.length, stderr.length) * delayMsPerLine
       : 0;
   const exited = totalMs
-    ? new Promise<number>((resolve) => setTimeout(() => resolve(exitCode), totalMs))
+    ? new Promise<number>((resolve) =>
+        setTimeout(() => resolve(exitCode), totalMs),
+      )
     : Promise.resolve(exitCode);
 
   return {
