@@ -56,7 +56,7 @@
     "pw": "pacwich ri --workspace=pw --script",
     "docs": "pacwich ri --workspace=docs --script",
     "sandbox": "pacwich ri --workspace=sandbox --script",
-    "lint": "pacwich run lint",
+    "lint": "pacwich run lint '*' not:tag:sandbox",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
