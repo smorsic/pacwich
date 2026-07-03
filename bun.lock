@@ -116,6 +116,9 @@
       "devDependencies": {
         "@fontsource/unifontex": "catalog:web",
         "@pacwich/common": "workspace:*",
+        "@pacwich/web-cli": "workspace:*",
+        "@pacwich/web-common": "workspace:*",
+        "@rsbuild/plugin-node-polyfill": "^1.4.6",
         "@rsbuild/plugin-svgr": "catalog:web",
         "@rspress/core": "catalog:web",
         "@rspress/plugin-client-redirects": "catalog:web",
@@ -123,21 +126,46 @@
         "@types/lodash": "catalog:web",
         "@types/react": "catalog:web",
         "@types/react-syntax-highlighter": "catalog:web",
-        "@types/shell-quote": "catalog:pacwich-dev",
-        "@xterm/addon-fit": "^0.11.0",
-        "@xterm/xterm": "^6.0.0",
-        "bw-web-service-shared": "0.2.0",
         "lodash": "catalog:web",
         "react": "catalog:web",
-        "react-arborist": "catalog:web",
         "react-dom": "catalog:web",
         "react-icons": "catalog:web",
         "react-router": "catalog:web",
         "react-router-dom": "catalog:web",
         "react-syntax-highlighter": "catalog:web",
+        "zustand": "catalog:web",
+      },
+    },
+    "workspaces/web/web-cli": {
+      "name": "@pacwich/web-cli",
+      "dependencies": {
+        "@pacwich/web-common": "workspace:*",
+        "@xterm/addon-fit": "^0.11.0",
+        "@xterm/xterm": "^6.0.0",
+        "pacwich": "latest",
+        "react-arborist": "catalog:web",
+        "react-icons": "catalog:web",
+        "react-syntax-highlighter": "catalog:web",
         "shell-quote": "catalog:pacwich-prod",
         "zustand": "catalog:web",
       },
+      "devDependencies": {
+        "@rsbuild/core": "^2.0.8",
+        "@rsbuild/plugin-node-polyfill": "^1.4.6",
+        "@rsbuild/plugin-react": "^2.0.0",
+        "@types/path-browserify": "^1.0.3",
+        "@types/react": "catalog:web",
+        "@types/react-dom": "^19.2.0",
+        "@types/react-syntax-highlighter": "catalog:web",
+        "@types/shell-quote": "catalog:pacwich-dev",
+        "memfs": "^4.17.0",
+        "path-browserify": "^1.0.1",
+        "react": "catalog:web",
+        "react-dom": "catalog:web",
+      },
+    },
+    "workspaces/web/web-common": {
+      "name": "@pacwich/web-common",
     },
   },
   "catalogs": {
@@ -437,6 +465,10 @@
 
     "@pacwich/sandbox--web-cli": ["@pacwich/sandbox--web-cli@workspace:workspaces/sandboxes/web-cli"],
 
+    "@pacwich/web-cli": ["@pacwich/web-cli@workspace:workspaces/web/web-cli"],
+
+    "@pacwich/web-common": ["@pacwich/web-common@workspace:workspaces/web/web-common"],
+
     "@radix-ui/number": ["@radix-ui/number@1.1.1", "", {}, "sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g=="],
 
     "@radix-ui/primitive": ["@radix-ui/primitive@1.1.3", "", {}, "sha512-JTF99U/6XIjCBo0wqkU5sK10glYe27MRRsfwoiq5zzOEZLHU3A3KCMa5X/azekYRCJ0HlwI0crAXS/5dEHTzDg=="],
@@ -681,6 +713,8 @@
 
     "@types/node": ["@types/node@25.9.1", "", { "dependencies": { "undici-types": "7.24.6" } }, "sha512-xfrlY7UD5rMJk3ZVJP8BNzS28J36YJg+xp+LPXV1TdWxr8uMH5A860QNxYDGQe/ylDSgjxE52Q9VnO7p75tJxg=="],
 
+    "@types/path-browserify": ["@types/path-browserify@1.0.3", "", {}, "sha512-ZmHivEbNCBtAfcrFeBCiTjdIc2dey0l7oCGNGpSuRTy8jP6UVND7oUowlvDujBy8r2Hoa8bfFUOCiPWfmtkfxw=="],
+
     "@types/prismjs": ["@types/prismjs@1.26.6", "", {}, "sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw=="],
 
     "@types/react": ["@types/react@19.2.15", "", { "dependencies": { "csstype": "3.2.3" } }, "sha512-eRwcGNHve+E8qtEQSSRl6urh+rFop4v8gm6O8rGv25CodbvFdLjA1vVQ1KkiFE0w0UPOnb8tDiFKL5lp0rtY5Q=="],
@@ -836,8 +870,6 @@
     "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "25.9.1" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
 
     "bundle-name": ["bundle-name@4.1.0", "", { "dependencies": { "run-applescript": "7.1.0" } }, "sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q=="],
-
-    "bw-web-service-shared": ["bw-web-service-shared@0.2.0", "", {}, "sha512-hTCNH+irBXA7K9AfzNOJzQuJOA3x10UEdD0u6pC3ftM5Vfp6eYYhjT/NOuBFTcAOHm1BBfQx95x3zqHlpVeEaA=="],
 
     "bytes": ["bytes@3.0.0", "", {}, "sha512-pMhOfFDPiv9t5jjIXkHosWmkSyQbvsgEVNkz0ERHbuLh2T/7j4Mqqpz523Fe8MVY89KC6Sh/QfS2sM+SjgFDcw=="],
 
@@ -2206,6 +2238,8 @@
     "@pacwich/sandbox--local-vs-release/pacwich_local": ["pacwich@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
 
     "@pacwich/sandbox--web-cli/pacwich": ["pacwich@0.2.1", "", { "bin": { "pacwich": "bin/cli.js" } }, "sha512-FHKX3mkx+7+J8M9Z+be7Cbme4IwcBUF8YLgNaHReW/k4l32av0R0unEg7srbygD28Wj4xDy5y1CE5na1AOAMlw=="],
+
+    "@pacwich/web-cli/pacwich": ["pacwich@0.2.1", "", { "bin": { "pacwich": "bin/cli.js" } }, "sha512-FHKX3mkx+7+J8M9Z+be7Cbme4IwcBUF8YLgNaHReW/k4l32av0R0unEg7srbygD28Wj4xDy5y1CE5na1AOAMlw=="],
 
     "@radix-ui/react-arrow/react": ["react@18.3.1", "", { "dependencies": { "loose-envify": "1.4.0" } }, "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ=="],
 

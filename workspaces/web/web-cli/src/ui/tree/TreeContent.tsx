@@ -1,10 +1,10 @@
-import { demoProject } from "bw-web-service-shared";
-import { SyntaxHighlighter } from "../../util/highlight";
+import { demoProjectFiles } from "../../demo-project";
+import { SyntaxHighlighter } from "../highlight";
 import { useSelectedFile } from "./selection";
 
 export const TreeContent = () => {
   const selectedFile = useSelectedFile();
-  const fileData = demoProject.files.find(
+  const fileData = demoProjectFiles.find(
     (file) => file.relativePath === selectedFile,
   );
 

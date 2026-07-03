@@ -1,16 +1,15 @@
-import type {
-  InvokeCliRequestBody,
-  InvokeCliResponseChunk,
-} from "bw-web-service-shared";
 import { useCallback } from "react";
 import { create } from "zustand";
-import { useApiState, serviceClient } from "../../service";
+import type { WebCliOutputChunk } from "../../engine";
 
 export const DEFAULT_TERMINAL_WIDTH = 80;
 
+/** stderr is rendered red; the CLI emits plain text on that stream. */
+const styleStderr = (text: string) => `\x1b[31m${text}\x1b[0m`;
+
 const useInvokeWebCliStore = create<{
   isLoading: boolean;
-  result: InvokeCliResponseChunk[];
+  result: WebCliOutputChunk[];
   input: string;
   terminalWidth: number;
   terminalSelection: string;
@@ -18,8 +17,8 @@ const useInvokeWebCliStore = create<{
   setTerminalWidth: (terminalWidth: number) => void;
   setInput: (input: string) => void;
   setIsLoading: (isLoading: boolean) => void;
-  setResult: (result: InvokeCliResponseChunk[]) => void;
-  addResultChunk: (chunk: InvokeCliResponseChunk) => void;
+  setResult: (result: WebCliOutputChunk[]) => void;
+  addResultChunk: (chunk: WebCliOutputChunk) => void;
 }>((set) => ({
   isLoading: false,
   result: [],
@@ -42,36 +41,36 @@ export const useInvokeWebCli = () => {
   const setResult = useInvokeWebCliStore((state) => state.setResult);
   const addResultChunk = useInvokeWebCliStore((state) => state.addResultChunk);
   const terminalWidth = useInvokeWebCliStore((state) => state.terminalWidth);
-  const { isReady } = useApiState();
 
   const invokeWebCli = useCallback(
-    async (request: Omit<InvokeCliRequestBody, "terminalWidth">) => {
-      if (isLoading || !isReady) return;
+    async (commandLine: string) => {
+      if (isLoading) return;
 
       setIsLoading(true);
       setResult([]);
 
-      for await (const chunk of serviceClient.invokeWebCli({
-        ...request,
+      // Loaded lazily (client-side, on first run) so the engine's env shims —
+      // which self-install a browser `process` on import — never evaluate
+      // during Node static-site generation.
+      const { runPacwichCli } = await import("../../engine");
+
+      // The engine runs the real pacwich CLI over an in-memory filesystem and
+      // streams stdout/stderr back chunk-by-chunk. It tokenizes and guards the
+      // command line itself.
+      await runPacwichCli(commandLine, {
         terminalWidth,
-      })) {
-        if (process.env.PACWICH_DOCS_ENV === "development") {
-          // eslint-disable-next-line no-console
-          console.debug("Chunk received:", { chunk });
-        }
-        addResultChunk(chunk);
-      }
+        onOutput: (text, stream) => {
+          addResultChunk({
+            terminalOutput: stream === "stderr" ? styleStderr(text) : text,
+            warnings: [],
+            errors: [],
+          });
+        },
+      });
 
       setIsLoading(false);
     },
-    [
-      addResultChunk,
-      isReady,
-      isLoading,
-      setIsLoading,
-      setResult,
-      terminalWidth,
-    ],
+    [addResultChunk, isLoading, setIsLoading, setResult, terminalWidth],
   );
 
   return { invokeWebCli, isLoading, result };

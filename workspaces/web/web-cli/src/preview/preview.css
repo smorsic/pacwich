@@ -1,0 +1,67 @@
+/*
+ * Standalone theming for the preview app. The shared app tokens come from
+ * @pacwich/web-common (imported in index.tsx); here we supply the structural
+ * `--rp-*` colors the UI reads that the docs otherwise get from rspress, and a
+ * little page layout. The preview runs dark (the <html> gets `.dark`), so these
+ * are the dark values.
+ */
+
+:root {
+  --rp-c-bg: #131212;
+  --rp-c-bg-soft: #1e1b1b;
+  --rp-c-bg-mute: #2d2a2a;
+  --rp-c-code-block-bg: #0c0b0b;
+  --rp-c-text-1: #ffffff;
+  --rp-c-text-2: #c8c8c8;
+  --rp-c-text-3: #8b8b8b;
+  --rp-c-link: #1dff99;
+  --rp-c-divider: #3a3a3a;
+  --rp-container-warning-text: var(--web-cli-yellow);
+  --rp-container-danger-text: var(--web-cli-red);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--rp-c-bg);
+  color: var(--rp-c-text-1);
+  font-family:
+    "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+.preview {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+}
+
+.preview__header {
+  text-align: center;
+}
+
+.preview__header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.preview__header p {
+  margin: 0.35rem 0 0;
+  color: var(--rp-c-text-3);
+  font-size: 0.9rem;
+}
+
+.preview__header code {
+  color: var(--rp-c-link);
+}

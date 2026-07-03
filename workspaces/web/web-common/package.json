@@ -1,0 +1,9 @@
+{
+  "name": "@pacwich/web-common",
+  "private": true,
+  "type": "module",
+  "description": "Shared assets for pacwich's web workspaces — currently the common theme variables consumed by the documentation website and the @pacwich/web-cli preview.",
+  "exports": {
+    "./theme.css": "./src/theme.css"
+  }
+}

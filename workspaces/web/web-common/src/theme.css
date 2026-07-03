@@ -1,0 +1,60 @@
+/*
+ * Shared web theme: the CSS custom properties the Web CLI experience reads,
+ * owned in one place so the documentation website and the @pacwich/web-cli
+ * preview don't each hand-maintain them.
+ *
+ * Light values live on :root; dark values on `.dark` (the class the docs site
+ * toggles on <html>, and the preview sets for a dark terminal). These are the
+ * app-specific tokens only — the structural `--rp-*` colors come from rspress
+ * in the docs and from a small fallback block in the preview.
+ */
+
+:root {
+  /* Fonts (fall back to monospace when the webfont isn't loaded). */
+  --rp-font-family-mono: "UnifontEx", monospace;
+  --rp-font-family-terminal: "Kode Mono", monospace;
+
+  /* Syntax highlighting (file-tree content view). */
+  --code-base-color: #0f0f0f;
+  --code-string-color: #5fa003;
+  --code-keyword-color: #7b639e;
+  --code-attr-color: #2f7b9a;
+  --code-built-in-color: #c06917;
+  --code-comment-color: #828282;
+
+  /* xterm ANSI palette. */
+  --web-cli-green: #2e7e14;
+  --web-cli-blue: #407ca8;
+  --web-cli-magenta: #8f69c5;
+  --web-cli-cyan: #3b93a0;
+  --web-cli-yellow: #a58029;
+  --web-cli-red: #d25151;
+  --web-cli-black: #3d3d3d;
+  --web-cli-bright-black: #6b6b6b;
+
+  /* Terminal chrome + sizing. */
+  --web-cli-divider: rgb(232, 232, 232);
+  --web-cli-width: clamp(35rem, 90vw, 55rem);
+  --web-cli-height: clamp(20rem, 50vh, 30rem);
+  --bwunster-eye-color: #4f5dcd;
+}
+
+.dark {
+  --code-base-color: var(--rp-c-text-1);
+  --code-string-color: #fef78f;
+  --code-keyword-color: #d5c6fa;
+  --code-attr-color: #a2b9f7;
+  --code-built-in-color: #fdb240;
+  --code-comment-color: #919191;
+
+  --web-cli-green: #6a9f58;
+  --web-cli-blue: #2ba1f6;
+  --web-cli-magenta: #8f69c5;
+  --web-cli-cyan: #58a7b4;
+  --web-cli-yellow: #fef78f;
+  --web-cli-red: #e05a5a;
+  --web-cli-black: #5a5757;
+  --web-cli-bright-black: #828282;
+
+  --web-cli-divider: transparent;
+}

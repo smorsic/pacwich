@@ -5,8 +5,6 @@
   --rp-nav-height: 5rem !important;
 
   --rp-font-family-base: "IBM Plex Sans", sans-serif;
-  --rp-font-family-mono: "UnifontEx", monospace;
-  --rp-font-family-terminal: "Kode Mono", monospace;
   --rp-c-text-1: #202020;
   --rp-c-text-2: #434343;
   --rp-c-text-3: #848484;
@@ -16,29 +14,11 @@
   --rp-c-bg-soft: #f8f6f6;
   --rp-c-link: var(--color-primary);
 
-  --code-base-color: #0f0f0f;
-  --code-string-color: #5fa003;
-  --code-keyword-color: #7b639e;
-  --code-attr-color: #2f7b9a;
-  --code-built-in-color: #c06917;
-  --code-comment-color: #828282;
-
-  --web-cli-green: #2e7e14;
-  --web-cli-blue: #407ca8;
-  --web-cli-magenta: #8f69c5;
-  --web-cli-cyan: #3b93a0;
-  --web-cli-yellow: #a58029;
-  --web-cli-red: #d25151;
-  --web-cli-black: #3d3d3d;
-  --web-cli-bright-black: #6b6b6b;
-  --web-cli-divider: rgb(232, 232, 232);
-
-  --web-cli-width: clamp(35rem, 90vw, 55rem);
-  --web-cli-height: clamp(20rem, 50vh, 30rem);
+  /* Web CLI theme tokens — mono/terminal fonts, --code-*, --web-cli-*, and
+     --bwunster-eye-color — come from @pacwich/web-common/theme.css (imported
+     in src/theme/index.tsx), shared with the @pacwich/web-cli preview. */
 
   --nav-color: #f0f0f060;
-
-  --bwunster-eye-color: #4f5dcd;
 
   --feature-shuttle-color: #0fb9d6;
   --feature-violin-color: #944e14;
@@ -116,22 +96,8 @@
   --rp-c-text-1: #ffffff;
   --rp-c-text-2: #c8c8c8;
 
-  --code-base-color: var(--rp-c-text-1);
-  --code-string-color: #fef78f;
-  --code-keyword-color: #d5c6fa;
-  --code-attr-color: #a2b9f7;
-  --code-built-in-color: #fdb240;
-  --code-comment-color: #919191;
-
-  --web-cli-green: #6a9f58;
-  --web-cli-blue: #2ba1f6;
-  --web-cli-magenta: #8f69c5;
-  --web-cli-cyan: #58a7b4;
-  --web-cli-yellow: #fef78f;
-  --web-cli-red: #e05a5a;
-  --web-cli-black: #5a5757;
-  --web-cli-bright-black: #828282;
-  --web-cli-divider: transparent;
+  /* Dark Web CLI theme tokens (--code-*, --web-cli-*) come from
+     @pacwich/web-common/theme.css. */
 
   --feature-shuttle-color: #92e1ef;
   --feature-violin-color: #c8956b;

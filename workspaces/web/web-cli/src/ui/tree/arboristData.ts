@@ -1,4 +1,4 @@
-import { demoProject, type DemoProjectFile } from "bw-web-service-shared";
+import { demoProjectFiles, type DemoProjectFile } from "../../demo-project";
 
 export type TreeNodeData = {
   id: string;
@@ -70,6 +70,5 @@ export const demoProjectFilesToArboristTree = (
   return builderMapToArboristNodes(root);
 };
 
-export const REACT_ARBORIST_DATA = demoProjectFilesToArboristTree(
-  demoProject.files,
-);
+export const REACT_ARBORIST_DATA =
+  demoProjectFilesToArboristTree(demoProjectFiles);

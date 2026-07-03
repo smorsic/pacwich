@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaTerminal } from "react-icons/fa";
 import { parse } from "shell-quote";
-import { useApiState } from "../../service";
 import {
   useAddCommandToHistory,
   useDecrementCommandHistoryIndex,
@@ -9,13 +8,13 @@ import {
   useHistoryIndex,
   useIncrementCommandHistoryIndex,
   useResetHistoryIndex,
-} from "../util/commandHistory";
+} from "../state/commandHistory";
 import {
   useInvokeWebCli,
   useSetWebCliInput,
   useWebCliInput,
   useWebCliTerminalSelection,
-} from "../util/invokeWebCli";
+} from "../state/invokeWebCli";
 import { EXAMPLE_COMMANDS } from "./exampleCommands";
 import { WEB_CLI_INPUT_ID } from "./ids";
 import { TerminalExamples } from "./TerminalExamples";
@@ -76,7 +75,7 @@ export const TerminalInput = () => {
 
   const { argv, operations } = useMemo(() => parseArgv(input), [input]);
 
-  const { isReady, isLoading, error } = useApiState();
+  const { isLoading: isInvoking, invokeWebCli } = useInvokeWebCli();
 
   const setNewPlaceholderExample = useCallback(() => {
     setPlaceholderText(
@@ -85,14 +84,14 @@ export const TerminalInput = () => {
   }, [placeholderText]);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isInvoking) {
       inputRef.current?.focus();
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setNewPlaceholderExample();
     } else {
       let ellipsisCount = 0;
       const interval = setInterval(() => {
-        setPlaceholderText("Loading" + ".".repeat(ellipsisCount));
+        setPlaceholderText("Running" + ".".repeat(ellipsisCount));
         ellipsisCount++;
         if (ellipsisCount > 3) {
           ellipsisCount = 0;
@@ -101,20 +100,17 @@ export const TerminalInput = () => {
       return () => clearInterval(interval);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+  }, [isInvoking]);
 
   useEffect(() => {
-    if (input.trim() || isLoading) return;
+    if (input.trim() || isInvoking) return;
     const timeout = setTimeout(() => {
       setNewPlaceholderExample();
     }, 4000);
     return () => clearTimeout(timeout);
-  }, [input, isLoading, setNewPlaceholderExample]);
+  }, [input, isInvoking, setNewPlaceholderExample]);
 
-  const { isLoading: isInvoking, invokeWebCli } = useInvokeWebCli();
-
-  const isError = !!error || (!isLoading && !isReady);
-  const disabled = !isReady || isError || isInvoking;
+  const disabled = isInvoking;
 
   useEffect(() => {
     if (historyCommand) {
@@ -159,14 +155,13 @@ export const TerminalInput = () => {
       e.preventDefault();
       if (disabled) return;
       if (!input.trim()) return;
-      invokeWebCli({
-        argv,
-      });
+      // The engine tokenizes and guards the raw command line itself.
+      invokeWebCli(input.trim());
       addCommandToHistory(input.trim());
       setInput("");
       inputRef.current?.focus();
     },
-    [disabled, invokeWebCli, input, argv, addCommandToHistory, setInput],
+    [disabled, invokeWebCli, input, addCommandToHistory, setInput],
   );
 
   return (
@@ -197,36 +192,22 @@ export const TerminalInput = () => {
         }}
       >
         <span className="web-cli-input-label">$ pacwich</span>
-        {isError ? (
-          <div className="web-cli-input-error">
-            Something went wrong! Try reloading or try again later. <br />
-            Report recurring issues on{" "}
-            <a
-              href="https://github.com/smorsic/pacwich"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
-            </a>
-          </div>
-        ) : (
-          <input
-            ref={inputRef}
-            className="web-cli-input"
-            id={WEB_CLI_INPUT_ID}
-            disabled={isLoading}
-            type="text"
-            autoCapitalize="off"
-            autoCorrect="off"
-            autoComplete="off"
-            spellCheck={false}
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            maxLength={200}
-            placeholder={placeholderText}
-          />
-        )}
+        <input
+          ref={inputRef}
+          className="web-cli-input"
+          id={WEB_CLI_INPUT_ID}
+          disabled={isInvoking}
+          type="text"
+          autoCapitalize="off"
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck={false}
+          value={input}
+          onChange={handleInput}
+          onKeyDown={handleKeyDown}
+          maxLength={200}
+          placeholder={placeholderText}
+        />
         <button
           disabled={disabled || !argv.length}
           type="submit"

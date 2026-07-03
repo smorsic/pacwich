@@ -1,12 +1,7 @@
-import { useInitializeApi } from "../service/apiHealth";
-import { WebCliMain } from "./main/WebCliMain";
+import { WebCli } from "@pacwich/web-cli/ui";
 import { WebCliNotes } from "./WebCliNotes";
 
-import "../../theme/css/web-cli.css";
-
 export const WebCliPage = () => {
-  useInitializeApi();
-
   return (
     <div className="web-cli-page">
       <div className="web-cli-page-header">
@@ -20,7 +15,7 @@ export const WebCliPage = () => {
           You may have a better experience with the Web CLI on desktop.
         </div>
       </div>
-      <WebCliMain />
+      <WebCli />
       <WebCliNotes />
     </div>
   );

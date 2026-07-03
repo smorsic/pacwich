@@ -1,5 +1,5 @@
 import { FaTerminal, FaFolderOpen } from "react-icons/fa";
-import { useSetView, useView } from "../util/view";
+import { useSetView, useView } from "./state/view";
 
 export const ViewSelector = () => {
   const view = useView();

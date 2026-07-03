@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useState } from "react";
-import { useSetWebCliInput } from "../util/invokeWebCli";
+import { useSetWebCliInput } from "../state/invokeWebCli";
 import { EXAMPLE_COMMANDS } from "./exampleCommands";
 import { WEB_CLI_EXAMPLES_ID, WEB_CLI_INPUT_ID } from "./ids";
 

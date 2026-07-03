@@ -91,10 +91,8 @@ export default defineConfig([
     },
   },
   {
-    name: "docWebsitePackageConfig",
-    files: [
-      "workspaces/web/documentation-website/**/*.{js,mjs,cjs,ts,mts,cts,tsx}",
-    ],
+    name: "webPackagesConfig",
+    files: ["workspaces/web/**/*.{js,mjs,cjs,ts,mts,cts,tsx}"],
     ...reactPlugin.configs.flat.recommended,
     ...reactHooksPlugin.configs.flat.recommended,
   },

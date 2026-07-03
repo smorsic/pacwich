@@ -1,6 +1,12 @@
 import fs from "fs";
 import path from "path";
+import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
+import {
+  createMockSubprocessPlugin,
+  nodePolyfillOptions,
+  webCliAliases,
+} from "@pacwich/web-cli/bundler";
 import { defineConfig } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
 import { pluginSitemap } from "@rspress/plugin-sitemap";
@@ -109,29 +115,45 @@ export default defineConfig({
   builderConfig: {
     dev: {},
     tools: {
-      rspack: {
-        ignoreWarnings: [
+      // A function (not an object) so we can use the build's own `rspack`
+      // instance — the Web CLI's subprocess-replacement plugin must come from
+      // the same rspack that's running the build.
+      rspack: (config, { rspack, appendPlugins }) => {
+        config.ignoreWarnings = [
+          ...(config.ignoreWarnings ?? []),
           // mismatched value stringification across builds
           /Conflicting values for 'import\.meta\.env\.SSR'/,
-        ],
+          // pacwich's inlined jiti has a dynamic `import(id)`; it's never
+          // reached on the browser path (JSONC configs, no jiti).
+          /Critical dependency: the request of a dependency is an expression/,
+        ];
+        appendPlugins(createMockSubprocessPlugin(rspack));
       },
     },
-    plugins: [pluginSvgr()],
+    // pluginNodePolyfill + the aliases below let the Web CLI page bundle and run
+    // the real pacwich CLI in the browser over memfs (see @pacwich/web-cli).
+    plugins: [pluginSvgr(), pluginNodePolyfill(nodePolyfillOptions)],
+    resolve: {
+      alias: webCliAliases,
+    },
     output: {
       cleanDistPath: true,
     },
     source: {
+      // Per-key `process.env.*` replacements (not a whole-`process` define):
+      // node-polyfill turns the `process` global off so the CLI's bare
+      // `process` resolves to its runtime shim, and a blanket define would
+      // otherwise clobber that.
       define: {
-        process: `({
-          env: {
-            YEAR: ${JSON.stringify(new Date().getFullYear())},
-            BUILD_ID: ${JSON.stringify(process.env.BUILD_ID ?? "(no build ID)")},
-            BWUNSTER_ASCII: ${JSON.stringify(BWUNSTER_ASCII)},
-            PACWICH_WEB_SERVICE_BASE_URL: ${JSON.stringify(process.env.PACWICH_WEB_SERVICE_BASE_URL ?? "http://localhost:8080")},
-            PACWICH_DOCS_ENV: ${JSON.stringify(process.env.PACWICH_DOCS_ENV ?? "production")},
-            BLOG_URL: ${JSON.stringify(BLOG_URL)},
-          },
-        })`,
+        "process.env.YEAR": JSON.stringify(new Date().getFullYear()),
+        "process.env.BUILD_ID": JSON.stringify(
+          process.env.BUILD_ID ?? "(no build ID)",
+        ),
+        "process.env.BWUNSTER_ASCII": JSON.stringify(BWUNSTER_ASCII),
+        "process.env.PACWICH_DOCS_ENV": JSON.stringify(
+          process.env.PACWICH_DOCS_ENV ?? "production",
+        ),
+        "process.env.BLOG_URL": JSON.stringify(BLOG_URL),
       },
     },
     html: {

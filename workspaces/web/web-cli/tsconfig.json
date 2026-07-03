@@ -1,0 +1,19 @@
+{
+  "extends": "../../meta/config/base/tsconfig.json",
+  "compilerOptions": {
+    // We consume the `pacwich` package as raw TS source. Its generated ajv
+    // `.js` validators ship without declarations; tsc surfaces them as
+    // implicit-any imports. They're the dependency's internals, not ours, so
+    // relax this for the cross-package boundary.
+    "noImplicitAny": false,
+    // The bundler helper is imported by rsbuild.config.ts; allow JSON if needed.
+    "resolveJsonModule": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "tests/**/*.ts",
+    "rsbuild.config.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

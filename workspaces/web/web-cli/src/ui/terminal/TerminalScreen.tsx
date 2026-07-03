@@ -1,4 +1,3 @@
-import { useThemeState } from "@rspress/core/theme-original";
 import { FitAddon } from "@xterm/addon-fit";
 import { type Terminal as XTermTerminal, type ITheme } from "@xterm/xterm";
 import { useEffect, useRef, useState } from "react";
@@ -6,7 +5,7 @@ import "@xterm/xterm/css/xterm.css";
 import {
   useSetWebCliTerminalSelection,
   useWebCliResult,
-} from "../util/invokeWebCli";
+} from "../state/invokeWebCli";
 import { WEB_CLI_INPUT_ID } from "./ids";
 
 export type TerminalSize = {
@@ -62,20 +61,14 @@ export const TerminalScreen = ({ onTerminalResize }: TerminalScreenProps) => {
   const cliResult = useWebCliResult();
   const writtenChunksRef = useRef(0);
 
-  const [theme] = useThemeState();
-
   useEffect(() => {
     import("@xterm/xterm").then((module) => {
       setXtermModule(module);
     });
   }, []);
 
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.options.theme = getTerminalTheme();
-    }
-  }, [theme]);
-
+  // Theme changes (the host toggling `.dark` on <html>) are picked up by the
+  // MutationObserver below, which re-reads the CSS variables and re-fits.
   useEffect(() => {
     if (!terminalDivRef.current || !xtermModule) return;
 

@@ -3,6 +3,8 @@ import { useLocation } from "@rspress/core/runtime";
 import { Layout as RspressLayout, Link } from "@rspress/core/theme-original";
 import { useEffect, useRef } from "react";
 import "@fontsource/unifontex";
+// Shared web theme tokens (Web CLI palette, code colors, terminal fonts/sizing).
+import "@pacwich/web-common/theme.css";
 import { Footer } from "../lib/components/Footer";
 import { BUILD_ID } from "../lib/util/env";
 import { PixelArtImage } from "../lib/util/pixelArt";

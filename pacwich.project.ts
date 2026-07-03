@@ -31,6 +31,15 @@ export default defineProjectConfig({
       patterns: ["path:workspaces/web/**/*"],
       config: {
         tags: ["web", "deployable"],
+        rules: {
+          workspaceDependencies: {
+            // `@pacwich/web-cli` runs the real `pacwich` CLI in the browser, so
+            // it depends on `pacwich`; the docs site depends on
+            // `@pacwich/web-cli` to render the Web CLI page.
+            allowPatterns: ["path:workspaces/web/**/*", "pacwich"],
+            denyPatterns: [],
+          },
+        },
       },
     },
     {

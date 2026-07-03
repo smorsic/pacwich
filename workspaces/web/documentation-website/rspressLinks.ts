@@ -52,12 +52,11 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     activeMatch: "/cli|web-cli",
     tag: navIconSvg("cli-nav-icon.svg"),
     items: [
-      // ! Reenable when supported
-      // {
-      //   text: "Web CLI (Demo)",
-      //   link: "/web-cli",
-      //   activeMatch: "/web-cli$",
-      // },
+      {
+        text: "Web CLI (Demo)",
+        link: "/web-cli",
+        activeMatch: "/web-cli$",
+      },
       {
         text: "Quick Start",
         link: "/cli",
