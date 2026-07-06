@@ -1,20 +1,58 @@
-name: Claude PR Review
+name: Agent PR Review
+
 on:
   pull_request:
-    types: [opened] # not synchronize, to protect quota
+    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review"
+        required: true
+        type: number
+
 permissions:
   contents: read
   pull-requests: write
+
+concurrency:
+  group: agent-review-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
 jobs:
   review:
+    name: Claude Review
     runs-on: ubuntu-latest
+    environment: agent-review
+    timeout-minutes: 15
+    # Skip fork PRs. They can't access secrets and will fail anyway
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: actions/checkout@<sha> # pin
-        with: { fetch-depth: 0 }
-      - uses: anthropics/claude-code-action@<sha> # pin to a v1 release SHA
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', inputs.pr_number) || '' }}
+      # TEMPORARY debug: prints only the secret's length, never its value.
+      # Remove once the auth issue is resolved.
+      - name: Debug token presence
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is EMPTY in this context"
+          else
+            echo "CLAUDE_CODE_OAUTH_TOKEN present, length=${#TOKEN}, prefix ok=$(case "$TOKEN" in sk-ant-oat*) echo yes;; *) echo no;; esac)"
+          fi
+      - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Explicit workflow token so the action needs no GitHub App install.
+          # This is the auto-provided GITHUB_TOKEN, not a secret you create.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
-            Review this PR against the conventions in CLAUDE.md
+            Review ${{ github.event_name == 'workflow_dispatch' && format('PR #{0}', inputs.pr_number) || 'this PR' }} against the conventions in CLAUDE.md
             (coding style, security, testing, change workflow).
-          claude_args: "--max-turns 6"
+          claude_args: >-
+            --max-turns 20
+            --allowedTools "Read,Glob,Grep,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Bash(gh pr comment:*),Bash(git diff:*),Bash(git log:*)"
