@@ -1,0 +1,895 @@
+## pacwich npm package: Overview
+
+`pacwich` is a CLI and TypeScript API to help manage JavaScript/TypeScript monorepos, working directly on top of Bun, npm, or pnpm workspaces. The pm is auto-detected from the project's lockfile (or pinned explicitly via config, env var, or `--pm` flag). The overall goal is a monorepo tool that is more lightweight than others while still offering powerful comparable features, requiring only a standard repo using the chosen package manager's workspaces.
+
+The CLI is recommended to be installed globally (which delegates to a local install if present), and/or installed locally in a project. Installation is required to use the TS API.
+
+pacwich's main features are to get metadata about the project and workspaces, and to run package.json scripts (or inline shell scripts) across workspaces.
+
+## Glossary
+
+- Project: usually synonymous with a monorepo, located at the directory containing the lockfile and root package.json. This is the core of `pacwich`'s functionality.
+- Workspace: a nested package within a project. Synonymous with pm's workspaces but can be enriched via `pacwich`'s optional configuration. The root package.json can be treated as a workspace as well, but by default, only nested packages are considered workspaces.
+- Inputs: files considered to be part of a workspace's source code, configurable per-workspace or per-workspace-script, by default all git-trackable files in a workspace's directory.
+- Script: an entry in the `scripts` field of a workspace's `package.json` file. pacwich can also run one-off commands known as "inline scripts," which can use the system shell (`sh -c` or `cmd /d /s /c` for windows, the default) or the Bun shell when opted in.
+
+## Notable features
+
+pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich list-affected`/`pacwich run-affected` for orchestrating builds, tests, etc. across only the workspaces that need them.
+
+pacwich detects the workspace dependency graph via explicit declarations in package.json.pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration.
+
+Optional config files: `pacwich.project.{ts,js,jsonc,json}` at root or `pacwich.workspace.{ts,js,jsonc,json}` at any workspace root, with utilities exported from `"pacwich/config"`.
+
+## Support
+
+`pacwich` can run via Bun or Node. Support is primarily for POSIX systems, while Windows cmd.exe is supported but lower priority.
+
+## Version requirements
+
+- **bun:** ^1.2.0
+- **node:** >=22.0.0 <=26.x
+- **pnpm:** >=10.0.0 <=11.x
+
+<!--End pacwich overview-->
+
+## pacwich npm package: Concepts
+
+### Workspace patterns
+
+Many features accept a list of workspace patterns to match a subset of workspaces:
+
+`[not:][(name|alias|path|tag):][re:]<value>`
+
+By default, a pattern matches the workspace name or alias: `my-workspace-name` or `my-alias-name`. Aliases are defined in config explained below.
+
+Patterns can include a wildcard to match only by workspace name: `my-workspace-*`.
+
+- Alias pattern specifier: `alias:my-alias-*`.
+- Path pattern specifier (supports glob): `path:packages/**/*`.
+- Name pattern specifier: `name:my-workspace-*`.
+- Tag pattern specifier: `tag:my-tag`.
+- Any pattern can start with `not:` to negate the pattern. (e.g. "not:my-workspace-name", "not:tag:my-tag-\*") This excludes workspaces that match any other present patterns from a result.
+- Regex pattern modifier can be applied before the pattern value: `re:` (e.g. "re:^my-workspace-.+" or "not:alias:re:^my-alias-.+")
+
+Patterns are always resolved as a list against the full workspace set. `not:` patterns only exclude — they need a positive pattern to subtract from. A list containing only `not:` patterns matches nothing. To express "all workspaces except X," pair the negation with an explicit positive like `*`: `pacwich run lint "*" "not:tag:legacy"`.
+
+#### Special selectors
+
+- Special root workspace selector: `@root`. This is a reference to the root workspace, whether it's included in a Project's workspace list or not.
+
+### Workspace Script Metadata
+
+Scripts ran via pacwich can access metadata about the workspace, script, and project
+via env vars. This same metadata can also be interpolated into inline scripts and appended args.
+
+```typescript
+// in a workspace's script invoked by pacwich using a metadata function
+import { getWorkspaceScriptMetadata } from "pacwich/script";
+
+// Use the helper within a script that was invoked via pacwich
+const projectPath = getWorkspaceScriptMetadata("projectPath");
+const projectName = getWorkspaceScriptMetadata("projectName");
+const workspaceName = getWorkspaceScriptMetadata("workspaceName");
+const workspacePath = getWorkspaceScriptMetadata("workspacePath");
+const workspaceRelativePath = getWorkspaceScriptMetadata(
+  "workspaceRelativePath",
+);
+const scriptName = getWorkspaceScriptMetadata("scriptName");
+```
+
+```typescript
+// In a script, but accessing the same data via plain environment variables (same values as previous example)
+const projectPath = process.env.PACWICH_PROJECT_PATH;
+const workspaceName = process.env.PACWICH_WORKSPACE_NAME;
+const workspacePath = process.env.PACWICH_WORKSPACE_PATH;
+const workspaceRelativePath = process.env.PACWICH_WORKSPACE_RELATIVE_PATH;
+const scriptName = process.env.PACWICH_SCRIPT_NAME;
+```
+
+```bash
+# interpolated
+pacwich run "bun <projectPath>/my-script.ts" --inline \
+  --inline-name="my-script-name" \
+  --args="<workspaceName> <workspacePath>"
+```
+
+### Affected workspaces
+
+A workspace is "affected" when something in its set of **inputs** has changed. Inputs default to:
+
+- Files in the workspace's directory (only git-trackable files; the default file pattern is `"."`)
+- Workspace dependencies. If a workspace dep is affected for any reason, dependents cascade as affected.
+- All non-workspace dependencies declared in its `package.json` (across all four maps: `dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`). Version changes are detected by diffing resolved versions in the active package manager's lockfile (`bun.lock`, `pnpm-lock.yaml`, or `package-lock.json`). For `peerDependencies`/`optionalDependencies`, lockfile presence is the gate. An unresolved optional (e.g. a platform-skipped native binding) emits no change.
+
+Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
+
+- `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern relative to the project root. Prefix `!` to exclude. Only git-trackable files match.
+- `workspacePatterns`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep).
+- `externalDependencies`: an allowlist of package names. Omitted = all external deps participate; `[]` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
+
+There are two diff sources:
+
+- **git** (default): diff `HEAD` against the configured base ref (default `main`, configurable via `defaults.affectedBaseRef` in the project config or `PACWICH_AFFECTED_BASE_REF_DEFAULT` env var). Uncommitted changes (staged, unstaged, untracked) are included by default. Gitignored files never participate.
+- **fileList**: pass changed files explicitly (paths, dirs, or globs). Bypasses git entirely.
+
+Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.
+
+<!--End pacwich concepts-->
+
+### pacwich npm package: CLI examples
+
+```bash
+# Optional alias if pacwich is not installed locally. A global install
+# of pacwich also auto-delegates to a project-local pacwich when one
+# is present, so just `pacwich` usually works once installed.
+alias pacwich="bunx pacwich"
+
+pacwich list-workspaces # human-readable output
+pacwich ls --json --pretty # ls is alias for list-workspaces
+pacwich ls "name:my-workspace-*" "alias:my-alias-*" "path:packages/**/*" # accepts workspace patterns
+
+# info includes the name, aliases, path, etc.
+pacwich workspace-info my-workspace
+pacwich info my-workspace --json --pretty # info is alias for workspace-info
+
+# list scripts available across the project, grouped by workspaces that have them
+pacwich list-scripts
+pacwich ls-scripts --name-only # ls-scripts is alias for list-scripts
+
+# info includes the script name and workspaces that have it in their package.json "scripts" field
+pacwich script-info my-script --json --pretty
+
+# list tags defined across workspaces with the workspaces that carry them
+pacwich list-tags
+pacwich ls-tags --json --pretty # ls-tags is alias for list-tags
+
+# info about a single tag (lists workspaces tagged with it)
+pacwich tag-info my-tag --json --pretty
+
+# run the package.json "lint" script for all workspaces that have it
+pacwich run-script lint
+
+# run is alias for run-script
+# run the package.json "lint" script for workspaces using matching specifiers
+pacwich run lint my-workspace-name "alias:my-alias-pattern-*" "path:my-glob/**/*" # accepts workspace patterns
+
+# A workspace's script will wait until any workspaces it depends on have completed
+# Similar to Bun's --filter behavior
+pacwich run lint --dep-order
+
+# Continue running scripts even if a dependency fails
+pacwich run lint --dep-order --ignore-dep-failure
+
+# special root workspace selector (works even if root workspace is not included)
+pacwich run lint @root
+
+# Scripts run in parallel by default
+pacwich run lint --parallel=false # Run in series
+
+# Default can be overridden by config or env var PACWICH_PARALLEL_MAX_DEFAULT
+pacwich run lint --parallel # default "auto", os.availableParallelism()
+pacwich run lint --parallel=2 # Run in parallel with a max of 2 concurrent scripts
+pacwich run lint --parallel=50% # 50% of os.availableParallelism()
+pacwich run lint --parallel=unbounded # run all in one batch
+
+# add args to the script command
+pacwich run lint --args="--my-arg=value"
+pacwich run lint --args="--my-arg=<workspaceName>" # use the workspace name in args
+
+# run the script as an inline command from the workspace directory
+pacwich run "bun build" --inline
+pacwich run "bun build" --inline --inline-name="my-script"
+# The default shell is "system" (sh -c on POSIX, cmd /d /s /c on Windows).
+# Opt into the Bun shell explicitly when desired:
+pacwich run "bun build" --inline --shell=bun
+
+# Use the grouped output style (default when on a TTY)
+pacwich run my-script --output-style=grouped
+
+# Set the max preview lines for script output in grouped output style
+pacwich run my-script --output-style=grouped --grouped-lines=auto
+pacwich run my-script --output-style=grouped --grouped-lines=10
+
+# Use simple script output with workspace prefixes (default when not on a TTY)
+pacwich run my-script --output-style=prefixed
+
+# Use the plain output style (no workspace prefixes)
+pacwich run my-script --output-style=plain
+
+# Write the full structured run result to a JSON file
+pacwich run my-script --json-outfile=./run-result.json
+
+# The script and workspace pattern positional args can be passed as flags instead
+pacwich run --script="my-script" --workspace-patterns="my-pattern-*"
+
+# Run a script interactively (with access to stdin, stdout, and stderr)
+# Only for one script and workspace. Output isn't captured, so output-related flags aren't available
+pacwich run-interactive my-interactive-script my-workspace-name-or-alias
+pacwich ri "sudo my-interactive-script" my-workspace-name-or-alias --inline -- my args
+# Flag options for positional script and workspace
+pacwich ri --script="my-interactive-script" --workspace="my-workspace-name-or-alias"
+
+# List affected workspaces (default: git diff HEAD vs the configured base ref, "main" by default)
+pacwich list-affected
+pacwich ls-affected # alias
+
+# Compare specific git refs
+pacwich ls-affected --base=my-branch-a --head=my-branch-b
+pacwich ls-affected -B my-branch-a -H my-branch-b # short forms
+
+# Resolve inputs for a specific script (uses scripts[name].inputs when configured)
+pacwich ls-affected --script=build
+
+# Ignore some uncommitted changes (uncommitted included by default)
+pacwich ls-affected --ignore-uncommitted # all of: staged, unstaged, untracked
+pacwich ls-affected --ignore-untracked
+pacwich ls-affected --ignore-unstaged
+pacwich ls-affected --ignore-staged
+
+# Skip workspace dep cascade (only direct file/external-dep changes flag a workspace)
+pacwich ls-affected --ignore-workspace-deps
+
+# Skip lockfile-based external dep version tracking
+pacwich ls-affected --ignore-external-deps
+
+# Bypass git entirely with an explicit list of changed files
+# (paths, dirs, globs; '!' to exclude; whitespace-separated)
+pacwich ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+pacwich ls-affected -F "packages/a/**/*.ts !packages/a/**/*.test.ts"
+
+# Per-workspace summary of why each workspace is affected
+pacwich ls-affected --explain
+pacwich ls-affected -e
+
+# Full per-file changes and dep cascade chain for each affected workspace
+pacwich ls-affected --explain --detailed
+pacwich ls-affected -e -D
+
+# JSON output (with --explain produces the full result object)
+pacwich ls-affected --json --pretty
+pacwich ls-affected --explain --json --pretty
+
+# Run a script across affected workspaces (accepts the same affected options
+# as ls-affected, plus the same script-execution options as run-script:
+# --parallel, --dep-order, --args, --output-style, --inline, etc.)
+pacwich run-affected build
+pacwich run-affected build --base=my-branch --ignore-uncommitted --dep-order
+pacwich run-affected build --files="packages/a/src/**/*.ts" --parallel=2
+pacwich run-affected "bun build" --inline --inline-name=build # inline command form
+
+# Detect implicit workspace dependencies (imports of other workspaces'
+# package names that aren't declared in the importing workspace's package.json).
+# Scans each workspace's inputs (defaultInputs.files, default ["."]);
+# only git-trackable files are considered.
+pacwich verify
+pacwich verify my-workspace-name "tag:my-tag" # limit to a subset via workspace patterns
+pacwich verify --strict # exit non-zero on any finding (default warns and exits 0)
+pacwich verify -s # short form
+pacwich verify --json --pretty # emit the full structured VerifyResult
+
+# Print diagnostic info (runtime, OS, shell, installed package manager versions, etc.)
+pacwich doctor
+pacwich doctor --json --pretty
+
+### Global Options ###
+# Root directory of project (walks up from cwd by default to find the
+# nearest ancestor package.json with a "workspaces" field, or, for pnpm,
+# a package.json next to a pnpm-workspace.yaml):
+pacwich --cwd=/path/to/project ls
+pacwich -d /path/to/project ls
+
+# Include root workspace as a normal workspace (default false):
+pacwich --include-root ls
+pacwich -r ls
+pacwich --no-include-root ls # override config/env var setting
+
+# Log level (debug|info|warn|error|silent, default info)
+pacwich --log-level=silent ls
+pacwich -l silent ls
+
+# Pin the package manager backend explicitly (overrides the project config
+# "packageManager" field and the PACWICH_PACKAGE_MANAGER env var).
+# "auto" picks from the lockfiles present in the project root.
+pacwich --pm=bun ls
+pacwich --pm=pnpm ls
+pacwich --pm=npm ls
+pacwich --pm=auto ls
+
+# Skip evaluating executable config files (pacwich.project.{ts,js},
+# pacwich.workspace.{ts,js}) for untrusted contexts. Only jsonc/json
+# and package.json configs are read. Also settable via env var
+# PACWICH_DISABLE_EXECUTABLE_CONFIGS_DEFAULT=true.
+pacwich --disable-executable-configs ls
+pacwich --no-disable-executable-configs ls # override config/env var setting
+```
+
+<!--End pacwich CLI examples-->
+
+### pacwich npm package: API examples
+
+The API is held in close parity with the CLI. It is developed first so that the CLI is a thin wrapper around the API.
+
+```typescript
+import { createFileSystemProject } from "pacwich";
+
+const project = createFileSystemProject({
+  // the options object itself and its properties are optional
+  rootDirectory: "path/to/your/project",
+  includeRootWorkspace: false,
+  // Optional. Defaults to "auto" (lockfile-based detection). Pass a
+  // concrete name to pin the backend explicitly.
+  packageManager: "auto", // "auto" | "bun" | "pnpm" | "npm"
+  // Optional. Skip evaluating executable config files
+  // (pacwich.project.{ts,js}, pacwich.workspace.{ts,js}) for
+  // untrusted contexts. Only jsonc/json/package.json configs are read.
+  disableExecutableConfigs: false,
+});
+
+project.name; // project name (typically the root package.json name)
+project.rootDirectory; // resolved project root directory
+project.packageManager; // the concrete backend name in use: "bun" | "pnpm" | "npm"
+project.workspaces; // array of all workspaces in the project
+project.rootWorkspace; // the root workspace (available even when not included in the workspaces array)
+project.config; // resolved project- and workspace-level configs
+
+project.findWorkspaceByName("my-workspace"); // find a workspace by name
+project.findWorkspaceByAlias("my-alias"); // find a workspace by alias
+project.findWorkspaceByNameOrAlias("my-workspace-or-alias"); // find a workspace by name or alias
+project.findWorkspacesByPattern(
+  "my-workspace-name",
+  "my-workspace-alias",
+  "my-name-pattern-*",
+  "alias:my-alias-*",
+  "path:my-glob/**/*",
+); // find workspaces by pattern like the CLI
+project.listWorkspacesWithScript("lint"); // workspaces that have a given script
+project.listWorkspacesWithTag("shared"); // workspaces that have a given tag
+
+// Plain JSON-serializable maps keyed alphabetically:
+project.scriptMap; // Record<string, ScriptDetails> where ScriptDetails = { name, workspaces }
+project.tagMap; // Record<string, TagDetails> where TagDetails = Workspace[]
+
+const { output, exit } = project.runWorkspaceScript({
+  script: "lint", // required
+  workspaceNameOrAlias: "my-workspace", // required
+  // boolean enables inline-with-defaults; pass an object to customize
+  // the inline script (script label, shell choice)
+  inline: { scriptName: "my-script", shell: "system" },
+  // args can be a string or an array of strings
+  // if string, the argv will be parsed POSIX-style
+  args: "--my-arg=value",
+  // ignore output from the script
+  ignoreOutput: false,
+  // run the script interactively to accept user input
+  // output is not captured (ignoreOutput not accepted and no output in return)
+  interactive: false,
+});
+
+const { output, summary, workspaces } = project.runScriptAcrossWorkspaces({
+  script: "lint",
+  workspacePatterns: [
+    "alias:my-alias-pattern-*",
+    "path:my-glob/**/*",
+    "workspace-name-a",
+    "workspace-alias-b",
+  ],
+  parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
+  dependencyOrder: true,
+  ignoreDependencyFailure: true,
+  // same as for runWorkspaceScript
+  args: ["--my", "--appended", "--args"],
+  // Optional, callback when script starts, skips, or exits
+  onScriptEvent: (event, { workspace, exitResult }) => {
+    // event: "start", "skip", "exit"
+  },
+});
+
+// Determine affected workspaces — git mode (default)
+project.determineAffectedWorkspaces({
+  diffSource: "git",
+  // optional: resolve inputs for a specific script (uses scripts[name].inputs)
+  script: "build",
+  // optional: skip workspace dep cascade
+  ignoreWorkspaceDependencies: false,
+  // optional: skip lockfile-based external dep version tracking
+  ignoreExternalDependencies: false,
+  diffOptions: {
+    baseRef: "main", // default from config / "main"
+    headRef: "HEAD", // default
+    ignoreUncommitted: false, // staged + unstaged + untracked
+    ignoreUntracked: false,
+    ignoreUnstaged: false,
+    ignoreStaged: false,
+  },
+});
+
+// Determine affected workspaces — fileList mode (bypass git)
+project.determineAffectedWorkspaces({
+  diffSource: "fileList",
+  // paths, directories, or globs (relative to project root); '!' to exclude
+  changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
+});
+
+// Run a script across affected workspaces. Accepts the same affected options
+// as determineAffectedWorkspaces, plus the script-execution options from
+// runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
+project.runAffectedWorkspaceScript({
+  script: "build",
+  diffSource: "git",
+  diffOptions: { baseRef: "main", ignoreUncommitted: true },
+  parallel: { max: 2 },
+  dependencyOrder: true,
+  ignoreDependencyFailure: true,
+});
+
+// Detect implicit workspace dependencies (imports of other workspaces'
+// package names that aren't declared in the importing workspace's
+// package.json). Returns a Promise<VerifyResult>.
+//
+// Scope: each workspace's inputs (`defaultInputs.files`, default
+// `["."]`) determine which files are scanned. Only git-trackable
+// files are considered, the same scope as affected resolution.
+const verifyResult = await project.verify({
+  // Optional. Limit to specific workspaces via workspace patterns.
+  workspacePatterns: ["my-workspace-name", "tag:my-tag"],
+  // Optional. When true, the returned result's `ok` is false on any
+  // finding (errors). Defaults to false (warnings only, `ok: true`).
+  strict: false,
+});
+// VerifyResult: { ok: boolean; errors: VerifyIssue[]; warnings: VerifyIssue[] }
+// VerifyIssue.name discriminates the rich `metadata` shape. Today the
+// only category is "implicitWorkspaceDependency".
+```
+
+`createMemoryProject` and the `MemoryProject` type are also exported but are flagged `@experimental`. They cover only the read-only `Project` surface today (no `runWorkspaceScript`, `runScriptAcrossWorkspaces`, `determineAffectedWorkspaces`, `runAffectedWorkspaceScript`, or `verify`) and the constructor shape is expected to change. Prefer `createFileSystemProject` for non-test code paths.
+
+## The Workspace object
+
+```jsonc
+{
+  // The name of the workspace from its package.json
+  "name": "my-workspace",
+  // Whether the workspace is the root workspace
+  "isRoot": false,
+  // The relative path to the workspace from the project root
+  "path": "my/workspace/path",
+  // The glob pattern from the project's workspaces declaration
+  // (root package.json "workspaces" field, or pnpm-workspace.yaml under pnpm)
+  // that this workspace was matched from
+  "matchPattern": "my/workspace/pattern/*",
+  // The scripts available in the workspace's package.json
+  "scripts": ["my-script"],
+  // Aliases defined in workspace configuration (pacwich.workspace.*)
+  "aliases": ["my-alias"],
+  // Tags defined in workspace configuration
+  "tags": ["my-tag"],
+  // Names of other workspaces that this workspace depends on
+  "dependencies": ["my-dependency"],
+  // Names of other workspaces that depend on this workspace
+  "dependents": ["my-dependent"],
+  // Non-workspace package deps declared in package.json (across all four maps).
+  // `source` is one of "dependencies" | "devDependencies" | "peerDependencies" | "optionalDependencies".
+  // `version` is the package.json range, with `catalog:`/`catalog:<name>` resolved when possible.
+  // `catalog` is present when declared via a catalog ref.
+  "externalDependencies": [
+    { "name": "lodash", "version": "^4.17.0", "source": "dependencies" },
+    { "name": "typescript", "version": "^5.0.0", "source": "devDependencies" },
+    {
+      "name": "react",
+      "version": "^18.0.0",
+      "source": "dependencies",
+      "catalog": { "name": "" },
+    },
+  ],
+}
+```
+
+<!--End pacwich API examples-->
+
+## pacwich npm package: Configuration files
+
+`pacwich` is a package that is zero-config by default but accepts optional configuration files for project-level and workspace-level settings.
+
+### Project config
+
+Optional project config can be placed in `pacwich.project.ts`/`pacwich.project.js`/`pacwich.project.jsonc`/`pacwich.project.json` in the root directory, or in the `"pacwich-project"` key of the root `package.json`.
+
+Config defaults here take precedence over environment variables. Explicit CLI arguments or API options take precedence over all other settings.
+
+```jsonc
+{
+  // Pin the package manager backend explicitly. When omitted, pacwich
+  // auto-detects from the lockfiles in the project root. The CLI `--pm`
+  // flag (and the API `packageManager` option) take precedence over this
+  // field, which in turn takes precedence over the `PACWICH_PACKAGE_MANAGER`
+  // env var. Not nested under "defaults" because it identifies the
+  // project, not a per-invocation preference.
+  "packageManager": "auto", // "auto" | "bun" | "pnpm" | "npm"
+  "defaults": {
+    "parallelMax": 5, // same options as seen in CLI examples above
+    "shell": "system", // "bun" or "system" (default "system")
+    "includeRootWorkspace": true, // treat root package.json as a normal workspace
+    "affectedBaseRef": "main", // default git base ref for affected resolution (env: PACWICH_AFFECTED_BASE_REF_DEFAULT)
+    // Default output style for `run-script` / `run-affected` when no
+    // --output-style flag is passed. CLI-only (ignored by API callers).
+    // "grouped" is still downgraded to "prefixed" when stdout is not a
+    // TTY. Env override: PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT.
+    "cliScriptOutputStyle": "prefixed", // "grouped" | "prefixed" | "plain" | "none"
+  },
+  "workspacePatternConfigs": [
+    // see Workspace Pattern Configs section below
+  ],
+  "verify": {
+    "workspaceDependencies": {
+      // Project-relative globs to skip during `pacwich verify` scanning.
+      // Single project-level escape hatch (no per-workspace verify config).
+      // Negation prefixes (`!`) are not honored here, since this is an
+      // exception list rather than an inputs list.
+      "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+    },
+  },
+}
+```
+
+> Note: pnpm projects place their workspace globs in `pnpm-workspace.yaml`'s top-level `packages:` key (and catalogs under `catalog:` / `catalogs:`), not in `package.json.workspaces`. pacwich reads them transparently for the pnpm backend.
+
+### mergeProjectConfig
+
+`mergeProjectConfig` merges multiple project configs left to right. Later configs take precedence for scalar fields. `workspacePatternConfigs` entries are concatenated. Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`.
+
+```ts
+import { mergeProjectConfig } from "pacwich/config";
+
+export default mergeProjectConfig(
+  { defaults: { parallelMax: 4 } },
+  { defaults: { shell: "system" } },
+  (prevConfig) => ({ defaults: { includeRootWorkspace: true } }),
+);
+```
+
+## Workspace config
+
+Optional config can be placed in `pacwich.workspace.ts`/`pacwich.workspace.js`/`pacwich.workspace.jsonc`/`pacwich.workspace.json` in a workspace directory, or in the `"pacwich"` key of the workspace's `package.json`.
+
+Aliases must be unique to each workspace and must not clash with other workspaces' `package.json` names.
+
+Tags are strings to group workspaces together. They do not need to be unique.
+
+```jsonc
+{
+  "alias": "my-alias", // can be array
+  "tags": ["my-tag"],
+  // Default inputs used to determine if the workspace is affected, applied to
+  // all scripts that don't configure their own inputs. See "Inputs" below.
+  "defaultInputs": {
+    "files": ["src/**/*.ts", "!src/**/*.test.ts"],
+    "workspacePatterns": ["tag:shared-lib"],
+    "externalDependencies": ["lodash", "react"],
+  },
+  "scripts": {
+    "lint": {
+      // set optional sorting order for scripts
+      "order": 1,
+    },
+    "build": {
+      // per-script inputs override defaultInputs for this script's affected resolution
+      "inputs": {
+        "files": ["src/**/*.ts", "/shared-types/**/*.ts"], // leading "/" = relative to the project root
+      },
+    },
+  },
+  "rules": {
+    "workspaceDependencies": {
+      // allowPatterns: only workspaces matching these patterns are permitted as dependencies
+      "allowPatterns": ["my-allow-pattern-*"],
+      // denyPatterns: workspaces matching these patterns are forbidden as dependencies.
+      // When combined with allowPatterns, deny filters within the allowed subset.
+      "denyPatterns": ["my-deny-pattern-*"],
+    },
+  },
+}
+```
+
+### Inputs
+
+The `defaultInputs` field (and the per-script `scripts[name].inputs` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (`WorkspaceInputsConfig`):
+
+- `files` — file paths, directories, or globs relative to the workspace's directory. Leading `/` makes a pattern relative to the project root. Prefix with `!` to exclude. Only git-trackable files are matched. Default when not provided is `["."]` (everything in the workspace dir).
+- `workspacePatterns` — workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep edge).
+- `externalDependencies` — allowlist of package names that participate in lockfile-change detection. Omitted = all external deps participate; `[]` = none participate; non-empty list = only listed names participate (intersected with the workspace's actual external deps from `package.json`).
+
+Per-script `inputs` fully replaces `defaultInputs` for that script. The two are not merged. If a script has its own `inputs` field, `defaultInputs` is ignored for that script.
+
+The `pacwich verify` command also reuses each workspace's `defaultInputs.files` to scope which files it scans for implicit workspace dependencies.
+
+### Workspace Dependency Rules
+
+Using the `rules.workspaceDependencies` field, you can define rules for which workspaces are allowed to be dependencies, using `allowPatterns`, `denyPatterns`, or both.
+
+`allowPatterns` defines the permitted subset of dependencies. `denyPatterns` forbids specific dependencies. When both are present, `denyPatterns` further filters within the subset permitted by `allowPatterns`.
+
+Workspace Patterns are used to match workspaces.
+
+### mergeWorkspaceConfig
+
+`mergeWorkspaceConfig` merges multiple workspace configs left to right. Arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`) are concatenated and deduplicated. Scalar fields later wins. `scripts` are deep-merged per key. Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`.
+
+```ts
+import { mergeWorkspaceConfig } from "pacwich/config";
+
+export default mergeWorkspaceConfig(
+  { alias: "a", tags: ["x"] },
+  { alias: "b", scripts: { build: { order: 1 } } },
+  (prevConfig) => ({ tags: ["y"] }),
+);
+// result: { alias: ["a", "b"], tags: ["x", "y"], scripts: { build: { order: 1 } } }
+```
+
+## Workspace Pattern Configs
+
+The project config's `workspacePatternConfigs` field applies workspace configs to groups of workspaces matched by [workspace patterns](/concepts/workspace-patterns). Entries are applied in order, left to right.
+
+Each entry's `config` is merged into the accumulated config of all matching workspaces using the same semantics as `mergeWorkspaceConfig`. The local workspace config (from `pacwich.workspace.*` or the `pacwich` key in `package.json`) is always the starting base.
+
+Pattern matching reflects the accumulated state: aliases and tags added by earlier entries are visible to later entries' patterns.
+
+```ts
+import { defineProjectConfig } from "pacwich/config";
+
+export default defineProjectConfig({
+  workspacePatternConfigs: [
+    {
+      patterns: ["path:packages/apps/**/*"],
+      config: { tags: ["app"] },
+    },
+    {
+      // "tag:app" matches because the entry above added it
+      patterns: ["tag:app"],
+      config: {
+        rules: { workspaceDependencies: { allowPatterns: ["tag:lib"] } },
+      },
+    },
+    {
+      patterns: ["tag:app"],
+      // Factory form: JS/TS only. Receives static workspace data and accumulated config.
+      config: (workspace, prevConfig) => ({
+        alias: workspace.name.replace(/^@my-scope\//, ""),
+      }),
+    },
+  ],
+});
+```
+
+### Factory function context (`RawWorkspace`)
+
+The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => WorkspaceConfig` receives:
+
+- `workspace.name` — package name from package.json
+- `workspace.isRoot` — whether this is the root workspace
+- `workspace.path` — relative path from project root
+- `workspace.matchPattern` — glob from the project's workspaces declaration that matched (root `package.json.workspaces`, or `pnpm-workspace.yaml` under pnpm)
+- `workspace.scripts` — sorted list of script names from package.json
+- `workspace.dependencies` — names of workspace dependencies
+- `workspace.dependents` — names of workspaces that depend on this one
+
+`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`.
+
+## TypeScript/JSON Config Files
+
+### TypeScript
+
+`pacwich.workspace.ts`
+
+```ts
+import { defineWorkspaceConfig } from "pacwich/config";
+
+export default defineWorkspaceConfig({
+  alias: "my-alias",
+  tags: ["my-tag"],
+});
+```
+
+`pacwich.project.ts`
+
+```ts
+import { defineProjectConfig } from "pacwich/config";
+
+export default defineProjectConfig({
+  packageManager: "pnpm",
+  defaults: {
+    parallelMax: 5,
+  },
+});
+```
+
+<!--End pacwich config-->
+
+## pacwich Contributing development
+
+Most work happens in the workspace at `workspaces/packages/pacwich`, the main npm package source. This is the assumed default location for development. `workspaces/libraries/pacwich-common` is the shared library for common utilities/data, e.g. between the main package
+and documentation website.
+
+The next most commonly developed workspace is `workspaces/web/documentation-website`, the documentation website.
+
+Useful development commands (all from root dir, no need to cd into workspaces, generally
+are using pacwich themselves under the hood):
+
+- Format via prettier: `bun format`
+- Run all lint scripts: `bun lint`
+- `bun pw [script] -- [...args]` runs one of pacwich's workspace scripts (other commands similarly available)
+  - Run tests against src directly via Bun: `bun pw test`
+  - Run a test that matches a pattern (vitest args accepted): `bun pw test -- myFilePattern`
+  - Build with rslib: `bun pw build`
+  - Build the test-friendly dist (`dist.test/`): `bun pw build-for-tests`
+  - Run tests against the dist.test build via Node: `bun pw test:build:node`
+- `bun docs [script]` runs one of the documentation website's scripts
+  - Build the documentation website: `bun docs build` (or `bun docs build:dev` for development build)
+- Try to lean on root-based scripts like above instead of cd'ing into workspaces (unless necessary) and use the pacwich CLI itself for this repo (can help test the CLI itself)
+
+Bun is the primary package manager and TS script runner for the project. The existence of `pnpm-lock.yaml` is due to Dependabot's lack of Bun support.
+
+## Coding style
+
+TypeScript is written in a generally functional/procedural style. Patterns in general in this project should remain fairly consistent but are not dogmatic, as will be explained below.
+
+Class-based patterns are seen but are not the default, such as the `Project` class, which encapsulates composable operations, since context of most of pacwich's functionality depends on the state of a given project. Classes are still abstracted away, such as how `Project`s are usually instantiated via `createFileSystemProject()`.
+
+The `Workspace` objects are a plain JSON-serializable objects to prevent complex class structures and maintain a functional-like style that generally separates process from data within the project context. Many generic utilities on top of workspaces are written as plain functions and then incorporated into a `Project`'s implementation details.
+
+### Packaging
+
+Feature packaging is preferred over layer packaging. The `src/internal/` directory leans more towards layer packaging for generic utilities.
+
+Module directories often contain an `index.ts` that simply uses `export *` for all files and subdirectories. However, `src/index.ts` defines the public-facing API, so this is where exports must be defined only explicitly.
+
+Do not import from `@pacwich/common` without a subpath like `@pacwich/common/cli` within pacwich's src/.
+
+### Naming and language features
+
+Variable names are camelCase and longer descriptive names are preferred over abbreviations. Functions should generally use a verb. Booleans read as a question, often using `is` or `has` prefix etc. SCREAMING_SNAKE_CASE is used for top-level constants and environment variables.
+
+Arrow functions are preferred, and a single object parameter is generally preferred over multiple parameters. Inline types are not encouraged, with a preference of a named type for object parameters and return types, so that these types can be reused and potentially exported.
+
+Object destructuring is encouraged.
+
+Don't use TypeScript `enum`s but prefer plain objects.
+
+### Style example:
+
+This example shows some common patterns used when a set of accepted values is needed. The main idea here is that the structure of this code is DRY and self-validating, since the `MyValue` type is inferred directly from the concrete `MY_VALUES` array, which is the one source of truth for both the type and runtime values. The `MY_BEHAVIOR_MAP` ensures each value has a handler when this type of branched logic is needed instead of using `switch`. Other modules importing from this can use the parameter and return types for `handleMyValue` as needed when composing logic.
+
+```typescript
+export const MY_VALUES = ["a", "b", "c"] as const;
+
+export type MyValue = (typeof MY_VALUES)[number];
+
+/** Description of the purpose of the options */
+export type MyFunctionOptions = {
+  /** The value to handle */
+  value: MyValue;
+  /** An optional flag */
+  isSomething?: boolean;
+};
+
+/** Description of the purpose of the result */
+export type MyFunctionResult = {
+  /** Whether the operation was successful */
+  success: boolean;
+};
+
+const MY_BEHAVIOR_MAP: Record<
+  MyValue,
+  (options: MyFunctionOptions) => MyFunctionResult
+> = {
+  a: ({ isSomething }) => {
+    console.log("a", isSomething);
+    return { success: true };
+  },
+  b: ({ isSomething }) => {
+    console.log("b", isSomething);
+    return { success: true };
+  },
+  c: ({ isSomething }) => {
+    console.log("c", isSomething);
+    return { success: true };
+  },
+};
+
+/** Description of the purpose of the function */
+export const handleSomething = (options: MyFunctionOptions): MyFunctionResult =>
+  MY_BEHAVIOR_MAP[options.value](options);
+
+// Example usage
+const { success } = handleSomething({ value: "a", isSomething: true });
+```
+
+### Comments
+
+#### Public Exports
+
+Any public export is encouraged to have TSDoc for about every possible target (types, properties of types, functions, etc.).
+
+Don't use TSDoc tags that are already inferred by TS (e.g. params, which should generally be in a parameter object that has
+its own TSDoc for itself and its properties).
+
+Functions and methods should have at least a minimal `@example` that covers parameters, and types used as parameters and return types
+may benefit from a brief example too, like an example object of values.
+
+#### Internal Code
+
+Prefer descriptive code with minimal comments, but they are still encouraged to add clarity,
+explain reasoning (especially for something unconventional, hacky, or otherwise surprising),
+and provide light structure.
+
+Comments should be kept brief and add context that isn't immediately
+inferrable by the code naming underneath it (e.g. no "// This runs a script across workspaces"
+over `function runScriptAcrossWorkspaces`.) Structural comments (e.g headings for grouping etc.)
+should also be minimal, more useful in grouping meaningful chunks of lengthy repetition and
+especially long flat spans of code, but are not as encouraged if the code's nesting/naming would
+provide the same structure/meaning already.
+
+Avoid em dashes and prose semicolons in general.
+
+VSCode settings encourage the "Better Comments" extension for highlighted comments.
+However, prefer TSDoc `@todo` over `TODO`.
+
+### Security Considerations
+
+- External strings (e.g. from package.json, pacwich config files, cli/api input, etc.)
+  - If added to a shell command string such as via interpolation, use available shell-quote library to sanitize (note that pacwich often uses temp script files instead of plain argv to execute subprocesses)
+  - If used in CLI output, strip ANSI/control codes to prevent terminal display manipulation (minor exceptions for allowed ANSI in workspace script output etc.)
+  - If used in subprocess argv like how affected feature git commands are constructed, prevent injections like CLI flags (e.g. how the `--base` option is processed)
+- Temp files and similar: prevent TOCTOU vulnerabilities by using atomic file operations or proper locking mechanisms.
+- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option (defaulting on for the `mcp-server` command) restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
+- GitHub actions
+  - External actions versions must be SHA-pinned (dev should likely look up latest version)
+  - Install dependencies with `--frozen-lockfile` and `--ignore-scripts` if possible
+  - Publish/deploy workflows should use the `pacwich--prod` environment
+  - Workflows should generally simply avoid instances where a fork's code is checked out in the base repo's security context, especially on trigger (e.g. `pull_request_target`)
+- Note that this is not an exhaustive list. Since this is a public package that has supply chain exposure, security considerations should be high priority.
+
+### Testing practices
+
+Except when unreasonably complex to test, generally speaking, all feature additions and fixes should include tests. This means that all CLI commands and their options that can be passed should be verified.
+
+Testing both and API feature and the CLI version of it is necessary to ensure that arguments etc. are handled correctly in both places. It may often make sense to do the most exhaustive behavior testing on the API and then ensure the CLI passes all options correctly to this API more simply, but without making too much assumption that the CLI "must be fine" just because the API does.
+
+Sometimes important internals (like the generic `runScripts` function) are tested to ensure the core logic driving features work, even if they aren't exposed publicly, which can help with diagnosing issues and making more focused logic tests that require less boilerplate/setup.
+
+#### Test cases
+
+Test cases should be written at the very minimum for the following:
+
+- CLI feature:
+  - At least one case per form of command (e.g. if short form is provided)
+  - At least one case per positional or flag option, again with at least one per arg/option form
+  - If option takes specific values, one case per value, and at least one case of an unsupported value error
+  - If option takes multiple types (e.g. number or freeform string), one per type, and at least one for an invalid type
+  - Any command strings that would result in a CLI-specific error for the feature
+  - When many options/args possible, the different combinations of how these could be passed together
+
+- API feature:
+  - Similar to CLI: at least one case per arg/option, cases per arg value and/or type, cases per invalid arg, and cases for combinations of args/options
+  - Cases for errors thrown when args/options are passed that violate a TS type are only needed for public APIs (internal utilities can rely on source TS compile check, while public surface could be used by JS package user)
+
+- Other (general):
+  - Array-like arguments/options: cases for empty array, single item array, multi-item array (2 and more). When items can be multiple types, similar cases for different types and combinations of different types
+  - Cases using real test projects that change behavior or surface potential edge cases
+  - There don't need to necessarily be combinations/permutations of every single case requirement described here, just enough for confidence in each situation.
+  - Since most features are developed in the API followed by the CLI acting as a wrapper over the API, the API surface can be used to put a feature through the wringer the most, while the CLI should be as complete as described above but can be tested just to the point of confirmation of successful API passthrough of all options.
+
+tests/packageManagers/pmMatrix should likely be added to regularly to help ensure conformance across adapters. The project/ tests inside here
+should hit all Project properties/methods across the matrix of pms, and the adapter/ tests help ensure the internal adapter is consistent.
+
+### Change Workflow
+
+- General implementation precedence for each applicable surface: core utilities (if needed) -> config changes (if needed) -> public API -> CLI wrapper around API
+- Each above stage should include tests before moving on
+- Whether the above stages are planned or implemented separately, in combination, or in smaller chunks of each will be case-by-case depending on complexity
+- When implementing a plan that involves multiple concerns, pause for a commit between each if not instructed to commit yourself
+- If a new set of errors is defined via `defineErrors`, include this in the public exports (`src/errorExports.ts`)
+
+<!--End pacwich development-->
+
+<!--pacwich v0.2.1-->

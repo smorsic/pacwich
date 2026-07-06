@@ -1,10 +1,7 @@
-# Generated file
-AGENTS.md
-mise.toml
-
 #  Local files
 mise.local.toml
 CLAUDE.local.md
+AGENTS.local.md
 .claude/*
 !.claude/skills/
 

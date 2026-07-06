@@ -1,0 +1,8 @@
+[tools]
+node = '24.15.0'
+bun = '1.3.14'
+pnpm = '11.2.2'
+
+[env]
+# Allow pacwich global install to work within this repo
+PACWICH_DISABLE_LOCAL_DELEGATION = true
