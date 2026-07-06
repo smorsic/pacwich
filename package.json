@@ -72,7 +72,7 @@
     "portless-start": "portless proxy start --no-tls",
     "portless-stop": "portless proxy stop",
     "init-pacwich-package": "PACWICH_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/pacwich run create-modules && bun --cwd=workspaces/libraries/pacwich-common run build:dts",
-    "prepare": "husky"
+    "prepare": "bun prepare.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
