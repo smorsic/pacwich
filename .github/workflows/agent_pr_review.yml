@@ -33,26 +33,15 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', inputs.pr_number) || '' }}
-      # TEMPORARY debug: prints only the secret's length, never its value.
-      # Remove once the auth issue is resolved.
-      - name: Debug token presence
-        env:
-          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "CLAUDE_CODE_OAUTH_TOKEN is EMPTY in this context"
-          else
-            echo "CLAUDE_CODE_OAUTH_TOKEN present, length=${#TOKEN}, prefix ok=$(case "$TOKEN" in sk-ant-oat*) echo yes;; *) echo no;; esac)"
-          fi
       - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Explicit workflow token so the action needs no GitHub App install.
-          # This is the auto-provided GITHUB_TOKEN, not a secret you create.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Token passed so GitHub app integration isn't needed
           prompt: |
-            Review ${{ github.event_name == 'workflow_dispatch' && format('PR #{0}', inputs.pr_number) || 'this PR' }} against the conventions in CLAUDE.md
-            (coding style, security, testing, change workflow).
+            Review PR #${{ github.event.pull_request.number || inputs.pr_number }}. Look for possible
+            bugs, security issues, and violations of the conventions in CLAUDE.md.
+
+            If no suggestions for change are needed, still at least post a PR comment summarizing your review.
           claude_args: >-
             --max-turns 20
             --allowedTools "Read,Glob,Grep,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Bash(gh pr comment:*),Bash(git diff:*),Bash(git log:*)"
