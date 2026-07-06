@@ -66,6 +66,7 @@
     "create-agents-md": "pacwich -l warn ri create-agents-md meta",
     "create-readme": "pacwich -l warn ri create-readme meta",
     "create-mise-toml": "pacwich -l warn ri create-mise-toml meta",
+    "create-claude-skill-links": "pacwich -l warn ri create-claude-skill-links meta",
     "print-dev-bun-version": "pacwich -l silent ri print-dev-tool-version -- bun",
     "print-dev-node-version": "pacwich -l silent ri print-dev-tool-version -- node",
     "mise": "bun mise.ts",

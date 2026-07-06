@@ -5,6 +5,7 @@
     "create-agents-md": "bun scripts/createAgentsMd.ts",
     "create-readme": "bun scripts/createReadme.ts",
     "create-mise-toml": "bun scripts/createMiseToml.ts",
+    "create-claude-skill-links": "bun scripts/createClaudeSkillLinks.ts",
     "print-dev-tool-version": "bun scripts/printDevToolVersion.ts",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
