@@ -2,8 +2,9 @@
 mise.local.toml
 CLAUDE.local.md
 AGENTS.local.md
+
+# Note: skills generated from .agents
 .claude/*
-!.claude/skills/
 
 # generic personal ignored files
 *ignore-me*
