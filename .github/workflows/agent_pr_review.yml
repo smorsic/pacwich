@@ -33,6 +33,17 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', inputs.pr_number) || '' }}
+      # TEMPORARY debug: prints only the secret's length, never its value.
+      # Remove once the auth issue is resolved.
+      - name: Debug token presence
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "CLAUDE_CODE_OAUTH_TOKEN is EMPTY in this context"
+          else
+            echo "CLAUDE_CODE_OAUTH_TOKEN present, length=${#TOKEN}, prefix ok=$(case "$TOKEN" in sk-ant-oat*) echo yes;; *) echo no;; esac)"
+          fi
       - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
