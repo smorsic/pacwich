@@ -31,6 +31,13 @@ export interface CliInstallProps {
   docLinks?: boolean;
 }
 
+const COMPLETIONS_TEXT = `
+# Print help for installing completions
+pacwich completion
+# Attempt to automatically install completions for your shell
+pacwich completion install
+`;
+
 export const CliInstall = ({ docLinks }: CliInstallProps) => {
   const globalInstallDescription = (
     <>
@@ -47,7 +54,7 @@ export const CliInstall = ({ docLinks }: CliInstallProps) => {
   );
 
   const createGlobalInstallCode = (pm: PackageManagerName) => {
-    return PM_COMMANDS[pm].globalInstall;
+    return PM_COMMANDS[pm].globalInstall + "\n" + COMPLETIONS_TEXT;
   };
 
   const createLocalInstallCode = (pm: PackageManagerName) => {
@@ -125,7 +132,11 @@ export const CliInstallAlt = () => {
         <div key={`cli-install-${pm}`}>
           <h3>{pm}:</h3>
           <div>
-            Global install: <code>{commands.globalInstall}</code>
+            Global install:{" "}
+            <code>
+              {commands.globalInstall}
+              {COMPLETIONS_TEXT}
+            </code>
             <br />
             Local install: <code>{commands.localInstall}</code>
             <br />
