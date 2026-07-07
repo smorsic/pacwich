@@ -33,6 +33,9 @@ export const PROJECT_CONFIG_JSON_SCHEMA = {
           type: "string",
           enum: OUTPUT_STYLE_VALUES,
         },
+        maxOutputBufferBytes: {
+          type: ["number", "string"],
+        },
       },
     },
     workspacePatternConfigs: {

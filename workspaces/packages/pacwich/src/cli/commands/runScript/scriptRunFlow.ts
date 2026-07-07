@@ -11,6 +11,7 @@ import type {
   RunScriptAcrossWorkspacesOptions,
   RunScriptAcrossWorkspacesResult,
 } from "../../../project";
+import { parseOutputBufferBytes } from "../../../runScript";
 import type { ProjectCommandContext } from "../commandHandlerUtils";
 import {
   getDefaultOutputStyle,
@@ -43,6 +44,7 @@ export type SharedRunScriptCliOptions = {
   jsonOutfile: string | undefined;
   outputStyle: string | undefined;
   groupedLines: string | undefined;
+  maxOutputBuffer: string | undefined;
 };
 
 /**
@@ -112,6 +114,19 @@ export const handleScriptRunFlow = async ({
           ? false
           : { max: cliOptions.parallel as ParallelMaxValue };
 
+  let maxOutputBufferBytes: number | undefined;
+  if (cliOptions.maxOutputBuffer !== undefined) {
+    try {
+      maxOutputBufferBytes = parseOutputBufferBytes(cliOptions.maxOutputBuffer);
+    } catch {
+      logger.error(
+        `Invalid --max-output-buffer value: ${cliOptions.maxOutputBuffer}. Expected a byte count, a size like "16MB", or "unbounded".`,
+      );
+      process.exit(1);
+      return;
+    }
+  }
+
   const { output, summary, workspaces } = await runner({
     script: script as string,
     inline,
@@ -119,6 +134,7 @@ export const handleScriptRunFlow = async ({
     dependencyOrder: cliOptions.depOrder,
     ignoreDependencyFailure: cliOptions.ignoreDepFailure,
     ignoreOutput: outputStyle === "none",
+    maxOutputBufferBytes,
     onScriptEvent: (event, { workspace, exitResult }) => {
       setTimeout(() =>
         // place at end of call stack so listeners in render func receive event

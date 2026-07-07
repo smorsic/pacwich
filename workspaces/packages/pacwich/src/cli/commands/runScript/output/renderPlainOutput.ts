@@ -5,6 +5,7 @@ import type {
 } from "../../../../project";
 import type { OutputStreamName } from "../../../../runScript";
 import type { WriteOutputOptions } from "../../../createCli";
+import { formatDroppedOutputNotice } from "./droppedOutputNotice";
 import { sanitizeChunk } from "./sanitizeChunk";
 
 /** The metadata tagging each chunk/event of a grouped run's merged output. */
@@ -19,9 +20,16 @@ export type RenderPlainOutputOptions = {
 
 /**
  * Splits a sanitized chunk into complete formatted lines, keeping the trailing
- * incomplete line in `buffers[workspaceName]` until a later chunk completes it.
- * Mutates `buffers`. Shared by the plain/prefixed and grouped line generators
- * so all three styles buffer at identical line granularity.
+ * incomplete line in `buffers[workspaceName]` until a later chunk completes it
+ * (or {@link flushChunkLineBuffer} emits it when the stream ends). Mutates
+ * `buffers`. Shared by the plain/prefixed and grouped line generators so all
+ * three styles buffer at identical line granularity.
+ *
+ * Only completed lines are yielded: the final `split("\n")` segment is always
+ * the incomplete trailing line (or `""` when `content` ended in a newline), so
+ * it is held back rather than emitted. Emitting it here too would re-yield the
+ * same partial line on every subsequent chunk (duplicating output, and going
+ * quadratic for a long stream with no newlines).
  */
 function* bufferChunkLines(
   chunk: string,
@@ -29,18 +37,31 @@ function* bufferChunkLines(
   buffers: Record<string, string>,
   formatLine: (line: string) => string,
 ): Generator<string> {
-  const prior = buffers[workspaceName] ?? "";
-
-  const content = prior + chunk;
+  const content = (buffers[workspaceName] ?? "") + chunk;
   const lines = content.split("\n");
 
-  for (const line of lines) {
+  for (const line of lines.slice(0, -1)) {
     if (line) yield formatLine(line);
   }
 
-  buffers[workspaceName] = content.endsWith("\n")
-    ? ""
-    : (lines[lines.length - 1] ?? "");
+  buffers[workspaceName] = lines[lines.length - 1] ?? "";
+}
+
+/**
+ * Emit any held-back trailing line for `workspaceName` (output that ended
+ * without a final newline) and clear it. Call when a stream is fully drained
+ * so the last unterminated line is not lost.
+ */
+function* flushChunkLineBuffer(
+  workspaceName: string,
+  buffers: Record<string, string>,
+  formatLine: (line: string) => string,
+): Generator<string> {
+  const remainder = buffers[workspaceName];
+  if (remainder) {
+    buffers[workspaceName] = "";
+    yield formatLine(remainder);
+  }
 }
 
 export async function* generatePlainOutputLines(
@@ -48,21 +69,50 @@ export async function* generatePlainOutputLines(
   { stripDisruptiveControls = true, prefix = false }: RenderPlainOutputOptions,
 ) {
   const workspaceLineBuffers: Record<string, string> = {};
+  const workspaceMetadata: Record<string, GroupedOutputMetadata> = {};
 
-  for await (const { metadata, chunk } of output.text()) {
+  const formatLine = (workspaceName: string, line: string) =>
+    `\x1b[0m${prefix ? `[${stripANSI(workspaceName)}] ${line}` : line}`;
+
+  for await (const { metadata, chunk, droppedBytesBefore } of output.text()) {
     const workspaceName = metadata.workspace.name;
-    const sanitizedChunk = sanitizeChunk(chunk, stripDisruptiveControls);
+    workspaceMetadata[workspaceName] = metadata;
 
-    const formatLine = (line: string) =>
-      `\x1b[0m${prefix ? `[${stripANSI(workspaceName)}] ${line}` : line}`;
+    if (droppedBytesBefore) {
+      // Output was dropped here: the buffered partial line is no longer
+      // contiguous with what follows, so clear it (don't glue across the gap)
+      // and note the drop inline before the retained output resumes.
+      workspaceLineBuffers[workspaceName] = "";
+      yield {
+        line: formatLine(
+          workspaceName,
+          formatDroppedOutputNotice(droppedBytesBefore),
+        ),
+        metadata,
+      };
+    }
+
+    const sanitizedChunk = sanitizeChunk(chunk, stripDisruptiveControls);
 
     for (const line of bufferChunkLines(
       sanitizedChunk,
       workspaceName,
       workspaceLineBuffers,
-      formatLine,
+      (line) => formatLine(workspaceName, line),
     )) {
       yield { line, metadata };
+    }
+  }
+
+  // Flush trailing lines for any workspace whose output ended without a final
+  // newline, so the last line is not dropped.
+  for (const workspaceName of Object.keys(workspaceLineBuffers)) {
+    for (const line of flushChunkLineBuffer(
+      workspaceName,
+      workspaceLineBuffers,
+      (line) => formatLine(workspaceName, line),
+    )) {
+      yield { line, metadata: workspaceMetadata[workspaceName] };
     }
   }
 }
@@ -91,16 +141,35 @@ export async function* generateGroupedOutputLines(
 ): AsyncGenerator<GroupedOutputEvent<GroupedOutputMetadata>> {
   const workspaceLineBuffers: Record<string, string> = {};
 
+  const formatLine = (line: string) => `\x1b[0m${line}`;
+
   for await (const event of output.textWithCompletion()) {
+    const workspaceName = event.metadata.workspace.name;
+
     if (event.type === "end") {
+      // Flush any held-back trailing line before signaling the stream drained,
+      // so output without a final newline is not lost.
+      for (const line of flushChunkLineBuffer(
+        workspaceName,
+        workspaceLineBuffers,
+        formatLine,
+      )) {
+        yield { type: "line", line, metadata: event.metadata };
+      }
       yield { type: "end", metadata: event.metadata };
       continue;
     }
 
-    const workspaceName = event.metadata.workspace.name;
-    const sanitizedChunk = sanitizeChunk(event.chunk, stripDisruptiveControls);
+    if (event.droppedBytesBefore) {
+      workspaceLineBuffers[workspaceName] = "";
+      yield {
+        type: "line",
+        line: formatLine(formatDroppedOutputNotice(event.droppedBytesBefore)),
+        metadata: event.metadata,
+      };
+    }
 
-    const formatLine = (line: string) => `\x1b[0m${line}`;
+    const sanitizedChunk = sanitizeChunk(event.chunk, stripDisruptiveControls);
 
     for (const line of bufferChunkLines(
       sanitizedChunk,

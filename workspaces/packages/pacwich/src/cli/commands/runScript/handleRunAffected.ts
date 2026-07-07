@@ -36,6 +36,7 @@ export const runAffected = handleProjectCommand(
     options.inlineName = options.inlineName?.trim();
     options.args = options.args?.trim();
     options.jsonOutfile = options.jsonOutfile?.trim();
+    options.maxOutputBuffer = options.maxOutputBuffer?.trim();
     options.parallel =
       typeof options.parallel === "string"
         ? options.parallel.trim()

@@ -1,3 +1,4 @@
+import { InvalidJSTypeError, IS_WINDOWS } from "../../../../src/internal/core";
 import {
   createFileSystemProject,
   type RunWorkspaceScriptMetadata,
@@ -697,6 +698,95 @@ describe("FileSystemProject runScriptAcrossWorkspaces - basic", () => {
           parallel: { max: "not-a-number" as never },
         }),
       ).toThrow(/Invalid parallel max value/);
+    });
+  });
+
+  describe("maxOutputBufferBytes option", () => {
+    test("throws for a non-number/string value", () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("default"),
+      });
+      expect(() =>
+        project.runScriptAcrossWorkspaces({
+          script: "all-workspaces",
+          maxOutputBufferBytes: true as unknown as number,
+        }),
+      ).toThrow(InvalidJSTypeError);
+    });
+
+    test("throws for an unparseable value", () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("default"),
+      });
+      expect(() =>
+        project.runScriptAcrossWorkspaces({
+          script: "all-workspaces",
+          maxOutputBufferBytes: "notasize" as unknown as number,
+        }),
+      ).toThrow(/output buffer size/i);
+    });
+
+    test.skipIf(IS_WINDOWS)(
+      "bounds retained output per script and reports drops",
+      async () => {
+        // PRODUCED >> CAP so the retained tail stays a small fraction despite
+        // the post-summary drain/consume race; exact semantics are pinned in
+        // processOutput.test.ts.
+        const PRODUCED = 4_000_000;
+        const CAP = 100_000;
+        const project = createFileSystemProject({
+          rootDirectory: getProjectRoot("default"),
+        });
+
+        const { output, summary } = project.runScriptAcrossWorkspaces({
+          workspacePatterns: ["application-a"],
+          script: `yes x | head -c ${PRODUCED}`,
+          inline: { scriptName: "flood" },
+          parallel: false,
+          maxOutputBufferBytes: CAP,
+        });
+
+        await summary;
+
+        let retained = 0;
+        let dropped = 0;
+        for await (const event of output.textWithCompletion()) {
+          if (event.type === "chunk") retained += event.chunk.length;
+          else if (event.metadata.streamName === "stdout")
+            dropped = event.droppedBytes;
+        }
+
+        expect(dropped).toBeGreaterThan(0);
+        expect(retained + dropped).toBe(PRODUCED);
+        expect(retained).toBeLessThan(PRODUCED / 2);
+      },
+    );
+
+    test.skipIf(IS_WINDOWS)("'unbounded' retains all output", async () => {
+      const PRODUCED = 4_000_000;
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("default"),
+      });
+
+      const { output, summary } = project.runScriptAcrossWorkspaces({
+        workspacePatterns: ["application-a"],
+        script: `yes x | head -c ${PRODUCED}`,
+        inline: { scriptName: "flood" },
+        parallel: false,
+        maxOutputBufferBytes: "unbounded",
+      });
+
+      await summary;
+
+      let retained = 0;
+      let dropped = 0;
+      for await (const event of output.textWithCompletion()) {
+        if (event.type === "chunk") retained += event.chunk.length;
+        else dropped += event.droppedBytes;
+      }
+
+      expect(dropped).toBe(0);
+      expect(retained).toBe(PRODUCED);
     });
   });
 });

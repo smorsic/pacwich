@@ -2,6 +2,7 @@ import {
   type ProjectConfig,
   type ResolvedProjectConfig,
   type ResolvedProjectVerifyConfig,
+  getUserEnvVarName,
 } from "@pacwich/common/config";
 import {
   OUTPUT_STYLE_VALUES,
@@ -13,7 +14,12 @@ import {
 import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
 import { validate } from "../../internal/generated/ajv/validateProjectConfig";
 import { logger } from "../../internal/logger";
-import { determineParallelMax, resolveScriptShell } from "../../runScript";
+import {
+  DEFAULT_OUTPUT_BUFFER_BYTES,
+  determineParallelMax,
+  parseOutputBufferBytes,
+  resolveScriptShell,
+} from "../../runScript";
 import { getUserEnvVar } from "../userEnvVars";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
@@ -84,6 +90,37 @@ const resolvePackageManagerConfigValue = (
   return "auto";
 };
 
+/**
+ * Precedence for the resolved cap: config value > env var >
+ * {@link DEFAULT_OUTPUT_BUFFER_BYTES}. Accepts a byte count, a human size
+ * (`"16MB"`), or `"unbounded"` (=> `Infinity`). Invalid env var values are
+ * ignored with a warning and fall back to the default (config values are
+ * AJV-validated for type but parsed here, so an invalid config string throws
+ * upstream via `parseOutputBufferBytes`).
+ */
+const resolveMaxOutputBufferBytesConfigValue = (
+  configValue: number | string | undefined,
+): number => {
+  if (configValue !== undefined) {
+    return parseOutputBufferBytes(configValue, " (set by project config)");
+  }
+  const envValue = getUserEnvVar("outputBufferBytesDefault");
+  if (envValue === undefined) return DEFAULT_OUTPUT_BUFFER_BYTES;
+  try {
+    return parseOutputBufferBytes(
+      envValue,
+      ` (set by env var ${getUserEnvVarName("outputBufferBytesDefault")})`,
+    );
+  } catch {
+    logger.warn(
+      `Ignoring invalid ${getUserEnvVarName(
+        "outputBufferBytesDefault",
+      )} value ${JSON.stringify(envValue)}. Falling back to the default.`,
+    );
+    return DEFAULT_OUTPUT_BUFFER_BYTES;
+  }
+};
+
 const resolveProjectVerifyConfig = (
   config: ProjectConfig["verify"],
 ): ResolvedProjectVerifyConfig => ({
@@ -119,6 +156,9 @@ export const resolveProjectConfig = (
       ),
       cliScriptOutputStyle: resolveCliScriptOutputStyleConfigValue(
         config.defaults?.cliScriptOutputStyle,
+      ),
+      maxOutputBufferBytes: resolveMaxOutputBufferBytesConfigValue(
+        config.defaults?.maxOutputBufferBytes,
       ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],

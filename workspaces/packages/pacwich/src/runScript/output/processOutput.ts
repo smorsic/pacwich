@@ -1,5 +1,6 @@
 import {
   PacwichError,
+  type AsyncIterableQueue,
   type SimpleAsyncIterable,
   createAsyncIterableQueue,
   defineErrors,
@@ -16,6 +17,13 @@ export type ProcessOutputChunk<
   metadata: Metadata;
   /** The output chunk */
   chunk: Chunk;
+  /**
+   * Bytes dropped from the in-memory buffer immediately before this chunk,
+   * because retained output exceeded the configured output buffer cap.
+   * Absent (or `0`) when no output was dropped before this chunk. Consumers
+   * can render an inline truncation marker when present.
+   */
+  droppedBytesBefore?: number;
 };
 
 export type ByteChunk<Metadata extends object = object> = ProcessOutputChunk<
@@ -39,6 +47,11 @@ export type TextOutput<Metadata extends object = object> = SimpleAsyncIterable<
 export interface ProcessOutput<Metadata extends object = object> {
   /** The metadata tagging every chunk this process produces. */
   readonly metadata: Metadata;
+  /**
+   * Cumulative bytes dropped from this process's output buffer to stay within
+   * the configured cap. Always `0` for an unbounded buffer.
+   */
+  readonly droppedBytes: number;
   bytes(): BytesOutput<Metadata>;
   text(): TextOutput<Metadata>;
 }
@@ -48,9 +61,20 @@ const ERRORS = defineErrors(PacwichError, "OutputStreamStarted");
 class _ProcessOutput<
   Metadata extends object = object,
 > implements ProcessOutput<Metadata> {
-  constructor(stream: ByteStream, metadata: Metadata) {
+  constructor(
+    stream: ByteStream,
+    metadata: Metadata,
+    maxBufferedBytes?: number,
+  ) {
     this.#inputStream = stream;
     this.#metadata = metadata;
+    this.#byteChunkQueue =
+      maxBufferedBytes !== undefined && Number.isFinite(maxBufferedBytes)
+        ? createAsyncIterableQueue<Uint8Array<ArrayBufferLike>>({
+            maxBufferedBytes,
+            measureItem: (chunk) => chunk.byteLength,
+          })
+        : createAsyncIterableQueue<Uint8Array<ArrayBufferLike>>();
 
     this.#done = new Promise((resolve, reject) => {
       this.#onDone = (error) => {
@@ -95,6 +119,10 @@ class _ProcessOutput<
     return this.#isCancelled;
   }
 
+  get droppedBytes(): number {
+    return this.#byteChunkQueue.droppedBytes;
+  }
+
   bytes(): BytesOutput<Metadata> {
     this.#onStart();
 
@@ -102,8 +130,13 @@ class _ProcessOutput<
     const byteChunkQueue = this.#byteChunkQueue;
 
     return (async function* () {
+      let lastDropped = 0;
       for await (const chunk of byteChunkQueue) {
-        yield { metadata, chunk };
+        const droppedBytesBefore = byteChunkQueue.droppedBytes - lastDropped;
+        lastDropped = byteChunkQueue.droppedBytes;
+        yield droppedBytesBefore > 0
+          ? { metadata, chunk, droppedBytesBefore }
+          : { metadata, chunk };
       }
     })();
   }
@@ -116,8 +149,14 @@ class _ProcessOutput<
 
     return (async function* () {
       const decoder = new TextDecoder();
+      let lastDropped = 0;
       for await (const byteChunk of byteChunkQueue) {
-        yield { metadata, chunk: decoder.decode(byteChunk, { stream: true }) };
+        const droppedBytesBefore = byteChunkQueue.droppedBytes - lastDropped;
+        lastDropped = byteChunkQueue.droppedBytes;
+        const chunk = decoder.decode(byteChunk, { stream: true });
+        yield droppedBytesBefore > 0
+          ? { metadata, chunk, droppedBytesBefore }
+          : { metadata, chunk };
       }
 
       // flush any remaining data in the decoder
@@ -156,11 +195,13 @@ class _ProcessOutput<
   #isDone = false;
   #isCancelled = false;
   #inputStream: ByteStream;
-  #byteChunkQueue = createAsyncIterableQueue<Uint8Array<ArrayBufferLike>>();
+  #byteChunkQueue!: AsyncIterableQueue<Uint8Array<ArrayBufferLike>>;
   #metadata: Metadata;
 }
 
 export const createProcessOutput = <Metadata extends object = object>(
   stream: ByteStream,
   metadata: Metadata,
-): ProcessOutput<Metadata> => new _ProcessOutput(stream, metadata);
+  maxBufferedBytes?: number,
+): ProcessOutput<Metadata> =>
+  new _ProcessOutput(stream, metadata, maxBufferedBytes);

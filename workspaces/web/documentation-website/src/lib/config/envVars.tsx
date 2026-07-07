@@ -128,4 +128,16 @@ export const ENV_VARS_METADATA: Record<
       </span>
     ),
   },
+  outputBufferBytesDefault: {
+    envVarName: getUserEnvVarName("outputBufferBytesDefault"),
+    projectConfigDefaultsKey: `${CONFIG_DEFAULTS_KEY}.maxOutputBufferBytes`,
+    description: (
+      <span>
+        The default maximum bytes of script output buffered in memory per stream
+        (stdout/stderr) when running scripts. Accepts a byte count, a human size
+        like <code>16MB</code>, or <code>unbounded</code> to disable the cap.
+        This is <code>16MB</code> when not overridden.
+      </span>
+    ),
+  },
 } as const;

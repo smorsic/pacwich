@@ -17,8 +17,22 @@ import {
  * process's `chunk` events.
  */
 export type TextStreamEvent<Metadata extends object = object> =
-  | { type: "chunk"; metadata: Metadata; chunk: string }
-  | { type: "end"; metadata: Metadata };
+  | {
+      type: "chunk";
+      metadata: Metadata;
+      chunk: string;
+      /**
+       * Bytes dropped from the buffer immediately before this chunk (output
+       * buffer cap). Absent/`0` when no output was dropped before it.
+       */
+      droppedBytesBefore?: number;
+    }
+  | {
+      type: "end";
+      metadata: Metadata;
+      /** Cumulative bytes this process dropped to stay within the buffer cap. */
+      droppedBytes: number;
+    };
 
 export type TextCompletionOutput<Metadata extends object = object> =
   SimpleAsyncIterable<TextStreamEvent<Metadata>>;
@@ -89,7 +103,11 @@ class _MultiProcessOutput<
             activeCount--;
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             nextCalls[index] = new Promise<never>(() => {});
-            yield { type: "end", metadata: metadatas[index] };
+            yield {
+              type: "end",
+              metadata: metadatas[index],
+              droppedBytes: processes[index].droppedBytes,
+            };
             continue;
           }
 
@@ -99,6 +117,7 @@ class _MultiProcessOutput<
             type: "chunk",
             metadata: result.value.metadata,
             chunk: result.value.chunk,
+            droppedBytesBefore: result.value.droppedBytesBefore,
           };
         }
       },

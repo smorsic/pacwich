@@ -19,6 +19,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -35,6 +36,7 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -50,6 +52,7 @@ describe("Test project config", () => {
             shell: "system",
             includeRootWorkspace: false,
             affectedBaseRef: "main",
+            maxOutputBufferBytes: 16 * 1024 * 1024,
           },
           packageManager: "auto",
           workspacePatternConfigs: [],
@@ -67,6 +70,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -111,6 +115,7 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -127,6 +132,7 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -182,6 +188,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -202,6 +209,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -220,6 +228,7 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -320,6 +329,7 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -336,6 +346,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -356,6 +367,7 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -374,6 +386,7 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
+          maxOutputBufferBytes: 16 * 1024 * 1024,
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -459,6 +472,83 @@ describe("Test project config", () => {
       expect(() =>
         resolveProjectConfig({
           defaults: { affectedBaseRef: 5 as unknown as string },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+  });
+
+  describe("maxOutputBufferBytes default", () => {
+    const ENV_VAR = getUserEnvVarName("outputBufferBytesDefault");
+    const DEFAULT = 16 * 1024 * 1024;
+
+    afterEach(() => {
+      delete process.env[ENV_VAR];
+    });
+
+    test("resolves to 16 MiB when not provided in config or env", () => {
+      expect(resolveProjectConfig({}).defaults.maxOutputBufferBytes).toBe(
+        DEFAULT,
+      );
+    });
+
+    test("uses explicit numeric config value", () => {
+      expect(
+        resolveProjectConfig({ defaults: { maxOutputBufferBytes: 2048 } })
+          .defaults.maxOutputBufferBytes,
+      ).toBe(2048);
+    });
+
+    test("parses a human-size config value", () => {
+      expect(
+        resolveProjectConfig({ defaults: { maxOutputBufferBytes: "8MB" } })
+          .defaults.maxOutputBufferBytes,
+      ).toBe(8 * 1024 * 1024);
+    });
+
+    test("'unbounded' config resolves to Infinity", () => {
+      expect(
+        resolveProjectConfig({
+          defaults: { maxOutputBufferBytes: "unbounded" },
+        }).defaults.maxOutputBufferBytes,
+      ).toBe(Infinity);
+    });
+
+    test("falls back to env var when config does not set it", () => {
+      process.env[ENV_VAR] = "4MB";
+      expect(resolveProjectConfig({}).defaults.maxOutputBufferBytes).toBe(
+        4 * 1024 * 1024,
+      );
+    });
+
+    test("config value takes precedence over env var", () => {
+      process.env[ENV_VAR] = "4MB";
+      expect(
+        resolveProjectConfig({ defaults: { maxOutputBufferBytes: 2048 } })
+          .defaults.maxOutputBufferBytes,
+      ).toBe(2048);
+    });
+
+    test("ignores invalid env var value and falls back to the default", () => {
+      process.env[ENV_VAR] = "garbage";
+      expect(resolveProjectConfig({}).defaults.maxOutputBufferBytes).toBe(
+        DEFAULT,
+      );
+    });
+
+    test("throws on an invalid config value", () => {
+      expect(() =>
+        resolveProjectConfig({
+          defaults: { maxOutputBufferBytes: "notasize" },
+        }),
+      ).toThrow();
+    });
+
+    test("rejects a non-number/string config value via schema", () => {
+      expect(() =>
+        resolveProjectConfig({
+          defaults: {
+            maxOutputBufferBytes: true as unknown as number,
+          },
         }),
       ).toThrow("Project config is invalid");
     });

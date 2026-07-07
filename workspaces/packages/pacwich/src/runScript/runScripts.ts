@@ -68,6 +68,13 @@ export type RunScriptsOptions<ScriptMetadata extends object = object> = {
   ignoreDependencyFailure?: boolean;
   /** Set to `true` to ignore all output from the scripts. This saves memory when you don't need script output. */
   ignoreOutput?: boolean;
+  /**
+   * Maximum bytes of unconsumed output to retain in memory per stream, per
+   * script. When exceeded, the oldest buffered output is dropped (keeping the
+   * most recent). Omitted or non-finite ⇒ unbounded. Resolve the default
+   * upstream.
+   */
+  maxOutputBufferBytes?: number;
   /** Callback to invoke when a script event occurs */
   onScriptEvent?: (
     event: ScriptEventName,
@@ -138,6 +145,7 @@ export const runScripts = <ScriptMetadata extends object = object>({
   parallel,
   ignoreDependencyFailure = false,
   ignoreOutput = false,
+  maxOutputBufferBytes,
   onScriptEvent,
 }: RunScriptsOptions<ScriptMetadata>): RunScriptsResult<ScriptMetadata> => {
   validateScriptDependencies(scripts);
@@ -324,15 +332,28 @@ export const runScripts = <ScriptMetadata extends object = object>({
   const multiProcessOutput = createMultiProcessOutput<
     ScriptMetadata & { streamName: OutputStreamName }
   >(
+    // The output cap is applied here (not on the inner per-script runScript):
+    // this outer ProcessOutput eagerly drains scriptOutputQueues into its own
+    // buffer, so it is the point where output accumulates against a slow
+    // consumer. The inner runScript queues are drained immediately below and
+    // stay near-empty, so they are left unbounded.
     scriptOutputQueues.flatMap(({ stdout, stderr }, index) => [
-      createProcessOutput(stdout, {
-        ...scripts[index].metadata,
-        streamName: "stdout",
-      }),
-      createProcessOutput(stderr, {
-        ...scripts[index].metadata,
-        streamName: "stderr",
-      }),
+      createProcessOutput(
+        stdout,
+        {
+          ...scripts[index].metadata,
+          streamName: "stdout",
+        },
+        maxOutputBufferBytes,
+      ),
+      createProcessOutput(
+        stderr,
+        {
+          ...scripts[index].metadata,
+          streamName: "stderr",
+        },
+        maxOutputBufferBytes,
+      ),
     ]),
   );
 

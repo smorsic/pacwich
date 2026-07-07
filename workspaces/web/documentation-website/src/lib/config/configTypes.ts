@@ -43,6 +43,11 @@ const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
       primitive: true,
       types: ["string"],
     },
+    maxOutputBufferBytes: {
+      value: 'number | "16MB" | "unbounded"',
+      comment:
+        "Max bytes of script output buffered in memory per stream (default: 16MB)",
+    },
   },
   verify: {
     workspaceDependencies: {

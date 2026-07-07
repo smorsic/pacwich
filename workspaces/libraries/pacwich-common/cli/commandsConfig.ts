@@ -310,6 +310,11 @@ export const CLI_COMMANDS_CONFIG = {
         flags: ["-L", "--grouped-lines <count>"],
         description: `With grouped output, the max preview lines per workspace: a number, "auto" (fit to terminal height, default), or "all"`,
       },
+      maxOutputBuffer: {
+        flags: ["--max-output-buffer <size>"],
+        description:
+          'Max script output buffered in memory per stream: a byte count, a size like "16MB" (default), or "unbounded"',
+      },
       noPrefix: {
         flags: ["-N", "--no-prefix"],
         description: "(DEPRECATED) Use --output-style=plain instead",
@@ -415,6 +420,11 @@ export const CLI_COMMANDS_CONFIG = {
       groupedLines: {
         flags: ["-L", "--grouped-lines <count>"],
         description: `With grouped output, the max preview lines per workspace: a number, "auto" (fit to terminal height, default), or "all"`,
+      },
+      maxOutputBuffer: {
+        flags: ["--max-output-buffer <size>"],
+        description:
+          'Max script output buffered in memory per stream: a byte count, a size like "16MB" (default), or "unbounded"',
       },
       noPrefix: {
         flags: ["-N", "--no-prefix"],

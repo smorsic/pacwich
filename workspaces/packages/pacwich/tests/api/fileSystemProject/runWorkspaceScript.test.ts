@@ -1,5 +1,5 @@
 import type { ShellOption } from "@pacwich/common/parameters";
-import { InvalidJSTypeError } from "../../../src/internal/core";
+import { InvalidJSTypeError, IS_WINDOWS } from "../../../src/internal/core";
 import {
   createFileSystemProject,
   PROJECT_ERRORS,
@@ -85,6 +85,28 @@ describe("FileSystemProject runWorkspaceScript - type validation", () => {
         inline: "true" as unknown as boolean,
       }),
     ).toThrow(InvalidJSTypeError);
+  });
+
+  test("throws for non-number/string maxOutputBufferBytes", () => {
+    const project = makeProject();
+    expect(() =>
+      project.runWorkspaceScript({
+        workspaceNameOrAlias: "application-a",
+        script: "a-workspaces",
+        maxOutputBufferBytes: true as unknown as number,
+      }),
+    ).toThrow(InvalidJSTypeError);
+  });
+
+  test("throws for an unparseable maxOutputBufferBytes value", () => {
+    const project = makeProject();
+    expect(() =>
+      project.runWorkspaceScript({
+        workspaceNameOrAlias: "application-a",
+        script: "a-workspaces",
+        maxOutputBufferBytes: "notasize" as unknown as number,
+      }),
+    ).toThrow(/output buffer size/i);
   });
 
   test("throws for invalid inline object scriptName", () => {
@@ -619,3 +641,85 @@ describe("FileSystemProject runWorkspaceScript", () => {
     }
   });
 });
+
+describe.skipIf(IS_WINDOWS)(
+  "FileSystemProject runWorkspaceScript - output buffer",
+  () => {
+    // PRODUCED >> CAP so the retained tail is a small fraction even with the
+    // post-exit pipe-drain/consume race. Exact cap semantics are pinned in
+    // processOutput.test.ts; here we assert end-to-end wiring + bounding.
+    const PRODUCED = 4_000_000;
+    const CAP = 100_000;
+
+    const consume = async (
+      output: { bytes: () => AsyncIterable<{ chunk: Uint8Array }> },
+      droppedRef: { total: number },
+    ) => {
+      let retained = 0;
+      for await (const {
+        chunk,
+        droppedBytesBefore,
+      } of output.bytes() as AsyncIterable<{
+        chunk: Uint8Array;
+        droppedBytesBefore?: number;
+      }>) {
+        retained += chunk.byteLength;
+        droppedRef.total += droppedBytesBefore ?? 0;
+      }
+      return retained;
+    };
+
+    test("explicit cap bounds retained output and drops the rest", async () => {
+      const project = makeProject();
+      const result = project.runWorkspaceScript({
+        workspaceNameOrAlias: "application-a",
+        script: `yes x | head -c ${PRODUCED}`,
+        inline: true,
+        maxOutputBufferBytes: CAP,
+      });
+
+      await result.exit;
+      const dropped = { total: 0 };
+      const retained = await consume(result.output, dropped);
+
+      expect(dropped.total).toBeGreaterThan(0);
+      expect(retained + dropped.total).toBe(PRODUCED);
+      expect(retained).toBeLessThan(PRODUCED / 2);
+    });
+
+    test("'unbounded' retains all output", async () => {
+      const project = makeProject();
+      const result = project.runWorkspaceScript({
+        workspaceNameOrAlias: "application-a",
+        script: `yes x | head -c ${PRODUCED}`,
+        inline: true,
+        maxOutputBufferBytes: "unbounded",
+      });
+
+      await result.exit;
+      const dropped = { total: 0 };
+      const retained = await consume(result.output, dropped);
+
+      expect(dropped.total).toBe(0);
+      expect(retained).toBe(PRODUCED);
+    });
+
+    test("falls back to the project config default cap when omitted", async () => {
+      // The default fixture sets no config, so the built-in 16 MiB default
+      // applies: output well under it is retained in full.
+      const project = makeProject();
+      const result = project.runWorkspaceScript({
+        workspaceNameOrAlias: "application-a",
+        script: `yes x | head -c ${PRODUCED}`,
+        inline: true,
+      });
+
+      await result.exit;
+      const dropped = { total: 0 };
+      const retained = await consume(result.output, dropped);
+
+      expect(dropped.total).toBe(0);
+      expect(retained).toBe(PRODUCED);
+    });
+  },
+);

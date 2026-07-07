@@ -32,6 +32,7 @@ import {
   runScript,
   runScriptInteractive,
   runScripts,
+  parseOutputBufferBytes,
   createScriptRuntimeEnvVars,
   interpolateWorkspaceScriptMetadata,
   type RunScriptsParallelOptions,
@@ -131,6 +132,14 @@ export type RunWorkspaceScriptOptions = {
   /** Set to `true` to ignore all output from the script. This saves memory when you don't need script output. */
   ignoreOutput?: boolean;
   /**
+   * Maximum bytes of unconsumed output to retain in memory per stream
+   * (stdout/stderr). When exceeded, the oldest buffered output is dropped
+   * (keeping the most recent). Accepts a byte count or `"unbounded"` to
+   * disable the cap. Defaults to the project config's
+   * `defaults.maxOutputBufferBytes` (16 MiB unless overridden).
+   */
+  maxOutputBufferBytes?: number | "unbounded";
+  /**
    * Pass `true` to inherit the terminal's stdio instead of capturing output.
    *
    * See {@link RunWorkspaceScriptInteractiveOptions}
@@ -147,7 +156,7 @@ export type RunWorkspaceScriptOptions = {
  */
 export type RunWorkspaceScriptInteractiveOptions = Omit<
   RunWorkspaceScriptOptions,
-  "ignoreOutput" | "interactive"
+  "ignoreOutput" | "maxOutputBufferBytes" | "interactive"
 > & {
   /** Run the script with the terminal's stdio inherited. */
   interactive: true;
@@ -222,6 +231,14 @@ export type RunScriptAcrossWorkspacesOptions = {
   ignoreDependencyFailure?: boolean;
   /** Set to `true` to ignore all output from the scripts. This saves memory when you don't need script output. */
   ignoreOutput?: boolean;
+  /**
+   * Maximum bytes of unconsumed output to retain in memory per stream
+   * (stdout/stderr), per script. When exceeded, the oldest buffered output is
+   * dropped (keeping the most recent). Accepts a byte count or `"unbounded"`
+   * to disable the cap. Defaults to the project config's
+   * `defaults.maxOutputBufferBytes` (16 MiB unless overridden).
+   */
+  maxOutputBufferBytes?: number | "unbounded";
   /** Callback to invoke when a script event occurs (start, skip, exit) */
   onScriptEvent?: OnScriptEventCallback;
 };
@@ -560,6 +577,11 @@ class _FileSystemProject extends ProjectBase implements Project {
             typeofName: "boolean",
             optional: true,
           },
+          "maxOutputBufferBytes option": {
+            value: options.maxOutputBufferBytes,
+            typeofName: ["number", "string"],
+            optional: true,
+          },
         },
         { throw: true },
       );
@@ -584,7 +606,22 @@ class _FileSystemProject extends ProjectBase implements Project {
       env,
       shell,
       ignoreOutput: options.ignoreOutput ?? false,
+      maxOutputBufferBytes: this.#resolveMaxOutputBufferBytes(
+        options.maxOutputBufferBytes,
+      ),
     });
+  }
+
+  /**
+   * Resolve the API `maxOutputBufferBytes` option to a concrete byte cap,
+   * defaulting to the resolved project config. `"unbounded"` (or `Infinity`)
+   * disables the cap; a byte count or human size is parsed and validated.
+   */
+  #resolveMaxOutputBufferBytes(option?: number | "unbounded"): number {
+    if (option === undefined) {
+      return this.config.project.defaults.maxOutputBufferBytes;
+    }
+    return parseOutputBufferBytes(option, " (maxOutputBufferBytes option)");
   }
 
   /**
@@ -788,6 +825,11 @@ class _FileSystemProject extends ProjectBase implements Project {
           typeofName: "boolean",
           optional: true,
         },
+        "maxOutputBufferBytes option": {
+          value: options.maxOutputBufferBytes,
+          typeofName: ["number", "string"],
+          optional: true,
+        },
         "onScriptEvent option": {
           value: options.onScriptEvent,
           typeofName: "function",
@@ -985,6 +1027,9 @@ class _FileSystemProject extends ProjectBase implements Project {
           ? { max: this.config.project.defaults.parallelMax }
           : (options.parallel ?? true),
       ignoreOutput: options.ignoreOutput ?? false,
+      maxOutputBufferBytes: this.#resolveMaxOutputBufferBytes(
+        options.maxOutputBufferBytes,
+      ),
       onScriptEvent: (event, index, exitResult) =>
         options.onScriptEvent?.(event, {
           workspace: workspaces[index],

@@ -38,6 +38,13 @@ export type RunScriptOptions<ScriptMetadata extends object = object> = {
   shell?: ScriptShellOption;
   /** Set to `true` to ignore all output from the script. This saves memory when you don't need script output. */
   ignoreOutput?: boolean;
+  /**
+   * Maximum bytes of unconsumed output to retain in memory per stream
+   * (stdout/stderr). When exceeded, the oldest buffered output is dropped
+   * (keeping the most recent) and surfaced via `droppedBytesBefore`. Omitted
+   * or non-finite ⇒ unbounded. Callers should resolve their default upstream.
+   */
+  maxOutputBufferBytes?: number;
 };
 
 /**
@@ -51,6 +58,7 @@ export const runScript = <ScriptMetadata extends object = object>({
   env,
   shell = "system",
   ignoreOutput = false,
+  maxOutputBufferBytes,
 }: RunScriptOptions<ScriptMetadata>): RunScriptResult<ScriptMetadata> => {
   const startTime = new Date();
 
@@ -81,6 +89,7 @@ export const runScript = <ScriptMetadata extends object = object>({
             /* empty */
           })(),
       { ...metadata, streamName: "stdout" },
+      maxOutputBufferBytes,
     ),
     createProcessOutput(
       proc.stderr
@@ -89,6 +98,7 @@ export const runScript = <ScriptMetadata extends object = object>({
             /* empty */
           })(),
       { ...metadata, streamName: "stderr" },
+      maxOutputBufferBytes,
     ),
   ]);
 

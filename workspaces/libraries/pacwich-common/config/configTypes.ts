@@ -189,6 +189,15 @@ export type ProjectConfig = {
      * `"prefixed"` when stdout is not a TTY.
      */
     cliScriptOutputStyle?: OutputStyleName;
+    /**
+     * Maximum bytes of unconsumed script output to retain in memory per
+     * stream (stdout/stderr), per script, when running scripts. Guards
+     * against a runaway script's output exhausting memory: once exceeded,
+     * the oldest buffered output is dropped (keeping the most recent) and a
+     * truncation notice is surfaced. Accepts a byte count, a human size (e.g.
+     * `"16MB"`), or `"unbounded"` to disable the cap. (default: 16 MiB)
+     */
+    maxOutputBufferBytes?: number | "unbounded" | (string & {});
   };
   /**
    * Workspace configs applied by pattern, in order, merging left to right,
@@ -254,6 +263,11 @@ export type ResolvedProjectConfig = {
      * value, so the CLI should derive a default from terminal state.
      */
     cliScriptOutputStyle: OutputStyleName | undefined;
+    /**
+     * Resolved per-stream output buffer cap in bytes. `Infinity` means the
+     * buffer is unbounded (the user opted out of the cap).
+     */
+    maxOutputBufferBytes: number;
   };
   workspacePatternConfigs: WorkspacePatternConfigEntry[];
   verify: ResolvedProjectVerifyConfig;
