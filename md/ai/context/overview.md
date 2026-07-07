@@ -21,6 +21,49 @@ pacwich detects the workspace dependency graph via explicit declarations in pack
 
 Optional config files: `pacwich.project.{ts,js,jsonc,json}` at root or `pacwich.workspace.{ts,js,jsonc,json}` at any workspace root, with utilities exported from `"pacwich/config"`.
 
+## Installation
+
+### Global CLI
+
+The global install gives you a convenient `pacwich` binary, which will still delegate to a local install's CLI, if available.
+
+```bash
+# Use the package manager of your choice:
+bun add -g pacwich
+# OR
+pnpm add -g pacwich
+# OR
+npm install -g pacwich
+```
+
+#### Completions
+
+When using the global install, you can set up shell completions for bash, zsh, or fish.
+
+```bash
+# Print help for setting up completions
+pacwich completion
+
+# Attempt to automatically install completion for your shell
+pacwich completion install
+```
+
+### Local install
+
+Pin the CLI version for your project, and/or use the TypeScript library.
+
+If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
+you need in your project.
+
+```bash
+# Use the package manager of your choice:
+bun add -d pacwich
+# OR
+pnpm add -D pacwich
+# OR
+npm install -D pacwich
+```
+
 ## Support
 
 `pacwich` can run via Bun or Node. Support is primarily for POSIX systems, while Windows cmd.exe is supported but lower priority.
