@@ -46,25 +46,44 @@ This means you have a root **project** that has some number of **workspaces**. T
 
 ### Installation
 
-Use the global install and/or local install. The global install gives you a convenient
-`pacwich` binary, which will still delegate to a local install's CLI, if available.
+#### Global CLI
+
+The global install gives you a convenient `pacwich` binary, which will still delegate to a local install's CLI, if available.
+
+```bash
+# Use the package manager of your choice:
+bun add -g pacwich
+# OR
+pnpm add -g pacwich
+# OR
+npm install -g pacwich
+```
+
+##### Completions
+
+When using the global install, you can set up shell completions for bash, zsh, or fish.
+
+```bash
+# Print help for setting up completions
+pacwich completion
+
+# Attempt to automatically install completion for your shell
+pacwich completion install
+```
+
+#### Local install
+
+Pin the CLI version for your project, and/or use the TypeScript library.
 
 If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
 you need in your project.
 
 ```bash
-# Use the global install command of choice below
-bun add -g pacwich
-# or
-pnpm add -g pacwich
-# or
-npm install -g pacwich
-
-# And/or local install in your project
+# Use the package manager of your choice:
 bun add -d pacwich
-# or
+# OR
 pnpm add -D pacwich
-# or
+# OR
 npm install -D pacwich
 ```
 
@@ -96,7 +115,7 @@ pnpm exec pacwich --help
 <<CLI_QUICKSTART>>
 ```
 
-### API Quickstart
+### TS API Quickstart
 
 [Full API documentation here](https://pacwich.dev/api)
 
