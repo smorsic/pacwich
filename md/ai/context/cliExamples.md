@@ -1,11 +1,6 @@
 ### pacwich npm package: CLI examples
 
 ```bash
-# Optional alias if pacwich is not installed locally. A global install
-# of pacwich also auto-delegates to a project-local pacwich when one
-# is present, so just `pacwich` usually works once installed.
-alias pacwich="bunx pacwich"
-
 pacwich list-workspaces # human-readable output
 pacwich ls --json --pretty # ls is alias for list-workspaces
 pacwich ls "name:my-workspace-*" "alias:my-alias-*" "path:packages/**/*" # accepts workspace patterns

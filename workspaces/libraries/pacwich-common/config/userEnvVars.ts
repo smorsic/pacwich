@@ -10,4 +10,5 @@ export const USER_ENV_VARS = {
 
 export type UserEnvVarName = keyof typeof USER_ENV_VARS;
 
-export const getUserEnvVarName = (key: UserEnvVarName) => USER_ENV_VARS[key];
+export const getUserEnvVarName = <K extends UserEnvVarName>(key: K) =>
+  USER_ENV_VARS[key];

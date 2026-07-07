@@ -54,6 +54,7 @@
     "lint": "eslint src",
     "mcp:inspect": "mcp-inspector bun run bin/cli.js --cwd ../../../ mcp",
     "test": "bunx --bun vitest",
+    "try-completion": "bun run scripts/tryCompletion.ts",
     "test:build": "command -v bun && bun run test:build:bun || bun run test:build:node",
     "test:build:bun": "cd dist.test && IS_BUILD=true bunx --bun vitest",
     "test:build:node": "cd dist.test && IS_BUILD=true npx vitest",

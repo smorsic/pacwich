@@ -431,6 +431,24 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
       "pacwich doctor --json --pretty # Output as formatted JSON",
     ],
   })),
+  completion: defineCommandContent("completion", () => ({
+    title: "Completion",
+    description:
+      "By default, print completion help for bash, zsh, or fish, or run install subcommand to auto-write user shell config.",
+    examples: [
+      "# Print help for completion setup:",
+      "pacwich completion",
+      "",
+      "# Attempt to automatically install completion for your shell",
+      "pacwich completion install",
+      "",
+      "# Specify a shell explicitly",
+      "pacwich completion install zsh",
+      "",
+      "# Print the completion script for a specific shell",
+      "pacwich completion zsh",
+    ],
+  })),
 } as const satisfies Record<CliCommandName, CliCommandContent>;
 
 export const getCliCommandContent = (commandName: CliCommandName) =>
