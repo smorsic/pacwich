@@ -94,9 +94,10 @@
   flex-direction: column;
   align-items: center;
   margin-bottom: 6rem;
-  margin-top: 2rem;
+  margin-top: 1rem;
   width: 100%;
   padding: 1.625rem;
+  padding-top: 1.25rem;
   background-color: var(--rp-c-bg-soft);
   border-radius: 0.75rem;
   box-shadow: var(--elevation-1_5-shadow);
@@ -108,7 +109,6 @@
   font-size: 1.5rem;
   font-weight: 500;
   display: block;
-  margin-bottom: 0.125rem;
 }
 
 .whats-new-subtitle {
@@ -281,6 +281,6 @@
 }
 
 .home-pm-tabs-container {
-  margin-bottom: 4rem;
+  margin-bottom: 5rem;
   width: 100%;
 }
