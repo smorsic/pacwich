@@ -1,5 +1,6 @@
 import { ROOT_WORKSPACE_SELECTOR } from "@pacwich/common/project";
 import { isJSONObject } from "@pacwich/common/types";
+import { createDefaultWorkspaceConfig } from "../../config";
 import { getDoctorInfo } from "../../doctor";
 import { stripANSI } from "../../internal/core";
 import { logger } from "../../internal/logger";
@@ -278,6 +279,72 @@ export const listTags = handleProjectCommand(
     }
 
     if (lines.length) commandOutputLogger.info(lines.join("\n"));
+  },
+);
+
+/**
+ * `config-info` — print resolved pacwich config as JSON, the source of
+ * truth after TS config evaluation and `workspacePatternConfigs`
+ * merging. JSON-only (with `--pretty`) since resolved config has no
+ * meaningful flat human-readable rendering, a deliberate divergence from
+ * the other `*-info` commands.
+ */
+export const configInfo = handleProjectCommand(
+  "configInfo",
+  (
+    { project },
+    workspaceNameOrAlias: string | undefined,
+    options: { project: boolean; pretty: boolean },
+  ) => {
+    logger.debug(`Options: ${JSON.stringify(options)}`);
+
+    if (workspaceNameOrAlias && options.project) {
+      logger.error(
+        "CLI syntax error: Cannot use both a workspace argument and --project",
+      );
+      process.exit(1);
+      return;
+    }
+
+    const { config } = project;
+
+    if (options.project) {
+      commandOutputLogger.info(
+        createJsonLines(config.project, options).join("\n"),
+      );
+      return;
+    }
+
+    if (workspaceNameOrAlias) {
+      const workspace =
+        workspaceNameOrAlias === ROOT_WORKSPACE_SELECTOR
+          ? project.rootWorkspace
+          : project.findWorkspaceByNameOrAlias(workspaceNameOrAlias);
+      if (!workspace) {
+        logger.error(
+          `Workspace ${JSON.stringify(workspaceNameOrAlias)} not found`,
+        );
+        process.exit(1);
+        return;
+      }
+
+      // Workspaces without resolved config are absent from the map; fall
+      // back to the resolved-empty shape so output always reflects the
+      // config pacwich resolved rather than erroring.
+      const workspaceConfig =
+        config.workspaces[workspace.name] ?? createDefaultWorkspaceConfig();
+      commandOutputLogger.info(
+        createJsonLines(workspaceConfig, options).join("\n"),
+      );
+      return;
+    }
+
+    commandOutputLogger.info(
+      createJsonLines(
+        { project: config.project, workspaces: config.workspaces },
+        options,
+      ).join("\n"),
+    );
   },
 );
 

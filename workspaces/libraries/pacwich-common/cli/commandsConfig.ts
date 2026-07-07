@@ -169,6 +169,23 @@ export const CLI_COMMANDS_CONFIG = {
       },
     },
   },
+  configInfo: {
+    command: "config-info [workspace]",
+    isGlobal: false,
+    aliases: [],
+    description:
+      "Print resolved pacwich config as JSON. With no argument, prints the combined project and workspace configs; pass a workspace name or alias (or @root) for its resolved config, or --project for the project config",
+    options: {
+      project: {
+        flags: ["--project"],
+        description: "Print the resolved project config only",
+      },
+      pretty: {
+        flags: PRETTY_FLAGS,
+        description: "Pretty print JSON",
+      },
+    },
+  },
   mcpServer: {
     command: "mcp-server",
     isGlobal: true,

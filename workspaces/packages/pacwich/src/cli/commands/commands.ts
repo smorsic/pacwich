@@ -12,6 +12,7 @@ import {
   doctor,
   listTags,
   tagInfo,
+  configInfo,
 } from "./handleSimpleCommands";
 import { listAffected } from "./listAffected";
 import { mcpServer } from "./mcp";
@@ -32,6 +33,7 @@ export const defineProjectCommands = (context: ProjectCommandContext) => {
   scriptInfo(context);
   listTags(context);
   tagInfo(context);
+  configInfo(context);
   runScript(context);
   listAffected(context);
   runAffected(context);
