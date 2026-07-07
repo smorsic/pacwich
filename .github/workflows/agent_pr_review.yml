@@ -45,5 +45,4 @@ jobs:
 
             If no suggestions for change are needed, still at least post a PR comment summarizing your review.
           claude_args: >-
-            --max-turns 20
             --allowedTools "Read,Glob,Grep,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr review:*),Bash(gh pr comment:*),Bash(git diff:*),Bash(git log:*)"
