@@ -3,6 +3,7 @@ import type {
   GlobalCommandContext,
   ProjectCommandContext,
 } from "./commandHandlerUtils";
+import { completion } from "./completion";
 import {
   listScripts,
   workspaceInfo,
@@ -21,6 +22,7 @@ export const defineGlobalCommands = (context: GlobalCommandContext) => {
   mcpServer(context);
   doctor(context);
   addSkills(context);
+  completion(context);
 };
 
 export const defineProjectCommands = (context: ProjectCommandContext) => {

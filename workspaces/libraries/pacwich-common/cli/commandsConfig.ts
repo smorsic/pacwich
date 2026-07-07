@@ -177,6 +177,14 @@ export const CLI_COMMANDS_CONFIG = {
       "Start the pacwich MCP (Model Context Protocol) server over stdio. Mainly provides documentation resources for agents",
     options: {},
   },
+  completion: {
+    command: "completion [action] [shell]",
+    isGlobal: true,
+    aliases: [],
+    description:
+      "Set up shell completions (bash, zsh, or fish). Passing no args prints setup help.",
+    options: {},
+  },
   addSkills: {
     command: "add-skills",
     isGlobal: true,
