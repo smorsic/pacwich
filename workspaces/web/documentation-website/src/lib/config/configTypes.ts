@@ -2,6 +2,7 @@ import {
   type WorkspaceInputsConfig,
   type ProjectConfig,
   type WorkspaceConfig,
+  type DependencyPatternRule,
 } from "@pacwich/common/config";
 import {
   PARALLEL_MAX_VALUES,
@@ -104,6 +105,21 @@ const inputsConfigDisplay = {
   },
 } as ValueToDisplay<RequiredDeep<WorkspaceInputsConfig>>;
 
+const dependencyPatternRuleDisplay: ValueToDisplay<
+  RequiredDeep<DependencyPatternRule>
+> = {
+  allowPatterns: {
+    comment: "Workspace patterns to allow as dependencies",
+    array: true,
+    item: { primitive: true, types: ["string"] },
+  },
+  denyPatterns: {
+    comment: "Workspace patterns to forbid as dependencies",
+    array: true,
+    item: { primitive: true, types: ["string"] },
+  },
+};
+
 const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
   alias: {
     value: "string | string[]",
@@ -141,6 +157,12 @@ const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
           "Workspace patterns to forbid as dependencies.\nWhen combined with allowPatterns, filters within that allowed subset.",
         array: true,
         item: { primitive: true, types: ["string"] },
+      },
+      bySource: {
+        dependencies: dependencyPatternRuleDisplay,
+        devDependencies: dependencyPatternRuleDisplay,
+        peerDependencies: dependencyPatternRuleDisplay,
+        optionalDependencies: dependencyPatternRuleDisplay,
       },
     },
   },

@@ -6,7 +6,26 @@ import type {
   ShellOption,
 } from "../parameters";
 
-export type WorkspaceDependenciesRule = {
+/**
+ * The four `package.json` dependency fields a dependency can be declared in.
+ * Used to scope {@link WorkspaceDependenciesRule} rules to a specific field.
+ */
+export type DependencySource =
+  | "dependencies"
+  | "devDependencies"
+  | "peerDependencies"
+  | "optionalDependencies";
+
+/**
+ * Allow/deny workspace patterns for a workspace dependency rule.
+ *
+ * @example
+ * const rule: DependencyPatternRule = {
+ *   allowPatterns: ["tag:lib"],
+ *   denyPatterns: ["tag:legacy"],
+ * };
+ */
+export type DependencyPatternRule = {
   /**
    * Workspace patterns that are permitted as dependencies.
    * Only workspaces matching these patterns are allowed.
@@ -20,6 +39,29 @@ export type WorkspaceDependenciesRule = {
    * the subset of allowed workspaces.
    */
   denyPatterns?: string[];
+};
+
+export type WorkspaceDependenciesRule = DependencyPatternRule & {
+  /**
+   * Rules scoped to specific `package.json` dependency fields, keyed by field name.
+   *
+   * Each entry applies *in addition to* the top-level
+   * `allowPatterns`/`denyPatterns`: a dependency declared in that field must
+   * satisfy both the top-level rule and the field-scoped rule.
+   *
+   * A field-scoped rule covers the workspace's directly-declared dependencies in
+   * that field *and everything those dependencies pull in transitively*, so a
+   * forbidden workspace cannot leak in through a permitted field-scoped dependency.
+   *
+   * @example
+   * const rule: WorkspaceDependenciesRule = {
+   *   bySource: {
+   *     devDependencies: { allowPatterns: ["tag:test-util"] },
+   *     optionalDependencies: { denyPatterns: ["*"] },
+   *   },
+   * };
+   */
+  bySource?: Partial<Record<DependencySource, DependencyPatternRule>>;
 };
 
 export type WorkspaceRules = {

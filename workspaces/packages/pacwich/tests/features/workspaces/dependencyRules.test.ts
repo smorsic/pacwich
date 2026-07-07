@@ -4,7 +4,11 @@ import { validateWorkspaceDependencyRules } from "../../../src/workspaces/depend
 import type { WorkspaceMap } from "../../../src/workspaces/dependencyGraph";
 import { WORKSPACE_ERRORS } from "../../../src/workspaces/errors";
 import { getProjectRoot } from "../../fixtures/testProjects";
-import { makeTestWorkspace, makeWorkspaceMapEntry } from "../../util/testData";
+import {
+  makeTestPackageJson,
+  makeTestWorkspace,
+  makeWorkspaceMapEntry,
+} from "../../util/testData";
 import { describe, test, expect } from "../../util/testFramework";
 
 const adapter = resolvePackageManagerAdapter("bun");
@@ -610,6 +614,214 @@ describe("validateWorkspaceDependencyRules", () => {
       ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
     });
   });
+
+  describe("bySource", () => {
+    const runValidate = (workspaceMap: WorkspaceMap) =>
+      validateWorkspaceDependencyRules({
+        workspaceMap,
+        rootWorkspace: TEST_ROOT_WORKSPACE,
+      });
+
+    test.each([
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+      "optionalDependencies",
+    ] as const)(
+      "denyPatterns scoped to %s throws when a dep declared in that field matches",
+      (source) => {
+        const workspaceMap: WorkspaceMap = {
+          a: makeWorkspaceMapEntry(
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { [source]: { denyPatterns: ["b"] } },
+                },
+              },
+            },
+            makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+            makeTestPackageJson({ [source]: { b: "workspace:*" } }),
+          ),
+          b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+        };
+        expect(() => runValidate(workspaceMap)).toThrow(
+          WORKSPACE_ERRORS.DependencyRuleViolation,
+        );
+      },
+    );
+
+    test("allowPatterns scoped to a field permits a matching dep in that field", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { devDependencies: { allowPatterns: ["b"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          makeTestPackageJson({ devDependencies: { b: "workspace:*" } }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+      };
+      expect(() => runValidate(workspaceMap)).not.toThrow();
+    });
+
+    test("allowPatterns scoped to a field rejects a non-matching dep in that field", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { devDependencies: { allowPatterns: ["c"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          makeTestPackageJson({ devDependencies: { b: "workspace:*" } }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+        c: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "c" })),
+      };
+      expect(() => runValidate(workspaceMap)).toThrow(
+        WORKSPACE_ERRORS.DependencyRuleViolation,
+      );
+    });
+
+    test("does not govern a dep declared in a field other than the scoped one", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { devDependencies: { denyPatterns: ["b"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          // b is a production dependency, not a devDependency
+          makeTestPackageJson({ dependencies: { b: "workspace:*" } }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+      };
+      expect(() => runValidate(workspaceMap)).not.toThrow();
+    });
+
+    test("catches a forbidden workspace that leaks in transitively through a scoped dep", () => {
+      // a devDepends on b; b (prod) depends on c. A devDependencies-scoped rule
+      // must catch c reached through the permitted dev dependency b.
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { devDependencies: { denyPatterns: ["c"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          makeTestPackageJson({ devDependencies: { b: "workspace:*" } }),
+        ),
+        b: makeWorkspaceMapEntry(
+          {},
+          makeTestWorkspace({ name: "b", dependencies: ["c"] }),
+        ),
+        c: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "c" })),
+      };
+      expect(() => runValidate(workspaceMap)).toThrow(
+        WORKSPACE_ERRORS.DependencyRuleViolation,
+      );
+      try {
+        runValidate(workspaceMap);
+      } catch (e) {
+        expect((e as Error).message).toContain(
+          '"a" violates workspaceDependencies rule for devDependencies: workspace "c" is denied by denyPatterns (dependency chain: a -> b -> c)',
+        );
+      }
+    });
+
+    test("governs a dep for every field it is declared in", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { optionalDependencies: { denyPatterns: ["b"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          // b is declared in two fields; the optionalDependencies rule still applies
+          makeTestPackageJson({
+            devDependencies: { b: "workspace:*" },
+            optionalDependencies: { b: "workspace:*" },
+          }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+      };
+      expect(() => runValidate(workspaceMap)).toThrow(
+        WORKSPACE_ERRORS.DependencyRuleViolation,
+      );
+    });
+
+    test("aggregates top-level and per-field violations together", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                denyPatterns: ["b"],
+                bySource: { devDependencies: { denyPatterns: ["c"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b", "c"] }),
+          makeTestPackageJson({
+            dependencies: { b: "workspace:*" },
+            devDependencies: { c: "workspace:*" },
+          }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+        c: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "c" })),
+      };
+      expect(() => runValidate(workspaceMap)).toThrow(
+        WORKSPACE_ERRORS.DependencyRuleViolation,
+      );
+      try {
+        runValidate(workspaceMap);
+      } catch (e) {
+        const message = (e as Error).message;
+        // Top-level violation carries no field scope label
+        expect(message).toContain(
+          '"a" violates workspaceDependencies rule: workspace "b" is denied by denyPatterns (dependency chain: a -> b)',
+        );
+        // Field-scoped violation names the field
+        expect(message).toContain(
+          '"a" violates workspaceDependencies rule for devDependencies: workspace "c" is denied by denyPatterns (dependency chain: a -> c)',
+        );
+      }
+    });
+
+    test("does nothing when a bySource field has no declared workspace deps", () => {
+      const workspaceMap: WorkspaceMap = {
+        a: makeWorkspaceMapEntry(
+          {
+            rules: {
+              workspaceDependencies: {
+                bySource: { devDependencies: { denyPatterns: ["b"] } },
+              },
+            },
+          },
+          makeTestWorkspace({ name: "a", dependencies: ["b"] }),
+          // no devDependencies at all
+          makeTestPackageJson({ dependencies: { b: "workspace:*" } }),
+        ),
+        b: makeWorkspaceMapEntry({}, makeTestWorkspace({ name: "b" })),
+      };
+      expect(() => runValidate(workspaceMap)).not.toThrow();
+    });
+  });
 });
 
 describe("findWorkspaces - multi-violation and multi-valid", () => {
@@ -718,6 +930,39 @@ describe("findWorkspaces with dependency rules", () => {
           rootDirectory: getProjectRoot("withDependencyRulesAllowIndirect"),
         }),
       ).toThrow(WORKSPACE_ERRORS.DependencyRuleViolation);
+    });
+  });
+
+  describe("bySource", () => {
+    test("throws for a workspace that leaks in transitively through a devDependencies-scoped rule", () => {
+      // a devDepends on b (packages/a devDependencies), b depends on c.
+      // a's rule denies "c" scoped to devDependencies.
+      let thrownError: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: getProjectRoot("withDependencyRulesBySourceViolation"),
+        });
+      } catch (e) {
+        thrownError = e;
+      }
+      expect(thrownError).toBeInstanceOf(
+        WORKSPACE_ERRORS.DependencyRuleViolation,
+      );
+      expect((thrownError as Error).message).toContain(
+        '"a" violates workspaceDependencies rule for devDependencies: workspace "c" is denied by denyPatterns (dependency chain: a -> b -> c)',
+      );
+    });
+
+    test("does not throw when the denied dep is declared in a field the rule does not scope", () => {
+      // Same graph, but b is a production dependency of a, so the
+      // devDependencies-scoped rule never reaches c.
+      expect(() =>
+        assembleProject({
+          adapter,
+          rootDirectory: getProjectRoot("withDependencyRulesBySourceValid"),
+        }),
+      ).not.toThrow();
     });
   });
 });

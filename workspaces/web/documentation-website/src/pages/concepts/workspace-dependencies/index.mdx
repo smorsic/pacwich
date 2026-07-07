@@ -43,6 +43,9 @@ Use `allowPatterns` to define which dependencies are permitted or `denyPatterns`
 
 For example, you may disallow dependencies with the [tag](/config/workspace#tags) "backend" for a frontend workspace with `denyPatterns: ["tag:backend"]`.
 
+These top-level patterns apply to every dependency, transitively, regardless of which `package.json` field the dependency was declared in.
+To scope a rule to a specific field, use [`bySource`](/config/workspace#workspace-dependency-rules).
+
 ## Running Scripts in Dependency Order
 
 When running scripts via the [CLI](/cli/commands#run-script) or [API](/api/reference#runscriptacrossworkspaces), workspaces can be run in dependency order.

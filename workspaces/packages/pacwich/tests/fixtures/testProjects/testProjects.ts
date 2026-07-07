@@ -103,6 +103,10 @@ const TEST_PROJECTS = {
     "withDependencies/withDependencyRulesMultiViolation",
   withDependencyRulesMultiValid:
     "withDependencies/withDependencyRulesMultiValid",
+  withDependencyRulesBySourceViolation:
+    "withDependencies/withDependencyRulesBySourceViolation",
+  withDependencyRulesBySourceValid:
+    "withDependencies/withDependencyRulesBySourceValid",
   recursiveScript: "recursiveScript",
   affectedWithInputs: "affected/withInputs",
   affectedWithExternalDepInputs: "affected/withExternalDepInputs",

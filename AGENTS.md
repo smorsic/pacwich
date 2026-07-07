@@ -626,6 +626,12 @@ Tags are strings to group workspaces together. They do not need to be unique.
       // denyPatterns: workspaces matching these patterns are forbidden as dependencies.
       // When combined with allowPatterns, deny filters within the allowed subset.
       "denyPatterns": ["my-deny-pattern-*"],
+      // bySource: rules scoped to specific package.json dependency fields.
+      // Each entry applies IN ADDITION to the top-level patterns above.
+      "bySource": {
+        "devDependencies": { "allowPatterns": ["tag:test-util"] },
+        "optionalDependencies": { "denyPatterns": ["*"] },
+      },
     },
   },
 }
@@ -651,9 +657,34 @@ Using the `rules.workspaceDependencies` field, you can define rules for which wo
 
 Workspace Patterns are used to match workspaces.
 
+The top-level `allowPatterns`/`denyPatterns` apply to every dependency, transitively, regardless of which `package.json` field a dependency was declared in.
+
+#### Scoping rules to a dependency field (`bySource`)
+
+`bySource` scopes rules to specific `package.json` dependency fields (`dependencies`, `devDependencies`, `peerDependencies`, `optionalDependencies`), keyed by field name. Each entry has the same `allowPatterns`/`denyPatterns` shape and applies **in addition to** the top-level rule: a dependency declared in that field must satisfy both the top-level rule and the field-scoped rule.
+
+A field-scoped rule covers the workspace's directly-declared dependencies in that field **and everything those dependencies pull in transitively**, so a forbidden workspace cannot leak in through a permitted field-scoped dependency.
+
+```jsonc
+{
+  "rules": {
+    "workspaceDependencies": {
+      // Applies to all dependencies (transitively).
+      "denyPatterns": ["tag:legacy"],
+      "bySource": {
+        // devDependencies (and their transitive deps) may only be test utilities.
+        "devDependencies": { "allowPatterns": ["tag:test-util"] },
+        // No optionalDependencies are permitted.
+        "optionalDependencies": { "denyPatterns": ["*"] },
+      },
+    },
+  },
+}
+```
+
 ### mergeWorkspaceConfig
 
-`mergeWorkspaceConfig` merges multiple workspace configs left to right. Arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`) are concatenated and deduplicated. Scalar fields later wins. `scripts` are deep-merged per key. Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`.
+`mergeWorkspaceConfig` merges multiple workspace configs left to right. Arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`, including per-field `rules.workspaceDependencies.bySource` entries) are concatenated and deduplicated. Scalar fields later wins. `scripts` are deep-merged per key. Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`.
 
 ```ts
 import { mergeWorkspaceConfig } from "pacwich/config";

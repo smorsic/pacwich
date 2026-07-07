@@ -228,6 +228,50 @@ describe("workspace config", () => {
       ).not.toThrow();
     });
 
+    test("accepts a bySource rule scoped to package.json fields", () => {
+      expect(() =>
+        validateWorkspaceConfig({
+          rules: {
+            workspaceDependencies: {
+              denyPatterns: ["tag:legacy"],
+              bySource: {
+                devDependencies: { allowPatterns: ["tag:test-util"] },
+                optionalDependencies: { denyPatterns: ["*"] },
+              },
+            },
+          },
+        }),
+      ).not.toThrow();
+    });
+
+    test("throws when bySource uses an unknown dependency field key", () => {
+      expect(() =>
+        validateWorkspaceConfig({
+          rules: {
+            workspaceDependencies: {
+              // @ts-expect-error - Invalid config: not a package.json dep field
+              bySource: { notADepField: { allowPatterns: ["a"] } },
+            },
+          },
+        }),
+      ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+    });
+
+    test("throws when a bySource entry has an extra property", () => {
+      expect(() =>
+        validateWorkspaceConfig({
+          rules: {
+            workspaceDependencies: {
+              bySource: {
+                // @ts-expect-error - Invalid config: unknown property
+                devDependencies: { allowPatterns: ["a"], bogus: true },
+              },
+            },
+          },
+        }),
+      ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+    });
+
     describe("inputs / defaultInputs", () => {
       test("accepts defaultInputs with files and workspacePatterns", () => {
         expect(() =>

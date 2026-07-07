@@ -184,6 +184,153 @@ describe("mergeWorkspaceConfig", () => {
         rules: { workspaceDependencies: { denyPatterns: ["a"] } },
       });
     });
+
+    describe("bySource", () => {
+      test("merges per-field allow/denyPatterns across configs", () => {
+        expect(
+          mergeWorkspaceConfig(
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { devDependencies: { allowPatterns: ["a"] } },
+                },
+              },
+            },
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { devDependencies: { allowPatterns: ["b"] } },
+                },
+              },
+            },
+          ),
+        ).toMatchObject({
+          rules: {
+            workspaceDependencies: {
+              bySource: { devDependencies: { allowPatterns: ["a", "b"] } },
+            },
+          },
+        });
+      });
+
+      test("deduplicates per-field patterns", () => {
+        expect(
+          mergeWorkspaceConfig(
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: {
+                    optionalDependencies: { denyPatterns: ["a", "b"] },
+                  },
+                },
+              },
+            },
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: {
+                    optionalDependencies: { denyPatterns: ["b", "c"] },
+                  },
+                },
+              },
+            },
+          ),
+        ).toMatchObject({
+          rules: {
+            workspaceDependencies: {
+              bySource: {
+                optionalDependencies: { denyPatterns: ["a", "b", "c"] },
+              },
+            },
+          },
+        });
+      });
+
+      test("keeps distinct fields side by side when present on only one side", () => {
+        expect(
+          mergeWorkspaceConfig(
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { dependencies: { allowPatterns: ["prod"] } },
+                },
+              },
+            },
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { devDependencies: { allowPatterns: ["dev"] } },
+                },
+              },
+            },
+          ),
+        ).toMatchObject({
+          rules: {
+            workspaceDependencies: {
+              bySource: {
+                dependencies: { allowPatterns: ["prod"] },
+                devDependencies: { allowPatterns: ["dev"] },
+              },
+            },
+          },
+        });
+      });
+
+      test("merges top-level patterns and bySource independently", () => {
+        expect(
+          mergeWorkspaceConfig(
+            {
+              rules: {
+                workspaceDependencies: { denyPatterns: ["tag:legacy"] },
+              },
+            },
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: {
+                    devDependencies: { allowPatterns: ["tag:test"] },
+                  },
+                },
+              },
+            },
+          ),
+        ).toMatchObject({
+          rules: {
+            workspaceDependencies: {
+              denyPatterns: ["tag:legacy"],
+              bySource: { devDependencies: { allowPatterns: ["tag:test"] } },
+            },
+          },
+        });
+      });
+
+      test("empty per-field patterns merge as no-ops", () => {
+        expect(
+          mergeWorkspaceConfig(
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { peerDependencies: { allowPatterns: [] } },
+                },
+              },
+            },
+            {
+              rules: {
+                workspaceDependencies: {
+                  bySource: { peerDependencies: { allowPatterns: ["a"] } },
+                },
+              },
+            },
+          ),
+        ).toMatchObject({
+          rules: {
+            workspaceDependencies: {
+              bySource: { peerDependencies: { allowPatterns: ["a"] } },
+            },
+          },
+        });
+      });
+    });
   });
 
   describe("defaultInputs", () => {

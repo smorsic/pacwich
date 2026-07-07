@@ -1,3 +1,5 @@
+import type { DependencySource } from "@pacwich/common/config";
+
 /** Catalog reference info attached to an `ExternalDependency` that uses a `catalog:` ref */
 export type ExternalDependencyCatalog = {
   /** Catalog name from the `catalog:<name>` ref. Empty string for the default catalog (`catalog:`). */
@@ -10,10 +12,11 @@ export const EXTERNAL_DEPENDENCY_SOURCES = [
   "devDependencies",
   "peerDependencies",
   "optionalDependencies",
-] as const;
+] as const satisfies readonly DependencySource[];
 
-export type ExternalDependencySource =
-  (typeof EXTERNAL_DEPENDENCY_SOURCES)[number];
+// Aliased to the canonical config-layer union so the field-name set has a
+// single source of truth (the runtime array above is checked against it).
+export type ExternalDependencySource = DependencySource;
 
 /** A non-workspace package the workspace declares (resolved via package.json + catalogs) */
 export type ExternalDependency = {

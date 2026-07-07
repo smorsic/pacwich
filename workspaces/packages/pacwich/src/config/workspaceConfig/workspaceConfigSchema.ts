@@ -1,6 +1,21 @@
 import type { WorkspaceConfig } from "@pacwich/common/config";
 import type { JSONSchema, FromSchema } from "json-schema-to-ts";
 
+const DEPENDENCY_PATTERN_RULE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    allowPatterns: {
+      type: "array",
+      items: { type: "string" },
+    },
+    denyPatterns: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+} as const satisfies JSONSchema;
+
 const WORKSPACE_INPUTS_CONFIG_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -61,6 +76,16 @@ export const WORKSPACE_CONFIG_JSON_SCHEMA = {
             denyPatterns: {
               type: "array",
               items: { type: "string" },
+            },
+            bySource: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                dependencies: DEPENDENCY_PATTERN_RULE_SCHEMA,
+                devDependencies: DEPENDENCY_PATTERN_RULE_SCHEMA,
+                peerDependencies: DEPENDENCY_PATTERN_RULE_SCHEMA,
+                optionalDependencies: DEPENDENCY_PATTERN_RULE_SCHEMA,
+              },
             },
           },
           additionalProperties: false,

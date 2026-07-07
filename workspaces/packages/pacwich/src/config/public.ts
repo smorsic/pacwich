@@ -7,6 +7,8 @@ export type {
   ResolvedProjectVerifyWorkspaceDependenciesConfig,
   WorkspaceConfig,
   WorkspaceDependenciesRule,
+  DependencyPatternRule,
+  DependencySource,
   ResolvedWorkspaceConfig,
   WorkspaceRules,
   WorkspaceInputsConfig,
