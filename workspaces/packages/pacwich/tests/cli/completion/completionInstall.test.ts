@@ -9,14 +9,14 @@ import {
   formatInstallReport,
   installCompletion,
   type ProcessInfo,
-} from "../../src/cli/commands/completionInstall";
+} from "../../../src/cli/commands/completionInstall";
 import {
   afterEach,
   beforeEach,
   describe,
   expect,
   test,
-} from "../util/testFramework";
+} from "../../util/testFramework";
 
 /**
  * Unit coverage for `pacwich completion install`: shell detection (via an

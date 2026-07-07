@@ -7,7 +7,7 @@ import {
   type ProjectGroup,
   type StaticGroup,
 } from "@pacwich/common/cli";
-import { describe, expect, test } from "../util/testFramework";
+import { describe, expect, test } from "../../util/testFramework";
 
 /**
  * `planCompletion` is the project-free brain of shell completion: it turns

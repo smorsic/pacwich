@@ -3,16 +3,16 @@ import {
   COMPLETE_COMMAND,
   sanitizeCompletionField,
   tryRunCompletionRequest,
-} from "../../src/cli/commands/completion";
-import { logger } from "../../src/internal/logger";
-import { getProjectRoot } from "../fixtures/testProjects";
+} from "../../../src/cli/commands/completion";
+import { logger } from "../../../src/internal/logger";
+import { getProjectRoot } from "../../fixtures/testProjects";
 import {
   afterEach,
   beforeEach,
   describe,
   expect,
   test,
-} from "../util/testFramework";
+} from "../../util/testFramework";
 
 /**
  * e2e behavior of the hidden `__complete` request handler, exercised

@@ -239,18 +239,18 @@ export const bashLoginShellHint = ({
 /** The setup help printed by bare `pacwich completion`. */
 export const completionInfoText = (): string =>
   [
-    `pacwich shell completions (${SUPPORTED_COMPLETION_SHELLS.join(", ")})`,
+    `Guide: pacwich shell completions`,
     ``,
-    `Install (auto-detects your shell):`,
-    `  pacwich completion install`,
+    `Install:`,
+    `  pacwich completion install                   # auto-detects your shell`,
     `  pacwich completion install <${SUPPORTED_COMPLETION_SHELLS.join("|")}>   # target a specific shell`,
     ``,
-    `Or wire it up yourself:`,
+    `Or manually add a one-liner to your shell file:`,
     `  bash   ~/.bashrc:   eval "$(pacwich completion bash)"`,
     `  zsh    ~/.zshrc:    eval "$(pacwich completion zsh)"      # after compinit`,
     `  fish:               pacwich completion fish > ~/.config/fish/completions/pacwich.fish`,
     ``,
-    `Print a script:  pacwich completion <${SUPPORTED_COMPLETION_SHELLS.join("|")}>`,
+    `Print the completion script:  pacwich completion <${SUPPORTED_COMPLETION_SHELLS.join("|")}>`,
   ].join("\n");
 
 const RELOAD_HINT: Record<CompletionShell, string> = {

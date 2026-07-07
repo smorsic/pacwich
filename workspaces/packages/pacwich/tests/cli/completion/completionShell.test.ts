@@ -9,15 +9,15 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { getCompletionScript } from "@pacwich/common/cli";
-import { getProjectRoot } from "../fixtures/testProjects";
-import { CLI_INVOCATION } from "../util/cliTestUtils";
+import { getProjectRoot } from "../../fixtures/testProjects";
+import { CLI_INVOCATION } from "../../util/cliTestUtils";
 import {
   afterAll,
   beforeAll,
   describe,
   expect,
   test,
-} from "../util/testFramework";
+} from "../../util/testFramework";
 
 /**
  * End-to-end test of the generated bash completion wrapper, driven in a real
