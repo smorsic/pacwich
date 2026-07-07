@@ -26,7 +26,7 @@ These are DRY examples used in the README and documentation website.
 
 These are terse markdown versions of the complete docs used in all AI-friendly documentation features and build the repo's own AGENTS.md. They don't use the quick starts in order to balance brevity with completeness.
 
-- Similar to the quick start splits, changes may need to be made for
+- Similar to the quick start splits, changes may need to be made for these files from the repo root:
   - md/ai/context/apiExamples.md
   - md/ai/context/cliExamples.md
   - md/ai/context/config.md
