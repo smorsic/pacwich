@@ -111,6 +111,15 @@ describe("tryRunCompletionRequest", () => {
     expect(sanitizeCompletionField("clear\x1b[2Jme")).toBe("clearme");
   });
 
+  test("path: candidates are project-root-relative, independent of process.cwd()", () => {
+    // workspace.path is already root-relative; resolving it against the
+    // process cwd (which is not ROOT here) would double-count the path.
+    const values = completeValues(["--cwd", ROOT, "run", "x", "path:"]);
+    expect(values).toContain("path:workspaces/a");
+    expect(values).toContain("path:workspaces/b");
+    expect(values.some((value) => value.includes(".."))).toBe(false);
+  });
+
   test("pattern specifiers carry the nospace flag; workspace values do not", () => {
     const lines = completeLines(["--cwd", ROOT, "run", "x", ""]);
     const flagOf = (value: string) =>

@@ -1,4 +1,3 @@
-import path from "path";
 import {
   SUPPORTED_COMPLETION_SHELLS,
   filterCompletionCandidates,
@@ -220,7 +219,7 @@ const resolveGroupLines = (
 
   if (!project) return [];
 
-  const names = ProjectSourceNames(group, project);
+  const names = projectSourceNames(group, project);
   return filterCompletionCandidates(names, group.prefix).map((name) =>
     [
       group.label,
@@ -231,7 +230,7 @@ const resolveGroupLines = (
   );
 };
 
-const ProjectSourceNames = (
+const projectSourceNames = (
   group: ProjectGroup,
   project: FileSystemProject,
 ): string[] => {
@@ -245,10 +244,8 @@ const ProjectSourceNames = (
     case "workspaceAlias":
       return project.workspaces.flatMap((workspace) => workspace.aliases);
     case "workspacePath":
-      return project.workspaces.map(
-        (workspace) =>
-          path.relative(project.rootDirectory, workspace.path) || ".",
-      );
+      // workspace.path is already project-root-relative
+      return project.workspaces.map((workspace) => workspace.path || ".");
   }
 };
 
