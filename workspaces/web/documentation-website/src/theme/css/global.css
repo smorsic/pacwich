@@ -758,6 +758,7 @@ a code {
 
 .pm-tabs-content {
   box-shadow: var(--elevation-1_75-shadow);
+  border-radius: 0.75rem;
 }
 
 .pm-tabs-header {
@@ -801,11 +802,11 @@ a code {
 }
 
 .pm-tabs-tabs button:first-child {
-  border-top-left-radius: 0.5rem;
+  border-top-left-radius: 0.75rem;
 }
 
 .pm-tabs-tabs button:last-child {
-  border-top-right-radius: 0.5rem;
+  border-top-right-radius: 0.75rem;
   border-right: none;
 }
 
@@ -831,8 +832,8 @@ a code {
 .pm-tabs pre:nth-last-of-type(1) {
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
-  border-bottom-left-radius: 0.5rem !important;
-  border-bottom-right-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.75rem !important;
+  border-bottom-right-radius: 0.75rem !important;
 }
 
 .doc-pm-tabs-container {

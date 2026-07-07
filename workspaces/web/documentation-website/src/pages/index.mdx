@@ -21,6 +21,7 @@ import { BlogLink } from "@/lib/components/BlogLink";
 <div className="home">
 <IntroAnimation />
 
+
 <div className="features">
   <FeatureBun kind="top" />
   <div className="features-list">
@@ -94,4 +95,16 @@ import { BlogLink } from "@/lib/components/BlogLink";
 </Link>
 </div>
 
+<div className="whats-new">
+  <h2 className="whats-new-title">What's New</h2>
+  <h3 className="whats-new-subtitle">Noteworthy recent updates</h3>
+  <hr />
+  <ul>
+    <li>[v0.3.0](https://github.com/smorsic/pacwich/releases/tag/pacwich-v0.3.0): Shell completions are here for the global CLI! See the install docs above.</li> 
+    <li>[v0.2.0](https://github.com/smorsic/pacwich/releases/tag/pacwich-v0.2.0): New [`run-interactive`](/cli/commands#run-interactive) feature for running a workspace script with full stdio support</li> 
+    <li>`pacwich` launches from the ashes of `bun-workspaces`: <BlogLink path="pacwich-launch">Read the blog post</BlogLink></li> 
+  </ul>
 </div>
+
+</div>
+
