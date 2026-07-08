@@ -146,7 +146,9 @@ export const createCli = ({
         projectError,
         workingDirectory,
         disableExecutableConfigs,
-      } = initializeWithGlobalOptions(program, args, middleware);
+      } = initializeWithGlobalOptions(program, args, middleware, {
+        programmatic: !!programmatic,
+      });
 
       // Caught here, after global options (including --log-level) are
       // applied, so the deprecation warning honors the configured log level.

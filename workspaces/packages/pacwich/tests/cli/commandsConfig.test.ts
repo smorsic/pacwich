@@ -2,6 +2,8 @@ import {
   CLI_COMMANDS_CONFIG,
   getCliGlobalOptionConfig,
   getCliGlobalOptionNames,
+  isGlobalCliCommandToken,
+  resolveCliCommandName,
   type CliCommandConfig,
 } from "@pacwich/common";
 import { describe, expect, test } from "../util/testFramework";
@@ -85,5 +87,68 @@ describe("CLI commands config integrity", () => {
     }
 
     expect(clashes).toEqual([]);
+  });
+});
+
+describe("resolveCliCommandName", () => {
+  test("resolves a command word to its canonical name", () => {
+    expect(resolveCliCommandName("list-workspaces")).toBe("listWorkspaces");
+    expect(resolveCliCommandName("completion")).toBe("completion");
+  });
+
+  test("resolves an alias to its canonical name", () => {
+    expect(resolveCliCommandName("ls")).toBe("listWorkspaces");
+    expect(resolveCliCommandName("run")).toBe("runScript");
+    expect(resolveCliCommandName("ls-affected")).toBe("listAffected");
+  });
+
+  test("returns null for an unknown token", () => {
+    expect(resolveCliCommandName("does-not-exist")).toBeNull();
+    expect(resolveCliCommandName("")).toBeNull();
+  });
+
+  test("does not match a partial command word", () => {
+    // "list" is a real alias of listWorkspaces, but "lis" is not.
+    expect(resolveCliCommandName("lis")).toBeNull();
+    expect(resolveCliCommandName("completio")).toBeNull();
+  });
+
+  test("resolves every configured command word and alias", () => {
+    for (const [key, config] of commandEntries) {
+      expect(resolveCliCommandName(commandName(config))).toBe(key);
+      for (const alias of config.aliases) {
+        expect(resolveCliCommandName(alias)).toBe(key);
+      }
+    }
+  });
+});
+
+describe("isGlobalCliCommandToken", () => {
+  test("is true for global command words", () => {
+    expect(isGlobalCliCommandToken("completion")).toBe(true);
+    expect(isGlobalCliCommandToken("doctor")).toBe(true);
+    expect(isGlobalCliCommandToken("mcp-server")).toBe(true);
+    expect(isGlobalCliCommandToken("add-skills")).toBe(true);
+  });
+
+  test("is false for project command words and aliases", () => {
+    expect(isGlobalCliCommandToken("list-workspaces")).toBe(false);
+    expect(isGlobalCliCommandToken("ls")).toBe(false);
+    expect(isGlobalCliCommandToken("run")).toBe(false);
+    expect(isGlobalCliCommandToken("verify")).toBe(false);
+  });
+
+  test("is false for an unknown token or undefined", () => {
+    expect(isGlobalCliCommandToken("does-not-exist")).toBe(false);
+    expect(isGlobalCliCommandToken("")).toBe(false);
+    expect(isGlobalCliCommandToken(undefined)).toBe(false);
+  });
+
+  test("agrees with each command's isGlobal flag", () => {
+    for (const config of commandEntries.map(([, value]) => value)) {
+      expect(isGlobalCliCommandToken(commandName(config))).toBe(
+        config.isGlobal,
+      );
+    }
   });
 });

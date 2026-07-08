@@ -516,3 +516,27 @@ export const getCliCommandConfig = (commandName: CliCommandName) =>
 
 export const getCliCommandNames = () =>
   Object.keys(CLI_COMMANDS_CONFIG) as CliCommandName[];
+
+/**
+ * Resolve a raw CLI token (a command word or alias exactly as typed) to
+ * its canonical command name, or `null` when it matches no command.
+ */
+export const resolveCliCommandName = (token: string): CliCommandName | null => {
+  for (const name of getCliCommandNames()) {
+    const { command, aliases } = CLI_COMMANDS_CONFIG[name];
+    const commandWord = command.split(/\s+/)[0];
+    if (token === commandWord || aliases.includes(token as never)) return name;
+  }
+  return null;
+};
+
+/**
+ * Whether a raw CLI token resolves to a global command (one that does not
+ * operate on a project, such as `completion` or `doctor`). A token that
+ * matches no known command returns `false`.
+ */
+export const isGlobalCliCommandToken = (token: string | undefined): boolean => {
+  if (!token) return false;
+  const name = resolveCliCommandName(token);
+  return name ? CLI_COMMANDS_CONFIG[name].isGlobal : false;
+};

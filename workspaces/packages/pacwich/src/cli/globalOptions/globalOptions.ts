@@ -4,6 +4,7 @@ import {
   type CliGlobalOptionName,
   type CliGlobalOptions,
   getCliGlobalOptionConfig,
+  isGlobalCliCommandToken,
 } from "@pacwich/common/cli";
 import { type Command } from "../../internal/bundledDeps/commander";
 import { Option } from "../../internal/bundledDeps/commander";
@@ -100,9 +101,36 @@ const defineGlobalOptions = (
   return { cwd };
 };
 
-const applyGlobalOptions = (options: CliGlobalOptions) => {
+// Placeholder used when no real project is loaded (a global command was
+// invoked, or project assembly failed)
+const createPlaceholderProject = () =>
+  createMemoryProject({
+    workspaces: [],
+    packageManager: "bun",
+  }) as unknown as FileSystemProject;
+
+type ApplyGlobalOptionsOptions = {
+  /**
+   * Skip loading the file-system project. Set for global commands.
+   */
+  skipProjectLoad: boolean;
+};
+
+const applyGlobalOptions = (
+  options: CliGlobalOptions,
+  { skipProjectLoad }: ApplyGlobalOptionsOptions,
+) => {
   logger.printLevel = options.logLevel;
   logger.debug("Log level: " + options.logLevel);
+
+  if (skipProjectLoad) {
+    return {
+      project: createPlaceholderProject(),
+      projectError: null,
+      workingDirectory: options.cwd,
+      disableExecutableConfigs: options.disableExecutableConfigs,
+    };
+  }
 
   let project: FileSystemProject;
   let error: Error | null = null;
@@ -122,14 +150,7 @@ const applyGlobalOptions = (options: CliGlobalOptions) => {
     logger.debug("Project root: " + path.resolve(project.rootDirectory));
   } catch (_error) {
     error = _error as Error;
-    // Placeholder used only when projectError is set. Every command
-    // handler checks projectError first and surfaces it, so the
-    // adapter choice is inert. Bun keeps things deterministic without
-    // implying a default.
-    project = createMemoryProject({
-      workspaces: [],
-      packageManager: "bun",
-    }) as unknown as FileSystemProject;
+    project = createPlaceholderProject();
   }
 
   return {
@@ -140,22 +161,38 @@ const applyGlobalOptions = (options: CliGlobalOptions) => {
   };
 };
 
+export type InitializeWithGlobalOptionsOptions = {
+  /**
+   * Whether `args` came in already stripped of the leading Node
+   * `execPath`/scriptPath prefix (mirrors Commander's `from: "user"`)
+   */
+  programmatic: boolean;
+};
+
 export const initializeWithGlobalOptions = (
   program: Command,
   args: string[],
   middleware: CliMiddleware,
+  { programmatic }: InitializeWithGlobalOptionsOptions,
 ) => {
   program.allowUnknownOption(true);
 
   const { cwd } = defineGlobalOptions(program, args, middleware);
 
-  program.parseOptions(args);
+  // Get positional args
+  const { operands } = program.parseOptions(args);
+
   program.allowUnknownOption(false);
+
+  const commandToken = (programmatic ? operands : operands.slice(2))[0];
 
   const options = program.opts() as CliGlobalOptions;
 
-  return applyGlobalOptions({
-    ...options,
-    cwd,
-  });
+  return applyGlobalOptions(
+    {
+      ...options,
+      cwd,
+    },
+    { skipProjectLoad: isGlobalCliCommandToken(commandToken) },
+  );
 };

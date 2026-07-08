@@ -10,7 +10,13 @@ import {
   USAGE_OUTPUT_PATTERN,
 } from "../util/cliTestUtils";
 import { makeTestWorkspace } from "../util/testData";
-import { test, expect, describe } from "../util/testFramework";
+import {
+  test,
+  expect,
+  describe,
+  beforeAll,
+  afterAll,
+} from "../util/testFramework";
 
 describe("CLI Global Options", () => {
   describe("usage/help", () => {
@@ -641,6 +647,79 @@ describe("CLI Global Options", () => {
       });
       const result = await run("--pm", "bun", "ls", "--json");
       expect(result.exitCode).toBe(0);
+    });
+  });
+
+  // A global command (completion, doctor, ...) never operates on a
+  // project, so the CLI must not eagerly assemble one. Assembling a
+  // workspaceless project emits a "No workspaces declared" hint, which
+  // is precisely the noise that must not leak into e.g.
+  // `eval "$(pacwich completion zsh)"`.
+  describe("global commands do not load the project", () => {
+    const NO_WORKSPACES_HINT = /No workspaces declared/;
+
+    // A valid-but-workspaceless project: a parseable bun.lock (so
+    // assembly succeeds) plus a package.json with no "workspaces" field
+    // (so the hint fires when a project IS loaded).
+    let workspacelessDir: string;
+
+    beforeAll(() => {
+      workspacelessDir = fs.mkdtempSync(
+        path.join(os.tmpdir(), "pacwich-noworkspaces-"),
+      );
+      fs.writeFileSync(
+        path.join(workspacelessDir, "package.json"),
+        JSON.stringify({ name: "no-workspaces-field" }),
+      );
+      fs.writeFileSync(
+        path.join(workspacelessDir, "bun.lock"),
+        JSON.stringify({
+          lockfileVersion: 1,
+          configVersion: 1,
+          workspaces: { "": { name: "no-workspaces-field" } },
+          packages: {},
+        }),
+      );
+    });
+
+    afterAll(() => {
+      fs.rmSync(workspacelessDir, { force: true, recursive: true });
+    });
+
+    test("a project command surfaces the no-workspaces hint (control)", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const result = await run("ls", "--name-only");
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stderr.sanitized, NO_WORKSPACES_HINT);
+    });
+
+    test("completion <shell> prints the script with no log output", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const result = await run("completion", "zsh");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toBeEmpty();
+      expect(result.stdout.raw.length).toBeGreaterThan(0);
+    });
+
+    test("doctor produces no log output", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const result = await run("doctor");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toBeEmpty();
+    });
+
+    test("global options before the command still skip project loading", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const result = await run("--log-level", "info", "completion", "zsh");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toBeEmpty();
+    });
+
+    test("--cwd targeting the workspaceless project still stays silent for a global command", async () => {
+      const { run } = setupCliTest();
+      const result = await run(`--cwd=${workspacelessDir}`, "doctor");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toBeEmpty();
     });
   });
 });

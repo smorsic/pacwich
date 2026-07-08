@@ -37,7 +37,7 @@
     },
     "workspaces/packages/pacwich": {
       "name": "pacwich",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "bin": {
         "pacwich": "bin/cliDev.js",
       },
