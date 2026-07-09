@@ -101,31 +101,36 @@ const { success } = handleSomething({ value: "a", isSomething: true });
 
 #### Public Exports
 
-Any public export is encouraged to have TSDoc for about every possible target (types, properties of types, functions, etc.).
+Any public (user-facing specifically) export is encouraged to have TSDoc.
 
-Don't use TSDoc tags that are already inferred by TS (e.g. params, which should generally be in a parameter object that has
-its own TSDoc for itself and its properties).
+Don't use TSDoc tags that are already inferred by TS (e.g. params and return types).
 
 Functions and methods should have at least a minimal `@example` that covers parameters, and types used as parameters and return types
-may benefit from a brief example too, like an example object of values.
+may benefit from a brief example too if it helps clarify user usage (e.g. config/parameter objects or complex return types), like
+a simple parameter object with a complete set of example values.
 
 #### Internal Code
 
-Prefer descriptive code with minimal comments, but they are still encouraged to add clarity,
-explain reasoning (especially for something unconventional, hacky, or otherwise surprising),
-and provide light structure.
+Internal code should follow different commenting conventions than public exports.
 
-Comments should be kept brief and add context that isn't immediately
-inferrable by the code naming underneath it (e.g. no "// This runs a script across workspaces"
-over `function runScriptAcrossWorkspaces`.) Structural comments (e.g headings for grouping etc.)
-should also be minimal, more useful in grouping meaningful chunks of lengthy repetition and
-especially long flat spans of code, but are not as encouraged if the code's nesting/naming would
-provide the same structure/meaning already.
+Prefer descriptive, self-documenting code over verbose comments. Do not use comments
+to re-explain what a variable or function name does (e.g. no "// add two numbers together" above `addTwo()`
+or similar).
 
-Avoid em dashes and prose semicolons in general.
+Most agents' default comment verbosity is usually overkill and can lead to drift.
+Repeating long explanations frequently makes drift more likely. Agents and people usually end up
+investigating the accuracy of verbose comments anyway, and skipping them increases risk of misinterpreting
+code truth from an outdated comment, so either contextual effort is increased or risk is increased despite
+an intention to reduce both.
 
-VSCode settings encourage the "Better Comments" extension for highlighted comments.
-However, prefer TSDoc `@todo` over `TODO`.
+Comments should be reserved for explaining something potentially surprising (hacky or breaking project conventions)
+or non-obvious. Prefer to limit comments to 1-2 lines at most unless more is truly justified.
+
+Exported internal code having a brief TSDoc can still still useful for development, but these should still
+stay brief.
+
+Avoid em dashes and prose semicolons in general. Use clear grammar, but brief, casual language
+can be useful for keeping comments quickly readable without full sentence strictness.
 
 ### Security Considerations
 
