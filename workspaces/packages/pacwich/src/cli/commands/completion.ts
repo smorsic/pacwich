@@ -7,7 +7,7 @@ import {
   type CompletionShell,
   type ProjectGroup,
 } from "@pacwich/common/cli";
-import { IS_MACOS, stripANSI } from "../../internal/core";
+import { IS_MACOS, stripANSI, withMutedStdio } from "../../internal/core";
 import { logger } from "../../internal/logger";
 import { createFileSystemProject } from "../../project";
 import type { FileSystemProject } from "../../project/implementations/fileSystemProject";
@@ -163,25 +163,6 @@ const hasDisableConfigsFlag = (words: string[]): boolean => {
     if (words[i] === DISABLE_CONFIGS_FLAG) return true;
   }
   return false;
-};
-
-/**
- * Run `fn` with `process.stdout`/`process.stderr` writes swallowed, so a
- * config's incidental output can't corrupt the completion candidate
- * stream. Writes are restored even if `fn` throws.
- */
-const withMutedStdio = <T>(fn: () => T): T => {
-  const originalStdout = process.stdout.write.bind(process.stdout);
-  const originalStderr = process.stderr.write.bind(process.stderr);
-  const swallow = (() => true) as typeof process.stdout.write;
-  process.stdout.write = swallow;
-  process.stderr.write = swallow;
-  try {
-    return fn();
-  } finally {
-    process.stdout.write = originalStdout;
-    process.stderr.write = originalStderr;
-  }
 };
 
 /**

@@ -900,7 +900,7 @@ can be useful for keeping comments quickly readable without full sentence strict
   - If used in CLI output, strip ANSI/control codes to prevent terminal display manipulation (minor exceptions for allowed ANSI in workspace script output etc.)
   - If used in subprocess argv like how affected feature git commands are constructed, prevent injections like CLI flags (e.g. how the `--base` option is processed)
 - Temp files and similar: prevent TOCTOU vulnerabilities by using atomic file operations or proper locking mechanisms.
-- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option (defaulting on for the `mcp-server` command) restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
+- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
 - GitHub actions
   - External actions versions must be SHA-pinned (dev should likely look up latest version)
   - Install dependencies with `--frozen-lockfile` and `--ignore-scripts` if possible
