@@ -45,6 +45,7 @@ These are terse markdown versions of the complete docs used in all AI-friendly d
   - This may cover most feature changes without direct README_TEMPLATE updates. If so, the README task can be skipped
 - Noteworthy feature additions to highlight may warrant a change beyond the quick starts
 - Run `bun install` after to generate an updated README.md if changes made
+  - The user may set DISABLE_README_AUTO_UPDATE=true to skip this if not wanting public README changes if a release is not planned after `main` update
 
 ## Documentation website
 
