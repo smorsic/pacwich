@@ -6,7 +6,7 @@
 
 # pacwich
 
-<sub>Latest: 0.3.1</sub>
+<sub>Latest: 0.4.0</sub>
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
@@ -20,16 +20,6 @@ Start running some [CLI commands](https://pacwich.dev/cli) right away in your re
 - [Getting Started Guide](https://pacwich.dev/intro/getting-started)
 - Changelog: [GitHub Releases](https://github.com/smorsic/pacwich/releases)
 
-#### Note: bun-workspaces
-
-This is the continuation of the `bun-workspaces` package that only worked with Bun.
-See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
-
-You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
-to assist with migration.
-
-Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
-
 ### Terminology
 
 The definitions of **workspace** and **project** differ between package managers and monorepo tooling.
@@ -41,6 +31,16 @@ The **project** is synonymous with your root where workspaces are defined, often
 This means you have a root **project** that has some number of **workspaces**. The root package is not considered a workspace by default, but [it optionally can be](https://pacwich.dev/concepts/root-workspace).
 
 [Docs: Glossary page](https://pacwich.dev/concepts/glossary)
+
+> #### Note: bun-workspaces
+>
+> This is the continuation of the `bun-workspaces` package that only worked with Bun.
+> See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
+>
+> You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
+> to assist with migration.
+>
+> Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
 
 ## Quick Start
 
@@ -130,7 +130,13 @@ pacwich --cwd=/path/to/your/project run my-script
 pacwich --pm=pnpm ls
 
 # Pass --log-level to any command (debug, info, warn, error, or silent)
+# A default can also be set with the PACWICH_LOG_LEVEL env var (the flag overrides it)
 pacwich --log-level=debug ls
+
+# Suppress specific warning messages (can also be set by project config)
+# Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings)
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 
 ####################
 # Getting metadata #
