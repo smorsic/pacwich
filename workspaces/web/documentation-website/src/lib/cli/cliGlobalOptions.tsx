@@ -70,6 +70,17 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
       `pacwich ${shortOption} error list-workspaces`,
     ],
   })),
+  suppressWarnings: defineOptionContent(
+    "suppressWarnings",
+    ({ mainOption }) => ({
+      title: "Suppress Warnings",
+      description:
+        "Suppress warning logs by id, in addition to the PACWICH_SUPPRESS_WARNINGS env var",
+      examples: [
+        `pacwich ${mainOption}=MissingWorkspacesHint,MultipleConfigsFound ls`,
+      ],
+    }),
+  ),
 } as const satisfies Record<CliGlobalOptionName, CliGlobalOptionContent>;
 
 export const getCliGlobalOptionContent = (optionName: CliGlobalOptionName) =>

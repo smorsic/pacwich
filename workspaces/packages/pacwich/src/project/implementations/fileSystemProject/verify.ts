@@ -45,12 +45,9 @@ const GLOB_CHARACTER_REGEX = /[*?[{]/;
 const normalizeIgnorePattern = (pattern: string): string | null => {
   let normalized = toPosixPath(pattern);
   if (normalized.startsWith(FILE_PATTERN_NEGATION_PREFIX)) {
-    logger.warn(
-      `verify.workspaceDependencies.ignoreInputFiles entry ${JSON.stringify(
-        pattern,
-      )} starts with "!". Re-include negations are not honored here. ` +
-        "Treating it as an ignore pattern.",
-    );
+    logger.warn("IgnoreInputFilesNegationNotHonored", {
+      pattern: JSON.stringify(pattern),
+    });
     normalized = normalized.slice(FILE_PATTERN_NEGATION_PREFIX.length);
   }
   normalized = stripLeadingSlashes(normalized);

@@ -36,9 +36,11 @@ const loadCurrentVersions = ({
   if (contents === null) return new Map();
   const parsed = parseBunLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse current bun.lock: ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("BunLockParseFailed", {
+      context: "current bun.lock",
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -56,9 +58,11 @@ const loadVersionsAtGitRef = async ({
   if (contents === null) return new Map();
   const parsed = parseBunLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse bun.lock at ref "${ref}": ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("BunLockParseFailed", {
+      context: `bun.lock at ref "${ref}"`,
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -93,9 +97,11 @@ export const loadBunWorkspaceLinks = ({
   if (contents === null) return null;
   const linkedNames = parseBunLockWorkspaceLinkNames(contents);
   if (linkedNames instanceof PacwichError) {
-    logger.warn(
-      `Could not parse bun.lock for workspace links: ${linkedNames.message}. Falling back to static dependency analysis.`,
-    );
+    logger.warn("BunLockParseFailed", {
+      context: "bun.lock for workspace links",
+      detail: linkedNames.message,
+      fallback: "Falling back to static dependency analysis.",
+    });
     return null;
   }
   return {

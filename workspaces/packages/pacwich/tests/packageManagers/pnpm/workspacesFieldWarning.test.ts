@@ -38,9 +38,7 @@ describe("pnpm: workspaces-field warning", () => {
 
   const findWarning = () =>
     warnSpy.mock.calls.find(
-      ([msg]: [string]) =>
-        typeof msg === "string" &&
-        msg.includes('"workspaces" field in package.json is not used by pnpm'),
+      ([id]: [string]) => id === "PnpmWorkspacesFieldIgnored",
     );
 
   test("warns when workspaces field is set and pnpm-workspace.yaml is missing", () => {

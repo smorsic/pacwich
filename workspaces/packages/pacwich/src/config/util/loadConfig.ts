@@ -201,8 +201,8 @@ const LOCATION_FINDERS: Record<
 /**
  * When true, skip discovery of `.ts`/`.js` config locations so that no
  * executable code is loaded via `require()`. Plain `.jsonc`/`.json` and
- * the `package.json` `pacwich` key still resolve. Used by the MCP server,
- * which can be redirected to arbitrary directories at runtime.
+ * the `package.json` `pacwich` key still resolve. For untrusted contexts,
+ * set via the `--disable-executable-configs` flag or the factory option.
  */
 export type LoadConfigOptions = {
   disableExecutableConfigs?: boolean;
@@ -237,11 +237,12 @@ export const getConfigLocation = (
   }
 
   if (locations.length > 1) {
-    logger.warn(
-      `Found multiple ${name} configs:\n${locations
+    logger.warn("MultipleConfigsFound", {
+      configName: name,
+      details: `${locations
         .map((location) => "  " + location.path)
         .join("\n")}\nUsing config at ${locations[0]?.path}`,
-    );
+    });
   }
 
   return locations[0] ?? null;

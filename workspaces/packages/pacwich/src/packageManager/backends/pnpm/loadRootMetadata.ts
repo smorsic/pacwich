@@ -57,9 +57,7 @@ export const loadRootMetadata = ({
     rootPackageJson.workspaces !== undefined &&
     !fs.existsSync(pnpmWorkspaceYamlPath)
   ) {
-    logger.warn(
-      `The "workspaces" field in package.json is not used by pnpm. Define workspace packages in "pnpm-workspace.yaml" instead.`,
-    );
+    logger.warn("PnpmWorkspacesFieldIgnored", {});
   }
 
   const config = readPnpmWorkspaceYaml(rootDirectory);

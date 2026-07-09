@@ -6,10 +6,15 @@ import {
   getCliGlobalOptionConfig,
   isGlobalCliCommandToken,
 } from "@pacwich/common/cli";
+import type { WarningId } from "@pacwich/common/warnings";
 import { type Command } from "../../internal/bundledDeps/commander";
 import { Option } from "../../internal/bundledDeps/commander";
-import { defineErrors, expandHomePath } from "../../internal/core";
-import { logger } from "../../internal/logger";
+import {
+  defineErrors,
+  expandHomePath,
+  splitCsvList,
+} from "../../internal/core";
+import { logger, setSuppressWarnings } from "../../internal/logger";
 import {
   createFileSystemProject,
   createMemoryProject,
@@ -97,6 +102,7 @@ const defineGlobalOptions = (
   addGlobalOption(program, "includeRoot");
   addGlobalOption(program, "disableExecutableConfigs");
   addGlobalOption(program, "pm");
+  addGlobalOption(program, "suppressWarnings");
 
   return { cwd };
 };
@@ -122,6 +128,12 @@ const applyGlobalOptions = (
 ) => {
   logger.printLevel = options.logLevel;
   logger.debug("Log level: " + options.logLevel);
+
+  // The --suppress-warnings flag. The PACWICH_SUPPRESS_WARNINGS env var is
+  // honored by the logger directly, so nothing else is wired up here.
+  setSuppressWarnings(
+    splitCsvList(options.suppressWarnings ?? "") as WarningId[],
+  );
 
   if (skipProjectLoad) {
     return {

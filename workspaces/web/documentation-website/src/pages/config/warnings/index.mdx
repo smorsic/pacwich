@@ -1,0 +1,21 @@
+---
+title: Warnings
+titleSuffix: " | pacwich Documentation"
+description: "Warning logs to suppress for pacwich | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+import { getUserEnvVarName } from '@pacwich/common/config'
+import { WarningIds } from '../../../lib/config/WarningIds'
+
+You can suppress warnings via:
+* The [environment variable](/config/env-vars) <code>{getUserEnvVarName('suppressWarnings')}</code>, a comma-separated list of warning ids,
+* The `--suppress-warnings` [CLI global option](/cli/global-options#suppress-warnings), which is unioned with the environment variable.
+
+Warnings are a process-level concern rather than a project setting, so there is no project config or TS API option for suppression.
+
+## All Warning IDs
+
+<WarningIds />

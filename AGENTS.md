@@ -342,6 +342,12 @@ pacwich --pm=auto ls
 # PACWICH_DISABLE_EXECUTABLE_CONFIGS_DEFAULT=true.
 pacwich --disable-executable-configs ls
 pacwich --no-disable-executable-configs ls # override config/env var setting
+
+# Suppress specific warning messages
+# Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings/index.md)
+# Also settable via the PACWICH_SUPPRESS_WARNINGS env var as csv (the flag unions with it)
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 ```
 
 <!--End pacwich CLI examples-->
@@ -867,8 +873,7 @@ or similar).
 Most agents' default comment verbosity is usually overkill and can lead to drift.
 Repeating long explanations frequently makes drift more likely. Agents and people usually end up
 investigating the accuracy of verbose comments anyway, and skipping them increases risk of misinterpreting
-code truth from an outdated comment, so either contextual effort is increased or risk is increased despite
-an intention to reduce both.
+code truth from an outdated comment. **Overly verbose internal comments will not be approved.**
 
 Comments should be reserved for explaining something potentially surprising (hacky or breaking project conventions)
 or non-obvious. Prefer to limit comments to 1-2 lines at most unless more is truly justified.
@@ -886,7 +891,7 @@ can be useful for keeping comments quickly readable without full sentence strict
   - If used in CLI output, strip ANSI/control codes to prevent terminal display manipulation (minor exceptions for allowed ANSI in workspace script output etc.)
   - If used in subprocess argv like how affected feature git commands are constructed, prevent injections like CLI flags (e.g. how the `--base` option is processed)
 - Temp files and similar: prevent TOCTOU vulnerabilities by using atomic file operations or proper locking mechanisms.
-- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option (defaulting on for the `mcp-server` command) restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
+- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
 - GitHub actions
   - External actions versions must be SHA-pinned (dev should likely look up latest version)
   - Install dependencies with `--frozen-lockfile` and `--ignore-scripts` if possible
