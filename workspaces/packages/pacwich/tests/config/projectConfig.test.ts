@@ -1,5 +1,4 @@
 import { getUserEnvVarName } from "@pacwich/common/config";
-import type { WarningId } from "@pacwich/common/warnings";
 import { createFileSystemProject } from "../../src";
 import { LOAD_CONFIG_ERRORS } from "../../src/config";
 import {
@@ -11,9 +10,6 @@ import { determineParallelMax, resolveScriptShell } from "../../src/runScript";
 import { getProjectRoot } from "../fixtures/testProjects";
 import { afterEach, describe, expect, test } from "../util/testFramework";
 
-// Test ids are unregistered WarningId values, cast for the sake of exercising resolution.
-const asWarningIds = (ids: string[]) => ids as WarningId[];
-
 describe("Test project config", () => {
   describe("loadProjectConfig", () => {
     test("loads defaults when no config file exists", () => {
@@ -23,7 +19,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -40,7 +35,6 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -56,7 +50,6 @@ describe("Test project config", () => {
             shell: "system",
             includeRootWorkspace: false,
             affectedBaseRef: "main",
-            suppressWarnings: [],
           },
           packageManager: "auto",
           workspacePatternConfigs: [],
@@ -74,7 +67,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -119,7 +111,6 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -136,7 +127,6 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -192,7 +182,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -213,7 +202,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -232,7 +220,6 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -333,7 +320,6 @@ describe("Test project config", () => {
           shell: "bun",
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -350,7 +336,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -371,7 +356,6 @@ describe("Test project config", () => {
           shell: resolveScriptShell("default"),
           includeRootWorkspace: false,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -390,7 +374,6 @@ describe("Test project config", () => {
           shell: "system",
           includeRootWorkspace: true,
           affectedBaseRef: "main",
-          suppressWarnings: [],
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
@@ -613,85 +596,6 @@ describe("Test project config", () => {
           defaults: {
             cliScriptOutputStyle: 5 as unknown as "grouped",
           },
-        }),
-      ).toThrow("Project config is invalid");
-    });
-  });
-
-  describe("suppressWarnings default", () => {
-    const ENV_VAR = getUserEnvVarName("suppressWarningsDefault");
-
-    afterEach(() => {
-      delete process.env[ENV_VAR];
-    });
-
-    test("defaults to [] when not provided in config or env", () => {
-      expect(resolveProjectConfig({}).defaults.suppressWarnings).toEqual([]);
-    });
-
-    test("passes through a single-item config value", () => {
-      expect(
-        resolveProjectConfig({
-          defaults: { suppressWarnings: asWarningIds(["warningA"]) },
-        }).defaults.suppressWarnings,
-      ).toEqual(["warningA"]);
-    });
-
-    test("passes through a multi-item config value", () => {
-      expect(
-        resolveProjectConfig({
-          defaults: {
-            suppressWarnings: asWarningIds(["warningA", "warningB"]),
-          },
-        }).defaults.suppressWarnings,
-      ).toEqual(["warningA", "warningB"]);
-    });
-
-    test("falls back to the env var (comma-separated) when config does not set it", () => {
-      process.env[ENV_VAR] = "warningA,warningB";
-      expect(resolveProjectConfig({}).defaults.suppressWarnings).toEqual([
-        "warningA",
-        "warningB",
-      ]);
-    });
-
-    test("unions the config value and the env var rather than one overriding the other", () => {
-      process.env[ENV_VAR] = "warningB";
-      expect(
-        resolveProjectConfig({
-          defaults: { suppressWarnings: asWarningIds(["warningA"]) },
-        }).defaults.suppressWarnings,
-      ).toEqual(["warningA", "warningB"]);
-    });
-
-    test("deduplicates ids shared between the config value and the env var", () => {
-      process.env[ENV_VAR] = "warningA";
-      expect(
-        resolveProjectConfig({
-          defaults: { suppressWarnings: asWarningIds(["warningA"]) },
-        }).defaults.suppressWarnings,
-      ).toEqual(["warningA"]);
-    });
-
-    test("an empty config array stays empty when the env var is unset", () => {
-      expect(
-        resolveProjectConfig({ defaults: { suppressWarnings: [] } }).defaults
-          .suppressWarnings,
-      ).toEqual([]);
-    });
-
-    test("throws when config value is not an array", () => {
-      expect(() =>
-        resolveProjectConfig({
-          defaults: { suppressWarnings: "warningA" as unknown as WarningId[] },
-        }),
-      ).toThrow("Project config is invalid");
-    });
-
-    test("throws when config value entries are not strings", () => {
-      expect(() =>
-        resolveProjectConfig({
-          defaults: { suppressWarnings: [5 as unknown as WarningId] },
         }),
       ).toThrow("Project config is invalid");
     });

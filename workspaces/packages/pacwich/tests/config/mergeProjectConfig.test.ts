@@ -1,10 +1,6 @@
 import type { ProjectConfig } from "@pacwich/common";
-import type { WarningId } from "@pacwich/common/warnings";
 import { mergeProjectConfig } from "../../src/config/projectConfig";
 import { describe, expect, test } from "../util/testFramework";
-
-// Test ids are unregistered WarningId values, cast for the sake of exercising merging.
-const asWarningIds = (ids: string[]) => ids as WarningId[];
 
 describe("mergeProjectConfig", () => {
   test("returns empty config when called with no arguments", () => {
@@ -297,70 +293,6 @@ describe("mergeProjectConfig", () => {
         "a/**/*",
         "b/**/*",
         "c/**/*",
-      ]);
-    });
-  });
-
-  describe("defaults.suppressWarnings", () => {
-    test("entries from two configs are concatenated in order", () => {
-      expect(
-        mergeProjectConfig(
-          { defaults: { suppressWarnings: asWarningIds(["warningA"]) } },
-          { defaults: { suppressWarnings: asWarningIds(["warningB"]) } },
-        ),
-      ).toMatchObject({
-        defaults: { suppressWarnings: ["warningA", "warningB"] },
-      });
-    });
-
-    test("duplicate ids across configs are deduplicated", () => {
-      expect(
-        mergeProjectConfig(
-          {
-            defaults: {
-              suppressWarnings: asWarningIds(["shared", "warningA"]),
-            },
-          },
-          {
-            defaults: {
-              suppressWarnings: asWarningIds(["shared", "warningB"]),
-            },
-          },
-        ),
-      ).toMatchObject({
-        defaults: { suppressWarnings: ["shared", "warningA", "warningB"] },
-      });
-    });
-
-    test("config with no suppressWarnings does not clear accumulated entries", () => {
-      expect(
-        mergeProjectConfig(
-          { defaults: { suppressWarnings: asWarningIds(["warningA"]) } },
-          { defaults: { parallelMax: 4 } },
-        ),
-      ).toMatchObject({
-        defaults: { suppressWarnings: ["warningA"], parallelMax: 4 },
-      });
-    });
-
-    test("suppressWarnings is absent from result when no config sets it", () => {
-      const result = mergeProjectConfig(
-        { defaults: { parallelMax: 4 } },
-        { defaults: { shell: "system" } },
-      );
-      expect(result.defaults?.suppressWarnings).toBeUndefined();
-    });
-
-    test("entries from three configs concatenate left to right", () => {
-      const { defaults } = mergeProjectConfig(
-        { defaults: { suppressWarnings: asWarningIds(["warningA"]) } },
-        { defaults: { suppressWarnings: asWarningIds(["warningB"]) } },
-        { defaults: { suppressWarnings: asWarningIds(["warningC"]) } },
-      );
-      expect(defaults?.suppressWarnings).toEqual([
-        "warningA",
-        "warningB",
-        "warningC",
       ]);
     });
   });

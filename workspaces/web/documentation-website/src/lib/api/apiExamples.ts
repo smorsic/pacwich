@@ -20,9 +20,6 @@ const pathProject = createFileSystemProject({
 
   // Disable executable configuration files (TS/JS) for untrusted contexts
   disableExecutableConfigs: true,
-
-  // Suppress warnings by WarningId
-  suppressWarnings: ["MissingWorkspacesHint"],
 });
 
 `.trim();
@@ -156,12 +153,6 @@ project.runWorkspaceScript({
   script: "echo 'my script: <scriptName>'",
   inline: { scriptName: "my-inline-script" },
 });
-`.trim();
-
-export const SET_SUPPRESS_WARNINGS_EXAMPLE = `
-import { setSuppressWarnings } from "pacwich";
-
-setSuppressWarnings(["MissingWorkspacesHint", "MultipleConfigsFound"]);
 `.trim();
 
 export const API_PARALLEL_SCRIPTS_EXAMPLE = `

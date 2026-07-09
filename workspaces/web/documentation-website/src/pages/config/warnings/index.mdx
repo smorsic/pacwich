@@ -11,12 +11,10 @@ import { getUserEnvVarName } from '@pacwich/common/config'
 import { WarningIds } from '../../../lib/config/WarningIds'
 
 You can suppress warnings via:
-* The `--suppress-warnings` [CLI global option](/cli/global-options#suppress-warnings),
-* The `suppressWarnings` [project config](/config/project#defaults) default,
-* The `suppressWarnings` [option in the TS API](/api/reference#createfilesystemproject),
-* The [environment variable](/config/env-vars) <code>{getUserEnvVarName('suppressWarningsDefault')}</code>.
+* The [environment variable](/config/env-vars) <code>{getUserEnvVarName('suppressWarnings')}</code>, a comma-separated list of warning ids,
+* The `--suppress-warnings` [CLI global option](/cli/global-options#suppress-warnings), which is unioned with the environment variable.
 
-These are additive with each other. Using the API's `setSuppressWarnings` [function](/api/reference#setsuppresswarnings) will override the suppressions globally.
+Warnings are a process-level concern rather than a project setting, so there is no project config or TS API option for suppression.
 
 ## All Warning IDs
 

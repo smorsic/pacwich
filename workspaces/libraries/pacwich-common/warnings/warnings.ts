@@ -38,7 +38,7 @@ const TEMPLATES = {
     "Number of scripts to run in parallel ({batchSize}) is greater than the available CPUs ({recommendedMax})",
 } as const;
 
-/** Id of a pacwich warning. Appears in a warning's printed `[pacwich WARN: <id>]` prefix and is what `suppressWarnings` matches against. */
+/** Id of a pacwich warning. Appears in a warning's printed `[pacwich WARN: <id>]` prefix and is what warning suppression matches against. */
 export type WarningId = keyof typeof TEMPLATES;
 
 export const WARNING_IDS = Object.keys(TEMPLATES) as WarningId[];

@@ -75,7 +75,7 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
     ({ mainOption }) => ({
       title: "Suppress Warnings",
       description:
-        "Suppress warning logs for the project in addition to configured suppressions",
+        "Suppress warning logs by id, in addition to the PACWICH_SUPPRESS_WARNINGS env var",
       examples: [
         `pacwich ${mainOption}=MissingWorkspacesHint,MultipleConfigsFound ls`,
       ],

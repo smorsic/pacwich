@@ -43,11 +43,6 @@ const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
       primitive: true,
       types: ["string"],
     },
-    suppressWarnings: {
-      comment: "Suppress warning logs by WarningId",
-      array: true,
-      item: { primitive: true, types: ["string"] },
-    },
   },
   verify: {
     workspaceDependencies: {

@@ -1,4 +1,5 @@
 import { inspect } from "util";
+import { USER_ENV_VARS } from "@pacwich/common/config";
 import {
   LOG_LEVELS,
   getLogLevelNumber,
@@ -12,7 +13,15 @@ import {
   type WarningInterpolation,
 } from "@pacwich/common/warnings";
 import { defineErrors } from "../core/error";
+import { splitCsvList } from "../core/language/string/csvList";
 import { IS_TEST } from "../core/process/env";
+
+// Read live (not cached) so warnings emitted before any project/CLI setup
+// still honor the env var, and so it stays overridable in tests.
+const readEnvSuppressedWarnings = (): Set<string> => {
+  const raw = process.env[USER_ENV_VARS.suppressWarnings];
+  return new Set(raw ? splitCsvList(raw) : []);
+};
 
 /** Errors thrown by {@link setLogLevel} when given a value outside
  * the accepted set of log levels. Subclass of {@link PacwichError}. */
@@ -172,7 +181,8 @@ class _Logger implements Logger {
       time: new Date(),
     };
 
-    if (this._suppressWarnings.has(id)) return log;
+    if (this._suppressWarnings.has(id) || readEnvSuppressedWarnings().has(id))
+      return log;
 
     if (this.shouldPrint("warn")) {
       const formatted = `${YELLOW}${formatWarningPrefix(this.name, id)}: ${message}${NC}`;
@@ -265,14 +275,8 @@ export const setLogLevel = (level: LogLevelSetting) => {
   logger.printLevel = level;
 };
 
-/**
- * Set which warning ids pacwich's logger silently drops for the rest of the process.
- *
- * @example
- * import { setSuppressWarnings } from "pacwich";
- *
- * setSuppressWarnings(["DeprecatedNoPrefixFlag"]);
- */
+// Internal. Sets the programmatic suppression set (the CLI --suppress-warnings
+// flag). The PACWICH_SUPPRESS_WARNINGS env var is always additionally honored.
 export const setSuppressWarnings = (ids: readonly WarningId[]) => {
   logger.suppressWarnings = ids;
 };

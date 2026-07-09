@@ -1,7 +1,7 @@
 /**
  * Split a comma-separated string into trimmed, non-empty entries. Used
  * for list-shaped CLI flags and env vars (e.g. `--suppress-warnings`,
- * `PACWICH_SUPPRESS_WARNINGS_DEFAULT`).
+ * `PACWICH_SUPPRESS_WARNINGS`).
  *
  * @example
  * splitCsvList("a, b,,c") // ["a", "b", "c"]

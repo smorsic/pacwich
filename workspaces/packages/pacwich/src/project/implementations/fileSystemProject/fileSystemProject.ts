@@ -6,7 +6,6 @@ import type {
   ShellOption,
 } from "@pacwich/common/parameters";
 import type { WorkspaceScriptMetadata } from "@pacwich/common/runScript";
-import type { WarningId } from "@pacwich/common/warnings";
 import { loadProjectConfig } from "../../../config";
 import { getUserBoolEnvVar, getUserEnvVar } from "../../../config/userEnvVars";
 import { parse, quote } from "../../../internal/bundledDeps/shellQuote";
@@ -21,7 +20,7 @@ import {
   validateJSArray,
   validateJSTypes,
 } from "../../../internal/core";
-import { logger, setSuppressWarnings } from "../../../internal/logger";
+import { logger } from "../../../internal/logger";
 import {
   PACKAGE_MANAGER_VALUES,
   resolvePackageManagerValue,
@@ -110,8 +109,6 @@ export type CreateFileSystemProjectOptions = {
    * consulted (`"true"` or `"false"`). If neither is set, defaults to false.
    */
   disableExecutableConfigs?: boolean;
-  /** Ids of warnings to silently drop. Unioned (not overridden) with the project config field and env var. */
-  suppressWarnings?: WarningId[];
 };
 
 export type InlineScriptOptions = {
@@ -1241,12 +1238,6 @@ const validateCreateFileSystemProjectOptions = (
         typeofName: "boolean",
         optional: true,
       },
-      "suppressWarnings option": {
-        value: options.suppressWarnings,
-        optional: true,
-        itemOptions: { typeofName: "string" },
-        array: true,
-      },
     },
     { throw: true },
   );
@@ -1314,16 +1305,6 @@ export const createFileSystemProject = (
   };
 
   const projectConfig = loadProjectConfig(rootDirectory, loadConfigOptions);
-
-  // Union (not override): suppressing more warnings from any one source
-  // is never surprising, unlike the "last one wins" precedence used for
-  // other options/config fields.
-  setSuppressWarnings([
-    ...new Set([
-      ...projectConfig.defaults.suppressWarnings,
-      ...(options.suppressWarnings ?? []),
-    ]),
-  ]);
 
   const effectivePackageManagerValue =
     options.packageManager ?? projectConfig.packageManager;

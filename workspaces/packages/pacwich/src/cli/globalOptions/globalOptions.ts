@@ -7,22 +7,18 @@ import {
   isGlobalCliCommandToken,
 } from "@pacwich/common/cli";
 import type { WarningId } from "@pacwich/common/warnings";
-import { loadProjectConfig } from "../../config";
-import { getUserBoolEnvVar, getUserListEnvVar } from "../../config/userEnvVars";
 import { type Command } from "../../internal/bundledDeps/commander";
 import { Option } from "../../internal/bundledDeps/commander";
 import {
   defineErrors,
   expandHomePath,
   splitCsvList,
-  withMutedStdio,
 } from "../../internal/core";
 import { logger, setSuppressWarnings } from "../../internal/logger";
 import {
   createFileSystemProject,
   createMemoryProject,
   type FileSystemProject,
-  findProjectRoot,
 } from "../../project";
 import type { CliMiddleware } from "../middleware";
 
@@ -126,42 +122,6 @@ type ApplyGlobalOptionsOptions = {
   skipProjectLoad: boolean;
 };
 
-export type ResolveGlobalCommandSuppressWarningsOptions = {
-  cwd: string;
-  cliSuppressWarnings: WarningId[];
-  disableExecutableConfigs: boolean;
-};
-
-// Global commands skip project assembly, so probe config directly to keep
-// suppression additive across config/env/flag. Muted so the probe can't leak.
-export const resolveGlobalCommandSuppressWarnings = ({
-  cwd,
-  cliSuppressWarnings,
-  disableExecutableConfigs,
-}: ResolveGlobalCommandSuppressWarningsOptions): WarningId[] => {
-  const envSuppressWarnings = (getUserListEnvVar("suppressWarningsDefault") ??
-    []) as WarningId[];
-
-  let configSuppressWarnings: WarningId[] = [];
-  withMutedStdio(() => {
-    try {
-      configSuppressWarnings = loadProjectConfig(findProjectRoot(cwd), {
-        disableExecutableConfigs,
-      }).defaults.suppressWarnings;
-    } catch {
-      // best-effort: missing/malformed config can't fail a global command
-    }
-  });
-
-  return [
-    ...new Set([
-      ...configSuppressWarnings,
-      ...envSuppressWarnings,
-      ...cliSuppressWarnings,
-    ]),
-  ];
-};
-
 const applyGlobalOptions = (
   options: CliGlobalOptions,
   { skipProjectLoad }: ApplyGlobalOptionsOptions,
@@ -169,23 +129,13 @@ const applyGlobalOptions = (
   logger.printLevel = options.logLevel;
   logger.debug("Log level: " + options.logLevel);
 
-  const cliSuppressWarnings = splitCsvList(
-    options.suppressWarnings ?? "",
-  ) as WarningId[];
+  // The --suppress-warnings flag. The PACWICH_SUPPRESS_WARNINGS env var is
+  // honored by the logger directly, so nothing else is wired up here.
+  setSuppressWarnings(
+    splitCsvList(options.suppressWarnings ?? "") as WarningId[],
+  );
 
   if (skipProjectLoad) {
-    // Mirror createFileSystemProject's precedence: option > env var > false.
-    const disableExecutableConfigs =
-      options.disableExecutableConfigs ??
-      getUserBoolEnvVar("disableExecutableConfigsDefault") ??
-      false;
-    setSuppressWarnings(
-      resolveGlobalCommandSuppressWarnings({
-        cwd: options.cwd,
-        cliSuppressWarnings,
-        disableExecutableConfigs,
-      }),
-    );
     return {
       project: createPlaceholderProject(),
       projectError: null,
@@ -193,10 +143,6 @@ const applyGlobalOptions = (
       disableExecutableConfigs: options.disableExecutableConfigs,
     };
   }
-
-  // Pre-project baseline; createFileSystemProject re-applies the union of
-  // config + env-var + flag sources below.
-  setSuppressWarnings(cliSuppressWarnings);
 
   let project: FileSystemProject;
   let error: Error | null = null;
@@ -206,7 +152,6 @@ const applyGlobalOptions = (
       includeRootWorkspace: options.includeRoot,
       disableExecutableConfigs: options.disableExecutableConfigs,
       packageManager: options.pm,
-      suppressWarnings: cliSuppressWarnings,
     });
 
     logger.debug(

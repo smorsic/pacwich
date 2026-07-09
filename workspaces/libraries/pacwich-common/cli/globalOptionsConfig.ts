@@ -69,7 +69,7 @@ const CLI_GLOBAL_OPTIONS_CONFIG = {
   suppressWarnings: {
     mainOption: "--suppress-warnings",
     shortOption: "",
-    description: `Comma-separated warning ids to suppress. A warning's id appears in its printed "${formatWarningPrefix("pacwich", "<id>")}" prefix. Unioned with the project config "defaults.suppressWarnings" field and the ${getUserEnvVarName("suppressWarningsDefault")} env var.`,
+    description: `Comma-separated warning ids to suppress. A warning's id appears in its printed "${formatWarningPrefix("pacwich", "<id>")}" prefix. Combined with the ${getUserEnvVarName("suppressWarnings")} env var.`,
     defaultValue: "",
     values: null,
     param: "ids",

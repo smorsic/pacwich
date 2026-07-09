@@ -3,7 +3,7 @@
 The API is held in close parity with the CLI. It is developed first so that the CLI is a thin wrapper around the API.
 
 ```typescript
-import { createFileSystemProject, setSuppressWarnings } from "pacwich";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject({
   // the options object itself and its properties are optional
@@ -16,12 +16,7 @@ const project = createFileSystemProject({
   // (pacwich.project.{ts,js}, pacwich.workspace.{ts,js}) for
   // untrusted contexts. Only jsonc/json/package.json configs are read.
   disableExecutableConfigs: false,
-  // Suppress warning logs for the project
-  suppressWarnings: ["MultiplePackageManagerLockfiles"],
 });
-
-// Global setting to suppress warnings (overrides all settings)
-setSuppressWarnings(["MultiplePackageManagerLockfiles"]);
 
 project.name; // project name (typically the root package.json name)
 project.rootDirectory; // resolved project root directory

@@ -201,8 +201,8 @@ const LOCATION_FINDERS: Record<
 /**
  * When true, skip discovery of `.ts`/`.js` config locations so that no
  * executable code is loaded via `require()`. Plain `.jsonc`/`.json` and
- * the `package.json` `pacwich` key still resolve. Used by the MCP server,
- * which can be redirected to arbitrary directories at runtime.
+ * the `package.json` `pacwich` key still resolve. For untrusted contexts,
+ * set via the `--disable-executable-configs` flag or the factory option.
  */
 export type LoadConfigOptions = {
   disableExecutableConfigs?: boolean;

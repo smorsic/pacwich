@@ -10,12 +10,11 @@ import {
   type PackageManagerValue,
   type ParallelMaxValue,
 } from "@pacwich/common/parameters";
-import type { WarningId } from "@pacwich/common/warnings";
 import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
 import { validate } from "../../internal/generated/ajv/validateProjectConfig";
 import { logger } from "../../internal/logger";
 import { determineParallelMax, resolveScriptShell } from "../../runScript";
-import { getUserEnvVar, getUserListEnvVar } from "../userEnvVars";
+import { getUserEnvVar } from "../userEnvVars";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
 import { validateWorkspaceConfig } from "../workspaceConfig/workspaceConfig";
@@ -83,15 +82,6 @@ const resolvePackageManagerConfigValue = (
   return "auto";
 };
 
-// Union (not override) with the env var; the CLI flag/option unions in further downstream.
-const resolveSuppressWarningsConfigValue = (
-  configValue: WarningId[] | undefined,
-): WarningId[] => {
-  const envValue = (getUserListEnvVar("suppressWarningsDefault") ??
-    []) as WarningId[];
-  return [...new Set([...(configValue ?? []), ...envValue])];
-};
-
 const resolveProjectVerifyConfig = (
   config: ProjectConfig["verify"],
 ): ResolvedProjectVerifyConfig => ({
@@ -127,9 +117,6 @@ export const resolveProjectConfig = (
       ),
       cliScriptOutputStyle: resolveCliScriptOutputStyleConfigValue(
         config.defaults?.cliScriptOutputStyle,
-      ),
-      suppressWarnings: resolveSuppressWarningsConfigValue(
-        config.defaults?.suppressWarnings,
       ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],

@@ -181,7 +181,7 @@ pacwich --no-disable-executable-configs ls # override config/env var setting
 
 # Suppress specific warning messages
 # Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings/index.md)
-# Configurable via project config as well or PACWICH_SUPPRESS_WARNINGS_DEFAULT env var as csv (all additive rather than overrides)
+# Also settable via the PACWICH_SUPPRESS_WARNINGS env var as csv (the flag unions with it)
 pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
 pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 ```

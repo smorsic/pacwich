@@ -29,7 +29,6 @@ import {
   SET_LOG_LEVEL_EXAMPLE,
   CREATE_MEMORY_PROJECT_EXAMPLE,
   WORKSPACE_EXAMPLE,
-  SET_SUPPRESS_WARNINGS_EXAMPLE,
 } from '../../../lib/api/apiExamples';
 
 # TS/JS API: Reference
@@ -313,16 +312,5 @@ A `MemoryProject` currently does not support running scripts directly, though a 
 Set the global logging level. Defaults to "info" or "error" when `NODE_ENV` is "test".
 <SyntaxHighlighter language="typescript">
 {SET_LOG_LEVEL_EXAMPLE}
-</SyntaxHighlighter>
-
-## setSuppressWarnings
-`setSuppressWarnings(warningIds: string[])`
-
-Set the global warning suppressions. Defaults to an empty array.
-
-See the [warning page](/config/warnings) for a list of all IDs and means of setting suppression.
-
-<SyntaxHighlighter language="typescript">
-{SET_SUPPRESS_WARNINGS_EXAMPLE}
 </SyntaxHighlighter>
 

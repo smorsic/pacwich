@@ -73,7 +73,6 @@ const TEST_PROJECTS = {
     "projectConfig/cliScriptOutputStylePlain",
   projectConfigPackageManagerNpm: "projectConfig/packageManagerNpm",
   projectConfigWorkspacePatternConfigs: "projectConfig/workspacePatternConfigs",
-  projectConfigSuppressWarnings: "projectConfig/suppressWarnings",
   withCatalogSimple: "withCatalog/simple",
   withRootWorkspace: "withRootWorkspace/simple",
   withRootWorkspaceWithConfigFiles: "withRootWorkspace/withConfigFiles",

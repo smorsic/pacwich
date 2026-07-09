@@ -2,10 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { getUserEnvVarName } from "@pacwich/common/config";
-import type { WarningId } from "@pacwich/common/warnings";
 import { createFileSystemProject } from "../../src";
-import { resolveGlobalCommandSuppressWarnings } from "../../src/cli";
-import { logger } from "../../src/internal/logger";
 import { getProjectRoot } from "../fixtures/testProjects";
 import {
   setupCliTest,
@@ -19,8 +16,6 @@ import {
   describe,
   beforeAll,
   afterAll,
-  beforeEach,
-  afterEach,
 } from "../util/testFramework";
 
 describe("CLI Global Options", () => {
@@ -707,12 +702,11 @@ describe("CLI Global Options", () => {
       );
     });
 
-    test("PACWICH_SUPPRESS_WARNINGS_DEFAULT env var alone suppresses the warning", async () => {
+    test("PACWICH_SUPPRESS_WARNINGS env var alone suppresses the warning", async () => {
       const result = await setupCliTest({
         testProject: "simple1",
         env: {
-          [getUserEnvVarName("suppressWarningsDefault")]:
-            "DeprecatedNoPrefixFlag",
+          [getUserEnvVarName("suppressWarnings")]: "DeprecatedNoPrefixFlag",
         },
       }).run("run-script", "all-workspaces", "--no-prefix", "--parallel=false");
       expect(result.exitCode).toBe(0);
@@ -723,7 +717,7 @@ describe("CLI Global Options", () => {
       const result = await setupCliTest({
         testProject: "simple1",
         env: {
-          [getUserEnvVarName("suppressWarningsDefault")]: "someOtherWarning",
+          [getUserEnvVarName("suppressWarnings")]: "someOtherWarning",
         },
       }).run(
         "run-script",
@@ -809,144 +803,27 @@ describe("CLI Global Options", () => {
       expect(result.stderr.raw).toBeEmpty();
     });
 
-    // A global command honors an executable project config, but the probe
-    // that reads it mutes stdio, so the config's console.log must not leak
-    // into the command's output (here, the completion script on stdout).
-    test("a global command reads an executable project config without leaking its output", async () => {
-      const projectDir = fs.mkdtempSync(
-        path.join(os.tmpdir(), "pacwich-execconfig-"),
-      );
-      try {
-        fs.writeFileSync(
-          path.join(projectDir, "pacwich.project.ts"),
-          `console.log("EXECUTABLE_CONFIG_LEAK");\nexport default { defaults: { suppressWarnings: [] } };`,
-        );
-        const { run } = setupCliTest({ workingDirectory: projectDir });
-        const result = await run("completion", "zsh");
-        expect(result.exitCode).toBe(0);
-        expect(result.stdout.raw).not.toContain("EXECUTABLE_CONFIG_LEAK");
-        expect(result.stderr.raw).toBeEmpty();
-      } finally {
-        fs.rmSync(projectDir, { force: true, recursive: true });
-      }
-    });
-  });
-
-  // The union/dedup logic that lets global commands honor config- and
-  // env-var-based suppression (which createFileSystemProject otherwise
-  // folds in only for project commands).
-  describe("resolveGlobalCommandSuppressWarnings", () => {
-    const ENV_KEY = getUserEnvVarName("suppressWarningsDefault");
-    let projectDir: string;
-    let originalEnv: string | undefined;
-    let originalPrintLevel: (typeof logger)["printLevel"];
-
-    beforeEach(() => {
-      projectDir = fs.mkdtempSync(
-        path.join(os.tmpdir(), "pacwich-global-suppress-"),
-      );
-      originalEnv = process.env[ENV_KEY];
-      delete process.env[ENV_KEY];
-      originalPrintLevel = logger.printLevel;
-    });
-
-    afterEach(() => {
-      fs.rmSync(projectDir, { force: true, recursive: true });
-      if (originalEnv === undefined) delete process.env[ENV_KEY];
-      else process.env[ENV_KEY] = originalEnv;
-      logger.printLevel = originalPrintLevel;
-    });
-
-    const resolve = (
-      cliSuppressWarnings: WarningId[],
-      { disableExecutableConfigs = false } = {},
-    ) =>
-      resolveGlobalCommandSuppressWarnings({
-        cwd: projectDir,
-        cliSuppressWarnings,
-        disableExecutableConfigs,
-      });
-
-    const writeJsoncConfig = (suppressWarnings: string[]) =>
-      fs.writeFileSync(
-        path.join(projectDir, "pacwich.project.jsonc"),
-        JSON.stringify({ defaults: { suppressWarnings } }),
+    // Global commands don't load project config, so the --suppress-warnings
+    // flag is their suppression path. DeprecatedBunWorkspacesFlag (from `-w`)
+    // is a warning that can surface on a global command, so it doubles as
+    // proof the flag reaches these.
+    test("the --suppress-warnings flag suppresses a warning on a global command", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const unsuppressed = await run("-w", "doctor");
+      expect(unsuppressed.exitCode).toBe(0);
+      expect(unsuppressed.stderr.sanitized).toContain(
+        "[pacwich WARN: DeprecatedBunWorkspacesFlag]",
       );
 
-    const writeExecutableConfig = (suppressWarnings: string[]) =>
-      fs.writeFileSync(
-        path.join(projectDir, "pacwich.project.ts"),
-        `export default { defaults: { suppressWarnings: ${JSON.stringify(
-          suppressWarnings,
-        )} } };`,
+      const suppressed = await run(
+        "--suppress-warnings=DeprecatedBunWorkspacesFlag",
+        "-w",
+        "doctor",
       );
-
-    test("returns only the flag ids when no config or env var is present", () => {
-      expect(resolve(["BashLoginShellHint"] as WarningId[])).toEqual([
-        "BashLoginShellHint",
-      ]);
-    });
-
-    test("includes the project config defaults.suppressWarnings", () => {
-      writeJsoncConfig(["MultiplePackageManagerLockfiles"]);
-      expect(resolve([])).toContain("MultiplePackageManagerLockfiles");
-    });
-
-    test("includes the PACWICH_SUPPRESS_WARNINGS_DEFAULT env var", () => {
-      process.env[ENV_KEY] = "MultiplePackageManagerLockfiles";
-      expect(resolve([])).toContain("MultiplePackageManagerLockfiles");
-    });
-
-    test("unions config, env var, and flag, deduping overlaps", () => {
-      writeJsoncConfig([
-        "MultiplePackageManagerLockfiles",
-        "MultipleConfigsFound",
-      ]);
-      process.env[ENV_KEY] = "BashLoginShellHint,MultipleConfigsFound";
-      const result = resolve([
-        "ParallelExceedsAvailableCpus",
-        "MultipleConfigsFound",
-      ] as WarningId[]);
-      expect([...result].sort()).toEqual([
-        "BashLoginShellHint",
-        "MultipleConfigsFound",
-        "MultiplePackageManagerLockfiles",
-        "ParallelExceedsAvailableCpus",
-      ]);
-    });
-
-    test("evaluates an executable config's suppressWarnings by default", () => {
-      writeExecutableConfig(["ParallelExceedsAvailableCpus"]);
-      expect(resolve([])).toContain("ParallelExceedsAvailableCpus");
-    });
-
-    test("skips executable configs when disableExecutableConfigs is set", () => {
-      writeExecutableConfig(["ParallelExceedsAvailableCpus"]);
-      expect(resolve([], { disableExecutableConfigs: true })).not.toContain(
-        "ParallelExceedsAvailableCpus",
+      expect(suppressed.exitCode).toBe(0);
+      expect(suppressed.stderr.sanitized).not.toContain(
+        "DeprecatedBunWorkspacesFlag",
       );
-    });
-
-    test("a malformed config does not throw and still applies env + flag", () => {
-      fs.writeFileSync(
-        path.join(projectDir, "pacwich.project.jsonc"),
-        "{ not valid json ",
-      );
-      process.env[ENV_KEY] = "MultiplePackageManagerLockfiles";
-      const result = resolve(["BashLoginShellHint"] as WarningId[]);
-      expect([...result].sort()).toEqual([
-        "BashLoginShellHint",
-        "MultiplePackageManagerLockfiles",
-      ]);
-    });
-
-    test("restores stdio after the muted probe", () => {
-      writeExecutableConfig([]);
-      const originalStdoutWrite = process.stdout.write;
-      const originalStderrWrite = process.stderr.write;
-      resolve([]);
-      expect(process.stdout.write).toBe(originalStdoutWrite);
-      expect(process.stderr.write).toBe(originalStderrWrite);
     });
   });
 });

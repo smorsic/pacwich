@@ -25,9 +25,7 @@ export type GlobalCommandContext = {
   workingDirectory: string;
   /**
    * Value of the global `--disable-executable-configs` flag.
-   * `undefined` means the flag was not passed. Commands are free to
-   * apply their own default (notably the mcp-server command defaults
-   * to disabled for security).
+   * `undefined` means the flag was not passed.
    */
   disableExecutableConfigs: boolean | undefined;
 };

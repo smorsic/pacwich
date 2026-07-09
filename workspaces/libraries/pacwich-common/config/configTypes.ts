@@ -5,7 +5,6 @@ import type {
   ScriptShellOption,
   ShellOption,
 } from "../parameters";
-import type { WarningId } from "../warnings";
 
 export type WorkspaceDependenciesRule = {
   /**
@@ -190,12 +189,6 @@ export type ProjectConfig = {
      * `"prefixed"` when stdout is not a TTY.
      */
     cliScriptOutputStyle?: OutputStyleName;
-    /**
-     * Ids of warnings to silently drop. Unioned (not overridden) with
-     * the `PACWICH_SUPPRESS_WARNINGS_DEFAULT` env var and the CLI
-     * flag / project factory option.
-     */
-    suppressWarnings?: WarningId[];
   };
   /**
    * Workspace configs applied by pattern, in order, merging left to right,
@@ -261,8 +254,6 @@ export type ResolvedProjectConfig = {
      * value, so the CLI should derive a default from terminal state.
      */
     cliScriptOutputStyle: OutputStyleName | undefined;
-    /** Union of the config value, the env var, and (merged in later) the CLI flag/option, deduplicated. */
-    suppressWarnings: WarningId[];
   };
   workspacePatternConfigs: WorkspacePatternConfigEntry[];
   verify: ResolvedProjectVerifyConfig;

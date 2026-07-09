@@ -1,6 +1,0 @@
-{
-  // Project config
-  "defaults": {
-    "suppressWarnings": ["fromConfig"],
-  },
-}

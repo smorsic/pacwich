@@ -345,7 +345,7 @@ pacwich --no-disable-executable-configs ls # override config/env var setting
 
 # Suppress specific warning messages
 # Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings/index.md)
-# Configurable via project config as well or PACWICH_SUPPRESS_WARNINGS_DEFAULT env var as csv (all additive rather than overrides)
+# Also settable via the PACWICH_SUPPRESS_WARNINGS env var as csv (the flag unions with it)
 pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
 pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 ```
@@ -357,7 +357,7 @@ pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvail
 The API is held in close parity with the CLI. It is developed first so that the CLI is a thin wrapper around the API.
 
 ```typescript
-import { createFileSystemProject, setSuppressWarnings } from "pacwich";
+import { createFileSystemProject } from "pacwich";
 
 const project = createFileSystemProject({
   // the options object itself and its properties are optional
@@ -370,12 +370,7 @@ const project = createFileSystemProject({
   // (pacwich.project.{ts,js}, pacwich.workspace.{ts,js}) for
   // untrusted contexts. Only jsonc/json/package.json configs are read.
   disableExecutableConfigs: false,
-  // Suppress warning logs for the project
-  suppressWarnings: ["MultiplePackageManagerLockfiles"],
 });
-
-// Global setting to suppress warnings (overrides all settings)
-setSuppressWarnings(["MultiplePackageManagerLockfiles"]);
 
 project.name; // project name (typically the root package.json name)
 project.rootDirectory; // resolved project root directory
@@ -567,9 +562,6 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
     // "grouped" is still downgraded to "prefixed" when stdout is not a
     // TTY. Env override: PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT.
     "cliScriptOutputStyle": "prefixed", // "grouped" | "prefixed" | "plain" | "none"
-    // Suppress warnings globally by WarningId
-    // See WarningId TS type or https://pacwich.dev/config/warnings/index.md for list
-    "suppressWarnings": ["MultiplePackageManagerLockfiles"],
   },
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
@@ -881,8 +873,7 @@ or similar).
 Most agents' default comment verbosity is usually overkill and can lead to drift.
 Repeating long explanations frequently makes drift more likely. Agents and people usually end up
 investigating the accuracy of verbose comments anyway, and skipping them increases risk of misinterpreting
-code truth from an outdated comment, so either contextual effort is increased or risk is increased despite
-an intention to reduce both.
+code truth from an outdated comment. **Overly verbose internal comments will not be approved.**
 
 Comments should be reserved for explaining something potentially surprising (hacky or breaking project conventions)
 or non-obvious. Prefer to limit comments to 1-2 lines at most unless more is truly justified.
