@@ -89,4 +89,5 @@ export {
   PacwichError,
 } from "./internal/core";
 export { type LogLevelSetting } from "@pacwich/common/logging";
-export { setLogLevel } from "./internal/logger";
+export { WARNING_IDS, type WarningId } from "@pacwich/common/warnings";
+export { setLogLevel, setSuppressWarnings } from "./internal/logger";

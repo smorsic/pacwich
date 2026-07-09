@@ -4,19 +4,16 @@ import {
   PACKAGE_MANAGER_VALUES,
   type PackageManagerValue,
 } from "../parameters";
+import { formatWarningPrefix } from "../warnings";
 
 export interface CliGlobalOptions {
   logLevel: LogLevelSetting;
   cwd: string;
   includeRoot: boolean;
   disableExecutableConfigs: boolean;
-  /**
-   * Package manager backend (`--pm <value>`). Overrides the root
-   * config `packageManager` field and the `PACWICH_PACKAGE_MANAGER`
-   * env var. When `"auto"` (or absent), falls back to the next-lower
-   * precedence source.
-   */
   pm: PackageManagerValue | undefined;
+  /** Comma-separated warning ids */
+  suppressWarnings: string | undefined;
 }
 
 export interface CliGlobalOptionConfig {
@@ -68,6 +65,14 @@ const CLI_GLOBAL_OPTIONS_CONFIG = {
     defaultValue: "",
     values: [...PACKAGE_MANAGER_VALUES],
     param: "value",
+  },
+  suppressWarnings: {
+    mainOption: "--suppress-warnings",
+    shortOption: "",
+    description: `Comma-separated warning ids to suppress. A warning's id appears in its printed "${formatWarningPrefix("pacwich", "<id>")}" prefix. Unioned with the project config "defaults.suppressWarnings" field and the ${getUserEnvVarName("suppressWarningsDefault")} env var.`,
+    defaultValue: "",
+    values: null,
+    param: "ids",
   },
 } as const satisfies Record<keyof CliGlobalOptions, CliGlobalOptionConfig>;
 

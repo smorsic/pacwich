@@ -237,11 +237,12 @@ export const getConfigLocation = (
   }
 
   if (locations.length > 1) {
-    logger.warn(
-      `Found multiple ${name} configs:\n${locations
+    logger.warn("MultipleConfigsFound", {
+      configName: name,
+      details: `${locations
         .map((location) => "  " + location.path)
         .join("\n")}\nUsing config at ${locations[0]?.path}`,
-    );
+    });
   }
 
   return locations[0] ?? null;

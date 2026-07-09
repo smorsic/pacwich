@@ -6,10 +6,15 @@ import {
   getCliGlobalOptionConfig,
   isGlobalCliCommandToken,
 } from "@pacwich/common/cli";
+import type { WarningId } from "@pacwich/common/warnings";
 import { type Command } from "../../internal/bundledDeps/commander";
 import { Option } from "../../internal/bundledDeps/commander";
-import { defineErrors, expandHomePath } from "../../internal/core";
-import { logger } from "../../internal/logger";
+import {
+  defineErrors,
+  expandHomePath,
+  splitCsvList,
+} from "../../internal/core";
+import { logger, setSuppressWarnings } from "../../internal/logger";
 import {
   createFileSystemProject,
   createMemoryProject,
@@ -97,6 +102,7 @@ const defineGlobalOptions = (
   addGlobalOption(program, "includeRoot");
   addGlobalOption(program, "disableExecutableConfigs");
   addGlobalOption(program, "pm");
+  addGlobalOption(program, "suppressWarnings");
 
   return { cwd };
 };
@@ -123,6 +129,12 @@ const applyGlobalOptions = (
   logger.printLevel = options.logLevel;
   logger.debug("Log level: " + options.logLevel);
 
+  const cliSuppressWarnings = splitCsvList(
+    options.suppressWarnings ?? "",
+  ) as WarningId[];
+  // Applies even for global commands (no project loaded); createFileSystemProject unions in more sources below.
+  setSuppressWarnings(cliSuppressWarnings);
+
   if (skipProjectLoad) {
     return {
       project: createPlaceholderProject(),
@@ -140,6 +152,7 @@ const applyGlobalOptions = (
       includeRootWorkspace: options.includeRoot,
       disableExecutableConfigs: options.disableExecutableConfigs,
       packageManager: options.pm,
+      suppressWarnings: cliSuppressWarnings,
     });
 
     logger.debug(

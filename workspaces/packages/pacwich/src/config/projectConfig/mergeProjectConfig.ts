@@ -2,6 +2,7 @@ import type {
   ProjectConfig,
   ProjectVerifyConfig,
 } from "@pacwich/common/config";
+import type { WarningId } from "@pacwich/common/warnings";
 
 /**
  * Lazy form of a {@link ProjectConfig} that receives the
@@ -50,14 +51,23 @@ const mergeVerifyConfig = (
   return { workspaceDependencies: { ignoreInputFiles: merged } };
 };
 
+// Unlike other defaults.* fields, suppressWarnings concatenates rather than overrides.
+const mergeSuppressWarnings = (
+  base: WarningId[] | undefined,
+  override: WarningId[] | undefined,
+): WarningId[] | undefined => {
+  if (!base && !override) return undefined;
+  return [...new Set([...(base ?? []), ...(override ?? [])])];
+};
+
 /**
  * Merge two or more project configs left to right, with each
  * subsequent config taking precedence on scalar fields.
  * `workspacePatternConfigs` entries are concatenated.
- * `verify.workspaceDependencies.ignoreInputFiles` arrays are
- * concatenated and deduplicated. Any argument may be a
- * {@link ProjectConfigFactory} receiving the accumulated config
- * up to that point.
+ * `verify.workspaceDependencies.ignoreInputFiles` and
+ * `defaults.suppressWarnings` arrays are concatenated and
+ * deduplicated. Any argument may be a {@link ProjectConfigFactory}
+ * receiving the accumulated config up to that point.
  *
  * @example
  * // pacwich.project.ts
@@ -82,6 +92,10 @@ export const mergeProjectConfig = (
       ...(config.workspacePatternConfigs ?? []),
     ];
     const mergedVerify = mergeVerifyConfig(acc.verify, config.verify);
+    const mergedSuppressWarnings = mergeSuppressWarnings(
+      acc.defaults?.suppressWarnings,
+      config.defaults?.suppressWarnings,
+    );
     return {
       ...(config.packageManager !== undefined
         ? { packageManager: config.packageManager }
@@ -91,6 +105,9 @@ export const mergeProjectConfig = (
       defaults: {
         ...acc.defaults,
         ...config.defaults,
+        ...(mergedSuppressWarnings !== undefined && {
+          suppressWarnings: mergedSuppressWarnings,
+        }),
       },
       ...(mergedPatternConfigs.length > 0 && {
         workspacePatternConfigs: mergedPatternConfigs,

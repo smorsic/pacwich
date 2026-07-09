@@ -10,11 +10,12 @@ import {
   type PackageManagerValue,
   type ParallelMaxValue,
 } from "@pacwich/common/parameters";
+import type { WarningId } from "@pacwich/common/warnings";
 import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
 import { validate } from "../../internal/generated/ajv/validateProjectConfig";
 import { logger } from "../../internal/logger";
 import { determineParallelMax, resolveScriptShell } from "../../runScript";
-import { getUserEnvVar } from "../userEnvVars";
+import { getUserEnvVar, getUserListEnvVar } from "../userEnvVars";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
 import { validateWorkspaceConfig } from "../workspaceConfig/workspaceConfig";
@@ -75,12 +76,20 @@ const resolvePackageManagerConfigValue = (
   const envValue = getUserEnvVar("packageManager");
   if (envValue === undefined) return "auto";
   if (isPackageManagerValue(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_PACKAGE_MANAGER value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${PACKAGE_MANAGER_VALUES.join(", ")}). Falling back to "auto".`,
-  );
+  logger.warn("InvalidPackageManagerEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: PACKAGE_MANAGER_VALUES.join(", "),
+  });
   return "auto";
+};
+
+// Union (not override) with the env var; the CLI flag/option unions in further downstream.
+const resolveSuppressWarningsConfigValue = (
+  configValue: WarningId[] | undefined,
+): WarningId[] => {
+  const envValue = (getUserListEnvVar("suppressWarningsDefault") ??
+    []) as WarningId[];
+  return [...new Set([...(configValue ?? []), ...envValue])];
 };
 
 const resolveProjectVerifyConfig = (
@@ -118,6 +127,9 @@ export const resolveProjectConfig = (
       ),
       cliScriptOutputStyle: resolveCliScriptOutputStyleConfigValue(
         config.defaults?.cliScriptOutputStyle,
+      ),
+      suppressWarnings: resolveSuppressWarningsConfigValue(
+        config.defaults?.suppressWarnings,
       ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],

@@ -33,6 +33,10 @@ export const PROJECT_CONFIG_JSON_SCHEMA = {
           type: "string",
           enum: OUTPUT_STYLE_VALUES,
         },
+        suppressWarnings: {
+          type: "array",
+          items: { type: "string" },
+        },
       },
     },
     workspacePatternConfigs: {
