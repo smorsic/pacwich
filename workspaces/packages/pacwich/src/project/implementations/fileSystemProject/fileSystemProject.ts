@@ -887,9 +887,10 @@ class _FileSystemProject extends ProjectBase implements Project {
       const cycleDetection = preventDependencyCycles(workspaces);
       workspaces = cycleDetection.workspaces;
       for (const cycle of cycleDetection.cycles) {
-        logger.warn(
-          `Dependency cycle detected: ${cycle.dependency} -> ${cycle.dependent} (ignoring)`,
-        );
+        logger.warn("DependencyCycleDetected", {
+          dependency: cycle.dependency,
+          dependent: cycle.dependent,
+        });
       }
     }
 

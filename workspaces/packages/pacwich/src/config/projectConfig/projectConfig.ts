@@ -53,11 +53,10 @@ const resolveCliScriptOutputStyleConfigValue = (
   const envValue = getUserEnvVar("cliScriptOutputStyleDefault");
   if (envValue === undefined) return undefined;
   if (isOutputStyleName(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${OUTPUT_STYLE_VALUES.join(", ")}).`,
-  );
+  logger.warn("InvalidCliScriptOutputStyleEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: OUTPUT_STYLE_VALUES.join(", "),
+  });
   return undefined;
 };
 

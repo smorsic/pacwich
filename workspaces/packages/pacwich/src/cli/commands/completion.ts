@@ -94,7 +94,7 @@ const runCompletionInstall = (
   // (see bashLoginShellHint). Silent for everyone else.
   if (shell === "bash") {
     const hint = bashLoginShellHint({ isMacOS: IS_MACOS });
-    if (hint) logger.warn(hint);
+    if (hint) logger.warn("BashLoginShellHint", { hint });
   }
 };
 

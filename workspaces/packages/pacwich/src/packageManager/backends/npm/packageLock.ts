@@ -88,9 +88,11 @@ export const parsePackageLock = (
   // Lenient high: a newer format is probably still compatible for the
   // fields we read. Warn and parse it as the newest version we know.
   if (lockfileVersion > MAX_SUPPORTED_NPM_LOCK_VERSION) {
-    logger.warn(
-      `npm lockfile ${npmLockPath ? `at "${npmLockPath}"` : ""} reports version ${lockfileVersion}, newer than the latest supported (${MAX_SUPPORTED_NPM_LOCK_VERSION}). Parsing anyway; results may be incomplete.`,
-    );
+    logger.warn("NpmLockNewerVersion", {
+      atPath: npmLockPath ? ` at "${npmLockPath}"` : "",
+      version: String(lockfileVersion),
+      maxVersion: String(MAX_SUPPORTED_NPM_LOCK_VERSION),
+    });
   }
 
   const packagesField = raw.packages;

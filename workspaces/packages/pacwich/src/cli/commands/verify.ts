@@ -37,7 +37,7 @@ export const verify = handleProjectCommand(
     }
 
     for (const issue of result.warnings) {
-      logger.warn(issue.message);
+      logger.warn("VerifyIssue", { message: issue.message });
     }
     for (const issue of result.errors) {
       logger.error(issue.message);

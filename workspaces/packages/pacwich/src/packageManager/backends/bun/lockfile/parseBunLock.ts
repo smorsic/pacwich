@@ -89,9 +89,11 @@ export const parseBunLock = (
   // fields we read. Warn and parse it as the newest version we know;
   // the structural guards below catch anything actually incompatible.
   if (lockfileVersion > MAX_SUPPORTED_BUN_LOCK_VERSION) {
-    logger.warn(
-      `Bun lockfile ${bunLockPath ? `at "${bunLockPath}"` : ""} reports version ${lockfileVersion}, newer than the latest supported (${MAX_SUPPORTED_BUN_LOCK_VERSION}). Parsing anyway; results may be incomplete.`,
-    );
+    logger.warn("BunLockNewerVersion", {
+      atPath: bunLockPath ? ` at "${bunLockPath}"` : "",
+      version: String(lockfileVersion),
+      maxVersion: String(MAX_SUPPORTED_BUN_LOCK_VERSION),
+    });
   }
 
   if (bunLockJson.workspaces && typeof bunLockJson.workspaces !== "object") {

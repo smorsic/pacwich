@@ -111,7 +111,7 @@ export const assembleProject = ({
       rootDirectory,
       rootPackageJson,
     });
-    if (hint) logger.warn(hint);
+    if (hint) logger.warn("MissingWorkspacesHint", { hint });
   }
 
   let rootWorkspace: Workspace | undefined;
