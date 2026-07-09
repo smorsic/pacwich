@@ -650,6 +650,87 @@ describe("CLI Global Options", () => {
     });
   });
 
+  describe("--suppress-warnings", () => {
+    const runWithNoPrefix = (...extraArgs: string[]) =>
+      setupCliTest({ testProject: "simple1" }).run(
+        "run-script",
+        "all-workspaces",
+        "--no-prefix",
+        "--parallel=false",
+        ...extraArgs,
+      );
+
+    test("without the flag, the deprecation warning is printed", async () => {
+      const result = await runWithNoPrefix();
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).toContain(
+        "[pacwich WARN: DeprecatedNoPrefixFlag]",
+      );
+    });
+
+    test("suppresses a warning matched by a single id", async () => {
+      const result = await runWithNoPrefix(
+        "--suppress-warnings=DeprecatedNoPrefixFlag",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain("DeprecatedNoPrefixFlag");
+    });
+
+    test("suppresses a warning matched within a comma-separated multi-id list", async () => {
+      const result = await runWithNoPrefix(
+        "--suppress-warnings=someOtherWarning,DeprecatedNoPrefixFlag,anotherOne",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain("DeprecatedNoPrefixFlag");
+    });
+
+    test("an unrelated id does not suppress the warning", async () => {
+      const result = await runWithNoPrefix(
+        "--suppress-warnings=someOtherWarning",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).toContain(
+        "[pacwich WARN: DeprecatedNoPrefixFlag]",
+      );
+    });
+
+    test("an empty value suppresses nothing", async () => {
+      const result = await runWithNoPrefix("--suppress-warnings=");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).toContain(
+        "[pacwich WARN: DeprecatedNoPrefixFlag]",
+      );
+    });
+
+    test("PACWICH_SUPPRESS_WARNINGS env var alone suppresses the warning", async () => {
+      const result = await setupCliTest({
+        testProject: "simple1",
+        env: {
+          [getUserEnvVarName("suppressWarnings")]: "DeprecatedNoPrefixFlag",
+        },
+      }).run("run-script", "all-workspaces", "--no-prefix", "--parallel=false");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain("DeprecatedNoPrefixFlag");
+    });
+
+    test("the flag and the env var union rather than override each other", async () => {
+      const result = await setupCliTest({
+        testProject: "simple1",
+        env: {
+          [getUserEnvVarName("suppressWarnings")]: "someOtherWarning",
+        },
+      }).run(
+        "run-script",
+        "all-workspaces",
+        "--no-prefix",
+        "--parallel=false",
+        "--suppress-warnings=DeprecatedNoPrefixFlag",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain("DeprecatedNoPrefixFlag");
+    });
+  });
+
   // A global command (completion, doctor, ...) never operates on a
   // project, so the CLI must not eagerly assemble one. Assembling a
   // workspaceless project emits a "No workspaces declared" hint, which
@@ -720,6 +801,29 @@ describe("CLI Global Options", () => {
       const result = await run(`--cwd=${workspacelessDir}`, "doctor");
       expect(result.exitCode).toBe(0);
       expect(result.stderr.raw).toBeEmpty();
+    });
+
+    // Global commands don't load project config, so the --suppress-warnings
+    // flag is their suppression path. DeprecatedBunWorkspacesFlag (from `-w`)
+    // is a warning that can surface on a global command, so it doubles as
+    // proof the flag reaches these.
+    test("the --suppress-warnings flag suppresses a warning on a global command", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const unsuppressed = await run("-w", "doctor");
+      expect(unsuppressed.exitCode).toBe(0);
+      expect(unsuppressed.stderr.sanitized).toContain(
+        "[pacwich WARN: DeprecatedBunWorkspacesFlag]",
+      );
+
+      const suppressed = await run(
+        "--suppress-warnings=DeprecatedBunWorkspacesFlag",
+        "-w",
+        "doctor",
+      );
+      expect(suppressed.exitCode).toBe(0);
+      expect(suppressed.stderr.sanitized).not.toContain(
+        "DeprecatedBunWorkspacesFlag",
+      );
     });
   });
 });

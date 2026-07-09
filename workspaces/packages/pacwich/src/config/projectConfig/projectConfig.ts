@@ -53,11 +53,10 @@ const resolveCliScriptOutputStyleConfigValue = (
   const envValue = getUserEnvVar("cliScriptOutputStyleDefault");
   if (envValue === undefined) return undefined;
   if (isOutputStyleName(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${OUTPUT_STYLE_VALUES.join(", ")}).`,
-  );
+  logger.warn("InvalidCliScriptOutputStyleEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: OUTPUT_STYLE_VALUES.join(", "),
+  });
   return undefined;
 };
 
@@ -76,11 +75,10 @@ const resolvePackageManagerConfigValue = (
   const envValue = getUserEnvVar("packageManager");
   if (envValue === undefined) return "auto";
   if (isPackageManagerValue(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_PACKAGE_MANAGER value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${PACKAGE_MANAGER_VALUES.join(", ")}). Falling back to "auto".`,
-  );
+  logger.warn("InvalidPackageManagerEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: PACKAGE_MANAGER_VALUES.join(", "),
+  });
   return "auto";
 };
 

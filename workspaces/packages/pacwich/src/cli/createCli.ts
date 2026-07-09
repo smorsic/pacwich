@@ -230,9 +230,7 @@ const tempCatchDeprecatedFlags = (args: string[]) => {
           .includes(prevArg),
       )
     ) {
-      logger.warn(
-        `The ${arg} flag from bun-workspaces is deprecated and will be removed in a future version. This is now pacwich's default behavior.`,
-      );
+      logger.warn("DeprecatedBunWorkspacesFlag", { flag: arg });
       args.splice(index, 1);
     }
   });

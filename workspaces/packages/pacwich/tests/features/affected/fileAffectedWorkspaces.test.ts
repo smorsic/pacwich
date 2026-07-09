@@ -782,7 +782,9 @@ describe("getFileAffectedWorkspaces", () => {
 
       const warnings = stderrSpy.mock.calls
         .map((call) => stripANSI(call[0] as string))
-        .filter((message) => message.includes("[pacwich WARN]"));
+        .filter((message) =>
+          message.includes("[pacwich WARN: InputPatternOutsideProject]"),
+        );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toContain("../../../external");
       expect(warnings[0]).toContain('workspace "a"');
@@ -821,7 +823,9 @@ describe("getFileAffectedWorkspaces", () => {
 
       const warnings = stderrSpy.mock.calls
         .map((call) => stripANSI(call[0] as string))
-        .filter((message) => message.includes("[pacwich WARN]"));
+        .filter((message) =>
+          message.includes("[pacwich WARN: InputPatternOutsideProject]"),
+        );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toContain("/../external");
 
@@ -858,7 +862,9 @@ describe("getFileAffectedWorkspaces", () => {
 
       const warnings = stderrSpy.mock.calls
         .map((call) => stripANSI(call[0] as string))
-        .filter((message) => message.includes("[pacwich WARN]"));
+        .filter((message) =>
+          message.includes("[pacwich WARN: InputPatternOutsideProject]"),
+        );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toContain("!../../../external");
 

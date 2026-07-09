@@ -56,8 +56,8 @@ const mergeVerifyConfig = (
  * `workspacePatternConfigs` entries are concatenated.
  * `verify.workspaceDependencies.ignoreInputFiles` arrays are
  * concatenated and deduplicated. Any argument may be a
- * {@link ProjectConfigFactory} receiving the accumulated config
- * up to that point.
+ * {@link ProjectConfigFactory} receiving the accumulated config up to
+ * that point.
  *
  * @example
  * // pacwich.project.ts

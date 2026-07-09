@@ -19,6 +19,11 @@ pacwich --pm=pnpm ls
 # Pass --log-level to any command (debug, info, warn, error, or silent)
 pacwich --log-level=debug ls
 
+# Suppress specific warning messages (can also be set by project config)
+# Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings)
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
+
 ####################
 # Getting metadata #
 ####################

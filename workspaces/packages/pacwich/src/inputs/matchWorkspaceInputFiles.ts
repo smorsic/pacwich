@@ -121,9 +121,10 @@ const resolveFilePatterns = ({
       const displayPattern = isExclude
         ? `${FILE_PATTERN_NEGATION_PREFIX}${inputPattern}`
         : inputPattern;
-      logger.warn(
-        `Input pattern ${JSON.stringify(displayPattern)} for workspace "${workspaceName}" resolves outside the project root and will be ignored.`,
-      );
+      logger.warn("InputPatternOutsideProject", {
+        pattern: JSON.stringify(displayPattern),
+        workspaceName,
+      });
       continue;
     }
     resolved.push({ inputPattern, resolvedPattern });

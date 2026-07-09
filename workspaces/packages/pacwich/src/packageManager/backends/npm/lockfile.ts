@@ -34,9 +34,11 @@ const loadCurrentVersions = ({
   if (contents === null) return new Map();
   const parsed = parsePackageLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse current package-lock.json: ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("NpmLockParseFailed", {
+      context: "current package-lock.json",
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -54,9 +56,11 @@ const loadVersionsAtGitRef = async ({
   if (contents === null) return new Map();
   const parsed = parsePackageLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse package-lock.json at ref "${ref}": ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("NpmLockParseFailed", {
+      context: `package-lock.json at ref "${ref}"`,
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -94,9 +98,11 @@ export const loadNpmWorkspaceLinks = ({
   if (contents === null) return null;
   const linkedNames = parsePackageLockWorkspaceLinkNames(contents);
   if (linkedNames instanceof PacwichError) {
-    logger.warn(
-      `Could not parse package-lock.json for workspace links: ${linkedNames.message}. Falling back to static dependency analysis.`,
-    );
+    logger.warn("NpmLockParseFailed", {
+      context: "package-lock.json for workspace links",
+      detail: linkedNames.message,
+      fallback: "Falling back to static dependency analysis.",
+    });
     return null;
   }
   return {

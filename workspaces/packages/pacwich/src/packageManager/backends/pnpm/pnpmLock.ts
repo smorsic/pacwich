@@ -93,9 +93,11 @@ export const parsePnpmLock = (
   // Lenient high: a newer major is probably still compatible for the
   // fields we read. Warn and parse it as the newest version we know.
   if (Math.floor(version) > MAX_SUPPORTED_PNPM_LOCK_VERSION) {
-    logger.warn(
-      `pnpm lockfile${pnpmLockPath ? ` at "${pnpmLockPath}"` : ""} reports version ${version}, newer than the latest supported (${MAX_SUPPORTED_PNPM_LOCK_VERSION}.x). Parsing anyway; results may be incomplete.`,
-    );
+    logger.warn("PnpmLockNewerVersion", {
+      atPath: pnpmLockPath ? ` at "${pnpmLockPath}"` : "",
+      version: String(version),
+      maxVersion: String(MAX_SUPPORTED_PNPM_LOCK_VERSION),
+    });
   }
 
   const importersField = raw.importers;
