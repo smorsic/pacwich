@@ -132,7 +132,13 @@ export const ENV_VARS_METADATA: Record<
     envVarName: getUserEnvVarName("suppressWarningsDefault"),
     projectConfigDefaultsKey: `${CONFIG_DEFAULTS_KEY}.suppressWarnings`,
     description: (
-      <span>Suppress warning logs by WarningId as a comma-separated list.</span>
+      <span>
+        Suppress warning logs by WarningId as a comma-separated list. See the{" "}
+        <Link href="/config/warnings" className="inline-link">
+          warnings page
+        </Link>{" "}
+        for a full list and other means of setting suppression.
+      </span>
     ),
   },
 } as const;

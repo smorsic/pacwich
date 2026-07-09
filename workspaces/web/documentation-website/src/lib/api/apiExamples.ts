@@ -20,6 +20,9 @@ const pathProject = createFileSystemProject({
 
   // Disable executable configuration files (TS/JS) for untrusted contexts
   disableExecutableConfigs: true,
+
+  // Suppress warnings by WarningId
+  suppressWarnings: ["MissingWorkspacesHint"],
 });
 
 `.trim();
