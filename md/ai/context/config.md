@@ -27,6 +27,9 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
     // "grouped" is still downgraded to "prefixed" when stdout is not a
     // TTY. Env override: PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT.
     "cliScriptOutputStyle": "prefixed", // "grouped" | "prefixed" | "plain" | "none"
+    // Suppress warnings globally by WarningId
+    // See WarningId TS type or https://pacwich.dev/config/warnings/index.md for list
+    "suppressWarnings": ["MultiplePackageManagerLockfiles"],
   },
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
