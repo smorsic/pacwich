@@ -88,6 +88,7 @@ export {
   type ErrorMap,
   PacwichError,
 } from "./internal/core";
+export { PACWICH_ERRORS } from "./errorExports";
 export { type LogLevelSetting } from "@pacwich/common/logging";
 export { WARNING_IDS, type WarningId } from "@pacwich/common/warnings";
 export { setLogLevel, setSuppressWarnings } from "./internal/logger";
