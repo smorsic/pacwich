@@ -13,6 +13,8 @@ export default defineRootConfig({
     shell: "system",
     // default value for global --include-root-workspace option
     includeRootWorkspace: false,
+    // suppress warnings globally
+    suppressWarnings: ["MultiplePackageManagerLockfiles"],
   },
 
   // Apply workspace configs in bulk by workspace pattern, in order.
