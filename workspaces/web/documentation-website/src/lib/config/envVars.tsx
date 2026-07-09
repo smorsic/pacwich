@@ -30,6 +30,33 @@ export const ENV_VARS_METADATA: Record<
       </span>
     ),
   },
+  logLevel: {
+    envVarName: getUserEnvVarName("logLevel"),
+    description: (
+      <span>
+        The default{" "}
+        <Link href="/cli/global-options#log-level" className="inline-link">
+          log level
+        </Link>{" "}
+        (<code>debug</code>, <code>info</code>, <code>warn</code>,{" "}
+        <code>error</code>, or <code>silent</code>), used when the{" "}
+        <code>--log-level</code> CLI flag is not passed. This is{" "}
+        <code>info</code> when not overridden.
+      </span>
+    ),
+  },
+  suppressWarnings: {
+    envVarName: getUserEnvVarName("suppressWarnings"),
+    description: (
+      <span>
+        Suppress warning logs by WarningId as a comma-separated list. See the{" "}
+        <Link href="/config/warnings" className="inline-link">
+          warnings page
+        </Link>{" "}
+        for a full list and other means of setting suppression.
+      </span>
+    ),
+  },
   cliScriptOutputStyleDefault: {
     envVarName: getUserEnvVarName("cliScriptOutputStyleDefault"),
     projectConfigDefaultsKey: `${CONFIG_DEFAULTS_KEY}.cliScriptOutputStyle`,
@@ -125,18 +152,6 @@ export const ENV_VARS_METADATA: Record<
       <span>
         Whether to disable loading executable configs (TS/JS), mainly for
         untrusted contexts. This is <code>false</code> when not overridden.
-      </span>
-    ),
-  },
-  suppressWarnings: {
-    envVarName: getUserEnvVarName("suppressWarnings"),
-    description: (
-      <span>
-        Suppress warning logs by WarningId as a comma-separated list. See the{" "}
-        <Link href="/config/warnings" className="inline-link">
-          warnings page
-        </Link>{" "}
-        for a full list and other means of setting suppression.
       </span>
     ),
   },

@@ -64,7 +64,8 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
   logLevel: defineOptionContent("logLevel", ({ mainOption, shortOption }) => ({
     title: "Log Level",
     description:
-      "Set the logging level. For the run-script (run) command, silence output with --output-style=none.",
+      "Set the logging level. For the run-script (run) command, silence output with --output-style=none. " +
+      `A default can be set with the ${getUserEnvVarName("logLevel")} env var, which this flag overrides when passed.`,
     examples: [
       `pacwich ${mainOption}=debug list-workspaces`,
       `pacwich ${shortOption} error list-workspaces`,

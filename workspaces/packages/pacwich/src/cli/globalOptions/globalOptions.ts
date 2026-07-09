@@ -14,7 +14,11 @@ import {
   expandHomePath,
   splitCsvList,
 } from "../../internal/core";
-import { logger, setSuppressWarnings } from "../../internal/logger";
+import {
+  logger,
+  resolveEnvLogLevel,
+  setSuppressWarnings,
+} from "../../internal/logger";
 import {
   createFileSystemProject,
   createMemoryProject,
@@ -120,14 +124,24 @@ type ApplyGlobalOptionsOptions = {
    * Skip loading the file-system project. Set for global commands.
    */
   skipProjectLoad: boolean;
+  /**
+   * Whether --log-level was explicitly passed (vs. Commander's default).
+   * When false, the PACWICH_LOG_LEVEL env var default stands.
+   */
+  logLevelExplicit: boolean;
 };
 
 const applyGlobalOptions = (
   options: CliGlobalOptions,
-  { skipProjectLoad }: ApplyGlobalOptionsOptions,
+  { skipProjectLoad, logLevelExplicit }: ApplyGlobalOptionsOptions,
 ) => {
-  logger.printLevel = options.logLevel;
-  logger.debug("Log level: " + options.logLevel);
+  // An explicit flag wins. Otherwise honor the PACWICH_LOG_LEVEL env var, and
+  // fall back to Commander's static default ("info") when it is unset. Reading
+  // the env var live also keeps repeated in-process invocations deterministic.
+  logger.printLevel = logLevelExplicit
+    ? options.logLevel
+    : (resolveEnvLogLevel() ?? options.logLevel);
+  logger.debug("Log level: " + logger.printLevel);
 
   // The --suppress-warnings flag. The PACWICH_SUPPRESS_WARNINGS env var is
   // honored by the logger directly, so nothing else is wired up here.
@@ -205,6 +219,9 @@ export const initializeWithGlobalOptions = (
       ...options,
       cwd,
     },
-    { skipProjectLoad: isGlobalCliCommandToken(commandToken) },
+    {
+      skipProjectLoad: isGlobalCliCommandToken(commandToken),
+      logLevelExplicit: program.getOptionValueSource("logLevel") === "cli",
+    },
   );
 };

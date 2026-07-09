@@ -17,6 +17,7 @@ pacwich --cwd=/path/to/your/project run my-script
 pacwich --pm=pnpm ls
 
 # Pass --log-level to any command (debug, info, warn, error, or silent)
+# A default can also be set with the PACWICH_LOG_LEVEL env var (the flag overrides it)
 pacwich --log-level=debug ls
 
 # Suppress specific warning messages (can also be set by project config)
