@@ -8,6 +8,7 @@ outline: true
 footer: false
 ---
 
+import { getUserEnvVarName } from "@pacwich/common/config";
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { ApiHeader } from "../../../lib/api/ApiHeader";
 import { 
@@ -310,6 +311,7 @@ A `MemoryProject` currently does not support running scripts directly, though a 
 `setLogLevel(level: LogLevelSetting)`
 
 Set the global logging level. Defaults to "info" or "error" when `NODE_ENV` is "test".
+The default log level can be set with the <code>{getUserEnvVarName("logLevel")}</code> environment variable.
 <SyntaxHighlighter language="typescript">
 {SET_LOG_LEVEL_EXAMPLE}
 </SyntaxHighlighter>
