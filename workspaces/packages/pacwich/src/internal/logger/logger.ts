@@ -36,6 +36,27 @@ export const validateLogLevel = (level: LogLevelSetting) => {
   }
 };
 
+/** The `PACWICH_LOG_LEVEL` env var as a valid level, or `undefined` when it is
+ * unset or invalid. Read live so it reflects the env var at call time. An
+ * invalid value is ignored (not thrown) so a typo can't crash pacwich at
+ * import, before CLI arg parsing could correct it. */
+export const resolveEnvLogLevel = (): LogLevelSetting | undefined => {
+  const envLevel = process.env[USER_ENV_VARS.logLevel];
+  if (envLevel === undefined) return undefined;
+  try {
+    validateLogLevel(envLevel as LogLevelSetting);
+    return envLevel as LogLevelSetting;
+  } catch {
+    return undefined;
+  }
+};
+
+/** The default print level for a new logger: the `PACWICH_LOG_LEVEL` env var
+ * when valid, otherwise `"info"` (or `"error"` under test). The CLI --log-level
+ * flag and setLogLevel override it. */
+export const resolveDefaultLogLevel = (): LogLevelSetting =>
+  resolveEnvLogLevel() ?? (IS_TEST ? "error" : "info");
+
 export type LogMetadata = Record<string, unknown>;
 
 export interface Log<
@@ -232,7 +253,7 @@ class _Logger implements Logger {
     return level === "error" ? `${RED}${prefixed}${NC}` : prefixed;
   }
 
-  private _printLevel: LogLevelSetting = IS_TEST ? "error" : "info";
+  private _printLevel: LogLevelSetting = resolveDefaultLogLevel();
 
   private shouldPrint(level: LogLevel): boolean {
     if (this.printLevel === "silent") return false;
@@ -262,9 +283,11 @@ class _Logger implements Logger {
 export const logger = createLogger("pacwich");
 
 /**
- * Set the global logging level for pacwich's own logger. Defaults
- * to `"info"`, or `"error"` when `NODE_ENV` is `"test"`. Affects
- * every log call from pacwich source for the rest of the process.
+ * Set the global logging level for pacwich's own logger. The default
+ * comes from the `PACWICH_LOG_LEVEL` env var when it holds a valid level,
+ * otherwise `"info"` (or `"error"` when `NODE_ENV` is `"test"`). Calling
+ * this overrides that default for every log call from pacwich source for
+ * the rest of the process.
  *
  * @example
  * import { setLogLevel } from "pacwich";

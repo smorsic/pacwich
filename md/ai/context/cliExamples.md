@@ -161,6 +161,7 @@ pacwich -r ls
 pacwich --no-include-root ls # override config/env var setting
 
 # Log level (debug|info|warn|error|silent, default info)
+# Also settable via the PACWICH_LOG_LEVEL env var as a default (the flag overrides it)
 pacwich --log-level=silent ls
 pacwich -l silent ls
 

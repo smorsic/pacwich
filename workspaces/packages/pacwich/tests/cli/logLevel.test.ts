@@ -1,6 +1,9 @@
+import { getUserEnvVarName } from "@pacwich/common/config";
 import { setupCliTest, assertOutputMatches } from "../util/cliTestUtils";
 import { makeTestWorkspace } from "../util/testData";
 import { test, describe, expect } from "../util/testFramework";
+
+const LOG_LEVEL_ENV_VAR = getUserEnvVarName("logLevel");
 
 const expectedOneWorkspace = makeTestWorkspace({
   name: "application-a",
@@ -402,6 +405,50 @@ application-a`,
       );
       expect(result.exitCode).toBe(0);
       expect(result.stdout.raw).toContain("script ran successfully");
+    });
+  });
+
+  describe("PACWICH_LOG_LEVEL env var", () => {
+    test("sets the default level when no flag is passed", async () => {
+      const { run } = setupCliTest({
+        testProject: "oneWorkspace",
+        env: { [LOG_LEVEL_ENV_VAR]: "debug" },
+      });
+      const result = await run("ls");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toContain("[pacwich DEBUG]");
+    });
+
+    test("a silent env var suppresses the not-found error", async () => {
+      const { run } = setupCliTest({
+        testProject: "oneWorkspace",
+        env: { [LOG_LEVEL_ENV_VAR]: "silent" },
+      });
+      assertOutputMatches(
+        (await run("info", "does-not-exist")).stdoutAndErr.raw,
+        /^$/,
+      );
+    });
+
+    test("an explicit --log-level flag overrides the env var", async () => {
+      const { run } = setupCliTest({
+        testProject: "oneWorkspace",
+        env: { [LOG_LEVEL_ENV_VAR]: "silent" },
+      });
+      const result = await run("--log-level=debug", "ls");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).toContain("[pacwich DEBUG]");
+    });
+
+    test("an invalid env var value is ignored without crashing", async () => {
+      const { run } = setupCliTest({
+        testProject: "oneWorkspace",
+        env: { [LOG_LEVEL_ENV_VAR]: "oops" },
+      });
+      const result = await run("ls");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.raw).not.toContain("[pacwich DEBUG]");
+      assertOutputMatches(result.stdout.raw, /Workspace: application-a/);
     });
   });
 });
