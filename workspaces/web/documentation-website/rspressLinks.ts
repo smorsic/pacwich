@@ -119,6 +119,10 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         text: "Environment Variables",
         link: "/config/env-vars",
       },
+      {
+        text: "Warnings",
+        link: "/config/warnings",
+      },
     ],
   },
   {
@@ -342,6 +346,10 @@ const SIDEBAR_GROUPS = {
             {
               text: "Environment Variables",
               link: "/config/env-vars",
+            },
+            {
+              text: "Warnings",
+              link: "/config/warnings",
             },
           ],
         },

@@ -128,4 +128,11 @@ export const ENV_VARS_METADATA: Record<
       </span>
     ),
   },
+  suppressWarningsDefault: {
+    envVarName: getUserEnvVarName("suppressWarningsDefault"),
+    projectConfigDefaultsKey: `${CONFIG_DEFAULTS_KEY}.suppressWarnings`,
+    description: (
+      <span>Suppress warning logs by WarningId as a comma-separated list.</span>
+    ),
+  },
 } as const;

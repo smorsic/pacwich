@@ -155,6 +155,12 @@ project.runWorkspaceScript({
 });
 `.trim();
 
+export const SET_SUPPRESS_WARNINGS_EXAMPLE = `
+import { setSuppressWarnings } from "pacwich";
+
+setSuppressWarnings(["MissingWorkspacesHint", "MultipleConfigsFound"]);
+`.trim();
+
 export const API_PARALLEL_SCRIPTS_EXAMPLE = `
 import { createFileSystemProject } from "pacwich";
 

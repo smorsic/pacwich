@@ -26,6 +26,7 @@ export const exampleProjectConfigSimple2: ProjectConfig = {
     shell: "bun",
     includeRootWorkspace: true,
     affectedBaseRef: "my-branch",
+    suppressWarnings: ["MissingWorkspacesHint", "BunLockParseFailed"],
   },
 };
 
