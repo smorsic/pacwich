@@ -55,6 +55,7 @@
     "cli:node": "node workspaces/packages/pacwich/dist/bin/cli.js",
     "pw": "pacwich ri --workspace=pw --script",
     "docs": "pacwich ri --workspace=docs --script",
+    "web-cli": "pacwich ri --workspace=webcli --script",
     "sandbox": "pacwich ri --workspace=sandbox --script",
     "lint": "pacwich run lint '*' not:tag:sandbox",
     "lint:fix": "eslint . --fix",
