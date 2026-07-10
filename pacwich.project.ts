@@ -42,6 +42,7 @@ export default defineProjectConfig({
               "@pacwich/common",
               "@pacwich/meta",
               "@pacwich/web-common",
+              "pacwich",
             ],
             denyPatterns: [],
           },
