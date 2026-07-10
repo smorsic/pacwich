@@ -99,6 +99,12 @@ export default defineConfig([
     ...reactHooksPlugin.configs.flat.recommended,
   },
   {
+    name: "webCliPackageConfig",
+    files: ["workspaces/web/web-cli/**/*.{js,mjs,cjs,ts,mts,cts,tsx}"],
+    ...reactPlugin.configs.flat.recommended,
+    ...reactHooksPlugin.configs.flat.recommended,
+  },
+  {
     name: "scripts",
     files: ["**/scripts/**/*.{js,mjs,cjs,ts,mts,cts,tsx}"],
     rules: {
