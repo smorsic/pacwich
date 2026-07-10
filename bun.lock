@@ -128,6 +128,7 @@
         "pacwich": "workspace:*",
       },
       "devDependencies": {
+        "@rsbuild/core": "^2.0.8",
         "@rsbuild/plugin-node-polyfill": "^1.4.6",
         "@rspress/core": "catalog:web",
         "@types/lodash": "catalog:web",

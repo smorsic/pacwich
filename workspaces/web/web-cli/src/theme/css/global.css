@@ -1,0 +1,9 @@
+/**
+ * Minimal global stylesheet for the standalone preview: just the shared
+ * web-cli tokens/structure from @pacwich/web-common. rspress's own default
+ * theme already ships sensible --rp-c- and --rp-container- prefixed
+ * defaults (see base-vars.css, Callout/index.css) for both light and dark,
+ * so this workspace doesn't need to redeclare them.
+ */
+@import "@pacwich/web-common/css/web-cli-tokens.css";
+@import "@pacwich/web-common/css/web-cli.css";
