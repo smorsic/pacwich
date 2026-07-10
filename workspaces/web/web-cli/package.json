@@ -17,6 +17,7 @@
     "@pacwich/web-common": "workspace:*"
   },
   "devDependencies": {
+    "@fontsource/unifontex": "catalog:web",
     "@rsbuild/core": "^2.0.8",
     "@rsbuild/plugin-node-polyfill": "^1.4.6",
     "@rspress/core": "catalog:web",

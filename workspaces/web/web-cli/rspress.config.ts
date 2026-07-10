@@ -71,5 +71,32 @@ export default defineConfig({
         appendPlugins(mockSubprocessPlugin);
       },
     },
+    html: {
+      tags: [
+        // IBM Plex Sans / Lexend, matching documentation-website's actual
+        // branding fonts (loaded the same way there — not self-hosted).
+        {
+          tag: "link",
+          attrs: {
+            rel: "preconnect",
+            href: "https://fonts.googleapis.com",
+          },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "preconnect",
+            href: "https://fonts.gstatic.com",
+          },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "stylesheet",
+            href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Lexend:wght@100..900&display=swap",
+          },
+        },
+      ],
+    },
   },
 });

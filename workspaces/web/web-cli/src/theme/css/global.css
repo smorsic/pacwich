@@ -4,6 +4,36 @@
  * theme already ships sensible --rp-c- and --rp-container- prefixed
  * defaults (see base-vars.css, Callout/index.css) for both light and dark,
  * so this workspace doesn't need to redeclare them.
+ *
+ * The font families ARE overridden below: rspress's defaults are valid but
+ * generic (Inter/Menlo-based stacks), whereas documentation-website's actual
+ * branding fonts (IBM Plex Sans, UnifontEx, Lexend for headings) are the
+ * source of truth. UnifontEx is self-hosted via @fontsource/unifontex
+ * (imported in src/pages/index.tsx); IBM Plex Sans/Lexend load the same way
+ * documentation-website loads them, via the Google Fonts <link> tags in
+ * rspress.config.ts's builderConfig.html.tags.
  */
 @import "@pacwich/web-common/css/web-cli-tokens.css";
 @import "@pacwich/web-common/css/web-cli.css";
+
+:root {
+  --rp-font-family-base: "IBM Plex Sans", sans-serif;
+  --rp-font-family-mono: "UnifontEx", monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Lexend", sans-serif;
+  letter-spacing: -0.025em !important;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+}

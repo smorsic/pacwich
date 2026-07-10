@@ -15,19 +15,14 @@ export const WebCliNotes = () => {
           .
         </li>
         <li>
-          <code>pacwich</code> is an alias for <code>bunx pacwich</code>.
-          However, you can use <code>pacwich</code> in your root{" "}
-          <code>package.json</code> scripts without setting up a shell alias
-          when <code>pacwich</code> is installed.
-        </li>
-        <li>
           This isn't a full bash shell, so shell operations beyond providing
           args to <code>pacwich</code> aren't supported.
         </li>
         <li>
-          Inline scripts, the <code>doctor</code> command, appending args to
-          scripts, and changing the working directory via <code>--cwd</code>{" "}
-          aren't supported here.
+          Inline scripts, the <code>doctor</code> command, changing the working
+          directory via <code>--cwd</code>, and git-based affected diffs (
+          <code>--base</code>/<code>--head</code>) aren't supported here — use{" "}
+          <code>--files</code> instead for affected resolution.
         </li>
       </ul>
     </div>
