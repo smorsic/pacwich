@@ -343,15 +343,15 @@ const SIDEBAR_GROUPS = {
               text: "More: Workspace Pattern Configs",
               link: "/config/workspace-pattern-configs",
             },
-            {
-              text: "Environment Variables",
-              link: "/config/env-vars",
-            },
-            {
-              text: "Warnings",
-              link: "/config/warnings",
-            },
           ],
+        },
+        {
+          text: "Environment Variables",
+          link: "/config/env-vars",
+        },
+        {
+          text: "Warnings",
+          link: "/config/warnings",
         },
       ],
     },
