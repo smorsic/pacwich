@@ -1,0 +1,9 @@
+{
+  "name": "@pacwich/web-common",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  }
+}

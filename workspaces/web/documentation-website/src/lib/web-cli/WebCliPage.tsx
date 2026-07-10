@@ -2,7 +2,7 @@ import { useInitializeApi } from "../service/apiHealth";
 import { WebCliMain } from "./main/WebCliMain";
 import { WebCliNotes } from "./WebCliNotes";
 
-import "../../theme/css/web-cli.css";
+import "@pacwich/web-common/css/web-cli.css";
 
 export const WebCliPage = () => {
   useInitializeApi();
