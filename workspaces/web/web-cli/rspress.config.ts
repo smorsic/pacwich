@@ -33,6 +33,8 @@ export default defineConfig({
   // rather than fight an SSR pass that would need every Node shim available
   // server-side too.
   ssg: false,
+  // No fixed dev server port: portless (see package.json's "dev"/"preview"
+  // scripts) assigns one via PORT, which Rsbuild reads automatically.
   builderConfig: {
     plugins: [
       // Polyfills path/os/util/buffer/url/stream/vm etc. We turn off the
@@ -68,9 +70,6 @@ export default defineConfig({
       rspack: (_config, { appendPlugins }) => {
         appendPlugins(mockSubprocessPlugin);
       },
-    },
-    server: {
-      port: 3300,
     },
   },
 });

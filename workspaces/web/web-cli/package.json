@@ -4,9 +4,10 @@
   "type": "module",
   "description": "The real pacwich CLI running in the browser over an in-memory filesystem (memfs), matching the UI/CSS of the (currently unrouted) web CLI demo in documentation-website.",
   "scripts": {
-    "dev": "rspress dev",
+    "dev": "portless pacwich-web-cli rspress dev --host",
+    "dev:plain": "rspress dev",
     "build": "rspress build",
-    "preview": "rspress preview",
+    "preview": "portless pacwich-web-cli-preview rspress preview",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "test": "bun test"

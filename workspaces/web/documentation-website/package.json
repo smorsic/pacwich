@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "PACWICH_DOCS_ENV=development portless pacwich-docs rspress dev --host",
+    "dev:plain": "PACWICH_DOCS_ENV=development rspress dev",
     "lint": "eslint src/",
     "build": "PACWICH_DOCS_ENV=production bun run scripts/build.ts",
     "build:dev": "PACWICH_DOCS_ENV=development bun run scripts/build.ts",
