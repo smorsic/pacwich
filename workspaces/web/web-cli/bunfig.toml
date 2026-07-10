@@ -1,0 +1,6 @@
+[test]
+preload = ["./tests/setup.ts"]
+root = "tests"
+
+[run]
+silent = true

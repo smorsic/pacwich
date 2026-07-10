@@ -2,36 +2,14 @@
  * Integration test for the browser wiring, run under bun.
  *
  * The browser build aliases `fs` to memfs and replaces pacwich's
- * `runScript/subprocesses.ts` with our mock (see `rspress.config.ts`); here we
- * do the equivalent with `mock.module(...)` so the *real* pacwich CLI reads the
- * seeded in-memory monorepo and runs scripts through the mock instead of disk /
- * real processes. path/os/process stay real (bun). This exercises the same code
+ * `runScript/subprocesses.ts` with our mock (see `rspress.config.ts`); the
+ * shared bun:test preload (`tests/setup.ts`) does the equivalent with
+ * `mock.module(...)` so the *real* pacwich CLI reads the seeded in-memory
+ * monorepo and runs scripts through the mock instead of disk / real
+ * processes. path/os/process stay real (bun). This exercises the same code
  * path the browser runs: seed memfs → createCli().run() → capture output.
  */
-import { realpathSync } from "node:fs";
-import { beforeAll, expect, mock, test } from "bun:test";
-import { fs as memfsFs, vol } from "memfs";
-
-// Resolve pacwich's internal subprocess module by realpath *before* fs is
-// mocked, so `mock.module` targets the same module the bundled CLI imports.
-const SUBPROCESS_PATH = realpathSync(
-  new URL(
-    "../node_modules/pacwich/src/runScript/subprocesses.ts",
-    import.meta.url,
-  ),
-);
-
-beforeAll(async () => {
-  vol.reset();
-  // Redirect every `import ... from "fs"` (incl. the bundled CLI) to memfs,
-  // bound to the same default volume our seeder writes to.
-  mock.module("fs", () => ({ ...memfsFs, default: memfsFs }));
-  mock.module("node:fs", () => ({ ...memfsFs, default: memfsFs }));
-  // Replace the single spawn chokepoint with the browser mock (mirrors the
-  // NormalModuleReplacementPlugin in rspress.config.ts).
-  const mockSubprocess = await import("../src/cli/mockSubprocess");
-  mock.module(SUBPROCESS_PATH, () => mockSubprocess);
-});
+import { expect, test } from "bun:test";
 
 test("list-workspaces lists the mock monorepo's workspaces", async () => {
   // Import AFTER the fs mock is installed so the CLI binds to memfs.
