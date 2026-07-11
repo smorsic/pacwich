@@ -130,7 +130,6 @@
       "name": "@pacwich/web-cli",
       "dependencies": {
         "@pacwich/web-common": "workspace:*",
-        "pacwich": "workspace:*",
       },
       "devDependencies": {
         "@fontsource/unifontex": "catalog:web",
@@ -145,8 +144,6 @@
         "@xterm/addon-fit": "^0.11.0",
         "@xterm/xterm": "^6.0.0",
         "lodash": "catalog:web",
-        "memfs": "^4.17.0",
-        "path-browserify": "^1.0.1",
         "react": "catalog:web",
         "react-arborist": "catalog:web",
         "react-dom": "catalog:web",
@@ -2249,8 +2246,6 @@
     "@pacwich/sandbox--local-vs-release/pacwich_local": ["pacwich@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
 
     "@pacwich/sandbox--web-cli/pacwich": ["pacwich@0.2.1", "", { "bin": { "pacwich": "bin/cli.js" } }, "sha512-FHKX3mkx+7+J8M9Z+be7Cbme4IwcBUF8YLgNaHReW/k4l32av0R0unEg7srbygD28Wj4xDy5y1CE5na1AOAMlw=="],
-
-    "@pacwich/web-cli/pacwich": ["pacwich@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
 
     "@pacwich/web-common/pacwich": ["pacwich@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
 

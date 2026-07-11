@@ -11,13 +11,21 @@
  * is replaced with the mock (see rspress.config.ts's `NormalModuleReplacementPlugin`).
  */
 import { realpathSync } from "node:fs";
+import path from "node:path";
 import { mock } from "bun:test";
 import { fs as memfsFs, vol } from "memfs";
 
+// Resolved via Bun's real module resolution (not a hardcoded relative path
+// into this workspace's own node_modules) since web-cli no longer declares
+// `pacwich` as a direct dependency — only @pacwich/web-common does now.
+const pacwichPackageJsonPath = Bun.resolveSync(
+  "pacwich/package.json",
+  import.meta.dir,
+);
 const SUBPROCESS_PATH = realpathSync(
-  new URL(
-    "../node_modules/pacwich/src/runScript/subprocesses.ts",
-    import.meta.url,
+  path.join(
+    path.dirname(pacwichPackageJsonPath),
+    "src/runScript/subprocesses.ts",
   ),
 );
 
@@ -25,5 +33,6 @@ vol.reset();
 mock.module("fs", () => ({ ...memfsFs, default: memfsFs }));
 mock.module("node:fs", () => ({ ...memfsFs, default: memfsFs }));
 
-const mockSubprocess = await import("../src/cli/mockSubprocess");
+const mockSubprocess =
+  await import("@pacwich/web-common/web-cli-runtime/mockSubprocess");
 mock.module(SUBPROCESS_PATH, () => mockSubprocess);

@@ -1,6 +1,6 @@
+import { localWebCliClient } from "@pacwich/web-common/web-cli-runtime";
 import { create } from "zustand";
 import { useOnMount } from "../../util/useOnMount";
-import { localWebCliClient } from "./localWebCliClient";
 
 const useHealthStore = create<{
   isPending: boolean;

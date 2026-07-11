@@ -5,12 +5,12 @@
  * (see the shared `tests/setup.ts` preload), since `invokeWebCli` is backed
  * by the real `runPacwichCliArgv`.
  */
+import type { InvokeCliResponseChunk } from "@pacwich/web-common/web-cli-runtime";
 import { expect, test } from "bun:test";
-import type { InvokeCliResponseChunk } from "../src/lib/web-cli/util/webCliClientTypes";
 
 test("health and ready resolve immediately, with no backend to probe", async () => {
   const { localWebCliClient } =
-    await import("../src/lib/web-cli/util/localWebCliClient");
+    await import("@pacwich/web-common/web-cli-runtime");
 
   const health = await localWebCliClient.health();
   const ready = await localWebCliClient.ready();
@@ -21,7 +21,7 @@ test("health and ready resolve immediately, with no backend to probe", async () 
 
 test("invokeWebCli streams incremental chunks then a final isDone chunk", async () => {
   const { localWebCliClient } =
-    await import("../src/lib/web-cli/util/localWebCliClient");
+    await import("@pacwich/web-common/web-cli-runtime");
 
   const chunks: InvokeCliResponseChunk[] = [];
   for await (const chunk of localWebCliClient.invokeWebCli({
@@ -50,7 +50,7 @@ test("invokeWebCli streams incremental chunks then a final isDone chunk", async 
 
 test("invokeWebCli reports a guard-blocked command as a clean final chunk", async () => {
   const { localWebCliClient } =
-    await import("../src/lib/web-cli/util/localWebCliClient");
+    await import("@pacwich/web-common/web-cli-runtime");
 
   const chunks: InvokeCliResponseChunk[] = [];
   for await (const chunk of localWebCliClient.invokeWebCli({

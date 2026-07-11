@@ -1,4 +1,4 @@
-import { getDemoProjectFiles } from "../../../cli/demoProject";
+import { getDemoProjectFiles } from "@pacwich/web-common/web-cli-runtime";
 import { SyntaxHighlighter } from "../../util/highlight";
 import { useSelectedFile } from "./selection";
 

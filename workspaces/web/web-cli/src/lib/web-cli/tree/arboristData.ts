@@ -1,7 +1,7 @@
 import {
   getDemoProjectFiles,
   type DemoProjectFile,
-} from "../../../cli/demoProject";
+} from "@pacwich/web-common/web-cli-runtime";
 
 export type TreeNodeData = {
   id: string;

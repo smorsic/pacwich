@@ -13,7 +13,7 @@ import { expect, test } from "bun:test";
 
 test("list-workspaces lists the mock monorepo's workspaces", async () => {
   // Import AFTER the fs mock is installed so the CLI binds to memfs.
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, stderr, exitCode } = await runPacwichCli("list-workspaces", {
     terminalWidth: 80,
@@ -27,7 +27,7 @@ test("list-workspaces lists the mock monorepo's workspaces", async () => {
 });
 
 test("list-workspaces --name-only prints just the names", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
     "list-workspaces --name-only",
@@ -45,7 +45,7 @@ test("list-workspaces --name-only prints just the names", async () => {
 });
 
 test("run <script> streams the mocked per-workspace output", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli("run build", {
     terminalWidth: 80,
@@ -63,8 +63,9 @@ test("run <script> streams the mocked per-workspace output", async () => {
 });
 
 test("run --dep-order starts workspaces in dependency order", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
-  const { runLog } = await import("../src/cli/mockSubprocess");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
+  const { runLog } =
+    await import("@pacwich/web-common/web-cli-runtime/mockSubprocess");
   runLog.length = 0;
 
   const { exitCode } = await runPacwichCli("run build --dep-order", {
@@ -79,7 +80,7 @@ test("run --dep-order starts workspaces in dependency order", async () => {
 });
 
 test("run test only runs where the script exists", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli("run test", {
     terminalWidth: 80,
@@ -92,7 +93,7 @@ test("run test only runs where the script exists", async () => {
 });
 
 test("list-affected --files resolves affected workspaces (glob)", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
     "list-affected --files 'packages/utils/**/*.ts'",
@@ -111,7 +112,7 @@ test("list-affected --files resolves affected workspaces (glob)", async () => {
 });
 
 test("list-affected --files scopes to the changed workspace", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
     "list-affected --files apps/web/src/index.ts",
@@ -126,7 +127,7 @@ test("list-affected --files scopes to the changed workspace", async () => {
 });
 
 test("run-affected --files runs the mocked script on affected workspaces", async () => {
-  const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
     "run-affected build --files 'packages/core/**/*.ts'",
@@ -141,7 +142,8 @@ test("run-affected --files runs the mocked script on affected workspaces", async
 });
 
 test("runPacwichCliArgv runs an already-tokenized argv", async () => {
-  const { runPacwichCliArgv } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCliArgv } =
+    await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCliArgv(
     ["list-workspaces", "--name-only"],
@@ -153,7 +155,8 @@ test("runPacwichCliArgv runs an already-tokenized argv", async () => {
 });
 
 test("runPacwichCliArgv still runs the webCliGuards", async () => {
-  const { runPacwichCliArgv } = await import("../src/cli/runPacwichCli");
+  const { runPacwichCliArgv } =
+    await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, stderr, exitCode } = await runPacwichCliArgv(["doctor"]);
 
@@ -185,7 +188,8 @@ const blocked: [string, string, RegExp][] = [
 
 for (const [name, command, pattern] of blocked) {
   test(`blocks ${name}`, async () => {
-    const { runPacwichCli } = await import("../src/cli/runPacwichCli");
+    const { runPacwichCli } =
+      await import("@pacwich/web-common/web-cli-runtime");
     const { stdout, stderr, exitCode } = await runPacwichCli(command, {
       terminalWidth: 80,
     });

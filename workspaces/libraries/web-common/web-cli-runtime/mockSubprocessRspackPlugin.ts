@@ -4,12 +4,15 @@ import path from "path";
  * Structural (not imported) type for rspack's `NormalModuleReplacementPlugin`
  * constructor, so this module doesn't need `@rsbuild/core` as a dependency —
  * each consumer passes in the `rspack` binding from its own bundler config.
+ * Generic over the constructed plugin type so callers get back whatever
+ * concrete plugin type their own `rspack` import actually has, instead of
+ * `unknown`.
  */
-type RspackLike = {
+type RspackLike<TPlugin> = {
   NormalModuleReplacementPlugin: new (
     resourceRegExp: RegExp,
     newResource: (resource: { request: string; context?: string }) => void,
-  ) => unknown;
+  ) => TPlugin;
 };
 
 /**
@@ -21,7 +24,9 @@ type RspackLike = {
  * absolute target, catching every importer without rewriting any unrelated
  * file named `subprocesses`.
  */
-export const createMockSubprocessRspackPlugin = (rspack: RspackLike) => {
+export const createMockSubprocessRspackPlugin = <TPlugin>(
+  rspack: RspackLike<TPlugin>,
+): TPlugin => {
   const mockSubprocess = path.resolve(__dirname, "./mockSubprocess.ts");
   return new rspack.NormalModuleReplacementPlugin(
     /(^|[\\/])subprocesses(\.ts)?$/,

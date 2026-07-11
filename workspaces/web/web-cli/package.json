@@ -13,7 +13,6 @@
     "test": "bun test"
   },
   "dependencies": {
-    "pacwich": "workspace:*",
     "@pacwich/web-common": "workspace:*"
   },
   "devDependencies": {
@@ -29,8 +28,6 @@
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
     "lodash": "catalog:web",
-    "memfs": "^4.17.0",
-    "path-browserify": "^1.0.1",
     "react": "catalog:web",
     "react-arborist": "catalog:web",
     "react-dom": "catalog:web",

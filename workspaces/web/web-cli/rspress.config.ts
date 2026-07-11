@@ -1,28 +1,18 @@
 import path from "path";
+import { createMockSubprocessRspackPlugin } from "@pacwich/web-common/web-cli-runtime/mockSubprocessRspackPlugin";
 import { rspack } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { defineConfig } from "@rspress/core";
 
-const fsShim = path.resolve(__dirname, "src/cli/fsShim.ts");
-const osShim = path.resolve(__dirname, "src/cli/osShim.ts");
-const stubs = path.resolve(__dirname, "src/cli/stubs.ts");
-const mockSubprocess = path.resolve(__dirname, "src/cli/mockSubprocess.ts");
-
-// pacwich funnels every spawn (scripts + git) through the single
-// `createSubprocess()` in `runScript/subprocesses.ts`. Swap that one module for
-// our browser mock. It's imported from a few dirs — `./subprocesses` (from
-// runScript/) and `../runScript/subprocesses` (from affected/, inputs/) — so we
-// resolve the request against its importer and match the absolute target,
-// catching every importer without rewriting any unrelated `subprocesses` file.
-const mockSubprocessPlugin = new rspack.NormalModuleReplacementPlugin(
-  /(^|[\\/])subprocesses(\.ts)?$/,
-  (resource: { request: string; context?: string }) => {
-    const resolved = path.resolve(resource.context ?? "", resource.request);
-    if (/[\\/]runScript[\\/]subprocesses(\.ts)?$/.test(resolved)) {
-      resource.request = mockSubprocess;
-    }
-  },
+const RUNTIME_DIR = path.resolve(
+  __dirname,
+  "../../libraries/web-common/web-cli-runtime",
 );
+const fsShim = path.join(RUNTIME_DIR, "fsShim.ts");
+const osShim = path.join(RUNTIME_DIR, "osShim.ts");
+const stubs = path.join(RUNTIME_DIR, "stubs.ts");
+
+const mockSubprocessPlugin = createMockSubprocessRspackPlugin(rspack);
 
 export default defineConfig({
   root: "src/pages",
@@ -38,8 +28,9 @@ export default defineConfig({
   builderConfig: {
     plugins: [
       // Polyfills path/os/util/buffer/url/stream/vm etc. We turn off the
-      // `process` global so bare `process` resolves to our own shim
-      // (src/cli/processShim.ts), which provides stdout/exit/env.
+      // `process` global so bare `process` resolves to the web-cli-runtime's
+      // own shim (processShim.ts, imported by runPacwichCli.ts), which
+      // provides stdout/exit/env.
       pluginNodePolyfill({
         globals: { process: false, Buffer: true },
         protocolImports: true,
@@ -54,7 +45,7 @@ export default defineConfig({
         os: osShim,
         "node:os": osShim,
         // Node built-ins / loaders the CLI imports but never runs on the
-        // read-only list-workspaces path. See src/cli/stubs.ts.
+        // read-only list-workspaces path. See web-cli-runtime/stubs.ts.
         child_process: stubs,
         "node:child_process": stubs,
         readline: stubs,

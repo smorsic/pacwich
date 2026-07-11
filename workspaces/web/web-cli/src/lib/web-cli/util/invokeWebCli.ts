@@ -1,11 +1,11 @@
-import { useCallback } from "react";
-import { create } from "zustand";
-import { useApiState } from "./apiHealth";
-import { localWebCliClient } from "./localWebCliClient";
+import { localWebCliClient } from "@pacwich/web-common/web-cli-runtime";
 import type {
   InvokeCliRequestBody,
   InvokeCliResponseChunk,
-} from "./webCliClientTypes";
+} from "@pacwich/web-common/web-cli-runtime";
+import { useCallback } from "react";
+import { create } from "zustand";
+import { useApiState } from "./apiHealth";
 
 export const DEFAULT_TERMINAL_WIDTH = 80;
 
