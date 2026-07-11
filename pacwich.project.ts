@@ -38,7 +38,12 @@ export default defineProjectConfig({
       config: {
         rules: {
           workspaceDependencies: {
-            allowPatterns: ["@pacwich/common", "@pacwich/meta"],
+            allowPatterns: [
+              "@pacwich/common",
+              "@pacwich/meta",
+              "@pacwich/web-common",
+              "pacwich",
+            ],
             denyPatterns: [],
           },
         },

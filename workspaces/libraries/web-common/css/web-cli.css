@@ -137,6 +137,7 @@ h1#web-cli {
   padding: 0.75rem 1.5rem;
   box-sizing: content-box;
   border-radius: 0.25rem;
+  cursor: pointer;
   transition:
     opacity 0.25s,
     background-color 0.25s,
@@ -171,6 +172,7 @@ h1#web-cli {
   font-size: 0.85rem;
   box-sizing: content-box;
   border-radius: 0.25rem;
+  cursor: pointer;
   transition:
     opacity 0.25s,
     background-color 0.25s,
@@ -200,6 +202,7 @@ h1#web-cli {
   text-align: left;
   padding: 0.75rem;
   border-radius: 0.25rem;
+  cursor: pointer;
   transition: background-color 0.25s;
   line-height: 1.25;
 }
@@ -362,6 +365,7 @@ button.web-cli-tree-node:hover {
   padding: 0.75rem 1.5rem;
   text-align: center;
   line-height: 0.75;
+  cursor: pointer;
   transition:
     background-color 0.25s,
     color 0.25s;
@@ -370,4 +374,10 @@ button.web-cli-tree-node:hover {
 .web-cli-view-selector-button.selected {
   background: var(--rp-c-link);
   color: var(--rp-c-code-block-bg);
+}
+
+/* rspress's own base styles zero out button focus outlines; restore one here. */
+.web-cli-view-selector-button:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: -2px;
 }

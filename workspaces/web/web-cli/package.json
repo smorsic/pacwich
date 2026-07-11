@@ -1,0 +1,39 @@
+{
+  "name": "@pacwich/web-cli",
+  "private": true,
+  "type": "module",
+  "description": "The real pacwich CLI running in the browser over an in-memory filesystem (memfs), matching the UI/CSS of the (currently unrouted) web CLI demo in documentation-website.",
+  "scripts": {
+    "dev": "portless pacwich-web-cli rspress dev --host",
+    "dev:plain": "rspress dev",
+    "build": "rspress build",
+    "preview": "portless pacwich-web-cli-preview rspress preview",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@pacwich/web-common": "workspace:*"
+  },
+  "devDependencies": {
+    "@fontsource/unifontex": "catalog:web",
+    "@rsbuild/core": "^2.0.8",
+    "@rsbuild/plugin-node-polyfill": "^1.4.6",
+    "@rspress/core": "catalog:web",
+    "@types/lodash": "catalog:web",
+    "@types/react": "catalog:web",
+    "@types/react-dom": "^19.2.0",
+    "@types/react-syntax-highlighter": "catalog:web",
+    "@types/shell-quote": "catalog:pacwich-dev",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "lodash": "catalog:web",
+    "react": "catalog:web",
+    "react-arborist": "catalog:web",
+    "react-dom": "catalog:web",
+    "react-icons": "catalog:web",
+    "react-syntax-highlighter": "catalog:web",
+    "shell-quote": "catalog:pacwich-prod",
+    "zustand": "catalog:web"
+  }
+}

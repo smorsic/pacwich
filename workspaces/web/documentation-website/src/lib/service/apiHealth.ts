@@ -1,6 +1,6 @@
+import { localWebCliClient } from "@pacwich/web-common/web-cli-runtime";
 import { create } from "zustand";
 import { useOnMount } from "../util/useOnMount";
-import { serviceClient } from "./client";
 
 const useHealthStore = create<{
   isPending: boolean;
@@ -37,7 +37,7 @@ export const useInitializeApi = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const healthResponse = serviceClient.health();
+        const healthResponse = localWebCliClient.health();
 
         let newError: Error | null = null;
         healthResponse
@@ -56,7 +56,7 @@ export const useInitializeApi = () => {
             newError = error as Error;
           });
 
-        const readyResponse = serviceClient.ready();
+        const readyResponse = localWebCliClient.ready();
         readyResponse
           .then((response) => {
             if (!newError && !response.isReady) {

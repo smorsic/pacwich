@@ -25,6 +25,8 @@ package-lock.json
 !**/_pm/npm/package-lock.json
 # Allow the web-cli sandbox's static demo-project lockfile (seeded into memfs)
 !workspaces/sandboxes/web-cli/src/demo-project/package-lock.json
+# Allow the web-cli-runtime's static demo-project lockfile (seeded into memfs)
+!workspaces/libraries/web-common/web-cli-runtime/demo-project/package-lock.json
 yarn.lock
 # Allow curated test fixture pnpm overlay files (committed pnpm overlay)
 !**/_pm/pnpm/pnpm-lock.yaml

@@ -1,10 +1,11 @@
+import { localWebCliClient } from "@pacwich/web-common/web-cli-runtime";
 import type {
   InvokeCliRequestBody,
   InvokeCliResponseChunk,
-} from "bw-web-service-shared";
+} from "@pacwich/web-common/web-cli-runtime";
 import { useCallback } from "react";
 import { create } from "zustand";
-import { useApiState, serviceClient } from "../../service";
+import { useApiState } from "../../service";
 
 export const DEFAULT_TERMINAL_WIDTH = 80;
 
@@ -51,7 +52,7 @@ export const useInvokeWebCli = () => {
       setIsLoading(true);
       setResult([]);
 
-      for await (const chunk of serviceClient.invokeWebCli({
+      for await (const chunk of localWebCliClient.invokeWebCli({
         ...request,
         terminalWidth,
       })) {
