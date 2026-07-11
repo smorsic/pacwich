@@ -1,5 +1,8 @@
 import fs from "fs";
 import path from "path";
+import { createMockSubprocessRspackPlugin } from "@pacwich/web-common/web-cli-runtime/mockSubprocessRspackPlugin";
+import { rspack } from "@rsbuild/core";
+import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 import { defineConfig } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
@@ -15,6 +18,21 @@ import {
   BLOG_URL,
   createSidebar,
 } from "./rspressLinks";
+
+// The web CLI (/web-cli) runs the real pacwich CLI in-browser over memfs —
+// browser-only machinery that must NOT leak into rspress's SSR ("node")
+// compilation pass, which other pages (CliInstall.tsx, PmTabs.tsx,
+// runScriptJson.ts) use to render real pacwich data server-side. Scoped
+// below to builderConfig.environments.web (the client-only bundle) instead
+// of the top level, which would apply to every environment.
+const WEB_CLI_RUNTIME_DIR = path.resolve(
+  __dirname,
+  "../../libraries/web-common/web-cli-runtime",
+);
+const fsShim = path.join(WEB_CLI_RUNTIME_DIR, "fsShim.ts");
+const osShim = path.join(WEB_CLI_RUNTIME_DIR, "osShim.ts");
+const stubs = path.join(WEB_CLI_RUNTIME_DIR, "stubs.ts");
+const mockSubprocessPlugin = createMockSubprocessRspackPlugin(rspack);
 
 const TITLE =
   "pacwich: Monorepo tooling for Bun, npm, and pnpm workspaces | Documentation";
@@ -69,6 +87,12 @@ export default defineConfig({
   icon: "/favicon.ico",
   logo: "/images/png/bwunster_64x70.png",
   logoText: `pacwich`,
+  // /web-cli uses memfs/xterm/the in-browser CLI — it can't be server
+  // rendered, so it falls back to pure client hydration while every other
+  // route stays fully SSG'd.
+  ssg: {
+    experimentalExcludeRoutePaths: ["/web-cli"],
+  },
   search: {
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
@@ -108,6 +132,42 @@ export default defineConfig({
   },
   builderConfig: {
     dev: {},
+    // Scoped to the client/browser bundle only — see the comment above
+    // WEB_CLI_RUNTIME_DIR. Left untouched: environments.node (SSR) and
+    // environments.node_md (llms.txt), both of which need real fs/child_process
+    // for CliInstall.tsx/PmTabs.tsx/runScriptJson.ts's real pacwich usage.
+    environments: {
+      web: {
+        plugins: [
+          pluginNodePolyfill({
+            globals: { process: false, Buffer: true },
+            protocolImports: true,
+          }),
+        ],
+        resolve: {
+          alias: {
+            fs: fsShim,
+            "node:fs": fsShim,
+            os: osShim,
+            "node:os": osShim,
+            child_process: stubs,
+            "node:child_process": stubs,
+            readline: stubs,
+            "node:readline": stubs,
+            module: stubs,
+            "node:module": stubs,
+            "stream/consumers": stubs,
+            "node:stream/consumers": stubs,
+            jiti: stubs,
+          },
+        },
+        tools: {
+          rspack: (_config, { appendPlugins }) => {
+            appendPlugins(mockSubprocessPlugin);
+          },
+        },
+      },
+    },
     tools: {
       rspack: {
         ignoreWarnings: [

@@ -103,6 +103,8 @@
         "@fontsource/unifontex": "catalog:web",
         "@pacwich/common": "workspace:*",
         "@pacwich/web-common": "workspace:*",
+        "@rsbuild/core": "^2.0.8",
+        "@rsbuild/plugin-node-polyfill": "^1.4.6",
         "@rsbuild/plugin-svgr": "catalog:web",
         "@rspress/core": "catalog:web",
         "@rspress/plugin-client-redirects": "catalog:web",
