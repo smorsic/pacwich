@@ -1,0 +1,23 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "demo-fixture-root",
+    },
+    "packages/core": {
+      "name": "@fixture/core",
+    },
+    "packages/utils": {
+      "name": "@fixture/utils",
+      "dependencies": {
+        "@fixture/core": "*",
+      },
+    },
+  },
+  "packages": {
+    "@fixture/core": ["@fixture/core@workspace:packages/core"],
+
+    "@fixture/utils": ["@fixture/utils@workspace:packages/utils"],
+  }
+}

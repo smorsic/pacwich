@@ -1,0 +1,120 @@
+{
+  "name": "@pacwich/vscode-extension",
+  "displayName": "pacwich",
+  "description": "VS Code integration for pacwich: browse workspaces, scripts, and affected packages in a monorepo managed by pacwich.",
+  "version": "0.0.1",
+  "private": true,
+  "publisher": "smorsic",
+  "license": "MIT",
+  "homepage": "https://pacwich.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smorsic/pacwich.git",
+    "directory": "workspaces/ide/vscode-extension"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "pacwich",
+    "monorepo",
+    "workspaces",
+    "bun",
+    "npm",
+    "pnpm"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "configuration": {
+      "title": "pacwich",
+      "properties": {
+        "pacwich.projectRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the pacwich project root (the directory containing the root package.json and lockfile), relative to the workspace folder. Leave empty to use the workspace folder itself. Set this when the pacwich project is nested in a subdirectory of the opened folder."
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "pacwich.workspaces",
+          "name": "pacwich Workspaces"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "pacwich.workspaces.refresh",
+        "title": "pacwich: Refresh Workspaces",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "pacwich.workspaces.revealInExplorer",
+        "title": "Reveal in Explorer"
+      },
+      {
+        "command": "pacwich.workspaces.openPackageJson",
+        "title": "Open package.json"
+      },
+      {
+        "command": "pacwich.workspaces.openWorkspaceConfig",
+        "title": "Open pacwich Workspace Config"
+      },
+      {
+        "command": "pacwich.workspaces.goToWorkspace",
+        "title": "pacwich: Go to Workspace"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "pacwich.workspaces.refresh",
+          "when": "view == pacwich.workspaces",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pacwich.workspaces.revealInExplorer",
+          "when": "view == pacwich.workspaces && viewItem =~ /^pacwich\\.workspace/",
+          "group": "inline"
+        },
+        {
+          "command": "pacwich.workspaces.openPackageJson",
+          "when": "view == pacwich.workspaces && viewItem =~ /^pacwich\\.workspace/",
+          "group": "inline"
+        },
+        {
+          "command": "pacwich.workspaces.openWorkspaceConfig",
+          "when": "view == pacwich.workspaces && viewItem == pacwich.workspace.withConfig",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "watch": "bun run scripts/build.ts --watch",
+    "package": "cd dist && bunx vsce package --no-dependencies",
+    "publish:vsce": "cd dist && bunx vsce publish --no-dependencies",
+    "publish:ovsx": "cd dist && bunx ovsx publish",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "test": "bunx --bun vitest"
+  },
+  "dependencies": {
+    "pacwich": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.125.0",
+    "@vscode/vsce": "^3.9.2",
+    "esbuild": "^0.28.1",
+    "ovsx": "^1.0.2",
+    "vitest": "catalog:pacwich-dev"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "extends": "../../meta/config/base/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    // We consume `pacwich` as raw TS source (workspace dep). Its generated
+    // ajv validators ship without declarations; tsc surfaces them as
+    // implicit-any imports. They're the dependency's internals, not ours,
+    // so relax this for the cross-package boundary (same as web-cli).
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

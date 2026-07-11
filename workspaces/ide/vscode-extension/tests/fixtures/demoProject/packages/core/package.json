@@ -1,0 +1,8 @@
+{
+  "name": "@fixture/core",
+  "private": true,
+  "scripts": {
+    "build": "echo build",
+    "test": "echo test"
+  }
+}

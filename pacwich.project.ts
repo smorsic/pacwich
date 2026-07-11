@@ -4,6 +4,12 @@ export default defineProjectConfig({
   packageManager: "bun",
   workspacePatternConfigs: [
     {
+      patterns: ["path:workspaces/ide/**/*"],
+      config: {
+        tags: ["ide", "deployable"],
+      },
+    },
+    {
       patterns: ["path:workspaces/libraries/**/*"],
       config: {
         tags: ["library"],
@@ -40,6 +46,18 @@ export default defineProjectConfig({
           workspaceDependencies: {
             allowPatterns: ["@pacwich/common", "@pacwich/meta"],
             denyPatterns: [],
+          },
+        },
+      },
+    },
+    {
+      patterns: ["tag:ide"],
+      config: {
+        rules: {
+          workspaceDependencies: {
+            // The extension bundles pacwich's own TS API (createFileSystemProject)
+            // for informational features rather than shelling out to the CLI.
+            allowPatterns: ["pacwich"],
           },
         },
       },

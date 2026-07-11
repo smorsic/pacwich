@@ -6,7 +6,8 @@
     "packages": [
       "workspaces/**/*",
       "!workspaces/packages/pacwich/**/*",
-      "!workspaces/sandboxes/local-vs-release/**/*"
+      "!workspaces/sandboxes/local-vs-release/**/*",
+      "!workspaces/ide/vscode-extension/tests/fixtures/**/*"
     ],
     "catalog": {},
     "catalogs": {

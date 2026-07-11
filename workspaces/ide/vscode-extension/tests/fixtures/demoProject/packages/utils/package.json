@@ -1,0 +1,10 @@
+{
+  "name": "@fixture/utils",
+  "private": true,
+  "scripts": {
+    "lint": "echo lint"
+  },
+  "dependencies": {
+    "@fixture/core": "*"
+  }
+}
