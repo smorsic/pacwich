@@ -1,10 +1,10 @@
-import { demoProject } from "bw-web-service-shared";
+import { getDemoProjectFiles } from "@pacwich/web-common/web-cli-runtime";
 import { SyntaxHighlighter } from "../../util/highlight";
 import { useSelectedFile } from "./selection";
 
 export const TreeContent = () => {
   const selectedFile = useSelectedFile();
-  const fileData = demoProject.files.find(
+  const fileData = getDemoProjectFiles().find(
     (file) => file.relativePath === selectedFile,
   );
 

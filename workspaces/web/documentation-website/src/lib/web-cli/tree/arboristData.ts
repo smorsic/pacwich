@@ -1,4 +1,7 @@
-import { demoProject, type DemoProjectFile } from "bw-web-service-shared";
+import {
+  getDemoProjectFiles,
+  type DemoProjectFile,
+} from "@pacwich/web-common/web-cli-runtime";
 
 export type TreeNodeData = {
   id: string;
@@ -71,5 +74,5 @@ export const demoProjectFilesToArboristTree = (
 };
 
 export const REACT_ARBORIST_DATA = demoProjectFilesToArboristTree(
-  demoProject.files,
+  getDemoProjectFiles(),
 );
