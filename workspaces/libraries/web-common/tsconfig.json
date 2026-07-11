@@ -1,4 +1,13 @@
 {
   "extends": "../../meta/config/base/tsconfig.json",
-  "include": ["**/*.ts"]
+  "compilerOptions": {
+    // We consume the `pacwich` package as raw TS source (workspace dep). Its
+    // generated ajv `.js` validators ship without declarations; tsc surfaces
+    // them as implicit-any imports. They're the dependency's internals, not
+    // ours, so relax this for the cross-package boundary.
+    "noImplicitAny": false,
+    // The demo project is loaded from static `.json` files (see demoProject.ts).
+    "resolveJsonModule": true
+  },
+  "include": ["**/*.ts", "**/*.json"]
 }

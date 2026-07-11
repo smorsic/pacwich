@@ -9,8 +9,8 @@
       "!workspaces/sandboxes/local-vs-release/**/*",
       "!workspaces/sandboxes/web-cli/src/demo-project",
       "!workspaces/sandboxes/web-cli/src/demo-project/**/*",
-      "!workspaces/web/web-cli/src/demo-project",
-      "!workspaces/web/web-cli/src/demo-project/**/*"
+      "!workspaces/libraries/web-common/web-cli-runtime/demo-project",
+      "!workspaces/libraries/web-common/web-cli-runtime/demo-project/**/*"
     ],
     "catalog": {},
     "catalogs": {

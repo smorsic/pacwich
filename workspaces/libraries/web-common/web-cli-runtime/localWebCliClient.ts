@@ -11,7 +11,7 @@
  * would be unbacked complexity. Failures are already visible via the normal
  * stderr-as-red-ANSI rendering path in `TerminalScreen`.
  */
-import { runPacwichCliArgv } from "../../../cli/runPacwichCli";
+import { runPacwichCliArgv } from "./runPacwichCli";
 import type { HttpClient, InvokeCliResponseChunk } from "./webCliClientTypes";
 
 const makeChunk = (

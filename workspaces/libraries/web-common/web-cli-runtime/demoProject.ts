@@ -13,12 +13,12 @@
  * are workspaces; each workspace still needs its own `package.json`.
  */
 import { vol } from "memfs";
-import webPkg from "../demo-project/apps/web/package.json";
-import packageLock from "../demo-project/package-lock.json";
-import rootPackageJson from "../demo-project/package.json";
-import corePkg from "../demo-project/packages/core/package.json";
-import utilsPkg from "../demo-project/packages/utils/package.json";
-import { SCRIPT_MOCKS } from "../demo-project/scriptMocks";
+import webPkg from "./demo-project/apps/web/package.json";
+import packageLock from "./demo-project/package-lock.json";
+import rootPackageJson from "./demo-project/package.json";
+import corePkg from "./demo-project/packages/core/package.json";
+import utilsPkg from "./demo-project/packages/utils/package.json";
+import { SCRIPT_MOCKS } from "./demo-project/scriptMocks";
 
 export const PROJECT_ROOT = "/project";
 
