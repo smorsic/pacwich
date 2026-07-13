@@ -151,6 +151,13 @@ pacwich verify --strict # exit non-zero on any finding (default warns and exits 
 pacwich verify -s # short form
 pacwich verify --json --pretty # emit the full structured VerifyResult
 
+# print all project and workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty
+pacwich config debug --project # project config only
+pacwich config debug --workspace="my-name-or-alias" # single workspace only
+pacwich config debug --workspace-patterns="my-pattern-*" # workspaces config only
+
 # Print diagnostic info (runtime, OS, shell, installed package manager versions, etc.)
 pacwich doctor
 pacwich doctor --json --pretty

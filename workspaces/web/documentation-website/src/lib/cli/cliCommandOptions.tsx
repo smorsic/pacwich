@@ -562,6 +562,31 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
       "pacwich completion install zsh",
     ],
   })),
+  config: defineCommandContent("config", () => ({
+    title: "Config",
+    description: "Parent command of config-related subcommands",
+    examples: ["pacwich config"],
+  })),
+  configDebug: defineCommandContent("configDebug", () => ({
+    title: "Config: Debug",
+    description: "Print project and workspace configuration as JSON",
+    examples: [
+      "# Print all project and workspace configs",
+      "pacwich config debug",
+      "",
+      "# Pretty-print JSON output",
+      "pacwich config debug --pretty",
+      "",
+      "# Print only project configuration",
+      "pacwich config debug --project",
+      "",
+      "# Print only workspace configuration by name/alias",
+      "pacwich config debug --workspace=my-name-or-alias",
+      "",
+      "# Print workspace configs by workspace pattern",
+      'pacwich config debug --workspace-patterns="my-pattern-* my-workspace"',
+    ],
+  })),
 } as const satisfies Record<CliCommandName, CliCommandContent>;
 
 export const getCliCommandContent = (commandName: CliCommandName) =>
