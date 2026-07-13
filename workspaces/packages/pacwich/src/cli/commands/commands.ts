@@ -5,6 +5,8 @@ import type {
   ProjectCommandContext,
 } from "./commandHandlerUtils";
 import { completion, completionInstall } from "./completion";
+import { config } from "./config";
+import { configDebug } from "./configDebug";
 import {
   listScripts,
   workspaceInfo,
@@ -47,4 +49,6 @@ export const defineProjectCommands = (context: ProjectCommandContext) => {
   affectedRun(context);
   runInteractive(context);
   verify(context);
+  config(context);
+  configDebug(context);
 };
