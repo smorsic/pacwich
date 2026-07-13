@@ -1,5 +1,6 @@
 import {
   getCliCommandConfig,
+  type CliCommandConfig,
   type CliCommandName,
   type CliGlobalCommandName,
   type CliProjectCommandName,
@@ -73,6 +74,33 @@ export const createJsonLines = (data: unknown, options: { pretty: boolean }) =>
 export const commandOutputLogger = createLogger("");
 commandOutputLogger.printLevel = "info";
 
+const commandWord = (command: string) => command.trim().split(/\s+/)[0];
+
+/**
+ * Resolve which Commander node a command config attaches to: the root
+ * program for a top-level entry, or the already-registered parent command
+ * for a child (see {@link CliCommandConfig.parent}). Parents must be
+ * registered before their children (see `commands.ts`).
+ */
+const resolveAttachPoint = (
+  rootProgram: Command,
+  config: CliCommandConfig,
+): Command => {
+  if (!config.parent) return rootProgram;
+  // AssertNoInvalidParents guarantees parent is valid.
+  const parentConfig = getCliCommandConfig(config.parent as CliCommandName);
+  const parentWord = commandWord(parentConfig.command);
+  const parentCommand = rootProgram.commands.find(
+    (cmd) => cmd.name() === parentWord,
+  );
+  if (!parentCommand) {
+    throw new Error(
+      `"${config.parent}" must be registered before its child command`,
+    );
+  }
+  return parentCommand;
+};
+
 const handleCommand =
   <HandlerContext extends GlobalCommandContext, ActionArgs extends unknown[]>(
     commandName: CliCommandName,
@@ -80,9 +108,8 @@ const handleCommand =
   ) =>
   (context: HandlerContext) => {
     const config = getCliCommandConfig(commandName);
-    let { program } = context;
 
-    program = program
+    let program = resolveAttachPoint(context.program, config)
       .command(config.command)
       .aliases(config.aliases)
       .description(config.description);
