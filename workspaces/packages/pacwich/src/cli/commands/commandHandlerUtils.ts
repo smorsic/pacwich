@@ -68,8 +68,23 @@ export const createScriptInfoLines = (
   ...workspaces.map((workspace) => ` - ${stripANSI(workspace.name)}`),
 ];
 
+/**
+ * Config files can define factory functions (e.g. `workspacePatternConfigs`
+ * entries) that survive unevaluated into `ResolvedProjectConfig`.
+ * `JSON.stringify` otherwise drops function-valued properties silently,
+ * which would make a config entry vanish from debug output with no trace.
+ */
+const jsonFunctionReplacer = (_key: string, value: unknown) =>
+  typeof value === "function"
+    ? { __function: true, name: (value as { name?: string }).name || null }
+    : value;
+
 export const createJsonLines = (data: unknown, options: { pretty: boolean }) =>
-  JSON.stringify(data, null, options.pretty ? 2 : undefined).split("\n");
+  JSON.stringify(
+    data,
+    jsonFunctionReplacer,
+    options.pretty ? 2 : undefined,
+  ).split("\n");
 
 export const commandOutputLogger = createLogger("");
 commandOutputLogger.printLevel = "info";
