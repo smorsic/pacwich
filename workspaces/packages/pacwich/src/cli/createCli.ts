@@ -3,9 +3,9 @@ import { createCommand } from "../internal/bundledDeps/commander";
 import { PacwichError } from "../internal/core";
 import { logger } from "../internal/logger";
 import {
-  CLI_COMMANDS_CONFIG,
   defineGlobalCommands,
   defineProjectCommands,
+  resolveCliCommandName,
 } from "./commands";
 import { commandOutputLogger } from "./commands/commandHandlerUtils";
 import { tryRunCompletionRequest } from "./commands/completion";
@@ -219,16 +219,21 @@ export const createCli = ({
 
 /**
  * @deprecated
+ *
+ * Strips the removed bun-workspaces `-w`/`--workspace-root` flag, but only
+ * while it sits in global position (before any real command starts), so a
+ * command remains free to define its own `-w` option. "Command started" is
+ * keyed on a resolvable top-level command word or alias, not any word in
+ * the tree, so subcommand-only words like `list`/`run`/`install` appearing
+ * as positionals do not count.
  */
 const tempCatchDeprecatedFlags = (args: string[]) => {
   args.forEach((arg, index) => {
     if (
       (arg === "-w" || arg === "--workspace-root") &&
-      !args.slice(0, index).find((prevArg) =>
-        Object.values(CLI_COMMANDS_CONFIG)
-          .map((config) => config.command.split(/\s+/)[0])
-          .includes(prevArg),
-      )
+      !args
+        .slice(0, index)
+        .some((prevArg) => resolveCliCommandName(prevArg) !== null)
     ) {
       logger.warn("DeprecatedBunWorkspacesFlag", { flag: arg });
       args.splice(index, 1);

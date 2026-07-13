@@ -478,6 +478,40 @@ describe("CLI Global Options", () => {
         );
       }
     });
+
+    // Strip deprecated bun-workspaces global -w flag
+    test("global -w is stripped even when a subcommand invocation follows", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "-w",
+        "affected",
+        "list",
+        "--files=package.json",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stderr.sanitized,
+        /The -w flag from bun-workspaces is deprecated/,
+      );
+    });
+
+    // allow -w for commands that define it (script-info)
+    test("a command's own -w option is left untouched (script-info -w)", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run("script-info", "all-workspaces", "-w");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toMatch(
+        /bun-workspaces is deprecated/,
+      );
+    });
+
+    // reject -w for commands that don't define it (run)
+    test("-w after a command with no such option is rejected, not stripped", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run("run", "lint", "-w");
+      expect(result.exitCode).toBe(1);
+      assertOutputMatches(result.stderr.sanitized, /unknown option '-w'/);
+    });
   });
 
   describe("--disable-executable-configs", () => {
