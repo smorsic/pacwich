@@ -1,4 +1,7 @@
-import type { CliCommandName } from "@pacwich/common/cli";
+import {
+  getCliFullCommandUsage,
+  type CliCommandName,
+} from "@pacwich/common/cli";
 import { Link } from "@rspress/core/theme-original";
 import { type ReactNode, useId } from "react";
 import { SyntaxHighlighter } from "../util/highlight";
@@ -65,7 +68,7 @@ export const CliCommandDoc = ({ command }: { command: CliCommandName }) => {
     <div className="cli-command-doc">
       <div id={getCommandId(content)} className="cli-doc-section-anchor" />
       <p>
-        <b>Usage</b>: <code>{content.command}</code>
+        <b>Usage</b>: <code>{getCliFullCommandUsage(command)}</code>
       </p>
       {content.aliases?.length ? (
         <p>

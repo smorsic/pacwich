@@ -15,7 +15,7 @@ pacwich's main features are to get metadata about the project and workspaces, an
 
 ## Notable features
 
-pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich list-affected`/`pacwich run-affected` for orchestrating builds, tests, etc. across only the workspaces that need them.
+pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich affected list`/`pacwich affected run` for orchestrating builds, tests, etc. across only the workspaces that need them.
 
 pacwich detects the workspace dependency graph via explicit declarations in package.json.pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration.
 
