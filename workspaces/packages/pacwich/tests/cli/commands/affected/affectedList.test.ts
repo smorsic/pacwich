@@ -1,12 +1,16 @@
-import { resolvePackageManagerAdapter } from "../../../src/packageManager/adapter";
-import {
-  assertOutputMatches,
-  listCommandAndAliases,
-  setupCliTest,
-} from "../../util/cliTestUtils";
-import { createGitFixture } from "../../util/gitFixtures";
-import { describe, expect, test } from "../../util/testFramework";
-import { withWindowsPath } from "../../util/windows";
+import { resolvePackageManagerAdapter } from "../../../../src/packageManager/adapter";
+import { assertOutputMatches, setupCliTest } from "../../../util/cliTestUtils";
+import { createGitFixture } from "../../../util/gitFixtures";
+import { describe, expect, test } from "../../../util/testFramework";
+import { withWindowsPath } from "../../../util/windows";
+
+/**
+ * `affected list` is the canonical command; these are its exhaustive tests.
+ * `./listAffectedDeprecated.test.ts` covers the deprecated `list-affected`
+ * alias with light sanity checks only, since it shares this same
+ * implementation (see listAffected.ts's `handleListAffected`) and will be
+ * removed in a future major version.
+ */
 
 // `--files` callsites that target the project's lockfile go through
 // `adapter.lockfile.projectRelativePath` rather than the literal
@@ -59,24 +63,68 @@ const TWO_WORKSPACE_PROJECT_FILES = [
   },
 ];
 
-describe("List Affected", () => {
+describe("Affected: List", () => {
   describe("command and aliases", () => {
-    test.each(listCommandAndAliases("listAffected"))(
-      "default output lists affected workspace names: %s",
-      async (command) => {
+    test.each(["list", "ls"])(
+      "default output lists affected workspace names: affected %s",
+      async (subcommand) => {
         const { run } = setupCliTest({ testProject: "affectedWithInputs" });
-        const result = await run(command, "--files", "packages/a/src/index.ts");
+        const result = await run(
+          "affected",
+          subcommand,
+          "--files",
+          "packages/a/src/index.ts",
+        );
         expect(result.exitCode).toBe(0);
         assertOutputMatches(result.stdout.sanitized, "a\nb");
       },
     );
+
+    test("the `af` parent alias works", async () => {
+      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const result = await run(
+        "af",
+        "list",
+        "--files",
+        "packages/a/src/index.ts",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stdout.sanitized, "a\nb");
+    });
+
+    test("a bare `ls` still routes to list-workspaces, unaffected by affected list's own `ls` alias", async () => {
+      // --name-only belongs to listWorkspaces, not affectedList. If "ls" ever
+      // mis-resolved to affectedList here, this option would be unrecognized
+      // and the command would fail.
+      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const result = await run("ls", "--name-only");
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stdout.sanitized, "a\nb\nc\nd\ne");
+    });
+  });
+
+  describe("deprecation", () => {
+    test("does not log the list-affected deprecation warning", async () => {
+      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const result = await run(
+        "affected",
+        "list",
+        "--files",
+        "packages/a/src/index.ts",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain(
+        "DeprecatedListAffectedCliCommand",
+      );
+    });
   });
 
   describe("default output (no flags)", () => {
     test("returns newline-separated affected workspace names", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
       );
@@ -89,7 +137,8 @@ describe("List Affected", () => {
       // 'e' has defaultInputs limited to package.json so an unrelated path
       // doesn't match; with --ignore-package-deps no cascade applies either
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "unrelated/path.txt",
         "--ignore-workspace-deps",
@@ -103,7 +152,8 @@ describe("List Affected", () => {
     test("emits a JSON array of workspace names", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--json",
@@ -115,7 +165,8 @@ describe("List Affected", () => {
     test("-j short form works", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "ls-affected",
+        "affected",
+        "list",
         "-F",
         "packages/a/src/index.ts",
         "-j",
@@ -127,7 +178,8 @@ describe("List Affected", () => {
     test("--json --pretty pretty-prints", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--json",
@@ -145,7 +197,8 @@ describe("List Affected", () => {
     test("summary lists workspace, file count, and dep names", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--explain",
@@ -166,7 +219,8 @@ describe("List Affected", () => {
     test("-e short form works", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "-F",
         "packages/a/src/index.ts",
         "-e",
@@ -178,7 +232,8 @@ describe("List Affected", () => {
     test("emits 'No affected workspaces' inside --explain output too", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "unrelated/path.txt",
         "--ignore-workspace-deps",
@@ -193,7 +248,8 @@ describe("List Affected", () => {
     test("renders per-file paths and dep chains", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--explain",
@@ -217,7 +273,8 @@ describe("List Affected", () => {
     test("-D requires -e (errors otherwise)", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "-D",
@@ -234,7 +291,8 @@ describe("List Affected", () => {
     test("emits the full result object instead of a name array", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--explain",
@@ -259,7 +317,8 @@ describe("List Affected", () => {
     test("--detailed has no effect on JSON output shape", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const withDetailed = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--explain",
@@ -267,7 +326,8 @@ describe("List Affected", () => {
         "--detailed",
       );
       const withoutDetailed = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--explain",
@@ -287,7 +347,8 @@ describe("List Affected", () => {
       // 'a' has scripts.build.inputs.files=["build/**/*"], so a change to
       // src/ should NOT match the build script's inputs
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--script",
@@ -301,7 +362,8 @@ describe("List Affected", () => {
     test("a build/ change matches the build script's inputs", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/build/out.js",
         "-S",
@@ -317,7 +379,8 @@ describe("List Affected", () => {
     test("blocks cascade through workspace:* dependencies", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--ignore-workspace-deps",
@@ -334,7 +397,8 @@ describe("List Affected", () => {
         testProject: "withDependenciesWithExternal",
       });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         PROJECT_LOCKFILE_PATH,
         "--ignore-external-deps",
@@ -352,7 +416,8 @@ describe("List Affected", () => {
         testProject: "withDependenciesWithExternal",
       });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         PROJECT_LOCKFILE_PATH,
         "--explain",
@@ -372,7 +437,8 @@ describe("List Affected", () => {
         testProject: "withDependenciesWithExternal",
       });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         PROJECT_LOCKFILE_PATH,
         "--explain",
@@ -389,7 +455,8 @@ describe("List Affected", () => {
     test("--files + --base errors", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--files",
         "packages/a/src/index.ts",
         "--base",
@@ -405,7 +472,8 @@ describe("List Affected", () => {
     test("--files + --head errors", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "-F",
         "packages/a/src/index.ts",
         "-H",
@@ -433,7 +501,8 @@ describe("List Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--base",
         "HEAD~1",
         "--head",
@@ -459,7 +528,8 @@ describe("List Affected", () => {
       const headSha = fixture.shaForMessage("change");
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "-B",
         "HEAD~1",
         "-H",
@@ -483,7 +553,8 @@ describe("List Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--base",
         "HEAD",
         "--head",
@@ -504,7 +575,8 @@ describe("List Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--base",
         "HEAD",
         "--head",
@@ -525,7 +597,8 @@ describe("List Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--base",
         "HEAD",
         "--head",
@@ -551,7 +624,8 @@ describe("List Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "list-affected",
+        "affected",
+        "list",
         "--base",
         "HEAD",
         "--head",
