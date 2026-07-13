@@ -135,6 +135,25 @@ pacwich affected run my-script --base=my-branch-a --head=my-branch-b
 pacwich affected ls
 pacwich af ls
 pacwich af run
+
+##########
+# Config #
+##########
+
+# Commands for pacwich's optional configuration
+
+# Print project and all workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty # pretty print JSON
+
+# Print just the project config as JSON
+pacwich config debug --project
+
+# Print a single workspace config as JSON
+pacwich config debug --workspace=name-or-alias
+
+# Print workspace configs matching a pattern as JSON
+pacwich config debug --workspace-patterns="my-pattern-*"
 `.trim();
 
 export const INLINE_SCRIPT_EXAMPLE = `

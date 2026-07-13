@@ -531,6 +531,41 @@ export const CLI_COMMANDS_CONFIG = {
       },
     },
   },
+  config: {
+    command: "config",
+    isGlobal: false,
+    aliases: [],
+    description: "Group of commands dealing with configuration",
+    options: {},
+  },
+  configDebug: {
+    command: "debug",
+    parent: "config",
+    isGlobal: false,
+    aliases: [],
+    description:
+      "Print resolved project and/or workspace config, for debugging config files. Defaults to both; scope with --project, --workspace, or --workspace-patterns",
+    options: {
+      project: {
+        flags: ["--project"],
+        description: "Only print the resolved project config",
+      },
+      workspace: {
+        flags: ["-w", "--workspace <workspace>"],
+        description:
+          "Only print the resolved config for a single workspace, resolved by name or alias",
+      },
+      workspacePatterns: {
+        flags: ["-W", "--workspace-patterns <patterns>"],
+        description:
+          "Only print the resolved config for workspaces matching these patterns, separated by whitespace",
+      },
+      pretty: {
+        flags: PRETTY_FLAGS,
+        description: "Pretty print JSON",
+      },
+    },
+  },
 } as const satisfies Record<string, CliCommandConfig>;
 
 /**

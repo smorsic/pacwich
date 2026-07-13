@@ -7,8 +7,7 @@ sidebar: true
 outline: true
 footer: false
 ---
-
-import { PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY, WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath, createConfigLocationDescription } from '@pacwich/common/config';
+import { PROJECT_CONFIG_FILE_NAME, PROJECT_CONFIG_PACKAGE_JSON_KEY, WORKSPACE_CONFIG_FILE_NAME, WORKSPACE_CONFIG_PACKAGE_JSON_KEY, CONFIG_LOCATION_TYPES, createConfigLocationPath, createConfigLocationDescription, getUserEnvVarName } from '@pacwich/common/config';
 import {  exampleWorkspaceConfigArray, exampleWorkspaceConfigSimple, createTsFileExample, exampleProjectConfigSimple1 } from "../../lib/config/exampleConfig";
 import { SyntaxHighlighter } from "../../lib/util/highlight";
 import { PROJECT_CONFIG_TYPE } from "../../lib/config/configTypes";
@@ -58,3 +57,32 @@ Values related to configuration are resolved in the following order of precedenc
 3. A value provided via an [environment variable](/config/env-vars), if applicable
 4. The generic default value, if applicable
 
+<hr/>
+
+## Debugging Configuration
+
+You can use the CLI command `pacwich config debug` to print all resolved JSON for configuration.
+
+See the [CLI reference](/cli/commands#config-debug) for more information.
+
+<hr/>
+
+## Security and Performance of TypeScript/JavaScript configs
+
+Keep in mind that TypeScript and JavaScript config files offer the most power and flexibility but both execute code and 
+can affect `pacwich`'s performance if configs are slow to resolve.
+
+### Performance
+
+The average `pacwich` project that uses config straightforwardly should not experience performance issues due to TS/JS config,
+unless very heavy processing or `async` logic is used within them. Keep in mind that slow config files will slow down all `pacwich` operations, including shell completions that are project-aware. 
+
+If you happen to need dynamic configs that slow down `pacwich`, consider using a separate process to generate JSON/JSONC configs dynamically
+to take the load off of `pacwich`'s resolution.
+
+### Security
+
+If you may be interacting with `pacwich` monorepos that are untrusted, you can set [environment variable](/config/env-vars) <code>{getUserEnvVarName("disableExecutableConfigsDefault")}</code>
+to `true` to disable loading TS/JS config files altogether. There is also the CLI [global flag](/cli/global-options#disable-executable-configs) for this.
+Of course, a malicious repository already has a large variety of attack vectors beyond just a `pacwich` config, but
+this exists as an optional guard against arbitrary code execution.

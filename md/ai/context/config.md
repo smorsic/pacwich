@@ -214,4 +214,6 @@ export default defineProjectConfig({
 });
 ```
 
+You can use the CLI command `pacwich config debug` to print all resolved JSON for configuration (use `--help` for narrowing output to project/workspace(s)).
+
 <!--End pacwich config-->
