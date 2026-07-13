@@ -99,7 +99,8 @@ export type ValidateJSTypesArrayEntry = Omit<
 };
 
 export type ValidateJSTypesConfigEntry =
-  ValidateJSTypesTypeEntry | ValidateJSTypesArrayEntry;
+  | ValidateJSTypesTypeEntry
+  | ValidateJSTypesArrayEntry;
 
 export type ValidateJSTypesConfig = {
   [valueLabel: string]: ValidateJSTypesConfigEntry;

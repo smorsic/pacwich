@@ -17,7 +17,11 @@ export type DocSliceKey = "overview" | "concepts" | "cli" | "api" | "config";
 
 /** The `md/ai/context/*` basename / `AgentDocFileName` for a slice. */
 export type DocSliceSourceName =
-  "overview" | "concepts" | "cliExamples" | "apiExamples" | "config";
+  | "overview"
+  | "concepts"
+  | "cliExamples"
+  | "apiExamples"
+  | "config";
 
 export interface DocSlice {
   key: DocSliceKey;

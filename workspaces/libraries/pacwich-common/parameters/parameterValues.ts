@@ -63,4 +63,6 @@ export type PercentageValue = `${number}%`;
  * - `"${number}%"`: A percentage of the available logical CPU threads (e.g. "50%").
  */
 export type ParallelMaxValue =
-  number | (typeof PARALLEL_MAX_VALUES)[number] | PercentageValue;
+  | number
+  | (typeof PARALLEL_MAX_VALUES)[number]
+  | PercentageValue;
