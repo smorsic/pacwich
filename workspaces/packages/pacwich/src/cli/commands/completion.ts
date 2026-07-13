@@ -23,44 +23,46 @@ import {
 const isCompletionShell = (value: string): value is CompletionShell =>
   (SUPPORTED_COMPLETION_SHELLS as readonly string[]).includes(value);
 
-const INSTALL_ACTION = "install";
-
 /**
- * `pacwich completion` — shell completion command with three modes:
+ * `pacwich completion` is the shell completion command, with two modes:
  * - no argument: print setup help ({@link completionInfoText}).
  * - `<shell>`: print that shell's completion script (a thin wrapper that
  *   calls the hidden `__complete` command; see {@link tryRunCompletionRequest}).
- * - `install [shell]`: wire completions into the shell's config, detecting
- *   the current shell when none is given ({@link runCompletionInstall}).
+ *
+ * `pacwich completion install [shell]` is a real Commander subcommand; see
+ * {@link completionInstall} below.
  */
 export const completion = handleGlobalCommand(
   "completion",
-  (
-    { outputWriters },
-    action: string | undefined,
-    shellArg: string | undefined,
-  ) => {
-    if (!action) {
+  ({ outputWriters }, shellArg: string | undefined) => {
+    if (!shellArg) {
       outputWriters.stdout(completionInfoText() + "\n");
       return;
     }
 
-    if (action === INSTALL_ACTION) {
-      runCompletionInstall(outputWriters.stdout, shellArg);
-      return;
-    }
-
-    if (isCompletionShell(action)) {
-      outputWriters.stdout(getCompletionScript(action) + "\n");
+    if (isCompletionShell(shellArg)) {
+      outputWriters.stdout(getCompletionScript(shellArg) + "\n");
       return;
     }
 
     logger.error(
-      `Unknown argument "${action}". Usage: pacwich completion [install] [${SUPPORTED_COMPLETION_SHELLS.join(
+      `Unknown argument "${shellArg}". Usage: pacwich completion [${SUPPORTED_COMPLETION_SHELLS.join(
         "|",
-      )}]. Run \`pacwich completion\` for setup help.`,
+      )}]. Run \`pacwich completion\` for setup help, or \`pacwich completion install\` to install.`,
     );
     process.exit(1);
+  },
+);
+
+/**
+ * `pacwich completion install [shell]` wires completions into the shell's
+ * config, detecting the current shell when none is given
+ * ({@link runCompletionInstall}).
+ */
+export const completionInstall = handleGlobalCommand(
+  "completionInstall",
+  ({ outputWriters }, shellArg: string | undefined) => {
+    runCompletionInstall(outputWriters.stdout, shellArg);
   },
 );
 

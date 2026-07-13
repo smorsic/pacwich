@@ -478,6 +478,40 @@ describe("CLI Global Options", () => {
         );
       }
     });
+
+    // Strip deprecated bun-workspaces global -w flag
+    test("global -w is stripped even when a subcommand invocation follows", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run(
+        "-w",
+        "affected",
+        "list",
+        "--files=package.json",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stderr.sanitized,
+        /The -w flag from bun-workspaces is deprecated/,
+      );
+    });
+
+    // allow -w for commands that define it (script-info)
+    test("a command's own -w option is left untouched (script-info -w)", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run("script-info", "all-workspaces", "-w");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toMatch(
+        /bun-workspaces is deprecated/,
+      );
+    });
+
+    // reject -w for commands that don't define it (run)
+    test("-w after a command with no such option is rejected, not stripped", async () => {
+      const { run } = setupCliTest({ testProject: "simple1" });
+      const result = await run("run", "lint", "-w");
+      expect(result.exitCode).toBe(1);
+      assertOutputMatches(result.stderr.sanitized, /unknown option '-w'/);
+    });
   });
 
   describe("--disable-executable-configs", () => {
@@ -794,6 +828,46 @@ describe("CLI Global Options", () => {
       const result = await run("--log-level", "info", "completion", "zsh");
       expect(result.exitCode).toBe(0);
       expect(result.stderr.raw).toBeEmpty();
+    });
+
+    // `completion install` is a two-token dispatch: `completion` resolves
+    // first, then `install` is resolved as its child to find the effective
+    // (global) scope. See isGlobalCliCommandToken's nextToken param.
+    test("completion install <shell> also skips project loading (global child command)", async () => {
+      // Redirect HOME so the real install write lands in a throwaway dir,
+      // not the test runner's actual shell config.
+      const fakeHome = fs.mkdtempSync(
+        path.join(os.tmpdir(), "pacwich-completion-install-home-"),
+      );
+      try {
+        const { run } = setupCliTest({
+          workingDirectory: workspacelessDir,
+          env: { HOME: fakeHome },
+        });
+        const result = await run("completion", "install", "bash");
+        expect(result.exitCode).toBe(0);
+        expect(result.stderr.sanitized).not.toMatch(NO_WORKSPACES_HINT);
+      } finally {
+        fs.rmSync(fakeHome, { force: true, recursive: true });
+      }
+    });
+
+    // `affected`'s children (list/run) are project-scoped, so unlike
+    // `completion`, neither a bare `affected` nor `affected list`/`affected
+    // run` should skip project loading.
+    test("affected list is project-scoped: surfaces the no-workspaces hint", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      // --files bypasses git (the fixture dir isn't a git repo).
+      const result = await run("affected", "list", "--files", "package.json");
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stderr.sanitized, NO_WORKSPACES_HINT);
+    });
+
+    test("bare affected still attempts project load (fallback derives from its project-scoped children)", async () => {
+      const { run } = setupCliTest({ workingDirectory: workspacelessDir });
+      const result = await run("affected");
+      expect(result.exitCode).toBe(1);
+      assertOutputMatches(result.stderr.sanitized, NO_WORKSPACES_HINT);
     });
 
     test("--cwd targeting the workspaceless project still stays silent for a global command", async () => {
