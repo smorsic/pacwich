@@ -137,16 +137,19 @@ const matchChangedFilesForWorkspace = ({
   workspace,
   inputFilePatterns,
   changedFilePaths,
+  otherWorkspacePaths,
 }: {
   workspace: Workspace;
   inputFilePatterns: string[];
   changedFilePaths: string[];
+  otherWorkspacePaths: string[];
 }): AffectedFileResult[] =>
   matchWorkspaceInputFiles({
     workspaceName: workspace.name,
     workspacePath: workspace.path,
     inputFilePatterns,
     projectFilePaths: changedFilePaths,
+    otherWorkspacePaths,
   }).map(({ filePath, inputPattern }) => ({
     filePath,
     fileMetadata: undefined,
@@ -421,6 +424,10 @@ export const getFileAffectedWorkspaces = async ({
     ),
   );
 
+  const allWorkspacePaths = workspaceInputs.map(
+    ({ workspace }) => workspace.path,
+  );
+
   const changedFilesByName = new Map<string, AffectedFileResult[]>();
   for (const { workspace, inputFilePatterns } of workspaceInputs) {
     changedFilesByName.set(
@@ -429,6 +436,7 @@ export const getFileAffectedWorkspaces = async ({
         workspace,
         inputFilePatterns,
         changedFilePaths: normalizedChangedFilePaths,
+        otherWorkspacePaths: allWorkspacePaths,
       }),
     );
   }

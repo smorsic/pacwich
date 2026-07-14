@@ -100,6 +100,39 @@ type ResolvedFilePattern = {
   resolvedPattern: string;
 };
 
+const normalizeWorkspacePath = (workspacePath: string): string => {
+  const posixPath = stripTrailingSlashes(toPosixPath(workspacePath));
+  return posixPath === "." ? "" : posixPath;
+};
+
+/**
+ * Paths of other workspaces located inside the given workspace's
+ * directory. Files under these are owned by the nested workspace and
+ * must not count as the outer workspace's inputs (most commonly the
+ * root workspace, whose directory contains every other workspace).
+ */
+const listNestedWorkspacePaths = ({
+  workspacePath,
+  otherWorkspacePaths,
+}: {
+  workspacePath: string;
+  otherWorkspacePaths: string[];
+}): string[] => {
+  const normalizedParent = normalizeWorkspacePath(workspacePath);
+  const nestedPaths: string[] = [];
+  for (const otherPath of otherWorkspacePaths) {
+    const normalizedOther = normalizeWorkspacePath(otherPath);
+    if (!normalizedOther || normalizedOther === normalizedParent) continue;
+    if (
+      !normalizedParent ||
+      normalizedOther.startsWith(`${normalizedParent}/`)
+    ) {
+      nestedPaths.push(normalizedOther);
+    }
+  }
+  return nestedPaths;
+};
+
 const resolveFilePatterns = ({
   workspaceName,
   workspacePath,
@@ -153,6 +186,13 @@ export interface MatchWorkspaceInputFilesOptions {
   inputFilePatterns: string[];
   /** Candidate project-relative POSIX file paths to match against the patterns. */
   projectFilePaths: string[];
+  /**
+   * Project-relative paths of the other workspaces in the project.
+   * Files inside a workspace nested within this workspace's directory
+   * are owned by the nested workspace and never match, regardless of
+   * the include patterns.
+   */
+  otherWorkspacePaths?: string[];
 }
 
 /**
@@ -160,14 +200,27 @@ export interface MatchWorkspaceInputFilesOptions {
  * workspace's input patterns. A file matches when it satisfies at least
  * one include pattern and no exclude (`!`-prefixed) pattern. Patterns
  * that resolve outside the project root are warned about and ignored.
+ * Files owned by another workspace nested inside this workspace's
+ * directory (per `otherWorkspacePaths`) never match.
  */
 export const matchWorkspaceInputFiles = ({
   workspaceName,
   workspacePath,
   inputFilePatterns,
   projectFilePaths,
+  otherWorkspacePaths = [],
 }: MatchWorkspaceInputFilesOptions): InputFileMatch[] => {
   const { includes, excludes } = splitFilePatterns(inputFilePatterns);
+
+  const nestedWorkspacePaths = listNestedWorkspacePaths({
+    workspacePath,
+    otherWorkspacePaths,
+  });
+  const isOwnedByNestedWorkspace = (filePath: string): boolean =>
+    nestedWorkspacePaths.some(
+      (nestedPath) =>
+        filePath === nestedPath || filePath.startsWith(`${nestedPath}/`),
+    );
 
   const resolvedIncludes = resolveFilePatterns({
     workspaceName,
@@ -187,6 +240,7 @@ export const matchWorkspaceInputFiles = ({
 
   for (const filePath of projectFilePaths) {
     if (matchedFilePaths.has(filePath)) continue;
+    if (isOwnedByNestedWorkspace(filePath)) continue;
 
     const matchingInclude = resolvedIncludes.find(({ resolvedPattern }) =>
       matchesResolvedPattern({ filePath, resolvedPattern }),

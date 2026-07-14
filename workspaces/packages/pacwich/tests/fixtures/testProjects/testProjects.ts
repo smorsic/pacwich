@@ -114,6 +114,7 @@ const TEST_PROJECTS = {
   semverWorkspaceLink: "semverWorkspaceLink",
   verifySimple: "verify/simple",
   verifyWithIgnore: "verify/withIgnore",
+  verifyWithRootWorkspace: "verify/withRootWorkspace",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;

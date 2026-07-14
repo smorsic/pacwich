@@ -327,6 +327,43 @@ describe("FileSystemProject.determineAffectedWorkspaces", () => {
       ]);
     });
 
+    test("included root workspace is not affected by nested workspace file changes", async () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("withRootWorkspace"),
+        includeRootWorkspace: true,
+      });
+      const result = await project.determineAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: ["applications/applicationA/src/index.ts"],
+      });
+      const root = findResult(result.workspaceResults, "test-root");
+      expect(root.isAffected).toBe(false);
+      expect(root.affectedReasons.changedFiles).toEqual([]);
+      expect(
+        findResult(result.workspaceResults, "application-1a").isAffected,
+      ).toBe(true);
+    });
+
+    test("included root workspace is affected by root-owned file changes", async () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("withRootWorkspace"),
+        includeRootWorkspace: true,
+      });
+      const result = await project.determineAffectedWorkspaces({
+        diffSource: "fileList",
+        changedFiles: ["package.json"],
+      });
+      const root = findResult(result.workspaceResults, "test-root");
+      expect(root.isAffected).toBe(true);
+      expect(root.affectedReasons.changedFiles).toEqual([
+        { projectFilePath: "package.json", inputMatch: "." },
+      ]);
+      for (const workspaceResult of result.workspaceResults) {
+        if (workspaceResult.workspace.name === "test-root") continue;
+        expect(workspaceResult.isAffected).toBe(false);
+      }
+    });
+
     test("file outside any workspace affects no workspaces", async () => {
       const project = makeProject(getProjectRoot("withDependenciesSimple"));
       const result = await project.determineAffectedWorkspaces({
