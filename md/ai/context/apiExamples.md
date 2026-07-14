@@ -58,27 +58,29 @@ const { output, exit } = project.runWorkspaceScript({
   interactive: false,
 });
 
-const { output, summary, workspaces } = project.runScriptAcrossWorkspaces({
-  script: "lint",
-  workspacePatterns: [
-    "alias:my-alias-pattern-*",
-    "path:my-glob/**/*",
-    "workspace-name-a",
-    "workspace-alias-b",
-  ],
-  parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
-  // same as for runWorkspaceScript
-  args: ["--my", "--appended", "--args"],
-  // Optional, callback when script starts, skips, or exits
-  onScriptEvent: (event, { workspace, exitResult }) => {
-    // event: "start", "skip", "exit"
+const { output, summary, workspaces } = await project.runScriptAcrossWorkspaces(
+  {
+    script: "lint",
+    workspacePatterns: [
+      "alias:my-alias-pattern-*",
+      "path:my-glob/**/*",
+      "workspace-name-a",
+      "workspace-alias-b",
+    ],
+    parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+    // same as for runWorkspaceScript
+    args: ["--my", "--appended", "--args"],
+    // Optional, callback when script starts, skips, or exits
+    onScriptEvent: (event, { workspace, exitResult }) => {
+      // event: "start", "skip", "exit"
+    },
   },
-});
+);
 
 // Determine affected workspaces — git mode (default)
-project.determineAffectedWorkspaces({
+await project.determineAffectedWorkspaces({
   diffSource: "git",
   // optional: resolve inputs for a specific script (uses scripts[name].inputs)
   script: "build",
@@ -97,7 +99,7 @@ project.determineAffectedWorkspaces({
 });
 
 // Determine affected workspaces — fileList mode (bypass git)
-project.determineAffectedWorkspaces({
+await project.determineAffectedWorkspaces({
   diffSource: "fileList",
   // paths, directories, or globs (relative to project root); '!' to exclude
   changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
@@ -106,7 +108,7 @@ project.determineAffectedWorkspaces({
 // Run a script across affected workspaces. Accepts the same affected options
 // as determineAffectedWorkspaces, plus the script-execution options from
 // runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
-project.runAffectedWorkspaceScript({
+await project.runAffectedWorkspaceScript({
   affectedOptions: {
     diffSource: "git",
     diffOptions: { baseRef: "main", ignoreUncommitted: true },
