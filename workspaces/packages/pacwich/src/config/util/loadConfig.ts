@@ -14,6 +14,7 @@ import {
   IS_BUN,
   isPacwichError,
   parseJSONC,
+  prefixPacwichErrorMessage,
   type AnyFunction,
 } from "../../internal/core";
 import { logger } from "../../internal/logger";
@@ -68,6 +69,13 @@ export const LOAD_CONFIG_ERRORS = defineErrors(
   "ModuleLoadFailure",
 );
 
+/** cwd-relative when the config is under the cwd, absolute otherwise
+ * (avoids long "../.." chains when running with --cwd elsewhere) */
+const createConfigErrorPathPrefix = (absolutePath: string) => {
+  const relativePath = path.relative(process.cwd(), absolutePath);
+  return relativePath.startsWith("..") ? absolutePath : relativePath;
+};
+
 const parseJSON = (jsonString: string, path: string) => {
   try {
     return parseJSONC(jsonString);
@@ -98,11 +106,17 @@ const parseModule = (
       // Domain errors (PacwichError subclasses) thrown from within
       // the evaluated config file (e.g. validation failures from
       // `defineProjectConfig`) carry the right message already, so
-      // re-throw them as-is rather than wrapping them in a generic
-      // "Failed to load module" envelope that obscures the cause.
+      // re-throw them with only the file path prefixed rather than
+      // wrapping them in a generic "Failed to load module" envelope
+      // that obscures the cause and changes the error class.
       // `isPacwichError` uses a Symbol.for marker so it matches even
       // when jiti loads the error class in a separate module realm.
-      if (isPacwichError(error)) throw error;
+      if (isPacwichError(error)) {
+        throw prefixPacwichErrorMessage(
+          error,
+          createConfigErrorPathPrefix(configFilePath),
+        );
+      }
       throw new LOAD_CONFIG_ERRORS.ModuleLoadFailure(
         `Failed to load module at ${configFilePath}: ${(error as Error).message}`,
       );
@@ -273,5 +287,14 @@ export const loadConfig = <ProcessContent extends AnyFunction>(
         : location.path
     }`,
   );
-  return processContent(location.content);
+  try {
+    return processContent(location.content);
+  } catch (error) {
+    // Validation errors thrown while resolving the loaded content don't
+    // know their source, so name the config location here.
+    throw prefixPacwichErrorMessage(
+      error,
+      createConfigErrorPathPrefix(path.resolve(location.path)),
+    );
+  }
 };
