@@ -405,11 +405,9 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
           workspacePatternConfigs: [
             {
               patterns: ["application-*"],
+              // @ts-expect-error - Invalid config
               config: (ctx) =>
-                ctx.name === "application-1b"
-                  ? // @ts-expect-error - Invalid config
-                    { alias: 42 }
-                  : {},
+                ctx.name === "application-1b" ? { alias: 42 } : {},
             },
           ],
         });
