@@ -1,0 +1,6 @@
+{
+  "name": "pkg-a",
+  "scripts": {
+    "evil; echo INJECTED": "echo ran the real script"
+  }
+}

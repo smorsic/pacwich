@@ -438,18 +438,22 @@ const serializeArgs = (
     IS_WINDOWS && shell === "system"
       ? interpolated.replace(/\\/g, "\\\\")
       : interpolated;
+  // Every parsed token is re-emitted as a single shell-quoted literal. Operators
+  // (`;`, `&&`, `|`, `(`, `)`, `>`), globs, and comments must not pass through
+  // unquoted or they reintroduce shell semantics into the generated command,
+  // which is arbitrary command injection via string-form args.
   return parse(parseInput)
     .flatMap((entry): string[] => {
       if (typeof entry === "string") {
         return [quoteArg(entry, shell)];
       }
       if ("comment" in entry) {
-        return [];
+        return [quoteArg(`#${entry.comment}`, shell)];
       }
       if ("pattern" in entry) {
-        return [entry.pattern];
+        return [quoteArg(entry.pattern, shell)];
       }
-      return [entry.op];
+      return [quoteArg(entry.op, shell)];
     })
     .join(" ");
 };
@@ -719,7 +723,11 @@ class _FileSystemProject extends ProjectBase implements Project {
           workingDirectory: resolveWorkspacePath(this, workspace),
         }
       : this.__adapter.createScriptCommand({
-          scriptName: script,
+          // Quote the script name before it lands in the adapter's shell
+          // command string. It comes from a workspace package.json "scripts"
+          // key, so a name carrying shell metacharacters would otherwise be
+          // an injection vector.
+          scriptName: quoteArg(script, shell),
           args,
           workspace,
           rootDirectory: path.resolve(this.rootDirectory),
@@ -955,7 +963,10 @@ class _FileSystemProject extends ProjectBase implements Project {
               workingDirectory: resolveWorkspacePath(this, workspace),
             }
           : this.__adapter.createScriptCommand({
-              scriptName: script,
+              // Quote the package.json-derived script name before it lands in
+              // the adapter's shell command string (injection guard). Mirrors
+              // the single-workspace path in #prepareWorkspaceScriptRun.
+              scriptName: quoteArg(script, shell),
               args,
               workspace,
               rootDirectory: path.resolve(this.rootDirectory),
