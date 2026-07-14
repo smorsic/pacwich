@@ -1,11 +1,11 @@
 ---
-name: spec-verification
+name: agent-qa
 description: Instructions for agentic validation of pacwich by interacting with real monorepos against documentation.
 ---
 
-# Agentic Spec Verification
+# Agent QA
 
-This is essentially a guide for performing manual QA of pacwich.
+This is a guide for performing manual QA of pacwich.
 
 The user may specify scopes for the validation:
 
@@ -115,6 +115,9 @@ to a local installation (it's okay to mutate node_modules to force a version dif
 It's also okay to verify the runtime being used by console logging the `Bun` global in the entrypoint in
 node_modules/pacwich/src/index.js. Simply append to the file so that you don't need to read it and remove
 the line confirming. Besides these two exceptions, still do not touch or read node_modules directly.
+
+Note: `PACWICH_DISABLE_LOCAL_DELEGATION` may be set to `true` by default in this repo. Ensure
+this is unset or set to `false` to test the global CLI delegation behavior.
 
 #### Commands
 
