@@ -965,7 +965,7 @@ class _FileSystemProject extends ProjectBase implements Project {
           : this.__adapter.createScriptCommand({
               // Quote the package.json-derived script name before it lands in
               // the adapter's shell command string (injection guard). Mirrors
-              // the single-workspace path in buildScriptCommand.
+              // the single-workspace path in #prepareWorkspaceScriptRun.
               scriptName: quoteArg(script, shell),
               args,
               workspace,
