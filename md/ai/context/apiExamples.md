@@ -107,12 +107,16 @@ project.determineAffectedWorkspaces({
 // as determineAffectedWorkspaces, plus the script-execution options from
 // runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
 project.runAffectedWorkspaceScript({
-  script: "build",
-  diffSource: "git",
-  diffOptions: { baseRef: "main", ignoreUncommitted: true },
-  parallel: { max: 2 },
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
+  affectedOptions: {
+    diffSource: "git",
+    diffOptions: { baseRef: "main", ignoreUncommitted: true },
+  },
+  scriptOptions: {
+    script: "my-script",
+    parallel: { max: 2 },
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+  },
 });
 
 // Detect implicit workspace dependencies (imports of other workspaces'
