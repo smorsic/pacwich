@@ -6,7 +6,10 @@ import type {
   ShellOption,
 } from "@pacwich/common/parameters";
 import type { WorkspaceScriptMetadata } from "@pacwich/common/runScript";
-import { loadProjectConfig } from "../../../config";
+import {
+  loadProjectConfigWithPath,
+  type loadProjectConfig,
+} from "../../../config";
 import { getUserBoolEnvVar, getUserEnvVar } from "../../../config/userEnvVars";
 import { parse, quote } from "../../../internal/bundledDeps/shellQuote";
 import type { Simplify } from "../../../internal/core";
@@ -470,6 +473,8 @@ type FileSystemProjectInternals = {
   rootDirectory: string;
   loadConfigOptions: { disableExecutableConfigs: boolean };
   projectConfig: ReturnType<typeof loadProjectConfig>;
+  /** Display path of the loaded project config, when one exists. */
+  projectConfigPath?: string;
   /** Already mapped through {@link resolvePackageManagerValue}. */
   packageManagerName: PackageManagerName;
 };
@@ -494,7 +499,7 @@ class _FileSystemProject extends ProjectBase implements Project {
     }
 
     this.rootDirectory = internals.rootDirectory;
-    const { loadConfigOptions, projectConfig } = internals;
+    const { loadConfigOptions, projectConfig, projectConfigPath } = internals;
 
     const { workspaces, workspaceMap, rootWorkspace } = assembleProject({
       rootDirectory: this.rootDirectory,
@@ -504,6 +509,7 @@ class _FileSystemProject extends ProjectBase implements Project {
         projectConfig.defaults.includeRootWorkspace ??
         getUserEnvVar("includeRootWorkspaceDefault") === "true",
       workspacePatternConfigs: projectConfig.workspacePatternConfigs,
+      projectConfigPath,
       loadConfigOptions,
     });
 
@@ -1315,7 +1321,8 @@ export const createFileSystemProject = (
       false,
   };
 
-  const projectConfig = loadProjectConfig(rootDirectory, loadConfigOptions);
+  const { config: projectConfig, configPath: projectConfigPath } =
+    loadProjectConfigWithPath(rootDirectory, loadConfigOptions);
 
   const effectivePackageManagerValue =
     options.packageManager ?? projectConfig.packageManager;
@@ -1329,6 +1336,7 @@ export const createFileSystemProject = (
     rootDirectory,
     loadConfigOptions,
     projectConfig,
+    projectConfigPath,
     packageManagerName,
   });
 };

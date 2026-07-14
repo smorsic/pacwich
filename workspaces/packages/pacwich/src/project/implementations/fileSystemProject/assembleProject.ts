@@ -35,6 +35,8 @@ export interface AssembleProjectOptions {
   includeRootWorkspace?: boolean;
   /** Workspace pattern config entries from the project config to apply after local configs are loaded. */
   workspacePatternConfigs?: WorkspacePatternConfigEntry[];
+  /** Display path of the project config the pattern entries came from, used in error messages. */
+  projectConfigPath?: string;
   /** Options forwarded to {@link loadWorkspaceConfig} for each workspace. */
   loadConfigOptions?: LoadConfigOptions;
 }
@@ -77,6 +79,7 @@ export const assembleProject = ({
   workspaceGlobs: _workspaceGlobs,
   includeRootWorkspace = false,
   workspacePatternConfigs,
+  projectConfigPath,
   loadConfigOptions,
 }: AssembleProjectOptions) => {
   rootDirectory = path.resolve(rootDirectory);
@@ -216,6 +219,7 @@ export const assembleProject = ({
       workspaceAliases,
       workspacePatternConfigs,
       rootWorkspace,
+      projectConfigPath,
     );
   }
 
