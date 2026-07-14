@@ -14,6 +14,7 @@ if (import.meta.main) {
   const ajv = new Ajv({
     code: { source: true, esm: true },
     allowUnionTypes: true,
+    allErrors: true,
   });
 
   const validateWorkspaceConfig = ajv.compile(WORKSPACE_CONFIG_JSON_SCHEMA);
