@@ -337,6 +337,9 @@ export const verifyProject = async (
   const workspaceByName = new Map(
     project.workspaces.map((workspace) => [workspace.name, workspace]),
   );
+  const allWorkspacePaths = project.workspaces.map(
+    (workspace) => workspace.path,
+  );
 
   const trackableFiles = await listProjectTrackableFiles({
     rootDirectory: project.rootDirectory,
@@ -357,6 +360,7 @@ export const verifyProject = async (
       workspacePath: workspace.path,
       inputFilePatterns,
       projectFilePaths: scannableFiles,
+      otherWorkspacePaths: allWorkspacePaths,
     });
     if (matchedFiles.length === 0) continue;
 

@@ -8,8 +8,9 @@ import {
 import { getProjectRoot } from "../../fixtures/testProjects";
 import { describe, expect, test } from "../../util/testFramework";
 
-const buildProject = (fixtureName: "verifySimple" | "verifyWithIgnore") =>
-  createFileSystemProject({ rootDirectory: getProjectRoot(fixtureName) });
+const buildProject = (
+  fixtureName: "verifySimple" | "verifyWithIgnore" | "verifyWithRootWorkspace",
+) => createFileSystemProject({ rootDirectory: getProjectRoot(fixtureName) });
 
 const allIssues = (result: VerifyResult): VerifyIssue[] => [
   ...result.errors,
@@ -266,6 +267,61 @@ describe("project.verify (API)", () => {
       expect(appBMeta).toHaveLength(1);
       const files = appBMeta[0].files.map((file) => file.path);
       expect(files).toEqual(["packages/app-b/src/index.ts"]);
+    });
+  });
+
+  describe("included root workspace", () => {
+    test("nested workspace files are not attributed to the root workspace", async () => {
+      const project = buildProject("verifyWithRootWorkspace");
+      const result = await project.verify();
+      const appBFindings = allImplicitDepMetadata(result).filter(
+        (metadata) => metadata.dependency === "lib-a",
+      );
+      const rootFindingForNestedFile = appBFindings.find(
+        (metadata) =>
+          metadata.workspace === "verify-root-project" &&
+          metadata.files.some((file) =>
+            file.path.startsWith("packages/app-b/"),
+          ),
+      );
+      expect(rootFindingForNestedFile).toBeUndefined();
+    });
+
+    test("app-b finding appears exactly once with only its own file", async () => {
+      const project = buildProject("verifyWithRootWorkspace");
+      const result = await project.verify();
+      const appBFindings = allImplicitDepMetadata(result).filter(
+        (metadata) => metadata.workspace === "app-b",
+      );
+      expect(appBFindings).toHaveLength(1);
+      expect(appBFindings[0].files.map((file) => file.path)).toEqual([
+        "packages/app-b/src/index.ts",
+      ]);
+    });
+
+    test("root workspace is still scanned for root-owned files", async () => {
+      const project = buildProject("verifyWithRootWorkspace");
+      const result = await project.verify();
+      const rootFinding = findImplicitDep(
+        result,
+        "verify-root-project",
+        "lib-a",
+      );
+      expect(rootFinding).toBeDefined();
+      expect(rootFinding!.files.map((file) => file.path)).toEqual([
+        "scripts/rootTool.ts",
+      ]);
+      expect(rootFinding!.fixHint).toContain("of package.json");
+    });
+
+    test("includeRootWorkspace: false yields only the app-b finding", async () => {
+      const project = createFileSystemProject({
+        rootDirectory: getProjectRoot("verifyWithRootWorkspace"),
+        includeRootWorkspace: false,
+      });
+      const result = await project.verify();
+      const metadata = allImplicitDepMetadata(result);
+      expect(metadata.map((m) => m.workspace)).toEqual(["app-b"]);
     });
   });
 
