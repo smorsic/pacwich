@@ -507,6 +507,23 @@ describe("FileSystemProject runScriptAcrossWorkspaces - basic", () => {
     ]);
   });
 
+  test("a script name with shell metacharacters is not injected", async () => {
+    // The package.json script key contains `;` and `echo INJECTED`. It must be
+    // quoted where it lands in the generated shell command, so only the real
+    // script body runs and the appended `echo INJECTED` never executes.
+    const project = createFileSystemProject({
+      rootDirectory: getProjectRoot("runScriptWithMetacharScriptName"),
+    });
+
+    const { output } = project.runScriptAcrossWorkspaces({
+      script: "evil; echo INJECTED",
+      parallel: false,
+    });
+
+    const chunks = await collectStdout(output);
+    expect(chunks.map((c) => c.text)).toEqual(["ran the real script"]);
+  });
+
   describe("not: pattern semantics", () => {
     test("not: excludes from a positive set", async () => {
       const project = createFileSystemProject({
