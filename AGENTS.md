@@ -449,8 +449,26 @@ const { output, summary, workspaces } = await project.runScriptAcrossWorkspaces(
   },
 );
 
+// Raw byte output also available via output.bytes()
+for await (const { metadata, chunk } of output.text()) {
+  console.log(metadata.streamName); // stdout/stderr
+  console.log(metadata.workspace); // Workspace
+  console.log(chunk); // string content
+}
+
+const {
+  scriptResults, // array of script exit details
+  allSuccess,
+  durationMs,
+  startTimeISO,
+  endTimeISO,
+  successCount,
+  failureCount,
+  totalCount,
+} = await summary;
+
 // Determine affected workspaces — git mode (default)
-await project.determineAffectedWorkspaces({
+const { workspaceResults } = await project.determineAffectedWorkspaces({
   diffSource: "git",
   // optional: resolve inputs for a specific script (uses scripts[name].inputs)
   script: "build",
@@ -468,8 +486,12 @@ await project.determineAffectedWorkspaces({
   },
 });
 
+workspaceResults.forEach((result) => {
+  console.log(result.workspace, result.isAffected, result.affectedReasons);
+});
+
 // Determine affected workspaces — fileList mode (bypass git)
-await project.determineAffectedWorkspaces({
+const fileListAffected = await project.determineAffectedWorkspaces({
   diffSource: "fileList",
   // paths, directories, or globs (relative to project root); '!' to exclude
   changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
@@ -478,6 +500,7 @@ await project.determineAffectedWorkspaces({
 // Run a script across affected workspaces. Accepts the same affected options
 // as determineAffectedWorkspaces, plus the script-execution options from
 // runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
+// Has same return type as runScriptAcrossWorkspaces.
 await project.runAffectedWorkspaceScript({
   affectedOptions: {
     diffSource: "git",
@@ -966,4 +989,4 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 
 <!--End pacwich development-->
 
-<!--pacwich v0.4.0-->
+<!--pacwich v0.5.0-->

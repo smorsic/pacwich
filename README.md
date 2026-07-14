@@ -6,7 +6,7 @@
 
 # pacwich
 
-<sub>Latest: 0.4.0</sub>
+<sub>Latest: 0.5.0</sub>
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
@@ -232,18 +232,41 @@ pacwich --log-level=silent run my-script --output-style=none
 #####################
 
 # List affected workspaces based on git diff (main vs. HEAD by default)
-pacwich list-affected
+pacwich affected list
 
 # Set the git base and head for comparison
-pacwich list-affected --base=my-branch-a --head=my-branch-b
+pacwich affected list --base=my-branch-a --head=my-branch-b
 
 # See detailed reasons for affected workspaces
-pacwich list-affected --explain --detailed
+pacwich affected list --explain --detailed
 
 # Run a script across the workspaces affected by a change
-pacwich run-affected my-script
-# ra is an alias for run-affected
-pacwich ra my-script --base=my-branch-a --head=my-branch-b
+pacwich affected run my-script
+pacwich affected run my-script --base=my-branch-a --head=my-branch-b
+
+# Aliases
+pacwich affected ls
+pacwich af ls
+pacwich af run
+
+##########
+# Config #
+##########
+
+# Commands for pacwich's optional configuration
+
+# Print project and all workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty # pretty print JSON
+
+# Print just the project config as JSON
+pacwich config debug --project
+
+# Print a single workspace config as JSON
+pacwich config debug --workspace=name-or-alias
+
+# Print workspace configs matching a pattern as JSON
+pacwich config debug --workspace-patterns="my-pattern-*"
 ```
 
 ### TS API Quickstart
