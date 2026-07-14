@@ -29,7 +29,12 @@ A **file** can be an input, which **must be git-trackable** (not ignored and wit
 
 **Default**: All git-trackable files in a workspace's directory
 
-> Note: Files that are staged, unstaged, or untracked (but not ignored) are inputs by default but can usually be selectively excluded in features.
+> Notes: 
+><br/>
+> Files that are staged, unstaged, or untracked (but not ignored) are inputs by default but can usually be selectively excluded in features.
+><br/>
+> If a workspace is nested within another workspace, the parent workspace's input files cannot be in the nested workspace.
+This is usually relevant when including the [root workspace](/concepts/root-workspace) as a normal workspace.
 
 #### Configuring Files
 
