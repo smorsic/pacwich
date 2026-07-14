@@ -101,6 +101,44 @@ describe("Test project config", () => {
         loadProjectConfig(getProjectRoot("projectConfigInvalidType")),
       ).toThrow("Project config is invalid: config.defaults must be object");
     });
+
+    test("invalid type error message names the config file", () => {
+      expect(() =>
+        loadProjectConfig(getProjectRoot("projectConfigInvalidType")),
+      ).toThrow("pacwich.project.jsonc");
+    });
+
+    test("invalid workspacePatternConfigs entry error from file names the config file and entry", () => {
+      let caught: unknown;
+      try {
+        loadProjectConfig(getProjectRoot("projectConfigInvalidPatternEntry"));
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("pacwich.project.jsonc");
+      expect(message).toContain("workspacePatternConfigs[0].config");
+      expect(message).toContain("Workspace config is invalid");
+    });
+
+    test("invalid workspacePatternConfigs entry error names the entry index", () => {
+      let caught: unknown;
+      try {
+        resolveProjectConfig({
+          workspacePatternConfigs: [
+            { patterns: ["*"], config: {} },
+            // @ts-expect-error - Invalid config
+            { patterns: ["*"], config: { alias: 5 } },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("workspacePatternConfigs[1].config");
+      expect(message).toContain("Workspace config is invalid");
+      expect(message).toContain("config.alias must be string,array");
+    });
   });
 
   describe("TypeScript config files", () => {
@@ -171,6 +209,8 @@ describe("Test project config", () => {
       // The actual validation message reaches the caller.
       expect(message).toContain("Project config is invalid");
       expect(message).toContain("packageManager");
+      // The config file path is prefixed so the source is identifiable.
+      expect(message).toContain("pacwich.project.ts");
     });
 
     test("ts config loads with precedence over js, jsonc, json, and package.json", () => {

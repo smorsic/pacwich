@@ -67,6 +67,7 @@ const TEST_PROJECTS = {
   projectConfigPackage: "projectConfig/package",
   projectConfigInvalidJson: "projectConfig/invalidJson",
   projectConfigInvalidType: "projectConfig/invalidType",
+  projectConfigInvalidPatternEntry: "projectConfig/invalidPatternEntry",
   projectConfigInvalidShell: "projectConfig/invalidShell",
   projectConfigInvalidParallel: "projectConfig/invalidParallel",
   projectConfigParallelMaxOnly: "projectConfig/parallelMaxOnly",

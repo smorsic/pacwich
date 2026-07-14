@@ -370,6 +370,56 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
       expect(appA.tags).toContain("from-factory");
       expect(appB.tags).toContain("from-factory");
     });
+
+    test("invalid factory result error names the entry index and workspace", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            { patterns: ["library-*"], config: { tags: ["lib"] } },
+            {
+              patterns: ["application-1b"],
+              // @ts-expect-error - Invalid config
+              config: () => ({ alias: 42 }),
+            },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain(
+        'project config workspacePatternConfigs[1] (workspace "application-1b")',
+      );
+      expect(message).toContain("Workspace config is invalid");
+    });
+
+    test("factory error thrown for the failing workspace only names that workspace", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            {
+              patterns: ["application-*"],
+              config: (ctx) =>
+                ctx.name === "application-1b"
+                  ? // @ts-expect-error - Invalid config
+                    { alias: 42 }
+                  : {},
+            },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain('workspace "application-1b"');
+      expect(message).not.toContain('workspace "application-1a"');
+    });
   });
 
   describe("combined with local workspace config", () => {

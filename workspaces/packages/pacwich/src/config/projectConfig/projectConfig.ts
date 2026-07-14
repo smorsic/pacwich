@@ -11,6 +11,7 @@ import {
   type ParallelMaxValue,
 } from "@pacwich/common/parameters";
 import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
+import { prefixPacwichErrorMessage } from "../../internal/core";
 import { validate } from "../../internal/generated/ajv/validateProjectConfig";
 import { logger } from "../../internal/logger";
 import { determineParallelMax, resolveScriptShell } from "../../runScript";
@@ -95,11 +96,18 @@ export const resolveProjectConfig = (
 ): ResolvedProjectConfig => {
   validateProjectConfig(config);
 
-  for (const entry of config.workspacePatternConfigs ?? []) {
+  (config.workspacePatternConfigs ?? []).forEach((entry, entryIndex) => {
     if (typeof entry.config !== "function") {
-      validateWorkspaceConfig(entry.config);
+      try {
+        validateWorkspaceConfig(entry.config);
+      } catch (error) {
+        throw prefixPacwichErrorMessage(
+          error,
+          `workspacePatternConfigs[${entryIndex}].config`,
+        );
+      }
     }
-  }
+  });
 
   return {
     packageManager: resolvePackageManagerConfigValue(config.packageManager),
