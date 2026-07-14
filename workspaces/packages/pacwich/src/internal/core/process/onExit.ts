@@ -25,9 +25,14 @@ const registerListeners = () => {
 
   logger.debug("Registering exit listeners");
 
+  /**
+   * No process.exit() here. Calling it re-entrantly during the exit
+   * event preempts Node's own teardown, which silently swallows
+   * uncaught exception reports and skips other exit listeners
+   * registered by the host process.
+   */
   process.on("exit", (code) => {
     runAllHandlers(code);
-    process.exit(code);
   });
 
   for (const signal of [
@@ -42,14 +47,20 @@ const registerListeners = () => {
       runAllHandlers(signal);
       process.off(signal, handleSignal);
       /**
-       * Re-raise on self so the process exits with code 128+signum.
+       * Re-raise on self so the process exits with code 128+signum,
+       * but only when no other listeners remain. If the host process
+       * has its own handler, the exit decision is theirs (matching
+       * runtime behavior as if pacwich weren't imported), and
+       * re-raising would invoke their handler a second time.
        * We don't broadcast to the process group (kill(0, …)) because
        * that would also signal whoever launched us (e.g. a test
        * runner orchestrating workers), and the per-child cleanup in
        * the subprocess registry already takes the descendant tree
        * down via process-group kills.
        */
-      process.kill(process.pid, signal);
+      if (process.listeners(signal).length === 0) {
+        process.kill(process.pid, signal);
+      }
     };
     process.on(signal, handleSignal);
   }
