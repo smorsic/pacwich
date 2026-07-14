@@ -71,7 +71,7 @@ export const LOAD_CONFIG_ERRORS = defineErrors(
 
 /** cwd-relative when the config is under the cwd, absolute otherwise
  * (avoids long "../.." chains when running with --cwd elsewhere) */
-const createConfigErrorPathPrefix = (absolutePath: string) => {
+export const createConfigErrorPathPrefix = (absolutePath: string) => {
   const relativePath = path.relative(process.cwd(), absolutePath);
   return relativePath.startsWith("..") ? absolutePath : relativePath;
 };
@@ -288,7 +288,7 @@ export const loadConfig = <ProcessContent extends AnyFunction>(
     }`,
   );
   try {
-    return processContent(location.content);
+    return processContent(location.content, location);
   } catch (error) {
     // Validation errors thrown while resolving the loaded content don't
     // know their source, so name the config location here.
