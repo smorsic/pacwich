@@ -103,6 +103,34 @@ describe("Affected: List", () => {
     });
   });
 
+  describe("root workspace inclusion", () => {
+    test("--include-root root is not affected by nested workspace changes", async () => {
+      const { run } = setupCliTest({ testProject: "withRootWorkspace" });
+      const result = await run(
+        "affected",
+        "list",
+        "--include-root",
+        "--files",
+        "applications/applicationA/src/index.ts",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stdout.sanitized, "application-1a");
+    });
+
+    test("--include-root root is affected by root-owned file changes", async () => {
+      const { run } = setupCliTest({ testProject: "withRootWorkspace" });
+      const result = await run(
+        "affected",
+        "list",
+        "--include-root",
+        "--files",
+        "package.json",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(result.stdout.sanitized, "test-root");
+    });
+  });
+
   describe("deprecation", () => {
     test("does not log the list-affected deprecation warning", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
