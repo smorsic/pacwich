@@ -16,10 +16,7 @@ export const isPacwichError = (value: unknown): value is PacwichError =>
     true;
 
 /**
- * Prefix a {@link PacwichError}'s message with source context (e.g. the
- * config file path it originated from), preserving the error class so
- * API consumers can still catch specific error types. No-op for
- * non-Pacwich errors. Returns the error for `throw` chaining.
+ * Prefix a {@link PacwichError}'s message
  */
 export const prefixPacwichErrorMessage = (
   error: unknown,
