@@ -30,6 +30,7 @@ const TEST_PROJECTS = {
   runScriptWithFailures: "forRunScript/withFailures",
   runScriptWithMixedOutput: "forRunScript/withMixedOutput",
   runScriptWithEchoArgs: "forRunScript/withEchoArgs",
+  runScriptWithMetacharScriptName: "forRunScript/withMetacharScriptName",
   runScriptWithRuntimeMetadataDebug: "forRunScript/withRuntimeMetadataDebug",
   runScriptWithDelaysAndSequenceConfig:
     "forRunScript/withDelaysAndSequenceConfig",

@@ -469,6 +469,52 @@ describe("FileSystemProject runWorkspaceScript", () => {
     );
   });
 
+  test("a script name carrying shell metacharacters is not injected into the command", async () => {
+    // The package.json script key contains `;` and `echo INJECTED`. It must
+    // be quoted where it lands in the generated shell command, so the shell
+    // runs only the real script body and never the appended `echo INJECTED`.
+    const project = createFileSystemProject({
+      rootDirectory: getProjectRoot("runScriptWithMetacharScriptName"),
+    });
+
+    const { output, exit } = project.runWorkspaceScript({
+      workspaceNameOrAlias: "pkg-a",
+      script: "evil; echo INJECTED",
+    });
+
+    const chunks: string[] = [];
+    for await (const { chunk } of output.text()) {
+      chunks.push(chunk.trim());
+    }
+    const exitResult = await exit;
+    expect(exitResult.success).toBe(true);
+    expect(chunks.join("\n")).toBe("ran the real script");
+  });
+
+  test("string args with shell operators are passed literally, never executed", async () => {
+    const project = createFileSystemProject({
+      rootDirectory: getProjectRoot("runScriptWithEchoArgs"),
+    });
+
+    // `;`, `&&`, and `|` would each start/chain a separate command if they
+    // reached the generated shell script unquoted (command injection).
+    const { output, exit } = project.runWorkspaceScript({
+      workspaceNameOrAlias: "application-1a",
+      script: "test-echo",
+      args: "; echo INJECTED && echo AGAIN | tee /tmp/pacwich-should-not-exist",
+    });
+
+    const chunks: string[] = [];
+    for await (const { chunk } of output.text()) {
+      chunks.push(chunk.trim());
+    }
+    const exitResult = await exit;
+    expect(exitResult.success).toBe(true);
+    expect(chunks.join("\n")).toBe(
+      "passed args: ; echo INJECTED && echo AGAIN | tee /tmp/pacwich-should-not-exist",
+    );
+  });
+
   test("expected output - process output (bytes)", async () => {
     const project = createFileSystemProject({
       rootDirectory: getProjectRoot("runScriptWithMixedOutput"),

@@ -1,0 +1,6 @@
+{
+  "name": "metachar-root",
+  "workspaces": [
+    "packages/*"
+  ]
+}

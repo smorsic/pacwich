@@ -65,18 +65,24 @@ describe("Script args", () => {
       },
     );
 
-    test("operator passes through shell (string)", async () => {
+    test("operator is passed as literal args, not executed (string)", async () => {
       const { output } = getProject().runWorkspaceScript({
         workspaceNameOrAlias: "workspace-a",
         script: "debug-argv",
         args: "first-arg && echo operator-passed",
       });
       const text = await collectOutputText(output);
-      expect(parseArgvLines(text)).toContainEqual(["first-arg"]);
-      expect(text).toContain("operator-passed");
+      // The `&&` must land as a literal argv token, never chaining a second
+      // command. If injection had happened, argv would be just ["first-arg"].
+      expect(parseArgvLines(text)).toContainEqual([
+        "first-arg",
+        "&&",
+        "echo",
+        "operator-passed",
+      ]);
     });
 
-    test("glob pattern passes through unquoted (string)", async () => {
+    test("glob pattern is passed as a literal arg (string)", async () => {
       const { output } = getProject().runWorkspaceScript({
         workspaceNameOrAlias: "workspace-a",
         script: "debug-argv",
@@ -84,6 +90,18 @@ describe("Script args", () => {
       });
       const text = await collectOutputText(output);
       expect(parseArgvLines(text)).toContainEqual(["no-match/**/*"]);
+    });
+
+    test("a matching glob is not expanded against the workspace dir (string)", async () => {
+      // workspace-a's directory contains package.json, so an unquoted `*.json`
+      // would expand. It must stay a single literal token instead.
+      const { output } = getProject().runWorkspaceScript({
+        workspaceNameOrAlias: "workspace-a",
+        script: "debug-argv",
+        args: "*.json",
+      });
+      const text = await collectOutputText(output);
+      expect(parseArgvLines(text)).toContainEqual(["*.json"]);
     });
 
     testNonWindows(
@@ -160,11 +178,15 @@ describe("Script args", () => {
           args: "'spaced value' --name=<workspaceName> && echo mix-op-passed",
         });
         const text = await collectOutputText(output);
+        // Quoted string and metadata resolve, and the `&&` stays a literal
+        // argv token rather than executing a second command.
         expect(parseArgvLines(text)).toContainEqual([
           "spaced value",
           "--name=workspace-a",
+          "&&",
+          "echo",
+          "mix-op-passed",
         ]);
-        expect(text).toContain("mix-op-passed");
       },
     );
 
@@ -395,7 +417,7 @@ describe("Script args", () => {
       ).toContainEqual(["hello world"]);
     });
 
-    test("operator passes through shell", async () => {
+    test("operator is passed as literal args, not executed", async () => {
       const result = await run(
         "run-script",
         "debug-argv",
@@ -406,11 +428,10 @@ describe("Script args", () => {
       expect(result.exitCode).toBe(0);
       expect(
         parseArgvLines(result.stdout.sanitizedCompactLines),
-      ).toContainEqual(["first-arg"]);
-      expect(result.stdout.sanitizedCompactLines).toContain("operator-passed");
+      ).toContainEqual(["first-arg", "&&", "echo", "operator-passed"]);
     });
 
-    test("glob pattern passes through", async () => {
+    test("glob pattern is passed as a literal arg", async () => {
       const result = await run(
         "run-script",
         "debug-argv",
@@ -477,10 +498,13 @@ describe("Script args", () => {
       expect(result.exitCode).toBe(0);
       expect(
         parseArgvLines(result.stdout.sanitizedCompactLines),
-      ).toContainEqual(["spaced value", "--name=workspace-a"]);
-      expect(result.stdout.sanitizedCompactLines).toContain(
+      ).toContainEqual([
+        "spaced value",
+        "--name=workspace-a",
+        "&&",
+        "echo",
         "cli-mix-op-passed",
-      );
+      ]);
     });
 
     testWindowsOnly(
