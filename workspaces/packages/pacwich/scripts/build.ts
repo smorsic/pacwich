@@ -16,7 +16,7 @@ import { createScriptLogger } from "@pacwich/meta/util";
 import { createRslib, mergeRslibConfig, type RslibConfig } from "@rslib/core";
 import { $ } from "bun";
 import { generateDtsBundle } from "dts-bundle-generator";
-import { createFileSystemProject } from "pacwich";
+import { createFileSystemProject } from "pacwich_local";
 
 import rsLibConfigRaw, { IS_TEST_BUILD, DIST_PATH } from "../rslib.config.ts";
 

@@ -60,6 +60,7 @@
         "ajv": "catalog:pacwich-dev",
         "dts-bundle-generator": "catalog:pacwich-dev",
         "knip": "catalog:pacwich-dev",
+        "pacwich": "file:.",
         "vitest": "catalog:pacwich-dev",
       },
     },
@@ -2300,6 +2301,8 @@
     "miller-rabin/bn.js": ["bn.js@4.12.5", "", {}, "sha512-3aRg6/JxfffFD+OlOjOFR3Vo79l39ooBTFucxx+MT3dhCtzn3EmiUPQo+6/OZuI2jbXi3YKgmiTFBgChQMwIRQ=="],
 
     "node-exports-info/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
+
+    "pacwich_local/pacwich": ["pacwich_local@workspace:workspaces/packages/pacwich"],
 
     "parse-entities/@types/unist": ["@types/unist@2.0.11", "", {}, "sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA=="],
 
