@@ -116,8 +116,7 @@ It's also okay to verify the runtime being used by console logging the `Bun` glo
 node_modules/pacwich/src/index.js. Simply append to the file so that you don't need to read it and remove
 the line confirming. Besides these two exceptions, still do not touch or read node_modules directly.
 
-Note: `PACWICH_DISABLE_LOCAL_DELEGATION` may be set to `true` by default in this repo. Ensure
-this is unset or set to `false` to test the global CLI delegation behavior.
+Note: `PACWICH_DISABLE_LOCAL_DELEGATION` should not be set to "true" in the sandbox env.
 
 #### Commands
 
