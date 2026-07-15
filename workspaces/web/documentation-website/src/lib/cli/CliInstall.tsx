@@ -1,5 +1,5 @@
+import { type PackageManagerName } from "@pacwich/common/parameters";
 import { Link } from "@rspress/core/theme-original";
-import { type PackageManagerName } from "pacwich";
 import { PmTabs } from "../components/PmTabs";
 
 export const PM_COMMANDS: Record<

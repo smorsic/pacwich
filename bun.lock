@@ -60,13 +60,13 @@
         "ajv": "catalog:pacwich-dev",
         "dts-bundle-generator": "catalog:pacwich-dev",
         "knip": "catalog:pacwich-dev",
+        "pacwich": "file:.",
         "vitest": "catalog:pacwich-dev",
       },
     },
     "workspaces/sandboxes/local-vs-release": {
       "name": "@pacwich/sandbox--local-vs-release",
       "devDependencies": {
-        "pacwich_local": "file:../../packages/pacwich",
         "pacwich_release": "npm:pacwich@latest",
       },
     },
@@ -2234,8 +2234,6 @@
 
     "@oxc-resolver/binding-wasm32-wasi/@emnapi/runtime": ["@emnapi/runtime@1.11.0", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-55coeOFKHv1ywEcUXJtWU5f+Jr/W5tZDvZig8DLKSwUN1JpROQ4rk/SNOQiFWmaR/VKF4zuFyW1B8JduOSv6Pg=="],
 
-    "@pacwich/sandbox--local-vs-release/pacwich_local": ["pacwich_local@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
-
     "@rsbuild/plugin-svgr/@rsbuild/plugin-react": ["@rsbuild/plugin-react@1.4.6", "", { "dependencies": { "@rspack/plugin-react-refresh": "^1.6.1", "react-refresh": "^0.18.0" }, "peerDependencies": { "@rsbuild/core": "^1.0.0 || ^2.0.0-0" }, "optionalPeers": ["@rsbuild/core"] }, "sha512-LAT6xHlEyZKA0VjF/ph5d50iyG+WSmBx+7g98HNZUwb94VeeTMZFB8qVptTkbIRMss3BNKOXmHOu71Lhsh9oEw=="],
 
     "@rslib/core/@rsbuild/core": ["@rsbuild/core@2.0.15", "", { "dependencies": { "@rspack/core": "~2.0.8", "@swc/helpers": "^0.5.23" }, "peerDependencies": { "core-js": ">= 3.0.0" }, "optionalPeers": ["core-js"], "bin": { "rsbuild": "./bin/rsbuild.js" } }, "sha512-O8vmMhZu1YImO6jOqt/K/vlJSvkq7UtSq5YM1DIlcEd9LW8Gf6/dkQ1B2KPI6F+hSMFBnTTTumdcIowSLCw97g=="],
@@ -2303,6 +2301,8 @@
     "miller-rabin/bn.js": ["bn.js@4.12.5", "", {}, "sha512-3aRg6/JxfffFD+OlOjOFR3Vo79l39ooBTFucxx+MT3dhCtzn3EmiUPQo+6/OZuI2jbXi3YKgmiTFBgChQMwIRQ=="],
 
     "node-exports-info/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
+
+    "pacwich_local/pacwich": ["pacwich_local@workspace:workspaces/packages/pacwich"],
 
     "parse-entities/@types/unist": ["@types/unist@2.0.11", "", {}, "sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA=="],
 

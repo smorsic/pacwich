@@ -42,11 +42,7 @@ export interface StaticGroup {
  * the completion command performs against the loaded project.
  */
 export type ProjectSource =
-  | "script"
-  | "tag"
-  | "workspaceName"
-  | "workspaceAlias"
-  | "workspacePath";
+  "script" | "tag" | "workspaceName" | "workspaceAlias" | "workspacePath";
 
 /**
  * A group whose candidates come dynamically from a loaded project (workspaces, scripts,
