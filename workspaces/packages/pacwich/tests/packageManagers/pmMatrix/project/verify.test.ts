@@ -20,11 +20,11 @@ import { describe, expect, test } from "../../../util/testFramework";
  *     `workspace.externalDependencies` (the union is what verify
  *     treats as "declared")
  *   - per-pm `formatImplicitWorkspaceDepVersion` (surfaces in
- *     fixHints — bun/npm use `"*"`, pnpm uses `"workspace:*"`)
+ *     fixHints: bun/pnpm use `"workspace:*"`, npm uses `"*"`)
  */
 
 const EXPECTED_FIX_HINT_VERSIONS = {
-  bun: "*",
+  bun: "workspace:*",
   npm: "*",
   pnpm: "workspace:*",
 } as const;

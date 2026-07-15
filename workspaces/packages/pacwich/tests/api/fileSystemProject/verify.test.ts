@@ -136,11 +136,11 @@ describe("project.verify (API)", () => {
       expect(metadata!.fixHint).toContain("dependencies");
     });
 
-    test("fixHint uses pm-adapter version string (bun → '*')", async () => {
+    test("fixHint uses pm-adapter version string (bun → 'workspace:*')", async () => {
       const project = buildProject("verifySimple");
       const result = await project.verify();
       const metadata = findImplicitDep(result, "app-c", "lib-b");
-      expect(metadata!.fixHint).toContain('"*"');
+      expect(metadata!.fixHint).toContain('"workspace:*"');
     });
 
     test("issue.message embeds the fixHint and source locations", async () => {

@@ -118,7 +118,7 @@ describe("CLI verify", () => {
       const result = await run("verify", "--json");
       const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
       for (const issue of parsed.warnings) {
-        expect(issue.metadata.fixHint).toContain('"*"');
+        expect(issue.metadata.fixHint).toContain('"workspace:*"');
         expect(issue.metadata.fixHint).toContain("package.json");
       }
     });
