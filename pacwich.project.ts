@@ -1,7 +1,10 @@
-import { defineProjectConfig } from "pacwich/config";
+import { defineProjectConfig } from "pacwich_local/config";
 
 export default defineProjectConfig({
   packageManager: "bun",
+  defaults: {
+    shell: "bun",
+  },
   workspacePatternConfigs: [
     {
       patterns: ["path:workspaces/libraries/**/*"],

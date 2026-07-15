@@ -31,7 +31,6 @@ const logger = createScriptLogger({ name: "Build" });
 
 const processPackageJson = () => {
   const {
-    name,
     version,
     description,
     exports,
@@ -51,7 +50,6 @@ const processPackageJson = () => {
   return {
     dependencies,
     inputPackageJson: {
-      name,
       version,
       description,
       type,
@@ -64,7 +62,7 @@ const processPackageJson = () => {
       scripts,
     },
     outputPackageJson: {
-      name,
+      name: "pacwich",
       version,
       description,
       type,

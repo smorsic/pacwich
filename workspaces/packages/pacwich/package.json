@@ -1,5 +1,5 @@
 {
-  "name": "pacwich",
+  "name": "pacwich_local",
   "version": "0.5.0",
   "exports": {
     ".": "./src/index.ts",
