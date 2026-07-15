@@ -66,7 +66,6 @@
     "workspaces/sandboxes/local-vs-release": {
       "name": "@pacwich/sandbox--local-vs-release",
       "devDependencies": {
-        "pacwich_local": "file:../../packages/pacwich",
         "pacwich_release": "npm:pacwich@latest",
       },
     },
@@ -2233,8 +2232,6 @@
     "@oxc-resolver/binding-wasm32-wasi/@emnapi/core": ["@emnapi/core@1.11.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.2", "tslib": "^2.4.0" } }, "sha512-l9Oo58x0HOP5znGzVhYW9U3e5wVuA4LAZU2AGezTmkhO1CgQRFDhDg4nneHsu/t3WniXg9QrG2nIXL/ZS8ln8Q=="],
 
     "@oxc-resolver/binding-wasm32-wasi/@emnapi/runtime": ["@emnapi/runtime@1.11.0", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-55coeOFKHv1ywEcUXJtWU5f+Jr/W5tZDvZig8DLKSwUN1JpROQ4rk/SNOQiFWmaR/VKF4zuFyW1B8JduOSv6Pg=="],
-
-    "@pacwich/sandbox--local-vs-release/pacwich_local": ["pacwich_local@file:workspaces/packages/pacwich", { "dependencies": { "@pacwich/common": "workspace:*", "commander": "catalog:pacwich-prod", "jiti": "catalog:pacwich-prod", "semver": "catalog:pacwich-prod", "shell-quote": "catalog:pacwich-prod", "sucrase": "catalog:pacwich-prod", "yaml": "catalog:pacwich-prod" }, "devDependencies": { "@modelcontextprotocol/inspector": "catalog:pacwich-dev", "@pacwich/meta": "workspace:*", "@rslib/core": "catalog:pacwich-dev", "@types/semver": "catalog:pacwich-dev", "@types/shell-quote": "catalog:pacwich-dev", "@xterm/headless": "catalog:pacwich-dev", "ajv": "catalog:pacwich-dev", "dts-bundle-generator": "catalog:pacwich-dev", "knip": "catalog:pacwich-dev", "vitest": "catalog:pacwich-dev" }, "bin": { "pacwich": "bin/cliDev.js" } }],
 
     "@rsbuild/plugin-svgr/@rsbuild/plugin-react": ["@rsbuild/plugin-react@1.4.6", "", { "dependencies": { "@rspack/plugin-react-refresh": "^1.6.1", "react-refresh": "^0.18.0" }, "peerDependencies": { "@rsbuild/core": "^1.0.0 || ^2.0.0-0" }, "optionalPeers": ["@rsbuild/core"] }, "sha512-LAT6xHlEyZKA0VjF/ph5d50iyG+WSmBx+7g98HNZUwb94VeeTMZFB8qVptTkbIRMss3BNKOXmHOu71Lhsh9oEw=="],
 
