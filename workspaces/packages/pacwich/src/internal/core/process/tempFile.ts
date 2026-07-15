@@ -22,7 +22,7 @@ const getUserSuffix = (): string => {
 };
 
 const getTempBasePackageDir = () =>
-  path.join(os.tmpdir(), `pacwich${getUserSuffix()}`);
+  path.join(os.tmpdir(), `pacwich-runtime${getUserSuffix()}`);
 
 const getTempParentDir = () =>
   path.join(getTempBasePackageDir(), PACWICH_VERSION);
@@ -41,7 +41,7 @@ class TempDir {
     this.dir = path.join(getTempParentDir(), this.id);
   }
 
-  initialize(clean = false) {
+  initialize() {
     if (fs.existsSync(this.dir)) return;
 
     // Pass mode at creation time so the dir is never briefly readable by
@@ -49,20 +49,6 @@ class TempDir {
     // TOCTOU window where another process could enter the dir before the
     // mode is tightened).
     fs.mkdirSync(this.dir, { recursive: true, mode: 0o700 });
-
-    if (clean) {
-      for (const dir of fs.readdirSync(path.resolve(getTempBasePackageDir()))) {
-        if (dir !== PACWICH_VERSION) {
-          logger.debug(
-            `Removing temp dir: ${path.join(getTempBasePackageDir(), dir)}`,
-          );
-          fs.rmSync(path.join(getTempBasePackageDir(), dir), {
-            force: true,
-            recursive: true,
-          });
-        }
-      }
-    }
 
     runOnExit(() => {
       logger.debug(`Removing temp dir: ${this.dir}`);

@@ -493,10 +493,7 @@ class _FileSystemProject extends ProjectBase implements Project {
   ) {
     super({ packageManager: internals.packageManagerName });
 
-    if (!_FileSystemProject.#initialized) {
-      DEFAULT_TEMP_DIR.initialize(true);
-      _FileSystemProject.#initialized = true;
-    }
+    DEFAULT_TEMP_DIR.initialize();
 
     this.rootDirectory = internals.rootDirectory;
     const { loadConfigOptions, projectConfig, projectConfigPath } = internals;
@@ -1218,8 +1215,6 @@ class _FileSystemProject extends ProjectBase implements Project {
       workspacePatterns: affectedNames,
     });
   }
-
-  static #initialized = false;
 }
 
 /** An implementation of {@link Project} that is created from a root directory in the file system. */
