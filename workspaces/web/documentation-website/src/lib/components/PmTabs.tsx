@@ -1,4 +1,4 @@
-import { type PackageManagerName } from "pacwich";
+import { type PackageManagerName } from "@pacwich/common/parameters";
 import { Fragment, useId } from "react";
 import { create } from "zustand";
 import { SyntaxHighlighter } from "../util/highlight";
