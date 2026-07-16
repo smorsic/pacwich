@@ -72,7 +72,7 @@ export const checkCommandLine = (
   if (hasFlag(tokens, ["--base", "-B", "--head", "-H"])) {
     return {
       message:
-        "Git diffs aren't available in the web CLI — use `--files` instead, e.g. `list-affected --files 'packages/**/*.ts'`.",
+        "Git diffs aren't available in the web CLI — use `--files` instead, e.g. `affected list --files 'packages/**/*.ts'`.",
     };
   }
 

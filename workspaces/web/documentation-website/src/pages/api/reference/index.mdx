@@ -233,7 +233,7 @@ Run a script in all workspaces that have it in their package.json "scripts" fiel
 
 
 ### .determineAffectedWorkspaces
-`determineAffectedWorkspaces(options: DetermineAffectedWorkspacesOptions): AffectedWorkspacesResult`
+`determineAffectedWorkspaces(options: DetermineAffectedWorkspacesOptions): Promise<AffectedWorkspacesResult>`
 
 Determine the workspaces that are affected by a change. The return object
 is the same as the CLI's output for `list-affected --explain --json`.
@@ -256,7 +256,7 @@ Using a list of changed files to determine affected workspaces:
 <hr className="reference-divider"/>
 
 ### .runAffectedWorkspaceScript
-`runAffectedWorkspaceScript(options: RunAffectedWorkspaceScriptOptions): RunAffectedWorkspaceScriptResult`
+`runAffectedWorkspaceScript(options: RunAffectedWorkspaceScriptOptions): Promise<RunScriptAcrossWorkspacesResult>`
 
 Run a script in the workspaces that are affected by a change.
 
@@ -276,7 +276,7 @@ while also taking similar options to [determineAffectedWorkspaces](/api/referenc
 <hr className="reference-divider"/>
 
 ### .verify
-`verify(options: VerifyOptions): VerifyResult`
+`verify(options: VerifyOptions): Promise<VerifyResult>`
 
 Verify the project for issues. The result is the same
 as the CLI [`verify`](/cli/commands#verify) command's JSON output.

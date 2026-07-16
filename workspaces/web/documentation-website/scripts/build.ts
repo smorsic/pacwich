@@ -7,7 +7,7 @@ import {
 } from "fs";
 import path from "path";
 import { $ } from "bun";
-import { createFileSystemProject } from "pacwich";
+import { createFileSystemProject } from "pacwich_local";
 import packageJson from "../../../packages/pacwich/package.json";
 
 export const runBuild = async () => {
@@ -16,7 +16,7 @@ export const runBuild = async () => {
   const outputPath = path.resolve("__dirname", "..", "doc_build");
 
   if (process.env.SKIP_PACWICH_BUILD !== "true") {
-    await $`bunx pacwich run build:no-dts pacwich`;
+    await $`bunx pacwich run build:no-dts pw`;
   }
 
   await $`bunx rspress build`;
@@ -34,7 +34,7 @@ export const runBuild = async () => {
 
   const pacwichBuildDir = path.resolve(
     project.rootDirectory,
-    project.findWorkspaceByName("pacwich")?.path ?? "",
+    project.findWorkspaceByName("pacwich_local")?.path ?? "",
     "dist",
   );
 

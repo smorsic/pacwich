@@ -206,6 +206,23 @@ describe("workspace config", () => {
       ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
     });
 
+    test("reports all invalid fields in one message", () => {
+      let caught: unknown;
+      try {
+        validateWorkspaceConfig({
+          // @ts-expect-error - Invalid config
+          alias: 123,
+          // @ts-expect-error - Invalid config
+          tags: "not-an-array",
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("config.alias must be string,array");
+      expect(message).toContain("config.tags must be array");
+    });
+
     test("throws when alias array contains non-strings", () => {
       expect(() =>
         validateWorkspaceConfig({
@@ -333,6 +350,28 @@ describe("workspace config", () => {
           ),
         ),
       ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+    });
+
+    test("error message names the package.json config location", () => {
+      expect(() =>
+        loadWorkspaceConfig(
+          path.join(
+            getProjectRoot("workspaceConfigInvalidConfig"),
+            "applications/application-a",
+          ),
+        ),
+      ).toThrow('applications/application-a/package.json["pacwich"]');
+    });
+
+    test("error message names the json config file", () => {
+      expect(() =>
+        loadWorkspaceConfig(
+          path.join(
+            getProjectRoot("workspaceConfigInvalidConfig"),
+            "applications/application-b",
+          ),
+        ),
+      ).toThrow("applications/application-b/pacwich.workspace.json");
     });
   });
   describe("findWorkspaces with workspace configs", () => {
@@ -614,6 +653,15 @@ describe("workspace config", () => {
       ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
     });
 
+    test("ts invalid config error message names the config file", () => {
+      expect(() =>
+        assembleProject({
+          adapter,
+          rootDirectory: getProjectRoot("workspaceConfigTsInvalid"),
+        }),
+      ).toThrow("applications/application-a/pacwich.workspace.ts");
+    });
+
     test("ts config that throws InvalidWorkspaceConfig from defineWorkspaceConfig surfaces clean validation message", () => {
       // Regression: see the matching test in projectConfig.test.ts.
       let caught: unknown;
@@ -630,6 +678,9 @@ describe("workspace config", () => {
       expect(message).not.toContain("Failed to load module");
       expect(message).toContain("Workspace config is invalid");
       expect(message).toContain("alias");
+      expect(message).toContain(
+        "applications/application-a/pacwich.workspace.ts",
+      );
     });
 
     test("ts config is skipped when disableExecutableConfigs is true", () => {

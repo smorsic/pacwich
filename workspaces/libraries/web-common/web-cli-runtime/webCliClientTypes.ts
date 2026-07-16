@@ -18,6 +18,7 @@ export type ReadyResponse = {
 export type InvokeCliRequestBody = {
   argv: string[];
   terminalWidth: number;
+  terminalHeight: number;
 };
 
 export type InvokeCliError = {

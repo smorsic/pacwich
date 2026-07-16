@@ -22,7 +22,7 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
     "shell": "system", // "bun" or "system" (default "system")
     "includeRootWorkspace": true, // treat root package.json as a normal workspace
     "affectedBaseRef": "main", // default git base ref for affected resolution (env: PACWICH_AFFECTED_BASE_REF_DEFAULT)
-    // Default output style for `run-script` / `run-affected` when no
+    // Default output style for `run-script` / `affected run` when no
     // --output-style flag is passed. CLI-only (ignored by API callers).
     // "grouped" is still downgraded to "prefixed" when stdout is not a
     // TTY. Env override: PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT.
@@ -213,5 +213,7 @@ export default defineProjectConfig({
   },
 });
 ```
+
+You can use the CLI command `pacwich config debug` to print all resolved JSON for configuration (use `--help` for narrowing output to project/workspace(s)).
 
 <!--End pacwich config-->

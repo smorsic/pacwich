@@ -10,7 +10,7 @@
 // `createCli` is imported for its type only (erased at build); the value is
 // loaded via dynamic import below so pacwich's modules evaluate only after the
 // env shims are in place.
-import type { createCli as CreateCliFn } from "pacwich/cli";
+import type { createCli as CreateCliFn } from "pacwich_local/cli";
 // Env shims, imported before any pacwich module evaluates. They self-install
 // on import: bufferShim teaches the buffer polyfill `base64url`, pathShim adds
 // `path.matchesGlob`, and processShim provides `globalThis.process` (several
@@ -28,6 +28,8 @@ export type OutputStream = "stdout" | "stderr";
 export type RunOptions = {
   /** Terminal width, so help/output wraps to the visible columns. */
   terminalWidth?: number;
+  /** Terminal height, so the grouped-output renderer sizes its live frame to fit. */
+  terminalHeight?: number;
   /** Called for each chunk the CLI writes, as it is written. */
   onOutput?: (text: string, stream: OutputStream) => void;
 };
@@ -69,9 +71,9 @@ let cli: Cli | undefined;
 const runTokens = async (
   tokens: string[],
   rawInput: string,
-  { terminalWidth = 80, onOutput }: RunOptions = {},
+  { terminalWidth = 80, terminalHeight = 30, onOutput }: RunOptions = {},
 ): Promise<RunResult> => {
-  installProcessShim();
+  installProcessShim({ columns: terminalWidth, rows: terminalHeight });
   seedDemoProject();
 
   // Reject features the browser can't support (inline scripts, git diffs,
@@ -87,7 +89,7 @@ const runTokens = async (
   if (!cli) {
     // Loaded lazily so pacwich's modules evaluate only after the process
     // shim and memfs are ready.
-    const { createCli } = await import("pacwich/cli");
+    const { createCli } = await import("pacwich_local/cli");
     cli = createCli({ defaultCwd: PROJECT_ROOT });
   }
 
@@ -111,7 +113,7 @@ const runTokens = async (
       argv,
       programmatic: true,
       terminalWidth,
-      terminalHeight: 30,
+      terminalHeight,
       writeOutput: {
         stdout: write("stdout"),
         stderr: write("stderr"),

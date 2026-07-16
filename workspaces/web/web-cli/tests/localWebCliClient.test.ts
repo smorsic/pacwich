@@ -27,6 +27,7 @@ test("invokeWebCli streams incremental chunks then a final isDone chunk", async 
   for await (const chunk of localWebCliClient.invokeWebCli({
     argv: ["list-workspaces", "--name-only"],
     terminalWidth: 80,
+    terminalHeight: 30,
   })) {
     chunks.push(chunk);
   }
@@ -56,6 +57,7 @@ test("invokeWebCli reports a guard-blocked command as a clean final chunk", asyn
   for await (const chunk of localWebCliClient.invokeWebCli({
     argv: ["doctor"],
     terminalWidth: 80,
+    terminalHeight: 30,
   })) {
     chunks.push(chunk);
   }

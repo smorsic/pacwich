@@ -2,7 +2,10 @@ import { ROOT_WORKSPACE_SELECTOR } from "../project";
 import { WORKSPACE_PATTERN_TARGETS } from "../workspaces/workspacePattern";
 import {
   CLI_COMMANDS_CONFIG,
-  getCliCommandNames,
+  getCliSubcommandNames,
+  getCliTopLevelCommandNames,
+  resolveCliCommandName,
+  resolveCliSubcommandName,
   type CliCommandConfig,
   type CliCommandName,
 } from "./commandsConfig";
@@ -39,11 +42,7 @@ export interface StaticGroup {
  * the completion command performs against the loaded project.
  */
 export type ProjectSource =
-  | "script"
-  | "tag"
-  | "workspaceName"
-  | "workspaceAlias"
-  | "workspacePath";
+  "script" | "tag" | "workspaceName" | "workspaceAlias" | "workspacePath";
 
 /**
  * A group whose candidates come dynamically from a loaded project (workspaces, scripts,
@@ -189,21 +188,6 @@ const valueGroupLabel = (spec: OptionSpec): string => {
   return `value-${slug}`;
 };
 
-/** Resolve a command token (name or alias) to its config key. */
-const resolveCommand = (token: string): CliCommandName | null => {
-  for (const name of getCliCommandNames()) {
-    const config = CLI_COMMANDS_CONFIG[name];
-    const commandName = config.command.split(/\s+/)[0];
-    if (
-      token === commandName ||
-      (config.aliases as readonly string[]).includes(token)
-    ) {
-      return name;
-    }
-  }
-  return null;
-};
-
 /** Find the option spec a flag token belongs to (global, then command). */
 const resolveFlag = (
   flagToken: string,
@@ -261,7 +245,13 @@ const readLine = (prior: string[]): LineContext => {
     }
   };
 
-  for (const token of prior) {
+  const selectCommand = (resolved: CliCommandName) => {
+    command = resolved;
+    commandOptions = commandOptionSpecs(CLI_COMMANDS_CONFIG[resolved]);
+  };
+
+  for (let i = 0; i < prior.length; i++) {
+    const token = prior[i];
     if (awaiting) {
       applyValue(awaiting, token);
       awaiting = null;
@@ -278,10 +268,21 @@ const readLine = (prior: string[]): LineContext => {
       continue;
     }
     if (command === null) {
-      const resolved = resolveCommand(token);
+      const resolved = resolveCliCommandName(token);
       if (resolved) {
-        command = resolved;
-        commandOptions = commandOptionSpecs(CLI_COMMANDS_CONFIG[resolved]);
+        selectCommand(resolved);
+        // A parent's second token may select one of its children instead of
+        // being a positional value for the parent itself (e.g. `completion
+        // install`, vs. `completion zsh` where `zsh` stays a positional).
+        const nextToken = prior[i + 1];
+        const child =
+          nextToken !== undefined
+            ? resolveCliSubcommandName(resolved, nextToken)
+            : null;
+        if (child) {
+          selectCommand(child);
+          i++;
+        }
       }
       continue;
     }
@@ -298,10 +299,10 @@ const readLine = (prior: string[]): LineContext => {
   };
 };
 
-/** Static group of all command names and aliases. */
+/** Static group of top-level command names and aliases. */
 const commandGroup = (): StaticGroup => {
   const items: CompletionItem[] = [];
-  for (const name of getCliCommandNames()) {
+  for (const name of getCliTopLevelCommandNames()) {
     const config = CLI_COMMANDS_CONFIG[name];
     const commandName = config.command.split(/\s+/)[0];
     items.push({ value: commandName, description: config.description });
@@ -457,6 +458,27 @@ const scriptGroup = (partial: string, scope: string[]): ProjectGroup => ({
   workspaceScope: scope.length ? scope : undefined,
 });
 
+/** Static group offering a parent command's subcommand names and aliases. */
+const subcommandGroup = (parent: CliCommandName): StaticGroup => {
+  const items: CompletionItem[] = [];
+  for (const name of getCliSubcommandNames(parent)) {
+    const config = CLI_COMMANDS_CONFIG[name];
+    const commandName = config.command.split(/\s+/)[0];
+    items.push({ value: commandName, description: config.description });
+    for (const alias of config.aliases) {
+      items.push({ value: alias, description: config.description });
+    }
+  }
+  return { kind: "static", label: "subcommand", items };
+};
+
+/** Shell names offered at `completion`'s own positional slot. */
+const completionShellGroup = (): StaticGroup => ({
+  kind: "static",
+  label: "shell",
+  items: SUPPORTED_COMPLETION_SHELLS.map((shell) => ({ value: shell })),
+});
+
 /**
  * Positional-slot completion once a command is known.
  *
@@ -476,12 +498,26 @@ const positionalGroups = (
     context;
   const scriptFilled = scriptFromOption || positionals.length >= 1;
 
+  // A parent command's first slot offers its subcommands (e.g. `install`
+  // under `completion`), generically for any parent. `completion` also
+  // accepts a bare shell name at that same slot, printing the script
+  // directly, so it folds in its own shell-name group alongside.
+  if (command && positionals.length === 0) {
+    const children = getCliSubcommandNames(command);
+    if (children.length) {
+      return command === "completion"
+        ? [completionShellGroup(), subcommandGroup(command)]
+        : [subcommandGroup(command)];
+    }
+  }
+
   switch (command) {
     case "runScript":
       return scriptFilled
         ? patternGroups(partial)
         : [scriptGroup(partial, context.workspaceScope)];
     case "runAffected":
+    case "affectedRun":
       return scriptFilled ? null : [scriptGroup(partial, [])];
     case "runInteractive": {
       if (!scriptFilled) return [scriptGroup(partial, context.workspaceScope)];
@@ -499,24 +535,12 @@ const positionalGroups = (
     case "listWorkspaces":
     case "verify":
       return patternGroups(partial);
-    case "completion": {
-      const shellGroup: StaticGroup = {
-        kind: "static",
-        label: "shell",
-        items: SUPPORTED_COMPLETION_SHELLS.map((shell) => ({ value: shell })),
-      };
-      // First slot: a shell to print, or the `install` action.
-      if (positionals.length === 0) {
-        return [
-          { ...shellGroup, items: [...shellGroup.items, { value: "install" }] },
-        ];
-      }
-      // `install <TAB>`: the shell to install for.
-      if (positionals.length === 1 && positionals[0] === "install") {
-        return [shellGroup];
-      }
+    case "completion":
+      // First slot handled above; a shell was already given as the
+      // positional, so there is nothing further to complete.
       return null;
-    }
+    case "completionInstall":
+      return positionals.length === 0 ? [completionShellGroup()] : null;
     default:
       return null;
   }

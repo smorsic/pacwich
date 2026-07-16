@@ -12,10 +12,6 @@ if (import.meta.main) {
 node = '${getToolDevLockVersion("node")}'
 bun = '${getToolDevLockVersion("bun")}'
 pnpm = '${getToolDevLockVersion("pnpm")}'
-
-[env]
-# Allow pacwich global install to work within this repo
-PACWICH_DISABLE_LOCAL_DELEGATION = true
 `.trim() + "\n",
   );
 }

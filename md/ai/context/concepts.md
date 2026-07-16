@@ -70,6 +70,7 @@ A workspace is "affected" when something in its set of **inputs** has changed. I
 Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
 
 - `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern relative to the project root. Prefix `!` to exclude. Only git-trackable files match.
+  - If a workspace is nested within another workspace, the parent workspace's input files cannot be in the nested workspace (usually relevant when including the root workspace)
 - `workspacePatterns`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep).
 - `externalDependencies`: an allowlist of package names. Omitted = all external deps participate; `[]` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
 

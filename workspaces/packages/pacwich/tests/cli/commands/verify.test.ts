@@ -139,4 +139,35 @@ describe("CLI verify", () => {
       expect(files).toEqual(["packages/app-b/src/index.ts"]);
     });
   });
+
+  describe("included root workspace", () => {
+    test("nested workspace findings are not duplicated onto the root workspace", async () => {
+      // Fixture config sets defaults.includeRootWorkspace: true
+      const { run } = setupCliTest({ testProject: "verifyWithRootWorkspace" });
+      const result = await run("verify", "--json");
+      expect(result.exitCode).toBe(0);
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const appBIssues = parsed.warnings.filter(
+        (issue) => issue.metadata.workspace === "app-b",
+      );
+      expect(appBIssues).toHaveLength(1);
+      const rootIssues = parsed.warnings.filter(
+        (issue) => issue.metadata.workspace === "verify-root-project",
+      );
+      expect(rootIssues).toHaveLength(1);
+      expect(rootIssues[0].metadata.files.map((file) => file.path)).toEqual([
+        "scripts/rootTool.ts",
+      ]);
+    });
+
+    test("--no-include-root drops the root workspace's own finding", async () => {
+      const { run } = setupCliTest({ testProject: "verifyWithRootWorkspace" });
+      const result = await run("verify", "--json", "--no-include-root");
+      expect(result.exitCode).toBe(0);
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      expect(parsed.warnings.map((issue) => issue.metadata.workspace)).toEqual([
+        "app-b",
+      ]);
+    });
+  });
 });

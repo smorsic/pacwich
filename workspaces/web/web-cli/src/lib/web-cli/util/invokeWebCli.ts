@@ -8,15 +8,18 @@ import { create } from "zustand";
 import { useApiState } from "./apiHealth";
 
 export const DEFAULT_TERMINAL_WIDTH = 80;
+export const DEFAULT_TERMINAL_HEIGHT = 30;
 
 const useInvokeWebCliStore = create<{
   isLoading: boolean;
   result: InvokeCliResponseChunk[];
   input: string;
   terminalWidth: number;
+  terminalHeight: number;
   terminalSelection: string;
   setTerminalSelection: (terminalSelection: string) => void;
   setTerminalWidth: (terminalWidth: number) => void;
+  setTerminalHeight: (terminalHeight: number) => void;
   setInput: (input: string) => void;
   setIsLoading: (isLoading: boolean) => void;
   setResult: (result: InvokeCliResponseChunk[]) => void;
@@ -26,9 +29,11 @@ const useInvokeWebCliStore = create<{
   result: [],
   input: "",
   terminalWidth: DEFAULT_TERMINAL_WIDTH,
+  terminalHeight: DEFAULT_TERMINAL_HEIGHT,
   terminalSelection: "",
   setTerminalSelection: (terminalSelection) => set({ terminalSelection }),
   setTerminalWidth: (terminalWidth) => set({ terminalWidth }),
+  setTerminalHeight: (terminalHeight) => set({ terminalHeight }),
   setInput: (input) => set({ input }),
   setIsLoading: (isLoading) => set({ isLoading }),
   setResult: (result) => set({ result }),
@@ -43,10 +48,13 @@ export const useInvokeWebCli = () => {
   const setResult = useInvokeWebCliStore((state) => state.setResult);
   const addResultChunk = useInvokeWebCliStore((state) => state.addResultChunk);
   const terminalWidth = useInvokeWebCliStore((state) => state.terminalWidth);
+  const terminalHeight = useInvokeWebCliStore((state) => state.terminalHeight);
   const { isReady } = useApiState();
 
   const invokeWebCli = useCallback(
-    async (request: Omit<InvokeCliRequestBody, "terminalWidth">) => {
+    async (
+      request: Omit<InvokeCliRequestBody, "terminalWidth" | "terminalHeight">,
+    ) => {
       if (isLoading || !isReady) return;
 
       setIsLoading(true);
@@ -55,6 +63,7 @@ export const useInvokeWebCli = () => {
       for await (const chunk of localWebCliClient.invokeWebCli({
         ...request,
         terminalWidth,
+        terminalHeight,
       })) {
         addResultChunk(chunk);
       }
@@ -68,6 +77,7 @@ export const useInvokeWebCli = () => {
       setIsLoading,
       setResult,
       terminalWidth,
+      terminalHeight,
     ],
   );
 
@@ -91,6 +101,12 @@ export const useWebCliTerminalWidth = () =>
 
 export const useSetWebCliTerminalWidth = () =>
   useInvokeWebCliStore((state) => state.setTerminalWidth);
+
+export const useWebCliTerminalHeight = () =>
+  useInvokeWebCliStore((state) => state.terminalHeight);
+
+export const useSetWebCliTerminalHeight = () =>
+  useInvokeWebCliStore((state) => state.setTerminalHeight);
 
 export const useWebCliTerminalSelection = () =>
   useInvokeWebCliStore((state) => state.terminalSelection);

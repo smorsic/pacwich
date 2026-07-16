@@ -35,7 +35,11 @@ export const localWebCliClient: HttpClient = {
   // rather than batching until the run finishes — the mocked script output's
   // per-line delays (see demo-project/scriptMocks.ts) are meant to be seen
   // streaming into the terminal, not dumped all at once.
-  invokeWebCli: async function* invokeWebCli({ argv, terminalWidth }) {
+  invokeWebCli: async function* invokeWebCli({
+    argv,
+    terminalWidth,
+    terminalHeight,
+  }) {
     const queue: InvokeCliResponseChunk[] = [];
     let notify: (() => void) | null = null;
     let finished = false;
@@ -48,6 +52,7 @@ export const localWebCliClient: HttpClient = {
 
     const runPromise = runPacwichCliArgv(argv, {
       terminalWidth,
+      terminalHeight,
       onOutput: (text, stream) =>
         push(makeChunk({ terminalOutput: text, streamName: stream })),
     }).finally(() => {

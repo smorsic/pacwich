@@ -62,6 +62,21 @@ test("run <script> streams the mocked per-workspace output", async () => {
   expect(stdout).toContain("42 modules transformed");
 });
 
+test("run <script> uses grouped output style, since the shim reports a TTY", async () => {
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
+
+  const { stdout, exitCode } = await runPacwichCli("run build", {
+    terminalWidth: 80,
+    terminalHeight: 30,
+  });
+
+  expect(exitCode).toBe(0);
+  // Grouped mode hides the cursor before drawing its live, redrawing frame;
+  // prefixed mode (picked when isTTY is false, the old shim default) never
+  // emits this raw ANSI escape.
+  expect(stdout).toContain("\x1b[?25l");
+});
+
 test("run --dep-order starts workspaces in dependency order", async () => {
   const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
   const { runLog } =
@@ -92,11 +107,11 @@ test("run test only runs where the script exists", async () => {
   expect(stdout).not.toContain("@demo/core: test");
 });
 
-test("list-affected --files resolves affected workspaces (glob)", async () => {
+test("affected list --files resolves affected workspaces (glob)", async () => {
   const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
-    "list-affected --files 'packages/utils/**/*.ts'",
+    "affected list --files 'packages/utils/**/*.ts'",
     { terminalWidth: 80 },
   );
 
@@ -111,11 +126,11 @@ test("list-affected --files resolves affected workspaces (glob)", async () => {
   );
 });
 
-test("list-affected --files scopes to the changed workspace", async () => {
+test("affected list --files scopes to the changed workspace", async () => {
   const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
-    "list-affected --files apps/web/src/index.ts",
+    "affected list --files apps/web/src/index.ts",
     { terminalWidth: 80 },
   );
 
@@ -126,11 +141,11 @@ test("list-affected --files scopes to the changed workspace", async () => {
   expect(stdout).not.toContain("@demo/core");
 });
 
-test("run-affected --files runs the mocked script on affected workspaces", async () => {
+test("affected run --files runs the mocked script on affected workspaces", async () => {
   const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
-    "run-affected build --files 'packages/core/**/*.ts'",
+    "affected run build --files 'packages/core/**/*.ts'",
     { terminalWidth: 80 },
   );
 
@@ -139,6 +154,24 @@ test("run-affected --files runs the mocked script on affected workspaces", async
   expect(stdout).toContain("✓ @demo/core built (mock)");
   expect(stdout).toContain("✓ @demo/web built (mock)");
   expect(stdout).not.toContain("✓ @demo/utils built (mock)");
+});
+
+test("the deprecated list-affected/run-affected forms still work (with a warning)", async () => {
+  const { runPacwichCli } = await import("@pacwich/web-common/web-cli-runtime");
+
+  const listResult = await runPacwichCli(
+    "list-affected --files apps/web/src/index.ts",
+    { terminalWidth: 80 },
+  );
+  expect(listResult.exitCode).toBe(0);
+  expect(listResult.stdout).toContain("@demo/web");
+
+  const runResult = await runPacwichCli(
+    "run-affected build --files 'packages/core/**/*.ts'",
+    { terminalWidth: 80 },
+  );
+  expect(runResult.exitCode).toBe(0);
+  expect(runResult.stdout).toContain("✓ @demo/core built (mock)");
 });
 
 test("runPacwichCliArgv runs an already-tokenized argv", async () => {
@@ -177,8 +210,8 @@ const blocked: [string, string, RegExp][] = [
   ["doctor", "doctor", /doctor.*isn't available/i],
   ["--cwd", "list-workspaces --cwd /elsewhere", /--cwd.*fixed/i],
   ["--cwd short", "list-workspaces -d /elsewhere", /--cwd.*fixed/i],
-  ["git base", "list-affected --base main", /use `--files` instead/i],
-  ["git head", "run-affected build --head HEAD", /use `--files` instead/i],
+  ["git base", "affected list --base main", /use `--files` instead/i],
+  ["git head", "affected run build --head HEAD", /use `--files` instead/i],
   [
     "shell pipe",
     "list-workspaces | grep demo",

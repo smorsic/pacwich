@@ -369,6 +369,108 @@ describe("getFileAffectedWorkspaces", () => {
       );
     });
 
+    test("root workspace with default inputs is not affected by nested workspace changes", async () => {
+      const root = makeTestWorkspace({ name: "root", isRoot: true, path: "" });
+      const workspaceA = makeTestWorkspace({ name: "a", path: "packages/a" });
+
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: root,
+        workspaceInputs: [
+          makeInput({ workspace: root, inputFilePatterns: ["."] }),
+          makeInput({ workspace: workspaceA, inputFilePatterns: ["."] }),
+        ],
+        changedFilePaths: ["packages/a/src/index.ts"],
+      });
+
+      const [rootResult, aResult] = result.affectedWorkspaces;
+      expect(rootResult.isAffected).toBe(false);
+      expect(rootResult.affectedReasons.changedFiles).toEqual([]);
+      expect(aResult.isAffected).toBe(true);
+    });
+
+    test("root workspace with default inputs is affected by root-owned file changes", async () => {
+      const root = makeTestWorkspace({ name: "root", isRoot: true, path: "" });
+      const workspaceA = makeTestWorkspace({ name: "a", path: "packages/a" });
+
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: root,
+        workspaceInputs: [
+          makeInput({ workspace: root, inputFilePatterns: ["."] }),
+          makeInput({ workspace: workspaceA, inputFilePatterns: ["."] }),
+        ],
+        changedFilePaths: ["scripts/build.ts", "package.json"],
+      });
+
+      const [rootResult, aResult] = result.affectedWorkspaces;
+      expect(rootResult.isAffected).toBe(true);
+      expect(
+        rootResult.affectedReasons.changedFiles.map((f) => f.filePath),
+      ).toEqual(["scripts/build.ts", "package.json"]);
+      expect(aResult.isAffected).toBe(false);
+    });
+
+    test("workspace nested inside another workspace owns its own files", async () => {
+      const outer = makeTestWorkspace({ name: "outer", path: "packages/a" });
+      const inner = makeTestWorkspace({
+        name: "inner",
+        path: "packages/a/inner",
+      });
+
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: makeTestWorkspace({ name: "root", isRoot: true }),
+        workspaceInputs: [
+          makeInput({ workspace: outer, inputFilePatterns: ["."] }),
+          makeInput({ workspace: inner, inputFilePatterns: ["."] }),
+        ],
+        changedFilePaths: ["packages/a/inner/src/index.ts"],
+      });
+
+      const [outerResult, innerResult] = result.affectedWorkspaces;
+      expect(outerResult.isAffected).toBe(false);
+      expect(outerResult.affectedReasons.changedFiles).toEqual([]);
+      expect(innerResult.isAffected).toBe(true);
+    });
+
+    test("root workspace still cascades as affected through workspace dependencies", async () => {
+      const root = makeTestWorkspace({
+        name: "root",
+        isRoot: true,
+        path: "",
+        dependencies: ["a"],
+      });
+      const workspaceA = makeTestWorkspace({
+        name: "a",
+        path: "packages/a",
+        dependents: ["root"],
+      });
+
+      const result = await getFileAffectedWorkspaces({
+        rootDirectory: ROOT_DIRECTORY,
+        rootWorkspace: root,
+        workspaceInputs: [
+          makeInput({ workspace: root, inputFilePatterns: ["."] }),
+          makeInput({ workspace: workspaceA, inputFilePatterns: ["."] }),
+        ],
+        changedFilePaths: ["packages/a/src/index.ts"],
+      });
+
+      const [rootResult] = result.affectedWorkspaces;
+      expect(rootResult.isAffected).toBe(true);
+      expect(rootResult.affectedReasons.changedFiles).toEqual([]);
+      expect(rootResult.affectedReasons.dependencies).toEqual([
+        {
+          dependencyName: "a",
+          chain: [
+            { workspaceName: "root" },
+            { workspaceName: "a", edgeSource: "package" },
+          ],
+        },
+      ]);
+    });
+
     test("converts absolute changed file paths to root-relative", async () => {
       const workspace = makeTestWorkspace({ name: "a", path: "packages/a" });
 

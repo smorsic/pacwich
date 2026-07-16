@@ -1,9 +1,12 @@
 import { addSkills } from "./addSkills";
+import { affected } from "./affected";
 import type {
   GlobalCommandContext,
   ProjectCommandContext,
 } from "./commandHandlerUtils";
-import { completion } from "./completion";
+import { completion, completionInstall } from "./completion";
+import { config } from "./config";
+import { configDebug } from "./configDebug";
 import {
   listScripts,
   workspaceInfo,
@@ -13,9 +16,14 @@ import {
   listTags,
   tagInfo,
 } from "./handleSimpleCommands";
-import { listAffected } from "./listAffected";
+import { affectedList, listAffectedDeprecated } from "./listAffected";
 import { mcpServer } from "./mcp";
-import { runAffected, runInteractive, runScript } from "./runScript";
+import {
+  affectedRun,
+  runAffectedDeprecated,
+  runInteractive,
+  runScript,
+} from "./runScript";
 import { verify } from "./verify";
 
 export const defineGlobalCommands = (context: GlobalCommandContext) => {
@@ -23,6 +31,7 @@ export const defineGlobalCommands = (context: GlobalCommandContext) => {
   doctor(context);
   addSkills(context);
   completion(context);
+  completionInstall(context);
 };
 
 export const defineProjectCommands = (context: ProjectCommandContext) => {
@@ -33,8 +42,13 @@ export const defineProjectCommands = (context: ProjectCommandContext) => {
   listTags(context);
   tagInfo(context);
   runScript(context);
-  listAffected(context);
-  runAffected(context);
+  listAffectedDeprecated(context);
+  runAffectedDeprecated(context);
+  affected(context);
+  affectedList(context);
+  affectedRun(context);
   runInteractive(context);
   verify(context);
+  config(context);
+  configDebug(context);
 };

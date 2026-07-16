@@ -133,7 +133,7 @@ describe("bun.lock utilities", () => {
 
       expect(
         projectBunLock.workspaces["workspaces/packages/pacwich"].name,
-      ).toBe("pacwich");
+      ).toBe("pacwich_local");
       expect(
         projectBunLock.workspaces["workspaces/web/documentation-website"].name,
       ).toBe("@pacwich/documentation-website");

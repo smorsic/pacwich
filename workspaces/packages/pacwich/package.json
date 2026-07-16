@@ -1,6 +1,6 @@
 {
-  "name": "pacwich",
-  "version": "0.4.0",
+  "name": "pacwich_local",
+  "version": "0.5.0",
   "exports": {
     ".": "./src/index.ts",
     "./cli": "./src/cli/index.ts",
@@ -70,6 +70,7 @@
     "ajv": "catalog:pacwich-dev",
     "dts-bundle-generator": "catalog:pacwich-dev",
     "knip": "catalog:pacwich-dev",
+    "pacwich": "file:.",
     "vitest": "catalog:pacwich-dev"
   },
   "dependencies": {

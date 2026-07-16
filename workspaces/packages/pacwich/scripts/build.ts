@@ -16,7 +16,7 @@ import { createScriptLogger } from "@pacwich/meta/util";
 import { createRslib, mergeRslibConfig, type RslibConfig } from "@rslib/core";
 import { $ } from "bun";
 import { generateDtsBundle } from "dts-bundle-generator";
-import { createFileSystemProject } from "pacwich";
+import { createFileSystemProject } from "pacwich_local";
 
 import rsLibConfigRaw, { IS_TEST_BUILD, DIST_PATH } from "../rslib.config.ts";
 
@@ -31,7 +31,6 @@ const logger = createScriptLogger({ name: "Build" });
 
 const processPackageJson = () => {
   const {
-    name,
     version,
     description,
     exports,
@@ -51,7 +50,6 @@ const processPackageJson = () => {
   return {
     dependencies,
     inputPackageJson: {
-      name,
       version,
       description,
       type,
@@ -64,7 +62,7 @@ const processPackageJson = () => {
       scripts,
     },
     outputPackageJson: {
-      name,
+      name: "pacwich",
       version,
       description,
       type,

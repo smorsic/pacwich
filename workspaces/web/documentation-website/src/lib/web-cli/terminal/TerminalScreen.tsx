@@ -98,6 +98,16 @@ export const TerminalScreen = ({ onTerminalResize }: TerminalScreenProps) => {
     const fitAddon = new FitAddon();
     terminal.loadAddon(fitAddon);
     terminal.open(terminalDivRef.current);
+    // xterm's hidden `.xterm-helper-textarea` stays tab-focusable even with
+    // `disableStdin: true`, eating a Tab stop between the view-selector tabs
+    // and the real command input below (and its own boundary-focus listeners
+    // can trap Tab there entirely). This display-only terminal has no use
+    // for it.
+    const helperTextarea =
+      terminalDivRef.current.querySelector<HTMLTextAreaElement>(
+        ".xterm-helper-textarea",
+      );
+    if (helperTextarea) helperTextarea.tabIndex = -1;
     terminal.write("\x1b[?25l");
 
     const fitAndNotify = () => {

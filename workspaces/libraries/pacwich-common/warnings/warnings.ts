@@ -5,6 +5,10 @@ const TEMPLATES = {
   VerifyIssue: "{message}",
   DeprecatedNoPrefixFlag:
     "--no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.",
+  DeprecatedListAffectedCliCommand:
+    "list-affected is deprecated and will be removed in a future version. Use `pacwich affected list` instead.",
+  DeprecatedRunAffectedCliCommand:
+    "run-affected is deprecated and will be removed in a future version. Use `pacwich affected run` instead.",
   MultipleConfigsFound: "Found multiple {configName} configs:\n{details}",
   InvalidCliScriptOutputStyleEnvVar:
     "Ignoring invalid PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT value {envValue} (expected one of: {values}).",

@@ -148,6 +148,17 @@ h1#web-cli {
   filter: brightness(1.25);
 }
 
+/*
+ * A positive offset (unlike the inset ring on the view-selector tabs above)
+ * draws outside the button, over the surrounding form's own background
+ * rather than the button's own --rp-c-link fill, so it stays visible without
+ * needing a per-state color override.
+ */
+.web-cli-input-submit:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: 2px;
+}
+
 .web-cli-input-submit:disabled {
   opacity: 0.5;
   background-color: var(--rp-c-text-3) !important;
@@ -181,6 +192,11 @@ h1#web-cli {
 
 .web-cli-terminal-example-button:focus {
   filter: brightness(1.25);
+}
+
+.web-cli-terminal-example-button:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: 2px;
 }
 
 .web-cli-terminal-examples-content {
@@ -380,4 +396,14 @@ button.web-cli-tree-node:hover {
 .web-cli-view-selector-button:focus-visible {
   outline: 2px solid var(--rp-c-link);
   outline-offset: -2px;
+}
+
+/*
+ * The selected tab's fill is the same --rp-c-link the ring above uses, so an
+ * inset ring there is invisible against its own background. Swap to the
+ * token already used for this tab's own text color, which by construction
+ * already contrasts against --rp-c-link.
+ */
+.web-cli-view-selector-button.selected:focus-visible {
+  outline-color: var(--rp-c-code-block-bg);
 }

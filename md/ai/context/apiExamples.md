@@ -58,27 +58,47 @@ const { output, exit } = project.runWorkspaceScript({
   interactive: false,
 });
 
-const { output, summary, workspaces } = project.runScriptAcrossWorkspaces({
-  script: "lint",
-  workspacePatterns: [
-    "alias:my-alias-pattern-*",
-    "path:my-glob/**/*",
-    "workspace-name-a",
-    "workspace-alias-b",
-  ],
-  parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
-  // same as for runWorkspaceScript
-  args: ["--my", "--appended", "--args"],
-  // Optional, callback when script starts, skips, or exits
-  onScriptEvent: (event, { workspace, exitResult }) => {
-    // event: "start", "skip", "exit"
+const { output, summary, workspaces } = await project.runScriptAcrossWorkspaces(
+  {
+    script: "lint",
+    workspacePatterns: [
+      "alias:my-alias-pattern-*",
+      "path:my-glob/**/*",
+      "workspace-name-a",
+      "workspace-alias-b",
+    ],
+    parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+    // same as for runWorkspaceScript
+    args: ["--my", "--appended", "--args"],
+    // Optional, callback when script starts, skips, or exits
+    onScriptEvent: (event, { workspace, exitResult }) => {
+      // event: "start", "skip", "exit"
+    },
   },
-});
+);
+
+// Raw byte output also available via output.bytes()
+for await (const { metadata, chunk } of output.text()) {
+  console.log(metadata.streamName); // stdout/stderr
+  console.log(metadata.workspace); // Workspace
+  console.log(chunk); // string content
+}
+
+const {
+  scriptResults, // array of script exit details
+  allSuccess,
+  durationMs,
+  startTimeISO,
+  endTimeISO,
+  successCount,
+  failureCount,
+  totalCount,
+} = await summary;
 
 // Determine affected workspaces — git mode (default)
-project.determineAffectedWorkspaces({
+const { workspaceResults } = await project.determineAffectedWorkspaces({
   diffSource: "git",
   // optional: resolve inputs for a specific script (uses scripts[name].inputs)
   script: "build",
@@ -96,8 +116,12 @@ project.determineAffectedWorkspaces({
   },
 });
 
+workspaceResults.forEach((result) => {
+  console.log(result.workspace, result.isAffected, result.affectedReasons);
+});
+
 // Determine affected workspaces — fileList mode (bypass git)
-project.determineAffectedWorkspaces({
+const fileListAffected = await project.determineAffectedWorkspaces({
   diffSource: "fileList",
   // paths, directories, or globs (relative to project root); '!' to exclude
   changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
@@ -106,13 +130,18 @@ project.determineAffectedWorkspaces({
 // Run a script across affected workspaces. Accepts the same affected options
 // as determineAffectedWorkspaces, plus the script-execution options from
 // runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
-project.runAffectedWorkspaceScript({
-  script: "build",
-  diffSource: "git",
-  diffOptions: { baseRef: "main", ignoreUncommitted: true },
-  parallel: { max: 2 },
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
+// Has same return type as runScriptAcrossWorkspaces.
+await project.runAffectedWorkspaceScript({
+  affectedOptions: {
+    diffSource: "git",
+    diffOptions: { baseRef: "main", ignoreUncommitted: true },
+  },
+  scriptOptions: {
+    script: "my-script",
+    parallel: { max: 2 },
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+  },
 });
 
 // Detect implicit workspace dependencies (imports of other workspaces'

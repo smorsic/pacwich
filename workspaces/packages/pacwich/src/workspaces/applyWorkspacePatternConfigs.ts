@@ -4,7 +4,9 @@ import type {
   WorkspacePatternConfigEntry,
 } from "@pacwich/common/config";
 import { mergeWorkspaceConfig, resolveWorkspaceConfig } from "../config";
+import { isPacwichError, prefixPacwichErrorMessage } from "../internal/core";
 import type { WorkspaceMap } from "./dependencyGraph";
+import { WORKSPACE_ERRORS } from "./errors";
 import type { Workspace } from "./workspace";
 import { matchWorkspacesByPatterns } from "./workspacePattern";
 
@@ -38,8 +40,9 @@ export const applyWorkspacePatternConfigs = (
   workspaceAliases: Record<string, string>,
   patternConfigs: WorkspacePatternConfigEntry[],
   rootWorkspace: Workspace,
+  projectConfigPath?: string,
 ): void => {
-  for (const entry of patternConfigs) {
+  patternConfigs.forEach((entry, entryIndex) => {
     const matched = matchWorkspacesByPatterns(
       entry.patterns,
       workspaces,
@@ -50,17 +53,30 @@ export const applyWorkspacePatternConfigs = (
       const mapEntry = workspaceMap[workspace.name];
       const prevConfig = mapEntry.config;
 
-      const configToMerge =
-        typeof entry.config === "function"
-          ? entry.config(makeContext(workspace), prevConfig)
-          : entry.config;
+      let resolved: ResolvedWorkspaceConfig;
+      try {
+        const configToMerge =
+          typeof entry.config === "function"
+            ? entry.config(makeContext(workspace), prevConfig)
+            : entry.config;
 
-      const resolved = resolveWorkspaceConfig(
-        mergeWorkspaceConfig(
-          resolvedToWorkspaceConfig(prevConfig),
-          configToMerge,
-        ),
-      );
+        resolved = resolveWorkspaceConfig(
+          mergeWorkspaceConfig(
+            resolvedToWorkspaceConfig(prevConfig),
+            configToMerge,
+          ),
+        );
+      } catch (error) {
+        const prefix = `${projectConfigPath ?? "project config"}: workspacePatternConfigs[${entryIndex}] (workspace ${JSON.stringify(workspace.name)})`;
+        if (isPacwichError(error)) {
+          throw prefixPacwichErrorMessage(error, prefix);
+        }
+        // Non-Pacwich throws (e.g. a bug in a user's factory function)
+        // would otherwise lose the entry/workspace context entirely
+        throw new WORKSPACE_ERRORS.WorkspacePatternConfigError(
+          `${prefix}: ${(error as Error).message}`,
+        );
+      }
 
       // Register any new aliases for validation
       const previousAliases = new Set(workspace.aliases);
@@ -76,5 +92,5 @@ export const applyWorkspacePatternConfigs = (
 
       mapEntry.config = resolved;
     }
-  }
+  });
 };

@@ -40,6 +40,16 @@ contributions are expected to match. You might also review
 [the same document](./md/ai/context/_development.md)
 of development guidelines used for agents.
 
+## Local Agent Skills
+
+Skills are centralized in `.agents/skills`.
+
+- doc-updates: Centralizes the task for writing thorough documentation changes
+- spec-verification: Runs agentic QA, instructing to only read documentation as an end user and manually test using sandbox shells
+- code-quiz: Pop quiz on one random file/symbol from the source code
+
+## Development Commands
+
 Some local commands you may run first to help with checks:
 
 - `bun format` - run Prettier

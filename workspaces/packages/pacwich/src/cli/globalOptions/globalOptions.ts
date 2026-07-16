@@ -210,7 +210,9 @@ export const initializeWithGlobalOptions = (
 
   program.allowUnknownOption(false);
 
-  const commandToken = (programmatic ? operands : operands.slice(2))[0];
+  const relevantOperands = programmatic ? operands : operands.slice(2);
+  const commandToken = relevantOperands[0];
+  const nextCommandToken = relevantOperands[1];
 
   const options = program.opts() as CliGlobalOptions;
 
@@ -220,7 +222,7 @@ export const initializeWithGlobalOptions = (
       cwd,
     },
     {
-      skipProjectLoad: isGlobalCliCommandToken(commandToken),
+      skipProjectLoad: isGlobalCliCommandToken(commandToken, nextCommandToken),
       logLevelExplicit: program.getOptionValueSource("logLevel") === "cli",
     },
   );

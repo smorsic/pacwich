@@ -148,6 +148,9 @@ describe("planCompletion — commands", () => {
     expect(values).toContain("run"); // alias
     expect(values).toContain("doctor");
     expect(values).toContain("completion");
+    expect(values).toContain("affected");
+    // A subcommand-only word never leaks into the top-level offering.
+    expect(values).not.toContain("install");
   });
 
   test("a partial command still offers the command group (shell filters)", () => {
@@ -350,10 +353,16 @@ describe("planCompletion — single-positional commands", () => {
     ).toBeDefined();
   });
 
-  test("completion completes the shell name and the install action", () => {
-    expect(
-      staticValues(staticGroup(planCompletion(["completion", ""]), "shell")),
-    ).toEqual(["bash", "zsh", "fish", "install"]);
+  test("completion completes the shell name and its subcommand, as separate groups", () => {
+    const groups = planCompletion(["completion", ""]);
+    expect(staticValues(staticGroup(groups, "shell"))).toEqual([
+      "bash",
+      "zsh",
+      "fish",
+    ]);
+    expect(staticValues(staticGroup(groups, "subcommand"))).toEqual([
+      "install",
+    ]);
   });
 
   test("completion install <TAB> completes the shell to install for", () => {
@@ -362,6 +371,39 @@ describe("planCompletion — single-positional commands", () => {
         staticGroup(planCompletion(["completion", "install", ""]), "shell"),
       ),
     ).toEqual(["bash", "zsh", "fish"]);
+    // The parent's own shell-print positional does not leak into the child.
+    expect(
+      staticGroup(planCompletion(["completion", "install", ""]), "subcommand"),
+    ).toBeUndefined();
+  });
+});
+
+describe("planCompletion: parent/child commands", () => {
+  test("affected <TAB> offers its subcommands and their aliases", () => {
+    expect(
+      staticValues(staticGroup(planCompletion(["affected", ""]), "subcommand")),
+    ).toEqual(["list", "ls", "run"]);
+  });
+
+  test("a bare subcommand word does not resolve at the top level", () => {
+    // "install"/"list"/"run" (as affected's children) only mean anything
+    // once preceded by their parent, so an empty/partial line still offers
+    // the full top-level command group.
+    const group = staticGroup(planCompletion(["install", ""]), "command");
+    expect(group).toBeDefined();
+  });
+
+  test("affected list <TAB> falls through to that child's own options", () => {
+    const groups = planCompletion(["affected", "list", "-"]);
+    expect(staticValues(staticGroup(groups, "command-option"))).toContain(
+      "--explain",
+    );
+  });
+
+  test("affected run <TAB> completes scripts, like run-affected", () => {
+    expect(
+      projectGroup(planCompletion(["affected", "run", ""]), "script"),
+    ).toBeDefined();
   });
 });
 

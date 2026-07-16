@@ -1,0 +1,9 @@
+{
+  "workspacePatternConfigs": [
+    {
+      "patterns": ["*"],
+      // Intentionally invalid: alias must be a string or array
+      "config": { "alias": 5 }
+    }
+  ]
+}

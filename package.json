@@ -95,7 +95,7 @@
     "husky": "^9.1.7",
     "json-schema-to-ts": "^3.1.1",
     "lint-staged": "^17.0.8",
-    "pacwich": "workspace:*",
+    "pacwich_local": "workspace:*",
     "portless": "^0.13.1",
     "prettier": "^3.8.3",
     "typescript": "^5.9.3",

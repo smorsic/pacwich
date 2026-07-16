@@ -38,12 +38,12 @@ export const EXAMPLE_COMMANDS = [
   {
     name: "List Affected Workspaces",
     description: "List all workspaces affected by changes",
-    command: "list-affected --files='packages/utils/**/*.ts'",
+    command: "affected list --files='packages/utils/**/*.ts'",
   },
   {
     name: "Explain Affected Workspaces",
     description: "List all workspaces affected by changes",
-    command: "list-affected --files='packages/utils/**/*.ts' --explain",
+    command: "affected list --files='packages/utils/**/*.ts' --explain",
   },
   {
     name: "Run Script - build all workspaces",
@@ -95,7 +95,7 @@ export const EXAMPLE_COMMANDS = [
   {
     name: "Run Script - Run Affected Workspaces",
     description: "Run a script for all workspaces affected by changes",
-    command: "run-affected build --files='packages/core/**/*.ts'",
+    command: "affected run build --files='packages/core/**/*.ts'",
   },
   {
     name: "Include the Root workspace",

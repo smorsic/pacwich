@@ -87,52 +87,59 @@ pacwich ri "sudo my-interactive-script" my-workspace-name-or-alias --inline -- m
 pacwich ri --script="my-interactive-script" --workspace="my-workspace-name-or-alias"
 
 # List affected workspaces (default: git diff HEAD vs the configured base ref, "main" by default)
-pacwich list-affected
-pacwich ls-affected # alias
+# `list-affected`/`ls-affected` are deprecated forms of the same command
+pacwich affected list
 
 # Compare specific git refs
-pacwich ls-affected --base=my-branch-a --head=my-branch-b
-pacwich ls-affected -B my-branch-a -H my-branch-b # short forms
+pacwich affected list --base=my-branch-a --head=my-branch-b
+pacwich affected list -B my-branch-a -H my-branch-b # short forms
 
 # Resolve inputs for a specific script (uses scripts[name].inputs when configured)
-pacwich ls-affected --script=build
+pacwich affected list --script=build
 
 # Ignore some uncommitted changes (uncommitted included by default)
-pacwich ls-affected --ignore-uncommitted # all of: staged, unstaged, untracked
-pacwich ls-affected --ignore-untracked
-pacwich ls-affected --ignore-unstaged
-pacwich ls-affected --ignore-staged
+pacwich affected list --ignore-uncommitted # all of: staged, unstaged, untracked
+pacwich affected list --ignore-untracked
+pacwich affected list --ignore-unstaged
+pacwich affected list --ignore-staged
 
 # Skip workspace dep cascade (only direct file/external-dep changes flag a workspace)
-pacwich ls-affected --ignore-workspace-deps
+pacwich affected list --ignore-workspace-deps
 
 # Skip lockfile-based external dep version tracking
-pacwich ls-affected --ignore-external-deps
+pacwich affected list --ignore-external-deps
 
 # Bypass git entirely with an explicit list of changed files
 # (paths, dirs, globs; '!' to exclude; whitespace-separated)
-pacwich ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
-pacwich ls-affected -F "packages/a/**/*.ts !packages/a/**/*.test.ts"
+pacwich affected list --files="packages/example/**/*.ts packages/example/my-file.json"
+pacwich affected list -F "packages/a/**/*.ts !packages/a/**/*.test.ts"
 
 # Per-workspace summary of why each workspace is affected
-pacwich ls-affected --explain
-pacwich ls-affected -e
+pacwich affected list --explain
+pacwich affected list -e
 
 # Full per-file changes and dep cascade chain for each affected workspace
-pacwich ls-affected --explain --detailed
-pacwich ls-affected -e -D
+pacwich affected list --explain --detailed
+pacwich affected list -e -D
 
 # JSON output (with --explain produces the full result object)
-pacwich ls-affected --json --pretty
-pacwich ls-affected --explain --json --pretty
+pacwich affected list --json --pretty
+pacwich affected list --explain --json --pretty
 
 # Run a script across affected workspaces (accepts the same affected options
-# as ls-affected, plus the same script-execution options as run-script:
+# as affected list, plus the same script-execution options as run-script:
 # --parallel, --dep-order, --args, --output-style, --inline, etc.)
-pacwich run-affected build
-pacwich run-affected build --base=my-branch --ignore-uncommitted --dep-order
-pacwich run-affected build --files="packages/a/src/**/*.ts" --parallel=2
-pacwich run-affected "bun build" --inline --inline-name=build # inline command form
+#
+# `run-affected` is a deprecated form of the same command
+pacwich affected run build
+pacwich affected run build --base=my-branch --ignore-uncommitted --dep-order
+pacwich affected run build --files="packages/a/src/**/*.ts" --parallel=2
+pacwich affected run "bun build" --inline --inline-name=build # inline command form
+
+# Aliases
+pacwich affected ls
+pacwich af ls
+pacwich af run
 
 # Detect implicit workspace dependencies (imports of other workspaces'
 # package names that aren't declared in the importing workspace's package.json).
@@ -143,6 +150,13 @@ pacwich verify my-workspace-name "tag:my-tag" # limit to a subset via workspace 
 pacwich verify --strict # exit non-zero on any finding (default warns and exits 0)
 pacwich verify -s # short form
 pacwich verify --json --pretty # emit the full structured VerifyResult
+
+# print all project and workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty
+pacwich config debug --project # project config only
+pacwich config debug --workspace="my-name-or-alias" # single workspace only
+pacwich config debug --workspace-patterns="my-pattern-*" # workspaces config only
 
 # Print diagnostic info (runtime, OS, shell, installed package manager versions, etc.)
 pacwich doctor

@@ -28,21 +28,59 @@ type Std = {
 const makeStd = (columns: number, rows: number): Std => ({
   columns,
   rows,
-  isTTY: false,
+  // Reporting a real TTY here is what makes pacwich's `getDefaultOutputStyle()`
+  // pick "grouped" (its live-updating, cursor-redrawing renderer) instead of
+  // falling back to plain `[workspace] text` lines. Its raw ANSI cursor-movement
+  // escapes flow through `write` unmodified and xterm.js renders them exactly
+  // like a real terminal would, so no actual PTY is needed to get that output.
+  isTTY: true,
   write: () => true,
 });
+
+// Grouped mode reads `process.stdin.on("data", ...)` unconditionally (it's
+// how it catches raw Ctrl+C/Ctrl+\ while it owns the tty) even though the web
+// CLI never forwards live keystrokes into a running command — the listener
+// just never fires. `pause`/`setRawMode`/`unref` are the shutdown path
+// (`tuiTerminal.ts`'s `resetTuiTerminalState`) and only need to not throw.
+const makeStdin = () => {
+  const stdin = {
+    isTTY: true,
+    on: () => stdin,
+    once: () => stdin,
+    removeListener: () => stdin,
+    pause: () => stdin,
+    resume: () => stdin,
+    setRawMode: () => stdin,
+    unref: () => stdin,
+  };
+  return stdin;
+};
 
 const noop = () => globalThis.process;
 
 /**
  * Install (once) a `process` global suitable for running the CLI. Returns the
- * same object on repeat calls so dimensions can be tweaked between runs.
+ * same object on repeat calls, updating stdout/stderr dimensions in place
+ * each time so a live terminal resize is reflected on the next run.
  */
-export const installProcessShim = (): NodeJS.Process => {
+export const installProcessShim = (dimensions?: {
+  columns: number;
+  rows: number;
+}): NodeJS.Process => {
   const existing = (globalThis as { process?: NodeJS.Process }).process;
   if (existing && (existing as { __pacwichShim?: boolean }).__pacwichShim) {
+    if (dimensions) {
+      const { stdout, stderr } = existing as unknown as {
+        stdout: Std;
+        stderr: Std;
+      };
+      stdout.columns = stderr.columns = dimensions.columns;
+      stdout.rows = stderr.rows = dimensions.rows;
+    }
     return existing;
   }
+
+  const { columns = 80, rows = 30 } = dimensions ?? {};
 
   const proc = {
     __pacwichShim: true,
@@ -52,13 +90,15 @@ export const installProcessShim = (): NodeJS.Process => {
     env: { NODE_ENV: "production" } as Record<string, string>,
     version: "v24.15.0",
     versions: { node: "24.15.0" } as Record<string, string>,
-    stdout: makeStd(80, 30),
-    stderr: makeStd(80, 30),
+    stdout: makeStd(columns, rows),
+    stderr: makeStd(columns, rows),
+    stdin: makeStdin(),
     cwd: () => "/project",
     chdir: () => undefined,
     exit: (code = 0) => {
       throw new ProcessExit(code);
     },
+    kill: () => true,
     nextTick: (fn: (...a: unknown[]) => void, ...args: unknown[]) =>
       queueMicrotask(() => fn(...args)),
     on: noop,

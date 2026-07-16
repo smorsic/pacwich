@@ -16,6 +16,19 @@ export const isPacwichError = (value: unknown): value is PacwichError =>
     true;
 
 /**
+ * Prefix a {@link PacwichError}'s message
+ */
+export const prefixPacwichErrorMessage = (
+  error: unknown,
+  prefix: string,
+): unknown => {
+  if (isPacwichError(error)) {
+    error.message = `${prefix}: ${error.message}`;
+  }
+  return error;
+};
+
+/**
  * Base class for every error pacwich throws that is a subclass of Error.
  * Each feature's error classes (collected in `PACWICH_ERRORS`) extend this,
  * so a single `instanceof PacwichError` catch handles all of them.

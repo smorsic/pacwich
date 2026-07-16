@@ -142,6 +142,12 @@ export default defineConfig({
           pluginNodePolyfill({
             globals: { process: false, Buffer: true },
             protocolImports: true,
+            // The plugin's own isServer check (which normally skips
+            // polyfilling for a Node-target build) doesn't correctly detect
+            // this as a client build when registered inside
+            // builderConfig.environments.web instead of at the config root
+            // — force it on, since this environment IS the client bundle.
+            force: true,
           }),
         ],
         resolve: {
@@ -181,21 +187,38 @@ export default defineConfig({
       cleanDistPath: true,
     },
     source: {
+      // Defined as individual `process.env.X` paths, not a single `process`
+      // key replacing the whole identifier — the latter clobbered every
+      // `process.on`/`.exit`/`.stdout` reference site-wide (including inside
+      // the bundled pacwich CLI powering /web-cli), since Rsbuild's define
+      // does a literal AST substitution of whatever key you give it.
       define: {
-        process: `({
-          env: {
-            YEAR: ${JSON.stringify(new Date().getFullYear())},
-            BUILD_ID: ${JSON.stringify(process.env.BUILD_ID ?? "(no build ID)")},
-            BWUNSTER_ASCII: ${JSON.stringify(BWUNSTER_ASCII)},
-            PACWICH_WEB_SERVICE_BASE_URL: ${JSON.stringify(process.env.PACWICH_WEB_SERVICE_BASE_URL ?? "http://localhost:8080")},
-            PACWICH_DOCS_ENV: ${JSON.stringify(process.env.PACWICH_DOCS_ENV ?? "production")},
-            BLOG_URL: ${JSON.stringify(BLOG_URL)},
-          },
-        })`,
+        "process.env.YEAR": JSON.stringify(new Date().getFullYear()),
+        "process.env.BUILD_ID": JSON.stringify(
+          process.env.BUILD_ID ?? "(no build ID)",
+        ),
+        "process.env.BWUNSTER_ASCII": JSON.stringify(BWUNSTER_ASCII),
+        "process.env.PACWICH_DOCS_ENV": JSON.stringify(
+          process.env.PACWICH_DOCS_ENV ?? "production",
+        ),
+        "process.env.BLOG_URL": JSON.stringify(BLOG_URL),
       },
     },
     html: {
       tags: [
+        // Safety net, runs before any bundled JS: a bare `process.env.X`
+        // reference anywhere on the site (outside the specific paths listed
+        // in source.define above) would otherwise throw "process is not
+        // defined" in the browser — e.g. @pacwich/common/version reading
+        // process.env._IS_PACWICH_LOCAL_SOURCE. Only installs if nothing has
+        // defined `process` yet, so it never shadows the real Node process
+        // during SSR, and /web-cli's own runPacwichCli.ts still installs its
+        // fuller shim on top when a command actually runs.
+        {
+          tag: "script",
+          children:
+            "if(typeof window.process==='undefined'){window.process={env:{}};}",
+        },
         ...(process.env.PACWICH_DOCS_ENV === "development"
           ? [
               {

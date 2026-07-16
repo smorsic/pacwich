@@ -27,7 +27,6 @@ const registerListeners = () => {
 
   process.on("exit", (code) => {
     runAllHandlers(code);
-    process.exit(code);
   });
 
   for (const signal of [
@@ -42,14 +41,17 @@ const registerListeners = () => {
       runAllHandlers(signal);
       process.off(signal, handleSignal);
       /**
-       * Re-raise on self so the process exits with code 128+signum.
+       * Re-raise on self so the process exits with code 128+signum,
+       * but only when no other listeners remain. This prevents
+       * re-raising on a user's handler that could end up invoked twice.
+       *
        * We don't broadcast to the process group (kill(0, …)) because
-       * that would also signal whoever launched us (e.g. a test
-       * runner orchestrating workers), and the per-child cleanup in
-       * the subprocess registry already takes the descendant tree
-       * down via process-group kills.
+       * that would also signal whoever launched us. pacwich subprocesses
+       * clean themselves up.
        */
-      process.kill(process.pid, signal);
+      if (process.listeners(signal).length === 0) {
+        process.kill(process.pid, signal);
+      }
     };
     process.on(signal, handleSignal);
   }

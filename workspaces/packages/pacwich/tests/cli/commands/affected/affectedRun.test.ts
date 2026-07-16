@@ -4,8 +4,15 @@ import { resolvePackageManagerAdapter } from "../../../../src/packageManager/ada
 import { getProjectRoot } from "../../../fixtures/testProjects";
 import { assertOutputMatches, setupCliTest } from "../../../util/cliTestUtils";
 import { createGitFixture } from "../../../util/gitFixtures";
-import { getModuleDir } from "../../../util/runtime";
 import { describe, expect, test } from "../../../util/testFramework";
+
+/**
+ * `affected run` is the canonical command; these are its exhaustive tests.
+ * `./runAffectedDeprecated.test.ts` covers the deprecated `run-affected`
+ * alias with light sanity checks only, since it shares this same
+ * implementation (see handleRunAffected.ts's `handleRunAffected`) and will
+ * be removed in a future major version.
+ */
 
 // `--files` callsites that target the project's lockfile go through
 // `adapter.lockfile.projectRelativePath` rather than the literal
@@ -60,12 +67,51 @@ const TWO_WORKSPACE_PROJECT_FILES = [
   { path: "packages/b/package.json", content: PACKAGE_B_JSON },
 ];
 
-describe("CLI Run Affected", () => {
+describe("Affected: Run", () => {
+  describe("command and aliases", () => {
+    test("the `af` parent alias works", async () => {
+      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const result = await run(
+        "af",
+        "run",
+        "echo-script",
+        "--files",
+        "packages/a/src/index.ts",
+        "--parallel=false",
+        "--output-style=plain",
+      );
+      expect(result.exitCode).toBe(0);
+      const out = result.stdoutAndErr.sanitizedCompactLines;
+      expect(out).toContain("✅ a: echo-script");
+      expect(out).toContain("✅ b: echo-script");
+    });
+  });
+
+  describe("deprecation", () => {
+    test("does not log the run-affected deprecation warning", async () => {
+      const { run } = setupCliTest({ testProject: "affectedWithInputs" });
+      const result = await run(
+        "affected",
+        "run",
+        "echo-script",
+        "--files",
+        "packages/a/src/index.ts",
+        "--parallel=false",
+        "--output-style=plain",
+      );
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain(
+        "DeprecatedRunAffectedCliCommand",
+      );
+    });
+  });
+
   describe("script name resolution", () => {
     test("positional script name runs the script across affected workspaces", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/src/index.ts",
@@ -82,7 +128,8 @@ describe("CLI Run Affected", () => {
     test("--script flag is equivalent to the positional", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "--script=echo-script",
         "--files",
         "packages/a/src/index.ts",
@@ -98,7 +145,8 @@ describe("CLI Run Affected", () => {
     test("-S short form works", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "-S",
         "echo-script",
         "-F",
@@ -115,7 +163,8 @@ describe("CLI Run Affected", () => {
     test("errors when both positional script and --script are used", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--script=echo-script",
         "--files",
@@ -134,7 +183,8 @@ describe("CLI Run Affected", () => {
     test("emits a clean summary with no failures", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "unrelated/path.txt",
@@ -153,7 +203,8 @@ describe("CLI Run Affected", () => {
     test("only runs in affected workspaces (cascade through workspace deps)", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/src/index.ts",
@@ -170,7 +221,8 @@ describe("CLI Run Affected", () => {
     test("--ignore-workspace-deps blocks the cascade", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/src/index.ts",
@@ -192,7 +244,8 @@ describe("CLI Run Affected", () => {
       // Workspace 'a' has externals in this fixture and would be flagged via
       // the bun.lock heuristic without suppression
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "--script=does-not-exist",
         "--files",
         PROJECT_LOCKFILE_PATH,
@@ -211,7 +264,8 @@ describe("CLI Run Affected", () => {
       // 'a' has scripts.echo-script.inputs.files=["src/**/*"] (the default
       // inputs); a build/ change should NOT match echo-script's inputs.
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/build/out.js",
@@ -230,7 +284,8 @@ describe("CLI Run Affected", () => {
     test("--files + --base errors", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/src/index.ts",
@@ -247,7 +302,8 @@ describe("CLI Run Affected", () => {
     test("--files + --head errors", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "-F",
         "packages/a/src/index.ts",
@@ -276,7 +332,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--base",
         "HEAD~1",
@@ -305,7 +362,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "-B",
         "HEAD~1",
@@ -331,7 +389,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--base",
         "HEAD",
@@ -357,7 +416,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--base",
         "HEAD",
@@ -383,7 +443,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--base",
         "HEAD",
@@ -409,7 +470,8 @@ describe("CLI Run Affected", () => {
       });
       const { run } = setupCliTest({ workingDirectory: fixture.projectPath });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--base",
         "HEAD",
@@ -431,7 +493,8 @@ describe("CLI Run Affected", () => {
     test("--args appends args to the script command (passthrough to inline)", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "--inline",
         "echo with-arg",
         "--args=hello",
@@ -451,7 +514,8 @@ describe("CLI Run Affected", () => {
     test("--inline runs an inline command across affected workspaces", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "--inline",
         "echo inline-ok",
         "--files",
@@ -469,7 +533,8 @@ describe("CLI Run Affected", () => {
     test("--inline-name labels the inline run in the summary", async () => {
       const { run } = setupCliTest({ testProject: "affectedWithInputs" });
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "--inline",
         "echo named",
         "--inline-name=my-inline",
@@ -493,9 +558,10 @@ describe("CLI Run Affected", () => {
       // making the test's source-path read fail.
       const workingDirectory = getProjectRoot("affectedWithInputs");
       const { run } = setupCliTest({ workingDirectory });
-      const outfile = `tests/test-output/run-affected-${Date.now()}.json`;
+      const outfile = `tests/test-output/affected-run-${Date.now()}.json`;
       const result = await run(
-        "run-affected",
+        "affected",
+        "run",
         "echo-script",
         "--files",
         "packages/a/src/index.ts",

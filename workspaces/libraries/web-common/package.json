@@ -7,7 +7,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "pacwich": "workspace:*",
+    "pacwich_local": "workspace:*",
     "memfs": "^4.17.0",
     "path-browserify": "^1.0.1"
   }
