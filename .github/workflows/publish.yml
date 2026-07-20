@@ -45,7 +45,9 @@ jobs:
 
       - name: Run tests against build
         shell: bash
-        run: bun pw build-and-test:bun
+        run: |
+          bun pw build-and-test:bun
+          rm -rf workspaces/packages/pacwich/dist.test
 
       - name: Build package
         shell: bash
