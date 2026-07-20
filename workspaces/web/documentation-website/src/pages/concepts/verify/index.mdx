@@ -1,0 +1,43 @@
+---
+title: Verify
+titleSuffix: " | pacwich Documentation"
+description: "Verify | Concepts | Documentation for pacwich: Monorepo tooling on top of Bun, npm, and pnpm workspaces"
+pageType: doc
+sidebar: true
+outline: true
+footer: false
+---
+
+# Verify
+
+The `verify` feature exists to help detect issues with a project.
+
+## Detecting Missing Workspace Dependencies
+
+`pacwich` uses workspaces' `package.json` files to detect when a workspace [depends on another workspace](/concepts/workspace-dependencies). 
+
+In Bun and pnpm, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies.
+
+However, `npm` workspaces do not require explicit `package.json` dependencies, so `pacwich` cannot detect implicit dependencies without source code analysis.
+
+The `verify` feature performs simple analysis to detect imports/exports in JS/TS files from other workspaces not listed in a workspace's `package.json`. 
+
+Analysis is only performed on workspace [input files](/concepts/inputs). You can further configure the verify
+command's behavior at the [project level](/config/project) or [workspace level](/config/workspace).
+
+## Usage
+
+Adding `pacwich verify` to your root `package.json` `"prepare"` script, a pre-commit hook, or a CI pipeline can be especially helpful to catch issues. 
+
+`pacwich verify --strict` will fail if implicit workspace dependencies are detected.
+
+See the [CLI reference](/cli/commands#verify) or the [API reference](/api/reference#verify) for more information.
+
+**Example output**:
+```
+[pacwich WARN: VerifyIssue]: Workspace "a" imports "b" but does not declare it as a 
+dependency (packages/a/hello.ts:1).
+  Add "b": "workspace:*" to the "dependencies" field of packages/a/package.json.
+Verify finished with 1 warning.
+Re-run with --strict to make warnings fail, or address each warning above.
+```
