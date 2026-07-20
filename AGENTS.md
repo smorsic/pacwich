@@ -761,7 +761,7 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 - `workspace.dependencies` — names of workspace dependencies
 - `workspace.dependents` — names of workspaces that depend on this one
 
-`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`.
+`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`, and `verify: VerifyConfig`.
 
 ### Config merging behavior
 
@@ -1129,4 +1129,4 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 
 <!--End pacwich development-->
 
-<!--pacwich v0.5.0-->
+<!--pacwich v0.6.0-->

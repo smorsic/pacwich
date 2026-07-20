@@ -6,7 +6,7 @@
 
 # pacwich
 
-<sub>Latest: 0.5.0</sub>
+<sub>Latest: 0.6.0</sub>
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
@@ -106,6 +106,20 @@ npx pacwich --help
 bunx pacwich --help
 pnpm exec pacwich --help
 ```
+
+### The `verify` Feature
+
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace.
+
+In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies.
+
+However, **npm** workspaces do not require explicit `package.json` dependencies, so `pacwich` cannot detect implicit dependencies without source code analysis.
+
+The `verify` feature performs simple analysis to detect imports/exports in JS/TS files from other workspaces not listed in a workspace's `package.json`.
+
+Adding `pacwich verify` to a `"prepare"` script, pre-commit hook, CI pipeline, or similar can be especially helpful to catch issues.
+
+`pacwich verify --strict` will fail if implicit workspace dependencies are detected.
 
 ### CLI Quickstart
 
@@ -408,7 +422,7 @@ Workspace configs can be placed in a workspace's directory at `pacwich.workspace
 [Workspace configuration documentation here](https://pacwich.dev/config/workspace)
 
 ```typescript
-// pacwich.workspace.ts — place in a workspace directory
+// pacwich.workspace.ts - placed in a workspace directory
 
 // Also supported: pacwich.workspace.js, pacwich.workspace.json, pacwich.workspace.jsonc,
 // or a "pacwich" key in package.json
@@ -416,8 +430,12 @@ Workspace configs can be placed in a workspace's directory at `pacwich.workspace
 import { defineWorkspaceConfig } from "pacwich/config";
 
 export default defineWorkspaceConfig({
-  alias: "my-web-app", // shorthand name; use array for multiple
+  // Shorthand name. use array for multiple
+  // Must be unique across workspace names and other aliases
+  alias: "my-web-app",
+
   tags: ["app", "frontend"],
+
   // Optional, for configuring affected workspace resolution inputs
   // Applies to all scripts that don't configure their own inputs
   defaultInputs: {
@@ -429,6 +447,19 @@ export default defineWorkspaceConfig({
     // Dependency names (e.g. "react") to treat as dependencies (default: all)
     externalDependencies: ["react"],
   },
+
+  // Configure the verify feature for this workspace
+  // This is additive with any project-level verify configuration
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning, relative to the workspace path
+      // Use a leading / for project-relative paths
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
+  },
+
   scripts: {
     // lower order runs first in sequenced script execution
     build: {
@@ -440,6 +471,7 @@ export default defineWorkspaceConfig({
     },
     test: { order: 2 },
   },
+
   rules: {
     workspaceDependencies: {
       // Only "my-workspace" or workspaces tagged "lib" are allowed as dependencies
@@ -461,7 +493,8 @@ which can also apply workspace configs in bulk by using workspace patterns.
 [More on workspace pattern configs here](https://pacwich.dev/config/workspace-pattern-configs)
 
 ```typescript
-// pacwich.project.ts — place in your project root directory
+// pacwich.project.ts - placed in your project root directory
+
 // Also supported: pacwich.project.js, pacwich.project.json, pacwich.project.jsonc,
 // or a "pacwich-root" key in package.json
 
@@ -475,6 +508,16 @@ export default defineRootConfig({
     shell: "system",
     // default value for global --include-root-workspace option
     includeRootWorkspace: false,
+  },
+
+  // Configure the verify feature
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning across the project
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
   },
 
   // Apply workspace configs in bulk by workspace pattern, in order.
