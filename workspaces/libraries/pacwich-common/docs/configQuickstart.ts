@@ -76,7 +76,7 @@ import { defineWorkspaceConfig } from "pacwich/config";
 export default defineWorkspaceConfig({
   // Shorthand name. use array for multiple
   // Must be unique across workspace names and other aliases
-  alias: "my-web-app", 
+  alias: "my-web-app",
 
   tags: ["app", "frontend"],
 
