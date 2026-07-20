@@ -63,6 +63,25 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Windows - Disable Defender for CI paths
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $paths = @(
+            $env:GITHUB_WORKSPACE,
+            $env:RUNNER_TEMP,
+            $env:TEMP,
+            $env:TMP,
+            "$env:USERPROFILE\.bun"
+          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+          $processes = @('bun.exe', 'node.exe', 'npm.cmd', 'pnpm.cmd', 'git.exe')
+          foreach ($p in $paths)     { Add-MpPreference -ExclusionPath    $p -ErrorAction SilentlyContinue }
+          foreach ($p in $processes) { Add-MpPreference -ExclusionProcess $p -ErrorAction SilentlyContinue }
+          Write-Host "Defender exclusion paths:"
+          (Get-MpPreference).ExclusionPath
+          Write-Host "Defender exclusion processes:"
+          (Get-MpPreference).ExclusionProcess
+
       - uses: ./.github/actions/bootstrap
         with:
           bun-version: ${{ inputs.bun-version }}
