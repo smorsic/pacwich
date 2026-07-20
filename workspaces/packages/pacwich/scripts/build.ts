@@ -294,20 +294,31 @@ export const runBuild = async () => {
       path.resolve(DIST_PATH, "setupTests.ts"),
     );
 
-    // Mark the CLI entrypoint executable (no-op on Windows) and link
-    // the built package back into its own node_modules so test code can
-    // resolve `pacwich` against the build. `junction` works on Windows
-    // without elevated privileges; on POSIX the type argument is
-    // ignored and a regular symlink is created.
+    // Mark the CLI entrypoint executable (no-op on Windows)
     chmodSync(path.resolve(DIST_PATH, "bin/cli.js"), 0o755);
-    const nodeModulesDir = path.resolve(DIST_PATH, "node_modules");
-    mkdirSync(nodeModulesDir, { recursive: true });
-    const pacwichLink = path.resolve(nodeModulesDir, "pacwich");
-    rmSync(pacwichLink, { recursive: true, force: true });
-    symlinkSync(DIST_PATH, pacwichLink, "junction");
+
+    // Remove any pacwich self-link from a previous test build before
+    // installing, so the installer never walks a stale directory cycle
+    const pacwichPackageDir = path.resolve(DIST_PATH, "node_modules/pacwich");
+    rmSync(pacwichPackageDir, { recursive: true, force: true });
 
     logger.info("Installing test build dependencies...");
     await $`cd ${DIST_PATH} && bun install`;
+
+    // Link the build into its own node_modules so test code and spawned
+    // subprocesses can resolve "pacwich" against the build
+    mkdirSync(pacwichPackageDir, { recursive: true });
+    copyFileSync(
+      path.resolve(DIST_PATH, "package.json"),
+      path.resolve(pacwichPackageDir, "package.json"),
+    );
+    for (const subpath of ["src", "bin", "agents"]) {
+      symlinkSync(
+        path.resolve(DIST_PATH, subpath),
+        path.resolve(pacwichPackageDir, subpath),
+        "junction",
+      );
+    }
   }
 };
 
