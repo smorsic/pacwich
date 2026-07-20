@@ -25,6 +25,8 @@ The optional project configuration is the general configuration for a [project](
   {PROJECT_CONFIG_TYPE}
 </SyntaxHighlighter>
 
+<hr/>
+
 ### Defaults
 
 The values in <code>{CONFIG_DEFAULTS_KEY}</code> can also be set by [environment variables](/config/env-vars). Configuration values take precedence over environment variables.
@@ -36,11 +38,27 @@ The values in <code>{CONFIG_DEFAULTS_KEY}</code> can also be set by [environment
 * <code>{ENV_VARS_METADATA.affectedBaseRefDefault.projectConfigDefaultsKey}</code>: The default git base ref for [affected workspaces](/concepts/affected) resolution
   (this is <code>main</code> when not overridden)
 
+<hr/>
+
+### Verify
+
+See the [verify](/concepts/verify) page for more information on this feature.
+
+* `verify.workspaceDependencies.ignoreInputFiles`: Ignore these [input files](/concepts/inputs) for verification of workspace dependencies, relative to the project root.
+* `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`: Ignore imports/exports from these workspaces, using [workspace patterns](/concepts/workspace-patterns).
+
+The same options can be used in [workspace configs](/config/workspace). Workspace verify configuration
+is additive with the project-level config.
+
+<hr/>
+
 ### Workspace Pattern Configs
 
 You can set workspace configs in bulk by using workspace patterns in `workspacePatternConfigs`.
 
 See the [workspace pattern configs](/config/workspace-pattern-configs) page for more information.
+
+<hr/>
 
 ## Examples:
 ### 1. TypeScript/JavaScript file

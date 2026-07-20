@@ -26,14 +26,20 @@ See the [**workspace pattern configs**](/config/workspace-pattern-configs) page 
   {WORKSPACE_CONFIG_TYPE}
 </SyntaxHighlighter>
 
+<hr/>
+
 ### Alias
 
 **Aliases** are an alternate name or names for a workspace. See the [workspace aliases](/concepts/workspace-aliases) page for more information.
+
+<hr/>
 
 ### Tags
 
 **Tags** are simple strings that can be used to group workspaces together. They can be used
 in [workspace patterns](/concepts/workspace-patterns).
+
+<hr/>
 
 ### Default Inputs
 
@@ -42,6 +48,8 @@ such as for [affected workspaces](/concepts/affected) resolution. These are appl
 scripts in the workspace that don't configure their own inputs (see below).
 
 See the [inputs](/concepts/inputs) page for more information.
+
+<hr/>
 
 ### Scripts
 
@@ -58,6 +66,20 @@ The `scripts[name].inputs` option is used to set the inputs for the script, such
 
 See the [inputs](/concepts/inputs) page for more information.
 
+<hr/>
+
+### Verify
+
+See the [verify](/concepts/verify) page for more information on this feature.
+
+* `verify.workspaceDependencies.ignoreInputFiles`: Ignore these [input files](/concepts/inputs) for verification of workspace dependencies.
+* `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`: Ignore imports/exports from these workspaces, using [workspace patterns](/concepts/workspace-patterns).
+
+The same options can be used in the [project config](/config/project). Workspace verify configuration
+is additive with the project-level config.
+
+<hr/>
+
 ### Workspace Dependency Rules
 
 Using the `rules.workspaceDependencies` field, you can define rules for which workspaces are allowed to be dependencies,
@@ -72,6 +94,8 @@ You can also use [negated](/concepts/workspace-patterns#negation) workspace patt
 For example, you may disallow dependencies with the [tag](/config/workspace#tags) "backend" for a frontend workspace with `denyPatterns: ["tag:backend"]`.
 
 [Workspace dependencies](/concepts/workspace-dependencies) are explicitly defined in workspaces' `package.json` files.
+
+<hr/>
 
 ## Examples:
 ### 1. TypeScript/JavaScript file
