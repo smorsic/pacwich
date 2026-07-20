@@ -1,5 +1,6 @@
 export const PROJECT_CONFIG_QUICKSTART = `
-// pacwich.project.ts — place in your project root directory
+// pacwich.project.ts - placed in your project root directory
+
 // Also supported: pacwich.project.js, pacwich.project.json, pacwich.project.jsonc,
 // or a "pacwich-root" key in package.json
 
@@ -13,6 +14,16 @@ export default defineRootConfig({
     shell: "system",
     // default value for global --include-root-workspace option
     includeRootWorkspace: false,
+  },
+
+  // Configure the verify feature
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning across the project
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
   },
 
   // Apply workspace configs in bulk by workspace pattern, in order.
@@ -55,7 +66,7 @@ export default defineRootConfig({
 `.trim();
 
 export const WORKSPACE_CONFIG_QUICKSTART = `
-// pacwich.workspace.ts — place in a workspace directory
+// pacwich.workspace.ts - placed in a workspace directory
 
 // Also supported: pacwich.workspace.js, pacwich.workspace.json, pacwich.workspace.jsonc,
 // or a "pacwich" key in package.json
@@ -63,8 +74,12 @@ export const WORKSPACE_CONFIG_QUICKSTART = `
 import { defineWorkspaceConfig } from "pacwich/config";
 
 export default defineWorkspaceConfig({
-  alias: "my-web-app", // shorthand name; use array for multiple
+  // Shorthand name. use array for multiple
+  // Must be unique across workspace names and other aliases
+  alias: "my-web-app", 
+
   tags: ["app", "frontend"],
+
   // Optional, for configuring affected workspace resolution inputs
   // Applies to all scripts that don't configure their own inputs
   defaultInputs: {
@@ -76,6 +91,19 @@ export default defineWorkspaceConfig({
     // Dependency names (e.g. "react") to treat as dependencies (default: all)
     externalDependencies: ["react"],
   },
+
+  // Configure the verify feature for this workspace
+  // This is additive with any project-level verify configuration
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning, relative to the workspace path
+      // Use a leading / for project-relative paths
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
+  },
+
   scripts: {
     // lower order runs first in sequenced script execution
     build: {
@@ -87,6 +115,7 @@ export default defineWorkspaceConfig({
     },
     test: { order: 2 },
   },
+
   rules: {
     workspaceDependencies: {
       // Only "my-workspace" or workspaces tagged "lib" are allowed as dependencies
