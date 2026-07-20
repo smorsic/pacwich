@@ -2,6 +2,7 @@ import path from "path";
 import { LOAD_CONFIG_ERRORS } from "../../src/config";
 import {
   loadWorkspaceConfig,
+  resolveWorkspaceConfig,
   validateWorkspaceConfig,
   WORKSPACE_CONFIG_ERRORS,
 } from "../../src/config/workspaceConfig";
@@ -10,6 +11,13 @@ import { assembleProject } from "../../src/project/implementations/fileSystemPro
 import { getProjectRoot } from "../fixtures/testProjects";
 import { makeTestWorkspace, makeWorkspaceMapEntry } from "../util/testData";
 import { expect, test, describe } from "../util/testFramework";
+
+const DEFAULT_VERIFY = {
+  workspaceDependencies: {
+    ignoreInputFiles: [],
+    ignoreImportsFromWorkspacePatterns: [],
+  },
+};
 
 const adapter = resolvePackageManagerAdapter("bun");
 
@@ -37,6 +45,7 @@ describe("workspace config", () => {
         aliases: ["appA"],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {
           "all-workspaces": {
             order: 1,
@@ -56,6 +65,7 @@ describe("workspace config", () => {
         aliases: ["appB_file"],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {
           "all-workspaces": {
             order: 0,
@@ -78,6 +88,7 @@ describe("workspace config", () => {
         aliases: ["libA_file"],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {},
       });
     });
@@ -93,6 +104,7 @@ describe("workspace config", () => {
         aliases: ["libB", "libB2"],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {
           "all-workspaces": {
             order: 100,
@@ -115,6 +127,7 @@ describe("workspace config", () => {
         aliases: [],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {},
       });
     });
@@ -130,6 +143,7 @@ describe("workspace config", () => {
         aliases: [],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {},
       });
     });
@@ -145,6 +159,7 @@ describe("workspace config", () => {
         aliases: ["appA"],
         tags: [],
         rules: {},
+        verify: DEFAULT_VERIFY,
         scripts: {
           "all-workspaces": {
             order: 1,
@@ -327,6 +342,80 @@ describe("workspace config", () => {
         ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
       });
     });
+
+    describe("verify", () => {
+      test("accepts verify.workspaceDependencies with both fields", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["generated/**/*.ts"],
+                ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+              },
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts empty verify object", () => {
+        expect(() => validateWorkspaceConfig({ verify: {} })).not.toThrow();
+      });
+
+      test("throws when ignoreInputFiles contains non-strings", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            verify: {
+              workspaceDependencies: {
+                // @ts-expect-error - Invalid config
+                ignoreInputFiles: [123],
+              },
+            },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when ignoreImportsFromWorkspacePatterns contains non-strings", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            verify: {
+              workspaceDependencies: {
+                // @ts-expect-error - Invalid config
+                ignoreImportsFromWorkspacePatterns: [123],
+              },
+            },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when verify has unknown property", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            verify: { extra: ["a"] },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+    });
+  });
+
+  describe("resolveWorkspaceConfig", () => {
+    test("verify defaults to empty arrays when not provided", () => {
+      expect(resolveWorkspaceConfig({}).verify).toEqual(DEFAULT_VERIFY);
+    });
+
+    test("passes through a configured verify field, defaulting unset fields", () => {
+      const verify = {
+        workspaceDependencies: {
+          ignoreInputFiles: ["generated/**/*.ts"],
+        },
+      };
+      expect(resolveWorkspaceConfig({ verify }).verify).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: ["generated/**/*.ts"],
+          ignoreImportsFromWorkspacePatterns: [],
+        },
+      });
+    });
   });
 
   describe("loadWorkspaceConfig with invalid config", () => {
@@ -422,6 +511,7 @@ describe("workspace config", () => {
           "application-1a": makeWorkspaceMapEntry({
             alias: ["appA"],
             rules: {},
+            verify: DEFAULT_VERIFY,
             scripts: {
               "all-workspaces": {
                 order: 1,
@@ -548,6 +638,7 @@ describe("workspace config", () => {
           "application-1a": makeWorkspaceMapEntry({
             alias: ["appA"],
             rules: {},
+            verify: DEFAULT_VERIFY,
             scripts: {
               "all-workspaces": {
                 order: 1,
@@ -557,6 +648,7 @@ describe("workspace config", () => {
           "application-1b": makeWorkspaceMapEntry({
             alias: ["appB_file"],
             rules: {},
+            verify: DEFAULT_VERIFY,
             scripts: {
               "all-workspaces": {
                 order: 0,
@@ -573,6 +665,7 @@ describe("workspace config", () => {
           "library-1b": makeWorkspaceMapEntry({
             alias: ["libB", "libB2"],
             rules: {},
+            verify: DEFAULT_VERIFY,
             scripts: {
               "all-workspaces": {
                 order: 100,
@@ -617,6 +710,7 @@ describe("workspace config", () => {
         "application-1a": makeWorkspaceMapEntry({
           alias: ["appA"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,
@@ -626,6 +720,7 @@ describe("workspace config", () => {
         "application-1b": makeWorkspaceMapEntry({
           alias: ["appB"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "b-workspaces": {
               order: 0,
@@ -749,6 +844,7 @@ describe("workspace config", () => {
         "application-1a": makeWorkspaceMapEntry({
           alias: ["appA-ts"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,
@@ -758,6 +854,7 @@ describe("workspace config", () => {
         "application-1b": makeWorkspaceMapEntry({
           alias: ["appB-ts"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,
@@ -797,6 +894,7 @@ describe("workspace config", () => {
         "application-1a": makeWorkspaceMapEntry({
           alias: ["appA"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,
@@ -806,6 +904,7 @@ describe("workspace config", () => {
         "application-1b": makeWorkspaceMapEntry({
           alias: ["appB"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "b-workspaces": {
               order: 0,
@@ -843,6 +942,7 @@ describe("workspace config", () => {
         "application-1a": makeWorkspaceMapEntry({
           alias: ["appA-js"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,
@@ -852,6 +952,7 @@ describe("workspace config", () => {
         "application-1b": makeWorkspaceMapEntry({
           alias: ["appB-js"],
           rules: {},
+          verify: DEFAULT_VERIFY,
           scripts: {
             "all-workspaces": {
               order: 1,

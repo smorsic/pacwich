@@ -16,12 +16,14 @@ const resolvedToWorkspaceConfig = ({
   scripts,
   rules,
   defaultInputs,
+  verify,
 }: ResolvedWorkspaceConfig) => ({
   alias: aliases,
   tags,
   scripts,
   rules,
   ...(defaultInputs && { defaultInputs }),
+  verify,
 });
 
 const makeContext = (workspace: Workspace): RawWorkspace => ({

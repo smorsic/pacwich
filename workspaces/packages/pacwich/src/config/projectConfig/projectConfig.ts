@@ -1,7 +1,6 @@
 import {
   type ProjectConfig,
   type ResolvedProjectConfig,
-  type ResolvedProjectVerifyConfig,
 } from "@pacwich/common/config";
 import {
   OUTPUT_STYLE_VALUES,
@@ -18,6 +17,7 @@ import { determineParallelMax, resolveScriptShell } from "../../runScript";
 import { getUserEnvVar } from "../userEnvVars";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
+import { resolveVerifyConfig } from "../verifyConfig";
 import { validateWorkspaceConfig } from "../workspaceConfig/workspaceConfig";
 import { PROJECT_CONFIG_ERRORS } from "./errors";
 
@@ -83,14 +83,6 @@ const resolvePackageManagerConfigValue = (
   return "auto";
 };
 
-const resolveProjectVerifyConfig = (
-  config: ProjectConfig["verify"],
-): ResolvedProjectVerifyConfig => ({
-  workspaceDependencies: {
-    ignoreInputFiles: config?.workspaceDependencies?.ignoreInputFiles ?? [],
-  },
-});
-
 export const resolveProjectConfig = (
   config: ProjectConfig,
 ): ResolvedProjectConfig => {
@@ -128,6 +120,6 @@ export const resolveProjectConfig = (
       ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],
-    verify: resolveProjectVerifyConfig(config.verify),
+    verify: resolveVerifyConfig(config.verify),
   };
 };

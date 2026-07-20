@@ -1,10 +1,6 @@
 export type {
   ProjectConfig,
   ResolvedProjectConfig,
-  ProjectVerifyConfig,
-  ProjectVerifyWorkspaceDependenciesConfig,
-  ResolvedProjectVerifyConfig,
-  ResolvedProjectVerifyWorkspaceDependenciesConfig,
   WorkspaceConfig,
   WorkspaceDependenciesRule,
   ResolvedWorkspaceConfig,
@@ -14,6 +10,17 @@ export type {
   RawWorkspace,
   WorkspacePatternConfigFactory,
   WorkspacePatternConfigEntry,
+  VerifyConfig,
+  VerifyWorkspaceDependenciesConfig,
+  ResolvedVerifyConfig,
+  ResolvedVerifyWorkspaceDependenciesConfig,
+  ProjectVerifyConfig,
+  WorkspaceVerifyConfig,
+  ResolvedProjectVerifyConfig,
+  ResolvedWorkspaceVerifyConfig,
+  ProjectVerifyWorkspaceDependenciesConfig,
+  WorkspaceVerifyWorkspaceDependenciesConfig,
+  ResolvedProjectVerifyWorkspaceDependenciesConfig,
 } from "@pacwich/common/config";
 // Parameter value types referenced by the config field types above
 // (e.g. `ProjectConfig.defaults.parallelMax` / `.shell`,

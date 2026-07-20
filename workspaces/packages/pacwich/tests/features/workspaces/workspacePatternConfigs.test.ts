@@ -555,6 +555,38 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
       expect(allow.indexOf("c")).toBeLessThan(allow.indexOf("b"));
     });
 
+    test("local verify config entries appear before pattern config entries in merged config", () => {
+      // app-a in verifyWithWorkspaceIgnore has local verify
+      // ignoreInputFiles; the pattern config concatenates on top
+      const { workspaceMap } = assembleProject({
+        adapter,
+        rootDirectory: getProjectRoot("verifyWithWorkspaceIgnore"),
+        workspacePatternConfigs: [
+          {
+            patterns: ["app-a"],
+            config: {
+              verify: {
+                workspaceDependencies: {
+                  ignoreInputFiles: ["scripts/extra/**/*"],
+                  ignoreImportsFromWorkspacePatterns: ["tag:pattern-added"],
+                },
+              },
+            },
+          },
+        ],
+      });
+      const verifyConfig =
+        workspaceMap["app-a"].config.verify.workspaceDependencies;
+      expect(verifyConfig.ignoreInputFiles).toEqual([
+        "scripts/codegen/**/*",
+        "/packages/app-a/scripts/legacy/**/*.ts",
+        "scripts/extra/**/*",
+      ]);
+      expect(verifyConfig.ignoreImportsFromWorkspacePatterns).toEqual([
+        "tag:pattern-added",
+      ]);
+    });
+
     test("workspaceMap config reflects merged result of local config and pattern configs", () => {
       const { workspaceMap } = assembleProject({
         adapter,

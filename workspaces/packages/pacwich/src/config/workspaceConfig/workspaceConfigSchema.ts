@@ -68,6 +68,26 @@ export const WORKSPACE_CONFIG_JSON_SCHEMA = {
       },
     },
     defaultInputs: WORKSPACE_INPUTS_CONFIG_SCHEMA,
+    verify: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        workspaceDependencies: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            ignoreInputFiles: {
+              type: "array",
+              items: { type: "string" },
+            },
+            ignoreImportsFromWorkspacePatterns: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+        },
+      },
+    },
   },
 } as const satisfies JSONSchema;
 

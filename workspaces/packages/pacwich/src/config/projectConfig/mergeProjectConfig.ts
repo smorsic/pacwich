@@ -1,7 +1,5 @@
-import type {
-  ProjectConfig,
-  ProjectVerifyConfig,
-} from "@pacwich/common/config";
+import type { ProjectConfig } from "@pacwich/common/config";
+import { mergeVerifyConfig } from "../verifyConfig";
 
 /**
  * Lazy form of a {@link ProjectConfig} that receives the
@@ -21,41 +19,12 @@ export type ProjectConfigFactory = (prev: ProjectConfig) => ProjectConfig;
 export type ProjectConfigInput = ProjectConfig | ProjectConfigFactory;
 
 /**
- * Concatenate `verify.workspaceDependencies.ignoreInputFiles` arrays
- * across configs, preserving order and deduplicating exact matches.
- * Returns `undefined` when neither side contributes any verify config
- * so the merged result omits the key entirely.
- */
-const mergeVerifyConfig = (
-  base: ProjectVerifyConfig | undefined,
-  override: ProjectVerifyConfig | undefined,
-): ProjectVerifyConfig | undefined => {
-  if (!base && !override) return undefined;
-  const baseIgnore = base?.workspaceDependencies?.ignoreInputFiles ?? [];
-  const overrideIgnore =
-    override?.workspaceDependencies?.ignoreInputFiles ?? [];
-  if (baseIgnore.length === 0 && overrideIgnore.length === 0) {
-    if (!base?.workspaceDependencies && !override?.workspaceDependencies) {
-      return {};
-    }
-    return { workspaceDependencies: {} };
-  }
-  const seen = new Set<string>();
-  const merged: string[] = [];
-  for (const pattern of [...baseIgnore, ...overrideIgnore]) {
-    if (seen.has(pattern)) continue;
-    seen.add(pattern);
-    merged.push(pattern);
-  }
-  return { workspaceDependencies: { ignoreInputFiles: merged } };
-};
-
-/**
  * Merge two or more project configs left to right, with each
  * subsequent config taking precedence on scalar fields.
  * `workspacePatternConfigs` entries are concatenated.
- * `verify.workspaceDependencies.ignoreInputFiles` arrays are
- * concatenated and deduplicated. Any argument may be a
+ * `verify.workspaceDependencies` array fields (`ignoreInputFiles`,
+ * `ignoreImportsFromWorkspacePatterns`) are concatenated and
+ * deduplicated. Any argument may be a
  * {@link ProjectConfigFactory} receiving the accumulated config up to
  * that point.
  *
