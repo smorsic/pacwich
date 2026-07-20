@@ -1,0 +1,9 @@
+{
+  // Negated entry: verify strips the "!" with a warning and treats it
+  // as a plain ignore pattern.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": ["!scripts/codegen/**/*"]
+    }
+  }
+}

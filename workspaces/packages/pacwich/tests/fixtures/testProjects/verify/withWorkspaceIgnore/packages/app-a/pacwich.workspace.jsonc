@@ -1,0 +1,12 @@
+{
+  // Workspace-relative and project-relative (leading "/") ignore
+  // patterns, scoped to just this workspace's own scan.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": [
+        "scripts/codegen/**/*",
+        "/packages/app-a/scripts/legacy/**/*.ts"
+      ]
+    }
+  }
+}

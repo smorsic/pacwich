@@ -117,6 +117,11 @@ const TEST_PROJECTS = {
   verifySimple: "verify/simple",
   verifyWithIgnore: "verify/withIgnore",
   verifyWithRootWorkspace: "verify/withRootWorkspace",
+  verifyWithWorkspaceIgnore: "verify/withWorkspaceIgnore",
+  verifyWithImportIgnore: "verify/withImportIgnore",
+  verifyWithIgnoreWarnings: "verify/withIgnoreWarnings",
+  verifyWithMatchAllIgnore: "verify/withMatchAllIgnore",
+  verifyWithPatternConfigVerify: "verify/withPatternConfigVerify",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;
