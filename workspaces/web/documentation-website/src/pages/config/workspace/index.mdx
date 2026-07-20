@@ -110,7 +110,7 @@ or
 
 #### `mergeWorkspaceConfig` Utility
 You can use the `mergeWorkspaceConfig` function to merge multiple workspace configurations left to right, with each subsequent config taking precedence. 
-Objects are merged deeply, and array items are concatenated while keeping items unique.
+Arrays are concatenated while keeping items unique, while inputs (`defaultInputs` and `scripts[name].inputs`) are replaced entirely rather than merged.
 
 <SyntaxHighlighter language="typescript">
   {MERGE_WORKSPACE_CONFIG_EXAMPLE}

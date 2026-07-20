@@ -73,7 +73,7 @@ or
 
 #### `mergeProjectConfig` Utility
 You can use the `mergeProjectConfig` function to merge multiple project configurations left to right, with each subsequent config taking precedence. 
-Objects are merged deeply.
+Fields under `defaults` merge individually, `workspacePatternConfigs` entries are concatenated, and `verify` arrays are concatenated while keeping items unique.
 
 <SyntaxHighlighter language="typescript">
   {MERGE_PROJECT_CONFIG_EXAMPLE}
