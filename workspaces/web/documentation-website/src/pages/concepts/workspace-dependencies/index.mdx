@@ -24,7 +24,7 @@ the graph of workspaces computationally fast and cheap, relying instead on expli
 `package.json` dependencies (using `"workspace:*"` for `bun` and `pnpm` or `"*"` for `npm`).
 
 In **Bun** and **pnpm**, workspaces must declare each other as dependencies to share code, which is ideal,
-but **npm** does not require this. The [`verify`](/cli/commands#verify) command can help identify missing dependencies
+but **npm** does not require this. The [`verify` feature](/concepts/verify) can help identify missing dependencies
 for **npm** by attempting to find imports/exports that reference other workspaces.
 
 ### Setting up Dependencies - Example
