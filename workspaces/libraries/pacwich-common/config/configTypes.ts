@@ -264,7 +264,6 @@ export type ProjectVerifyWorkspaceDependenciesConfig =
 export type WorkspaceVerifyConfig = VerifyConfig;
 
 /**
- *
  * Workspace-scoped configuration for verify workspace dependencies.
  *
  * @see {@link VerifyWorkspaceDependenciesConfig}
