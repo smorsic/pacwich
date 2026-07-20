@@ -90,7 +90,7 @@ export const createBunAdapter = (): PackageManagerAdapter => ({
   lockfile: bunLockfileAdapter,
   createScriptCommand,
   describeMissingWorkspacesHint,
-  formatImplicitWorkspaceDepVersion: () => "*",
+  formatImplicitWorkspaceDepVersion: () => "workspace:*",
   errors: {
     LockfileNotFound: BUN_LOCK_ERRORS.BunLockNotFound,
     MalformedLockfile: BUN_LOCK_ERRORS.MalformedBunLock,

@@ -94,27 +94,112 @@ export const MERGE_WORKSPACE_CONFIG_EXAMPLE = `
 import { mergeWorkspaceConfig } from "pacwich/config";
 
 export default mergeWorkspaceConfig(
-  { alias: "a", tags: ["x"] },
-  { alias: "b", scripts: { build: { order: 1 } } },
-  { 
-    // inputs always override previous entries instead of deep merging
-    defaultInputs: { files: ["src/**/*.ts"] },
-    scripts: { build: { inputs: { files: ["src/**/*.ts"] } } },
+  {
+    alias: "a",
+    tags: ["x"],
+    defaultInputs: { files: ["src/**/*.ts", "package.json"] },
+    scripts: {
+      build: { order: 1, inputs: { files: ["src/**/*.ts"] } },
+      test: { order: 2 },
+    },
+    rules: { workspaceDependencies: { allowPatterns: ["tag:lib"] } },
+    verify: { workspaceDependencies: { ignoreInputFiles: ["scripts/**/*"] } },
   },
-  // Factory function receives the accumulated config up to that point
-  (prevConfig) => ({ tags: ["y"] }),
+  {
+    alias: "b", // concatenated with "a"
+    tags: ["x", "y"], // "x" deduplicated
+    // whole object replaces the first config's defaultInputs
+    defaultInputs: { files: ["src/**/*.ts", "!src/**/*.test.ts"] },
+    scripts: {
+      // build.order kept from the first config, but inputs is replaced
+      // as a whole object ("src/**/*.ts" is gone unless restated)
+      build: { inputs: { files: ["src/index.ts"] } },
+    },
+    rules: { workspaceDependencies: { denyPatterns: ["tag:app"] } },
+    verify: {
+      workspaceDependencies: {
+        ignoreInputFiles: ["scripts/**/*", "legacy/**/*"], // concat + dedupe
+        ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+      },
+    },
+  },
+  // factory form reads the accumulated config so far
+  (prevConfig) => ({
+    tags: prevConfig.tags?.includes("y") ? ["frontend"] : [],
+  }),
 );
+
+// result: {
+//   alias: ["a", "b"],
+//   tags: ["x", "y", "frontend"],
+//   defaultInputs: { files: ["src/**/*.ts", "!src/**/*.test.ts"] },
+//   scripts: {
+//     build: { order: 1, inputs: { files: ["src/index.ts"] } },
+//     test: { order: 2 },
+//   },
+//   rules: {
+//     workspaceDependencies: {
+//       allowPatterns: ["tag:lib"],
+//       denyPatterns: ["tag:app"],
+//     },
+//   },
+//   verify: {
+//     workspaceDependencies: {
+//       ignoreInputFiles: ["scripts/**/*", "legacy/**/*"],
+//       ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+//     },
+//   },
+// }
 `.trim();
 
 export const MERGE_PROJECT_CONFIG_EXAMPLE = `
 import { mergeProjectConfig } from "pacwich/config";
 
 export default mergeProjectConfig(
-  { defaults: { parallelMax: 4 } },
-  { defaults: { shell: "bun" } },
-  // Factory function receives the accumulated config up to that point
-  (prevConfig) => ({ defaults: { includeRootWorkspace: true } }),
+  {
+    packageManager: "bun",
+    defaults: { parallelMax: 4, shell: "system" },
+    workspacePatternConfigs: [
+      { patterns: ["path:packages/apps/**/*"], config: { tags: ["app"] } },
+    ],
+    verify: {
+      workspaceDependencies: {
+        ignoreInputFiles: ["scripts/codegen/**/*"],
+        ignoreImportsFromWorkspacePatterns: ["tag:legacy"],
+      },
+    },
+  },
+  {
+    // fields under defaults merge individually: parallelMax overridden, shell kept
+    defaults: { parallelMax: 8 },
+    // appended after the first config's entries
+    workspacePatternConfigs: [
+      { patterns: ["tag:app"], config: { tags: ["deployable"] } },
+    ],
+    verify: {
+      workspaceDependencies: {
+        // "scripts/codegen/**/*" deduplicated, "legacy/**/*.ts" appended
+        ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
+      },
+    },
+  },
+  // factory form reads the accumulated config so far
+  (prevConfig) => ({
+    defaults: { includeRootWorkspace: prevConfig.packageManager === "bun" },
+  }),
 );
+
+// result: {
+//   packageManager: "bun",
+//   defaults: { parallelMax: 8, shell: "system", includeRootWorkspace: true },
+//   workspacePatternConfigs: [<app entry>, <deployable entry>],
+//   verify: {
+//     workspaceDependencies: {
+//       ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
+//       ignoreImportsFromWorkspacePatterns: ["tag:legacy"],
+//     },
+//   },
+// }
 `.trim();
 
 export const WORKSPACE_PATTERN_CONFIGS_EXAMPLE = `

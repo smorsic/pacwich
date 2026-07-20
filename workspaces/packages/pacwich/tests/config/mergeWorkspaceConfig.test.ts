@@ -186,6 +186,145 @@ describe("mergeWorkspaceConfig", () => {
     });
   });
 
+  describe("verify", () => {
+    test("empty ignoreInputFiles produces no ignoreInputFiles", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { verify: { workspaceDependencies: { ignoreInputFiles: [] } } },
+          { verify: { workspaceDependencies: { ignoreInputFiles: [] } } },
+        ),
+      ).toMatchObject({
+        verify: { workspaceDependencies: {} },
+      });
+    });
+
+    test("empty ignoreInputFiles in one config", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } } },
+          { verify: { workspaceDependencies: {} } },
+        ),
+      ).toMatchObject({
+        verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } },
+      });
+    });
+
+    test("empty ignoreInputFiles in one config (2)", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { verify: { workspaceDependencies: {} } },
+          { verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } } },
+        ),
+      ).toMatchObject({
+        verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } },
+      });
+    });
+
+    test("merges ignoreInputFiles from multiple configs", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } } },
+          { verify: { workspaceDependencies: { ignoreInputFiles: ["b"] } } },
+        ),
+      ).toMatchObject({
+        verify: { workspaceDependencies: { ignoreInputFiles: ["a", "b"] } },
+      });
+    });
+
+    test("deduplicates ignoreInputFiles across configs", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: { ignoreInputFiles: ["a", "b"] },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: { ignoreInputFiles: ["b", "c"] },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: { ignoreInputFiles: ["a", "b", "c"] },
+        },
+      });
+    });
+
+    test("merges ignoreImportsFromWorkspacePatterns from multiple configs", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:a"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:b"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "tag:b"],
+          },
+        },
+      });
+    });
+
+    test("merges ignoreInputFiles and ignoreImportsFromWorkspacePatterns independently", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["a"],
+                ignoreImportsFromWorkspacePatterns: ["tag:a"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["b"],
+                ignoreImportsFromWorkspacePatterns: ["tag:b"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: ["a", "b"],
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "tag:b"],
+          },
+        },
+      });
+    });
+
+    test("not present in result when neither config sets it", () => {
+      expect(mergeWorkspaceConfig({}, {})).not.toHaveProperty("verify");
+    });
+
+    test("config with no verify field does not clear accumulated entries", () => {
+      expect(
+        mergeWorkspaceConfig(
+          { verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } } },
+          { tags: ["x"] },
+        ),
+      ).toMatchObject({
+        verify: { workspaceDependencies: { ignoreInputFiles: ["a"] } },
+      });
+    });
+  });
+
   describe("defaultInputs", () => {
     test("later config replaces earlier defaultInputs entirely", () => {
       expect(

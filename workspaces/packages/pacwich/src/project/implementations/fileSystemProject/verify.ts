@@ -3,6 +3,8 @@ import path from "path";
 import {
   listProjectTrackableFiles,
   matchWorkspaceInputFiles,
+  resolveInputPattern,
+  type InputFileMatch,
 } from "../../../inputs";
 import {
   stripLeadingSlashes,
@@ -40,9 +42,10 @@ const GLOB_CHARACTER_REGEX = /[*?[{]/;
  * as `listProjectTrackableFiles` returns. `!` prefixes are stripped with
  * a warning (this is an exception list, re-including with `!` would be
  * a no-op), and a leading `/` is treated as project-relative since
- * every entry is already project-relative.
+ * every entry is already project-relative. A pattern resolving to the
+ * project root becomes `""`, which ignores every file.
  */
-const normalizeIgnorePattern = (pattern: string): string | null => {
+const normalizeIgnorePattern = (pattern: string): string => {
   let normalized = toPosixPath(pattern);
   if (normalized.startsWith(FILE_PATTERN_NEGATION_PREFIX)) {
     logger.warn("IgnoreInputFilesNegationNotHonored", {
@@ -52,15 +55,63 @@ const normalizeIgnorePattern = (pattern: string): string | null => {
   }
   normalized = stripLeadingSlashes(normalized);
   normalized = stripTrailingSlashes(normalized);
-  if (!normalized || normalized === ".") return null;
+  if (!normalized || normalized === ".") return "";
   return path.posix.normalize(normalized);
 };
 
 const matchesIgnorePattern = (filePath: string, pattern: string): boolean => {
+  // resolved match-everything pattern ("." or "/" etc. in config)
+  if (!pattern) return true;
   if (GLOB_CHARACTER_REGEX.test(pattern)) {
     return path.matchesGlob(filePath, pattern);
   }
   return filePath === pattern || filePath.startsWith(`${pattern}/`);
+};
+
+/**
+ * Resolve a workspace-level ignore glob (workspace-relative, or
+ * project-relative with a leading `/`) to a project-relative pattern
+ * matching `matchesIgnorePattern`'s expected shape. `!` prefixes are
+ * stripped with a warning, same as the project-level list. A pattern
+ * resolving to the workspace directory (e.g. `.`) or the project root
+ * (e.g. `/`, resolved to `""`) ignores everything it covers.
+ */
+const resolveWorkspaceIgnoreInputPattern = ({
+  workspacePath,
+  pattern,
+}: {
+  workspacePath: string;
+  pattern: string;
+}): string => {
+  let posixPattern = toPosixPath(pattern);
+  if (posixPattern.startsWith(FILE_PATTERN_NEGATION_PREFIX)) {
+    logger.warn("IgnoreInputFilesNegationNotHonored", {
+      pattern: JSON.stringify(pattern),
+    });
+    posixPattern = posixPattern.slice(FILE_PATTERN_NEGATION_PREFIX.length);
+  }
+  return resolveInputPattern({ workspacePath, inputPattern: posixPattern });
+};
+
+const filterWorkspaceIgnoredFiles = ({
+  matchedFiles,
+  workspacePath,
+  ignorePatterns,
+}: {
+  matchedFiles: InputFileMatch[];
+  workspacePath: string;
+  ignorePatterns: string[];
+}): InputFileMatch[] => {
+  const normalizedIgnores = ignorePatterns.map((pattern) =>
+    resolveWorkspaceIgnoreInputPattern({ workspacePath, pattern }),
+  );
+  if (normalizedIgnores.length === 0) return matchedFiles;
+  return matchedFiles.filter(
+    (match) =>
+      !normalizedIgnores.some((pattern) =>
+        matchesIgnorePattern(match.filePath, pattern),
+      ),
+  );
 };
 
 const hasScannableExtension = (filePath: string): boolean =>
@@ -86,6 +137,21 @@ const resolveTargetWorkspaces = (
   );
 };
 
+const resolveIgnoredImportDependencyNames = ({
+  project,
+  patterns,
+}: {
+  project: FileSystemProject;
+  patterns: string[];
+}): Set<string> =>
+  new Set(
+    matchWorkspacesByPatterns(
+      patterns,
+      project.workspaces,
+      project.rootWorkspace,
+    ).map((workspace) => workspace.name),
+  );
+
 const filterTrackableFiles = ({
   trackableFiles,
   ignorePatterns,
@@ -93,9 +159,7 @@ const filterTrackableFiles = ({
   trackableFiles: string[];
   ignorePatterns: string[];
 }): string[] => {
-  const normalizedIgnores = ignorePatterns
-    .map(normalizeIgnorePattern)
-    .filter((p): p is string => p !== null);
+  const normalizedIgnores = ignorePatterns.map(normalizeIgnorePattern);
   return trackableFiles.filter((filePath) => {
     if (!hasScannableExtension(filePath)) return false;
     return !normalizedIgnores.some((pattern) =>
@@ -322,6 +386,12 @@ export const verifyProject = async (
   const strict = options.strict ?? false;
   const ignorePatterns =
     project.config.project.verify.workspaceDependencies.ignoreInputFiles;
+  const globallyIgnoredImportNames = resolveIgnoredImportDependencyNames({
+    project,
+    patterns:
+      project.config.project.verify.workspaceDependencies
+        .ignoreImportsFromWorkspacePatterns,
+  });
 
   const targetWorkspaces = resolveTargetWorkspaces(
     project,
@@ -355,16 +425,33 @@ export const verifyProject = async (
     const inputFilePatterns = workspaceConfig?.defaultInputs?.files ?? [
       DEFAULT_INPUT_FILE_PATTERN,
     ];
-    const matchedFiles = matchWorkspaceInputFiles({
-      workspaceName: workspace.name,
+    const matchedFiles = filterWorkspaceIgnoredFiles({
+      matchedFiles: matchWorkspaceInputFiles({
+        workspaceName: workspace.name,
+        workspacePath: workspace.path,
+        inputFilePatterns,
+        projectFilePaths: scannableFiles,
+        otherWorkspacePaths: allWorkspacePaths,
+      }),
       workspacePath: workspace.path,
-      inputFilePatterns,
-      projectFilePaths: scannableFiles,
-      otherWorkspacePaths: allWorkspacePaths,
+      ignorePatterns:
+        workspaceConfig?.verify.workspaceDependencies.ignoreInputFiles ?? [],
     });
     if (matchedFiles.length === 0) continue;
 
     const declaredDependencyNames = collectDeclaredDependencyNames(workspace);
+    for (const name of globallyIgnoredImportNames) {
+      declaredDependencyNames.add(name);
+    }
+    const workspaceIgnoredImportNames = resolveIgnoredImportDependencyNames({
+      project,
+      patterns:
+        workspaceConfig?.verify.workspaceDependencies
+          .ignoreImportsFromWorkspacePatterns ?? [],
+    });
+    for (const name of workspaceIgnoredImportNames) {
+      declaredDependencyNames.add(name);
+    }
     const occurrencesByDep = new Map<string, Map<string, ScanOccurrence[]>>();
 
     for (const matchedFile of matchedFiles) {

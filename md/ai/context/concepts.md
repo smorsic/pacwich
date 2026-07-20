@@ -81,4 +81,16 @@ There are two diff sources:
 
 Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.
 
+### Verify
+
+The verify feature is mainly in place to check for implicit workspace dependencies, which are dependencies that are not declared in the `package.json` file but are used in the code. This is generally only possible with npm workspaces, since bun and pnpm require explicit package.json dependencies.
+
+pacwich does not normally perform source code analysis when constructing the dependency graph, so it cannot detect implicit dependencies. However, the verify feature does analyze TS/JS files to detect imports/exports from
+workspaces not listed in a workspace's package.json. This is only done for input files. It is recommended
+to have `pacwich verify` as a `"prepare"` script or pre-commit hook to catch these issues early especially
+for npm projects. `pacwich verify --strict` will fail if any implicit dependencies are found instead of simply warning.
+
+Pacwich config files can be used to ignore input files or imports/exports from given workspaces in scanning
+at the project or workspace scope.
+
 <!--End pacwich concepts-->

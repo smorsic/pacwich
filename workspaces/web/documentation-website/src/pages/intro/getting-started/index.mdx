@@ -73,14 +73,7 @@ See more starter code in the [CLI Quickstart](/cli) or [TS/JS API Quickstart](/a
 ## Using the Verify Command
 
 You can use the `verify` command just to check for issues with your project. This is especially useful for **npm** users.
-
-When using **Bun** or **pnpm**, workspaces must declare each other as dependencies in their `package.json` files for imports/exports
-to work between them. See the [page on workspace dependencies](/concepts/workspace-dependencies) for more information.
-
-When using **npm**, workspaces do not need to declare each other as dependencies to use each other's code.
-
-This is an issue, since `pacwich` uses package.json files to determine dependencies, so you are encouraged to always declare
-workspaces as dependencies in package.json files explicitly.
+Read more [here](/concepts/verify).
 
 Adding the [`verify` command](/cli/commands#verify) to your root `package.json`'s `"prepare"` script or as a pre-commit hook can help catch issues with your Project setup
 and will attempt to detect workspaces that import/export other workspaces' code without declaring them as dependencies:

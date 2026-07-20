@@ -22,7 +22,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -38,7 +43,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -53,7 +63,12 @@ describe("Test project config", () => {
           },
           packageManager: "auto",
           workspacePatternConfigs: [],
-          verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+          verify: {
+            workspaceDependencies: {
+              ignoreInputFiles: [],
+              ignoreImportsFromWorkspacePatterns: [],
+            },
+          },
         },
       );
     });
@@ -70,7 +85,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -152,7 +172,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -168,7 +193,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -225,7 +255,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
   });
@@ -245,7 +280,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -263,7 +303,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -363,7 +408,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -379,7 +429,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
   });
@@ -399,7 +454,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -417,7 +477,12 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+          },
+        },
       });
     });
 
@@ -644,20 +709,31 @@ describe("Test project config", () => {
   describe("verify.workspaceDependencies.ignoreInputFiles", () => {
     test("defaults to [] when not provided in config", () => {
       expect(resolveProjectConfig({}).verify).toEqual({
-        workspaceDependencies: { ignoreInputFiles: [] },
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+        },
       });
     });
 
     test("defaults to [] when verify object is empty", () => {
       expect(resolveProjectConfig({ verify: {} }).verify).toEqual({
-        workspaceDependencies: { ignoreInputFiles: [] },
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+        },
       });
     });
 
     test("defaults to [] when workspaceDependencies is empty", () => {
       expect(
         resolveProjectConfig({ verify: { workspaceDependencies: {} } }).verify,
-      ).toEqual({ workspaceDependencies: { ignoreInputFiles: [] } });
+      ).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+        },
+      });
     });
 
     test("passes through a non-empty patterns list", () => {
@@ -672,6 +748,7 @@ describe("Test project config", () => {
       ).toEqual({
         workspaceDependencies: {
           ignoreInputFiles: ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+          ignoreImportsFromWorkspacePatterns: [],
         },
       });
     });
@@ -718,6 +795,65 @@ describe("Test project config", () => {
             workspaceDependencies: {
               // @ts-expect-error intentional unknown key
               ignoreDependencies: ["x"],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+  });
+
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("defaults to [] when not provided in config", () => {
+      expect(resolveProjectConfig({}).verify).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+        },
+      });
+    });
+
+    test("passes through a non-empty patterns list", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns: [
+                "tag:internal-tooling",
+                "my-generated-package",
+              ],
+            },
+          },
+        }).verify,
+      ).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [
+            "tag:internal-tooling",
+            "my-generated-package",
+          ],
+        },
+      });
+    });
+
+    test("throws when ignoreImportsFromWorkspacePatterns is not an array", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns:
+                "tag:x" as unknown as string[],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+
+    test("throws when ignoreImportsFromWorkspacePatterns entries are not strings", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns: [5 as unknown as string],
             },
           },
         }),

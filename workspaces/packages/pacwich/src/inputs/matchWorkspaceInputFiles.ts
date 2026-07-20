@@ -21,7 +21,7 @@ const PARENT_SEGMENT = "..";
  * and a pattern that resolves to the project root becomes `""` (matches
  * everything).
  */
-const resolveInputPattern = ({
+export const resolveInputPattern = ({
   workspacePath,
   inputPattern,
 }: {

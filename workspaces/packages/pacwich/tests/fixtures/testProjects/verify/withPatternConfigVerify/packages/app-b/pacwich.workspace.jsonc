@@ -1,0 +1,9 @@
+{
+  // The project config's workspacePatternConfigs adds
+  // "scripts/legacy/**/*" on top of this local ignore.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": ["scripts/codegen/**/*"]
+    }
+  }
+}
