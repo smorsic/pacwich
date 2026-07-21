@@ -128,6 +128,7 @@
         "@xterm/xterm": "^6.0.0",
         "bw-web-service-shared": "0.2.0",
         "lodash": "catalog:web",
+        "pacwich_local": "workspace:*",
         "react": "catalog:web",
         "react-arborist": "catalog:web",
         "react-dom": "catalog:web",

@@ -5,6 +5,11 @@ export default defineProjectConfig({
   defaults: {
     shell: "bun",
   },
+  verify: {
+    workspaceDependencies: {
+      ignoreInputFiles: ["**/*/pacwich.workspace.ts"],
+    },
+  },
   workspacePatternConfigs: [
     {
       patterns: ["path:workspaces/libraries/**/*"],
@@ -28,6 +33,11 @@ export default defineProjectConfig({
       patterns: ["path:workspaces/sandboxes/**/*"],
       config: {
         tags: ["sandbox", "internal"],
+        verify: {
+          workspaceDependencies: {
+            ignoreImportsFromWorkspacePatterns: ["pacwich_local"],
+          },
+        },
       },
     },
     {
@@ -41,7 +51,11 @@ export default defineProjectConfig({
       config: {
         rules: {
           workspaceDependencies: {
-            allowPatterns: ["@pacwich/common", "@pacwich/meta"],
+            allowPatterns: [
+              "@pacwich/common",
+              "@pacwich/meta",
+              "pacwich_local",
+            ],
             denyPatterns: [],
           },
         },
