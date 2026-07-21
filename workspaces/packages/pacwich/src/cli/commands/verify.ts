@@ -56,7 +56,7 @@ export const verify = handleProjectCommand(
 
     if (!options.strict && warningCount > 0 && errorCount === 0) {
       commandOutputLogger.info(
-        `${summary}\nRe-run with \x1b[1m--strict\x1b[0m to make warnings fail, or address each warning above (a \`--fix\` flag is planned for a future release).`,
+        `${summary}\nRe-run with \x1b[1m--strict\x1b[0m to make warnings fail, or address each warning above.`,
       );
     } else {
       commandOutputLogger.info(summary);

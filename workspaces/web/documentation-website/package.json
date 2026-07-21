@@ -29,6 +29,7 @@
     "@pacwich/common": "workspace:*",
     "@pacwich/web-common": "workspace:*",
     "lodash": "catalog:web",
+    "pacwich_local": "workspace:*",
     "react": "catalog:web",
     "react-arborist": "catalog:web",
     "react-dom": "catalog:web",

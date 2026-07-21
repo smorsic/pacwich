@@ -4,7 +4,11 @@ import type {
   WorkspaceInputsConfig,
   WorkspaceRules,
 } from "@pacwich/common/config";
-import { resolveOptionalArray } from "../../internal/core";
+import {
+  concatUniqueStringArrays,
+  resolveOptionalArray,
+} from "../../internal/core";
+import { mergeVerifyConfig } from "../verifyConfig";
 
 /**
  * Lazy form of a {@link WorkspaceConfig} that receives the
@@ -25,24 +29,16 @@ export type WorkspaceConfigInput = WorkspaceConfig | WorkspaceConfigFactory;
 
 const uniqueArray = <T>(arr: T[]): T[] => [...new Set(arr)];
 
-const concatPatterns = (
-  a: string[] | undefined,
-  b: string[] | undefined,
-): string[] | undefined => {
-  if (!a?.length && !b?.length) return undefined;
-  return uniqueArray([...(a ?? []), ...(b ?? [])]);
-};
-
 const mergeWorkspaceDependenciesRule = (
   base: WorkspaceDependenciesRule | undefined,
   override: WorkspaceDependenciesRule | undefined,
 ): WorkspaceDependenciesRule | undefined => {
   if (!base && !override) return undefined;
-  const allowPatterns = concatPatterns(
+  const allowPatterns = concatUniqueStringArrays(
     base?.allowPatterns,
     override?.allowPatterns,
   );
-  const denyPatterns = concatPatterns(
+  const denyPatterns = concatUniqueStringArrays(
     base?.denyPatterns,
     override?.denyPatterns,
   );
@@ -93,6 +89,7 @@ const applyConfig = (
     acc.defaultInputs,
     config.defaultInputs,
   );
+  const verify = mergeVerifyConfig(acc.verify, config.verify);
   return {
     alias: uniqueArray([
       ...resolveOptionalArray(acc.alias ?? []),
@@ -102,13 +99,16 @@ const applyConfig = (
     scripts: mergeScripts(acc.scripts, config.scripts),
     rules: mergeWorkspaceRules(acc.rules, config.rules),
     ...(defaultInputs && { defaultInputs }),
+    ...(verify && { verify }),
   };
 };
 
 /**
  * Merge two or more workspace configs left to right, with each
  * subsequent config taking precedence. Objects are deeply merged,
- * and arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`) are
+ * and arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`,
+ * `verify.workspaceDependencies.ignoreInputFiles`,
+ * `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`) are
  * concatenated and deduplicated. Inputs (`defaultInputs` and script
  * `inputs`) are replaced wholesale rather than merged, since input
  * patterns are an exhaustive list. Any argument may be a

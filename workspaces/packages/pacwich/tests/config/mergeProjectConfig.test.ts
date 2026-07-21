@@ -297,6 +297,65 @@ describe("mergeProjectConfig", () => {
     });
   });
 
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("entries from two configs are concatenated and deduplicated", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:a", "shared"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:b", "shared"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "shared", "tag:b"],
+          },
+        },
+      });
+    });
+
+    test("merges independently of ignoreInputFiles in the same config", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["a/**/*"],
+                ignoreImportsFromWorkspacePatterns: ["tag:a"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["b/**/*"],
+                ignoreImportsFromWorkspacePatterns: ["tag:b"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: ["a/**/*", "b/**/*"],
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "tag:b"],
+          },
+        },
+      });
+    });
+  });
+
   test("is exported from the main module", async () => {
     const { mergeProjectConfig: imported } = await import("../../src/index");
     expect(imported).toBe(mergeProjectConfig);

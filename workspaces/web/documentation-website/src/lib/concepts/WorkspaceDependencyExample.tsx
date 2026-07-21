@@ -151,10 +151,10 @@ packages:
                 When using npm, placing <code>{`{ "workspace-a": "*" }`}</code>{" "}
                 in dependencies is not necessary, but this is how{" "}
                 <code>pacwich</code> determines dependencies. Use the{" "}
-                <Link href="/cli/commands#verify">
+                <Link href="/concepts/verify">
                   <code>verify</code>
                 </Link>{" "}
-                command to detect dependencies not declared in workspace's
+                feature to detect dependencies not declared in workspace's
                 package.json.
               </>
             ),

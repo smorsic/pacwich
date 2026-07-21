@@ -16,3 +16,4 @@ await $`bun create-mise-toml`;
 await $`bun create-claude-skill-links`;
 await $`bunx husky`;
 await $`bun mise`;
+await $`bunx pacwich verify`;

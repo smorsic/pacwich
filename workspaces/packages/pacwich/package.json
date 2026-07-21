@@ -1,6 +1,6 @@
 {
   "name": "pacwich_local",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "exports": {
     ".": "./src/index.ts",
     "./cli": "./src/cli/index.ts",
@@ -47,7 +47,8 @@
     "cli:bun:dev": "NODE_ENV=development bun run dist/bin/cli.js",
     "cli:node": "node dist/bin/cli.js",
     "cli:node:dev": "NODE_ENV=development node dist/bin/cli.js",
-    "create-modules": "bun run ajv && bun run create-public-agent-docs",
+    "create-modules": "bun run ajv && bun run create-public-agent-docs && bun run create-dev-package-link",
+    "create-dev-package-link": "bun run scripts/createDevPackageLink.ts",
     "create-pnpm-test-fixtures": "bun run scripts/createPnpmTestFixtures.ts",
     "create-public-agent-docs": "bun run scripts/createPublicAgentDocs.ts",
     "knip": "knip",

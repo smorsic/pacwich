@@ -16,7 +16,7 @@ export const runBuild = async () => {
   const outputPath = path.resolve("__dirname", "..", "doc_build");
 
   if (process.env.SKIP_PACWICH_BUILD !== "true") {
-    await $`bunx pacwich run build:no-dts pw`;
+    await $`bun --cwd=${project.rootDirectory} run pw build:no-dts`;
   }
 
   await $`bunx rspress build`;

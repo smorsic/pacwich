@@ -1,4 +1,5 @@
 import { InvalidJSTypeError } from "../../../src/internal/core";
+import { logger } from "../../../src/internal/logger";
 import {
   createFileSystemProject,
   type ImplicitWorkspaceDependencyMetadata,
@@ -6,10 +7,25 @@ import {
   type VerifyResult,
 } from "../../../src/project";
 import { getProjectRoot } from "../../fixtures/testProjects";
-import { describe, expect, test } from "../../util/testFramework";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  spyOn,
+  test,
+} from "../../util/testFramework";
 
 const buildProject = (
-  fixtureName: "verifySimple" | "verifyWithIgnore" | "verifyWithRootWorkspace",
+  fixtureName:
+    | "verifySimple"
+    | "verifyWithIgnore"
+    | "verifyWithRootWorkspace"
+    | "verifyWithWorkspaceIgnore"
+    | "verifyWithImportIgnore"
+    | "verifyWithIgnoreWarnings"
+    | "verifyWithMatchAllIgnore"
+    | "verifyWithPatternConfigVerify",
 ) => createFileSystemProject({ rootDirectory: getProjectRoot(fixtureName) });
 
 const allIssues = (result: VerifyResult): VerifyIssue[] => [
@@ -136,11 +152,11 @@ describe("project.verify (API)", () => {
       expect(metadata!.fixHint).toContain("dependencies");
     });
 
-    test("fixHint uses pm-adapter version string (bun → '*')", async () => {
+    test("fixHint uses pm-adapter version string (bun → 'workspace:*')", async () => {
       const project = buildProject("verifySimple");
       const result = await project.verify();
       const metadata = findImplicitDep(result, "app-c", "lib-b");
-      expect(metadata!.fixHint).toContain('"*"');
+      expect(metadata!.fixHint).toContain('"workspace:*"');
     });
 
     test("issue.message embeds the fixHint and source locations", async () => {
@@ -267,6 +283,143 @@ describe("project.verify (API)", () => {
       expect(appBMeta).toHaveLength(1);
       const files = appBMeta[0].files.map((file) => file.path);
       expect(files).toEqual(["packages/app-b/src/index.ts"]);
+    });
+  });
+
+  describe("workspace-level verify.workspaceDependencies.ignoreInputFiles", () => {
+    test("excludes workspace-relative and leading-/ project-relative patterns for that workspace only", async () => {
+      const project = buildProject("verifyWithWorkspaceIgnore");
+      const result = await project.verify();
+      const appAMeta = allImplicitDepMetadata(result).filter(
+        (metadata) =>
+          metadata.workspace === "app-a" && metadata.dependency === "lib-a",
+      );
+      expect(appAMeta).toHaveLength(1);
+      expect(appAMeta[0].files.map((file) => file.path)).toEqual([
+        "packages/app-a/src/index.ts",
+      ]);
+    });
+
+    test("does not apply to other workspaces (workspace-scoped, not global)", async () => {
+      const project = buildProject("verifyWithWorkspaceIgnore");
+      const result = await project.verify();
+      const appBMeta = allImplicitDepMetadata(result).filter(
+        (metadata) =>
+          metadata.workspace === "app-b" && metadata.dependency === "lib-a",
+      );
+      expect(appBMeta).toHaveLength(1);
+      expect(appBMeta[0].files.map((file) => file.path).sort()).toEqual([
+        "packages/app-b/scripts/codegen/build.ts",
+        "packages/app-b/src/index.ts",
+      ]);
+    });
+
+    test('"." ignores the entire workspace directory', async () => {
+      const project = buildProject("verifyWithWorkspaceIgnore");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-d", "lib-a")).toBeUndefined();
+    });
+  });
+
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("project-level pattern suppresses the dependency for every importer", async () => {
+      const project = buildProject("verifyWithImportIgnore");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-c", "lib-b")).toBeUndefined();
+    });
+
+    test("workspace-level pattern suppresses the dependency only for that workspace", async () => {
+      const project = buildProject("verifyWithImportIgnore");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-a", "lib-a")).toBeUndefined();
+      expect(findImplicitDep(result, "app-b", "lib-a")).toBeDefined();
+    });
+
+    test("project- and workspace-level patterns apply additively for a single workspace", async () => {
+      const project = buildProject("verifyWithImportIgnore");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-d", "lib-a")).toBeUndefined();
+      expect(findImplicitDep(result, "app-d", "lib-c")).toBeUndefined();
+    });
+  });
+
+  describe("ignoreInputFiles negation and match-everything patterns", () => {
+    let warnSpy: ReturnType<typeof spyOn>;
+
+    beforeEach(() => {
+      warnSpy = spyOn(logger, "warn").mockImplementation(
+        (() => undefined) as unknown as typeof logger.warn,
+      );
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    const findNegationWarning = (pattern: string) =>
+      warnSpy.mock.calls.find(
+        ([id, options]: [string, { pattern?: string }]) =>
+          id === "IgnoreInputFilesNegationNotHonored" &&
+          options?.pattern === JSON.stringify(pattern),
+      );
+
+    test("project-level ! entry warns and is treated as a plain ignore", async () => {
+      const project = buildProject("verifyWithIgnoreWarnings");
+      const result = await project.verify();
+      expect(
+        findNegationWarning("!packages/app-a/scripts/legacy/**/*"),
+      ).toBeDefined();
+      const appAMeta = findImplicitDep(result, "app-a", "lib-a");
+      expect(appAMeta).toBeDefined();
+      expect(appAMeta!.files.map((file) => file.path)).toEqual([
+        "packages/app-a/src/index.ts",
+      ]);
+    });
+
+    test("workspace-level ! entry warns and is treated as a plain ignore", async () => {
+      const project = buildProject("verifyWithIgnoreWarnings");
+      const result = await project.verify();
+      expect(findNegationWarning("!scripts/codegen/**/*")).toBeDefined();
+      const appAMeta = findImplicitDep(result, "app-a", "lib-a");
+      expect(appAMeta).toBeDefined();
+      expect(appAMeta!.files.map((file) => file.path)).toEqual([
+        "packages/app-a/src/index.ts",
+      ]);
+    });
+
+    test("workspace-level match-everything pattern ignores the whole workspace scan", async () => {
+      // app-b's ignoreInputFiles is ["/"], which resolves to the whole
+      // project, so all of app-b's matched files are ignored
+      const project = buildProject("verifyWithIgnoreWarnings");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-b", "lib-a")).toBeUndefined();
+      expect(findNegationWarning("/")).toBeUndefined();
+    });
+
+    test("project-level match-everything pattern suppresses all findings", async () => {
+      const project = buildProject("verifyWithMatchAllIgnore");
+      const result = await project.verify();
+      expect(result.ok).toBe(true);
+      expect(allIssues(result)).toHaveLength(0);
+    });
+  });
+
+  describe("workspacePatternConfigs contributing verify config", () => {
+    test("pattern-contributed ignoreImportsFromWorkspacePatterns applies to matched workspaces only", async () => {
+      const project = buildProject("verifyWithPatternConfigVerify");
+      const result = await project.verify();
+      expect(findImplicitDep(result, "app-a", "lib-a")).toBeUndefined();
+      expect(findImplicitDep(result, "app-c", "lib-a")).toBeDefined();
+    });
+
+    test("pattern-contributed ignoreInputFiles concatenate with the local workspace config", async () => {
+      const project = buildProject("verifyWithPatternConfigVerify");
+      const result = await project.verify();
+      const appBMeta = findImplicitDep(result, "app-b", "lib-a");
+      expect(appBMeta).toBeDefined();
+      expect(appBMeta!.files.map((file) => file.path)).toEqual([
+        "packages/app-b/src/index.ts",
+      ]);
     });
   });
 

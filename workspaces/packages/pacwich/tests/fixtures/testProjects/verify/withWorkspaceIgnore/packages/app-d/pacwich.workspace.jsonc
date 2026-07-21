@@ -1,0 +1,9 @@
+{
+  // "." resolves to this workspace's directory, ignoring its entire
+  // scan, so this workspace reports no findings.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": ["."]
+    }
+  }
+}

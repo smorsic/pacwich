@@ -136,6 +136,10 @@ export const HEADER_NAV_LINKS: NavItem[] = [
         link: "/concepts/glossary",
       },
       {
+        text: "Verify",
+        link: "/concepts/verify",
+      },
+      {
         text: "Inputs",
         link: "/concepts/inputs",
       },
@@ -363,6 +367,10 @@ const SIDEBAR_GROUPS = {
         {
           text: "Glossary",
           link: "/concepts/glossary",
+        },
+        {
+          text: "Verify",
+          link: "/concepts/verify",
         },
         {
           text: "Workspaces",

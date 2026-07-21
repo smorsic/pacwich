@@ -1,0 +1,8 @@
+{
+  // Suppresses lib-a as an implicit dependency only for this workspace.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreImportsFromWorkspacePatterns": ["tag:internal-tooling"]
+    }
+  }
+}

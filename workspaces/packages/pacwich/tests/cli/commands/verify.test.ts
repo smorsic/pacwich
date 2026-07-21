@@ -118,7 +118,7 @@ describe("CLI verify", () => {
       const result = await run("verify", "--json");
       const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
       for (const issue of parsed.warnings) {
-        expect(issue.metadata.fixHint).toContain('"*"');
+        expect(issue.metadata.fixHint).toContain('"workspace:*"');
         expect(issue.metadata.fixHint).toContain("package.json");
       }
     });
@@ -137,6 +137,103 @@ describe("CLI verify", () => {
       expect(appBIssues).toHaveLength(1);
       const files = appBIssues[0].metadata.files.map((file) => file.path);
       expect(files).toEqual(["packages/app-b/src/index.ts"]);
+    });
+  });
+
+  describe("workspace-level verify.workspaceDependencies.ignoreInputFiles", () => {
+    test("workspace config ignore patterns apply only to that workspace", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithWorkspaceIgnore",
+      });
+      const result = await run("verify", "--json");
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const appAIssues = parsed.warnings.filter(
+        (issue) =>
+          issue.metadata.workspace === "app-a" &&
+          issue.metadata.dependency === "lib-a",
+      );
+      expect(appAIssues).toHaveLength(1);
+      expect(appAIssues[0].metadata.files.map((file) => file.path)).toEqual([
+        "packages/app-a/src/index.ts",
+      ]);
+
+      const appBIssues = parsed.warnings.filter(
+        (issue) =>
+          issue.metadata.workspace === "app-b" &&
+          issue.metadata.dependency === "lib-a",
+      );
+      expect(appBIssues).toHaveLength(1);
+      expect(
+        appBIssues[0].metadata.files.map((file) => file.path).sort(),
+      ).toEqual([
+        "packages/app-b/scripts/codegen/build.ts",
+        "packages/app-b/src/index.ts",
+      ]);
+    });
+  });
+
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("project- and workspace-level patterns suppress the expected findings", async () => {
+      const { run } = setupCliTest({ testProject: "verifyWithImportIgnore" });
+      const result = await run("verify", "--json");
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const workspaceDepPairs = parsed.warnings.map(
+        (issue) => `${issue.metadata.workspace}::${issue.metadata.dependency}`,
+      );
+      expect(workspaceDepPairs).not.toContain("app-a::lib-a");
+      expect(workspaceDepPairs).toContain("app-b::lib-a");
+      expect(workspaceDepPairs).not.toContain("app-c::lib-b");
+      expect(workspaceDepPairs).not.toContain("app-d::lib-a");
+      expect(workspaceDepPairs).not.toContain("app-d::lib-c");
+    });
+  });
+
+  describe("ignoreInputFiles negation and match-everything patterns", () => {
+    test("negated entries warn on stderr and are treated as plain ignores", async () => {
+      const { run } = setupCliTest({ testProject: "verifyWithIgnoreWarnings" });
+      const result = await run("verify", "--json");
+      expect(result.stderr.sanitized).toContain(
+        "IgnoreInputFilesNegationNotHonored",
+      );
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const appAIssues = parsed.warnings.filter(
+        (issue) =>
+          issue.metadata.workspace === "app-a" &&
+          issue.metadata.dependency === "lib-a",
+      );
+      expect(appAIssues).toHaveLength(1);
+      expect(appAIssues[0].metadata.files.map((file) => file.path)).toEqual([
+        "packages/app-a/src/index.ts",
+      ]);
+
+      // app-b's match-everything "/" ignore suppresses its whole scan
+      const appBIssues = parsed.warnings.filter(
+        (issue) => issue.metadata.workspace === "app-b",
+      );
+      expect(appBIssues).toHaveLength(0);
+    });
+  });
+
+  describe("workspacePatternConfigs contributing verify config", () => {
+    test("pattern-contributed verify config is honored", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithPatternConfigVerify",
+      });
+      const result = await run("verify", "--json");
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const workspaceDepPairs = parsed.warnings.map(
+        (issue) => `${issue.metadata.workspace}::${issue.metadata.dependency}`,
+      );
+      expect(workspaceDepPairs).not.toContain("app-a::lib-a");
+      expect(workspaceDepPairs).toContain("app-c::lib-a");
+
+      const appBIssues = parsed.warnings.filter(
+        (issue) => issue.metadata.workspace === "app-b",
+      );
+      expect(appBIssues).toHaveLength(1);
+      expect(appBIssues[0].metadata.files.map((file) => file.path)).toEqual([
+        "packages/app-b/src/index.ts",
+      ]);
     });
   });
 

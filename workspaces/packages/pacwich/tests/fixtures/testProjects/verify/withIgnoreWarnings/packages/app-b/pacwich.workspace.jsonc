@@ -1,0 +1,9 @@
+{
+  // "/" resolves to the whole project, so every file in this
+  // workspace's scan is ignored and it reports no findings.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": ["/"]
+    }
+  }
+}

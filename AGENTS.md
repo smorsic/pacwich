@@ -161,6 +161,18 @@ There are two diff sources:
 
 Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.
 
+### Verify
+
+The verify feature is mainly in place to check for implicit workspace dependencies, which are dependencies that are not declared in the `package.json` file but are used in the code. This is generally only possible with npm workspaces, since bun and pnpm require explicit package.json dependencies.
+
+pacwich does not normally perform source code analysis when constructing the dependency graph, so it cannot detect implicit dependencies. However, the verify feature does analyze TS/JS files to detect imports/exports from
+workspaces not listed in a workspace's package.json. This is only done for input files. It is recommended
+to have `pacwich verify` as a `"prepare"` script or pre-commit hook to catch these issues early especially
+for npm projects. `pacwich verify --strict` will fail if any implicit dependencies are found instead of simply warning.
+
+Pacwich config files can be used to ignore input files or imports/exports from given workspaces in scanning
+at the project or workspace scope.
+
 <!--End pacwich concepts-->
 
 ### pacwich npm package: CLI examples
@@ -611,13 +623,15 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
   "workspacePatternConfigs": [
     // see Workspace Pattern Configs section below
   ],
+  // Configure the verify feature (scans JS/TS files to find missing package.json workspace dependencies)
   "verify": {
     "workspaceDependencies": {
       // Project-relative globs to skip during `pacwich verify` scanning.
-      // Single project-level escape hatch (no per-workspace verify config).
       // Negation prefixes (`!`) are not honored here, since this is an
       // exception list rather than an inputs list.
       "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+      // Workspaces to ignore imports/exports from in the verify scan
+      "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
     },
   },
 }
@@ -625,21 +639,7 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
 
 > Note: pnpm projects place their workspace globs in `pnpm-workspace.yaml`'s top-level `packages:` key (and catalogs under `catalog:` / `catalogs:`), not in `package.json.workspaces`. pacwich reads them transparently for the pnpm backend.
 
-### mergeProjectConfig
-
-`mergeProjectConfig` merges multiple project configs left to right. Later configs take precedence for scalar fields. `workspacePatternConfigs` entries are concatenated. Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`.
-
-```ts
-import { mergeProjectConfig } from "pacwich/config";
-
-export default mergeProjectConfig(
-  { defaults: { parallelMax: 4 } },
-  { defaults: { shell: "system" } },
-  (prevConfig) => ({ defaults: { includeRootWorkspace: true } }),
-);
-```
-
-## Workspace config
+### Workspace config
 
 Optional config can be placed in `pacwich.workspace.ts`/`pacwich.workspace.js`/`pacwich.workspace.jsonc`/`pacwich.workspace.json` in a workspace directory, or in the `"pacwich"` key of the workspace's `package.json`.
 
@@ -670,6 +670,18 @@ Tags are strings to group workspaces together. They do not need to be unique.
       },
     },
   },
+  // Configure the verify feature (scans JS/TS files to find missing package.json workspace dependencies)
+  "verify": {
+    "workspaceDependencies": {
+      // Workspace-relative globs to skip during `pacwich verify` scanning.
+      // Use a leading slash to denote project-relative paths.
+      // Negation prefixes (`!`) are not honored here, since this is an
+      // exception list rather than an inputs list.
+      "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+      // Workspaces to ignore imports/exports from in the verify scan
+      "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
+    },
+  },
   "rules": {
     "workspaceDependencies": {
       // allowPatterns: only workspaces matching these patterns are permitted as dependencies
@@ -682,7 +694,7 @@ Tags are strings to group workspaces together. They do not need to be unique.
 }
 ```
 
-### Inputs
+#### Inputs
 
 The `defaultInputs` field (and the per-script `scripts[name].inputs` field) controls what counts as an input for [affected workspace](#affected-workspaces) resolution. Both have the same shape (`WorkspaceInputsConfig`):
 
@@ -694,7 +706,7 @@ Per-script `inputs` fully replaces `defaultInputs` for that script. The two are 
 
 The `pacwich verify` command also reuses each workspace's `defaultInputs.files` to scope which files it scans for implicit workspace dependencies.
 
-### Workspace Dependency Rules
+#### Workspace Dependency Rules
 
 Using the `rules.workspaceDependencies` field, you can define rules for which workspaces are allowed to be dependencies, using `allowPatterns`, `denyPatterns`, or both.
 
@@ -702,22 +714,7 @@ Using the `rules.workspaceDependencies` field, you can define rules for which wo
 
 Workspace Patterns are used to match workspaces.
 
-### mergeWorkspaceConfig
-
-`mergeWorkspaceConfig` merges multiple workspace configs left to right. Arrays (`alias`, `tags`, `allowPatterns`, `denyPatterns`) are concatenated and deduplicated. Scalar fields later wins. `scripts` are deep-merged per key. Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`.
-
-```ts
-import { mergeWorkspaceConfig } from "pacwich/config";
-
-export default mergeWorkspaceConfig(
-  { alias: "a", tags: ["x"] },
-  { alias: "b", scripts: { build: { order: 1 } } },
-  (prevConfig) => ({ tags: ["y"] }),
-);
-// result: { alias: ["a", "b"], tags: ["x", "y"], scripts: { build: { order: 1 } } }
-```
-
-## Workspace Pattern Configs
+### Workspace Pattern Configs
 
 The project config's `workspacePatternConfigs` field applies workspace configs to groups of workspaces matched by [workspace patterns](/concepts/workspace-patterns). Entries are applied in order, left to right.
 
@@ -752,7 +749,7 @@ export default defineProjectConfig({
 });
 ```
 
-### Factory function context (`RawWorkspace`)
+#### Factory function context (`RawWorkspace`)
 
 The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => WorkspaceConfig` receives:
 
@@ -764,11 +761,154 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 - `workspace.dependencies` — names of workspace dependencies
 - `workspace.dependents` — names of workspaces that depend on this one
 
-`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`.
+`prevConfig` is the fully resolved workspace config at that point, including the local config and any configs applied by earlier pattern entries. It has `aliases: string[]`, `tags: string[]`, `scripts: Record<string, ScriptConfig>`, `rules: WorkspaceRules`, `defaultInputs?: WorkspaceInputsConfig`, and `verify: VerifyConfig`.
 
-## TypeScript/JSON Config Files
+### Config merging behavior
 
-### TypeScript
+#### Project
+
+`mergeProjectConfig` merges two or more project configs left to right.
+Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`
+receiving the accumulated config so far.
+
+- Scalar fields (`packageManager`, everything under `defaults`): later config wins.
+- `workspacePatternConfigs`: entries are concatenated in order.
+- `verify.workspaceDependencies.ignoreInputFiles` and
+  `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`:
+  concatenated and deduplicated.
+
+```ts
+import { mergeProjectConfig } from "pacwich/config";
+
+export default mergeProjectConfig(
+  {
+    packageManager: "bun",
+    defaults: { parallelMax: 4, shell: "system" },
+    workspacePatternConfigs: [
+      { patterns: ["path:packages/apps/**/*"], config: { tags: ["app"] } },
+    ],
+    verify: {
+      workspaceDependencies: {
+        ignoreInputFiles: ["scripts/codegen/**/*"],
+        ignoreImportsFromWorkspacePatterns: ["tag:legacy"],
+      },
+    },
+  },
+  {
+    // fields under defaults merge individually: parallelMax overridden, shell kept
+    defaults: { parallelMax: 8 },
+    // appended after the first config's entries
+    workspacePatternConfigs: [
+      { patterns: ["tag:app"], config: { tags: ["deployable"] } },
+    ],
+    verify: {
+      workspaceDependencies: {
+        // "scripts/codegen/**/*" deduplicated, "legacy/**/*.ts" appended
+        ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
+      },
+    },
+  },
+  // factory form reads the accumulated config so far
+  (prevConfig) => ({
+    defaults: { includeRootWorkspace: prevConfig.packageManager === "bun" },
+  }),
+);
+// result: {
+//   packageManager: "bun",
+//   defaults: { parallelMax: 8, shell: "system", includeRootWorkspace: true },
+//   workspacePatternConfigs: [<app entry>, <deployable entry>],
+//   verify: {
+//     workspaceDependencies: {
+//       ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
+//       ignoreImportsFromWorkspacePatterns: ["tag:legacy"],
+//     },
+//   },
+// }
+```
+
+#### Workspace
+
+`mergeWorkspaceConfig` merges two or more workspace configs left to right.
+Any argument may be a factory function `(prev: WorkspaceConfig) => WorkspaceConfig`
+receiving the accumulated config so far.
+
+- Array fields (`alias`, `tags`, `rules.workspaceDependencies.allowPatterns`,
+  `rules.workspaceDependencies.denyPatterns`, and both `verify.workspaceDependencies`
+  arrays): concatenated and deduplicated.
+- `scripts`: combined per script name. When both configs define the same script,
+  each field takes the later config's value: `order` is later-wins, and `inputs`
+  is replaced as a whole object rather than merged, since input patterns are an
+  exhaustive list.
+- `defaultInputs`: whole object replaced by the later config, same as script `inputs`.
+- Other scalar fields: later config wins.
+
+The same merge semantics drive `workspacePatternConfigs` accumulation, with the
+local workspace config always as the starting base.
+
+```ts
+import { mergeWorkspaceConfig } from "pacwich/config";
+
+export default mergeWorkspaceConfig(
+  {
+    alias: "a",
+    tags: ["x"],
+    defaultInputs: { files: ["src/**/*.ts", "package.json"] },
+    scripts: {
+      build: { order: 1, inputs: { files: ["src/**/*.ts"] } },
+      test: { order: 2 },
+    },
+    rules: { workspaceDependencies: { allowPatterns: ["tag:lib"] } },
+    verify: { workspaceDependencies: { ignoreInputFiles: ["scripts/**/*"] } },
+  },
+  {
+    alias: "b", // concatenated with "a"
+    tags: ["x", "y"], // "x" deduplicated
+    // whole object replaces the first config's defaultInputs
+    defaultInputs: { files: ["src/**/*.ts", "!src/**/*.test.ts"] },
+    scripts: {
+      // build.order kept from the first config, but inputs is replaced
+      // as a whole object ("src/**/*.ts" is gone unless restated)
+      build: { inputs: { files: ["src/index.ts"] } },
+    },
+    rules: { workspaceDependencies: { denyPatterns: ["tag:app"] } },
+    verify: {
+      workspaceDependencies: {
+        ignoreInputFiles: ["scripts/**/*", "legacy/**/*"], // deduplicated + appended
+        ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+      },
+    },
+  },
+  // factory form reads the accumulated config so far
+  (prevConfig) => ({
+    tags: prevConfig.tags?.includes("y") ? ["frontend"] : [],
+  }),
+);
+// result: {
+//   alias: ["a", "b"],
+//   tags: ["x", "y", "frontend"],
+//   defaultInputs: { files: ["src/**/*.ts", "!src/**/*.test.ts"] },
+//   scripts: {
+//     build: { order: 1, inputs: { files: ["src/index.ts"] } },
+//     test: { order: 2 },
+//   },
+//   rules: {
+//     workspaceDependencies: {
+//       allowPatterns: ["tag:lib"],
+//       denyPatterns: ["tag:app"],
+//     },
+//   },
+//   verify: {
+//     workspaceDependencies: {
+//       ignoreInputFiles: ["scripts/**/*", "legacy/**/*"],
+//       ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+//     },
+//   },
+// }
+```
+
+### TypeScript/JSON Config Files
+
+#### TypeScript
 
 `pacwich.workspace.ts`
 
@@ -990,4 +1130,4 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 
 <!--End pacwich development-->
 
-<!--pacwich v0.5.0-->
+<!--pacwich v0.6.0-->
