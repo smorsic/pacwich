@@ -31,7 +31,7 @@ export const EXAMPLE_COMMANDS = [
   {
     name: "Workspace Info",
     description: "Show metadata about a workspace, by its alias",
-    command: "info shr-a",
+    command: "info shr-b",
   },
   {
     name: "List Tags",

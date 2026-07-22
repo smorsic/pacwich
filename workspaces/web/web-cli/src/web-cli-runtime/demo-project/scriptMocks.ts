@@ -15,7 +15,10 @@ export type ScriptMock = {
 
 export const SCRIPT_MOCKS: Record<string, ScriptMock> = {
   "*:build": {
-    output: ["$ building {workspace}…", "✓ {workspace} built (mock)"],
+    output: [
+      "$ building {workspace}…",
+      "✓ {workspace} built (mock)",
+    ],
     delayMsPerLine: 120,
   },
   "*:lint": {
@@ -53,6 +56,9 @@ export const SCRIPT_MOCKS: Record<string, ScriptMock> = {
   },
 
   "*:*": {
-    output: ["$ {script} ({workspace})", "✓ {workspace}: {script} done (mock)"],
+    output: [
+      "$ {script} ({workspace})",
+      "✓ {workspace}: {script} done (mock)",
+    ],
   },
 };

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@demo/frontend-utils": "workspace:*",
+    "@demo/shared-a": "workspace:*",
     "@demo/shared-utils": "workspace:*",
     "react": "catalog:frontend",
     "react-dom": "catalog:frontend"

@@ -10,12 +10,14 @@ import backendAPkg from "./demo-project/apps/my-app-a/backend-a/package.json";
 import backendATsconfig from "./demo-project/apps/my-app-a/backend-a/tsconfig.json";
 import frontendAPkg from "./demo-project/apps/my-app-a/frontend-a/package.json";
 import frontendATsconfig from "./demo-project/apps/my-app-a/frontend-a/tsconfig.json";
+import sharedAPkg from "./demo-project/apps/my-app-a/shared-a/package.json";
+import sharedATsconfig from "./demo-project/apps/my-app-a/shared-a/tsconfig.json";
 import backendBPkg from "./demo-project/apps/my-app-b/backend-b/package.json";
 import backendBTsconfig from "./demo-project/apps/my-app-b/backend-b/tsconfig.json";
 import frontendBPkg from "./demo-project/apps/my-app-b/frontend-b/package.json";
 import frontendBTsconfig from "./demo-project/apps/my-app-b/frontend-b/tsconfig.json";
-import sharedAPkg from "./demo-project/apps/my-app-b/shared-a/package.json";
-import sharedATsconfig from "./demo-project/apps/my-app-b/shared-a/tsconfig.json";
+import sharedBPkg from "./demo-project/apps/my-app-b/shared-b/package.json";
+import sharedBTsconfig from "./demo-project/apps/my-app-b/shared-b/tsconfig.json";
 import backendUtilsPkg from "./demo-project/libraries/backend-utils/package.json";
 import backendUtilsTsconfig from "./demo-project/libraries/backend-utils/tsconfig.json";
 import frontendUtilsPkg from "./demo-project/libraries/frontend-utils/package.json";
@@ -32,6 +34,7 @@ import {
   FRONTEND_B_SOURCE_FILES,
   FRONTEND_UTILS_SOURCE_FILES,
   SHARED_A_SOURCE_FILES,
+  SHARED_B_SOURCE_FILES,
   SHARED_UTILS_SOURCE_FILES,
 } from "./demo-project/sourceFiles";
 
@@ -52,10 +55,16 @@ export const WORKSPACE_DIRS = [
     sourceFiles: BACKEND_A_SOURCE_FILES,
   },
   {
-    dir: "apps/my-app-b/shared-a",
+    dir: "apps/my-app-a/shared-a",
     pkg: sharedAPkg,
     tsconfig: sharedATsconfig,
     sourceFiles: SHARED_A_SOURCE_FILES,
+  },
+  {
+    dir: "apps/my-app-b/shared-b",
+    pkg: sharedBPkg,
+    tsconfig: sharedBTsconfig,
+    sourceFiles: SHARED_B_SOURCE_FILES,
   },
   {
     dir: "apps/my-app-b/frontend-b",

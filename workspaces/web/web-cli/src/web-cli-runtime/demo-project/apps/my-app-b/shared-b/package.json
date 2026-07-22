@@ -1,20 +1,19 @@
 {
-  "name": "@demo/backend-b",
+  "name": "@demo/shared-b",
   "version": "1.0.0",
   "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@demo/backend-utils": "workspace:*",
-    "@demo/shared-b": "workspace:*",
     "@demo/shared-utils": "workspace:*",
-    "express": "catalog:backend"
+    "zod": "catalog:shared"
   },
   "devDependencies": {
-    "@types/express": "catalog:backend",
     "typescript": "catalog:",
     "eslint": "catalog:"
   }

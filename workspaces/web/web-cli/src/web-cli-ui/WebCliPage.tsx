@@ -23,7 +23,7 @@ export const WebCliPage = ({ notes }: WebCliPageProps) => {
           You may have a better experience with the Web CLI on desktop.
         </div>
       </div>
-      <Suspense fallback={null}>
+      <Suspense fallback={<div className="web-cli-placeholder" />}>
         <WebCliMainLazy />
       </Suspense>
       {notes}

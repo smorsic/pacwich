@@ -1,4 +1,7 @@
-export const FRONTEND_UTILS_SOURCE_FILES: Record<string, string> = {
+export const FRONTEND_UTILS_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "src/index.ts": `import { useEffect, useState } from "react";
 
 export const useDebouncedValue = <T,>(value: T, delayMs: number): T => {
@@ -14,7 +17,10 @@ export const useDebouncedValue = <T,>(value: T, delayMs: number): T => {
 `,
 };
 
-export const BACKEND_UTILS_SOURCE_FILES: Record<string, string> = {
+export const BACKEND_UTILS_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "src/index.ts": `import type { NextFunction, Request, Response } from "express";
 
 export const requestLogger = (
@@ -32,7 +38,10 @@ export const notFoundHandler = (_req: Request, res: Response): void => {
 `,
 };
 
-export const SHARED_UTILS_SOURCE_FILES: Record<string, string> = {
+export const SHARED_UTILS_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "src/index.ts": `import { z } from "zod";
 
 export const UserSchema = z.object({
@@ -48,8 +57,30 @@ export const isValidUser = (value: unknown): value is User =>
 `,
 };
 
-export const SHARED_A_SOURCE_FILES: Record<string, string> = {
-  "src/index.ts": `import { UserSchema } from "@demo/shared-utils";
+export const SHARED_A_SOURCE_FILES: Record<string, string> =
+  {
+    "src/index.ts": `import { UserSchema } from "@demo/shared-utils";
+import { z } from "zod";
+
+export const AppAConfigSchema = z.object({
+  featureFlags: z.object({
+    darkMode: z.boolean(),
+  }),
+});
+
+export type AppAConfig = z.infer<typeof AppAConfigSchema>;
+
+export const DEFAULT_APP_A_CONFIG: AppAConfig = {
+  featureFlags: { darkMode: false },
+};
+
+export { UserSchema };
+`,
+  };
+
+export const SHARED_B_SOURCE_FILES: Record<string, string> =
+  {
+    "src/index.ts": `import { UserSchema } from "@demo/shared-utils";
 import { z } from "zod";
 
 export const AppBConfigSchema = z.object({
@@ -66,10 +97,14 @@ export const DEFAULT_APP_B_CONFIG: AppBConfig = {
 
 export { UserSchema };
 `,
-};
+  };
 
-export const BACKEND_A_SOURCE_FILES: Record<string, string> = {
+export const BACKEND_A_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "src/index.ts": `import { notFoundHandler, requestLogger } from "@demo/backend-utils";
+import { DEFAULT_APP_A_CONFIG } from "@demo/shared-a";
 import { UserSchema } from "@demo/shared-utils";
 import express from "express";
 
@@ -77,6 +112,10 @@ export const app = express();
 
 app.use(express.json());
 app.use(requestLogger);
+
+app.get("/config", (_req, res) => {
+  res.json(DEFAULT_APP_A_CONFIG);
+});
 
 app.post("/users", (req, res) => {
   const result = UserSchema.safeParse(req.body);
@@ -91,9 +130,12 @@ app.use(notFoundHandler);
 `,
 };
 
-export const BACKEND_B_SOURCE_FILES: Record<string, string> = {
+export const BACKEND_B_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "src/index.ts": `import { notFoundHandler, requestLogger } from "@demo/backend-utils";
-import { DEFAULT_APP_B_CONFIG } from "@demo/shared-a";
+import { DEFAULT_APP_B_CONFIG } from "@demo/shared-b";
 import { UserSchema } from "@demo/shared-utils";
 import express from "express";
 
@@ -127,7 +169,9 @@ export default defineConfig({
 });
 `;
 
-const frontendIndexHtml = (title: string): string => `<!doctype html>
+const frontendIndexHtml = (
+  title: string,
+): string => `<!doctype html>
 <html>
   <head>
     <meta charset="UTF-8" />
@@ -148,11 +192,15 @@ if (container) {
 }
 `;
 
-export const FRONTEND_A_SOURCE_FILES: Record<string, string> = {
+export const FRONTEND_A_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "rsbuild.config.ts": FRONTEND_RSBUILD_CONFIG,
   "index.html": frontendIndexHtml("My App A"),
   "src/index.tsx": FRONTEND_INDEX_TSX,
   "src/App.tsx": `import { useDebouncedValue } from "@demo/frontend-utils";
+import { DEFAULT_APP_A_CONFIG } from "@demo/shared-a";
 import { isValidUser } from "@demo/shared-utils";
 import { useState } from "react";
 
@@ -163,6 +211,9 @@ export const App = () => {
   return (
     <main>
       <h1>My App A</h1>
+      {DEFAULT_APP_A_CONFIG.featureFlags.darkMode && (
+        <p>Dark mode enabled</p>
+      )}
       <input value={query} onChange={(event) => setQuery(event.target.value)} />
       <p>Searching for: {debouncedQuery}</p>
       <p>Valid empty user: {String(isValidUser({}))}</p>
@@ -172,12 +223,15 @@ export const App = () => {
 `,
 };
 
-export const FRONTEND_B_SOURCE_FILES: Record<string, string> = {
+export const FRONTEND_B_SOURCE_FILES: Record<
+  string,
+  string
+> = {
   "rsbuild.config.ts": FRONTEND_RSBUILD_CONFIG,
   "index.html": frontendIndexHtml("My App B"),
   "src/index.tsx": FRONTEND_INDEX_TSX,
   "src/App.tsx": `import { useDebouncedValue } from "@demo/frontend-utils";
-import { DEFAULT_APP_B_CONFIG } from "@demo/shared-a";
+import { DEFAULT_APP_B_CONFIG } from "@demo/shared-b";
 import { isValidUser } from "@demo/shared-utils";
 import { useState } from "react";
 

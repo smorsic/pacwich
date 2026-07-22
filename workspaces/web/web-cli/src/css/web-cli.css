@@ -1,3 +1,9 @@
+.web-cli-placeholder {
+  width: var(--web-cli-width);
+  height: calc(var(--web-cli-height) + 8.25rem);
+  box-sizing: border-box;
+}
+
 .web-cli-page-header {
   display: flex;
   flex-direction: column;
@@ -159,10 +165,11 @@
 }
 
 .web-cli-terminal-example-button {
-  color: white;
-  background-color: var(--bwunster-eye-color);
-  padding: 0.575rem 0.5rem;
+  color: var(--rp-c-bg);
+  background-color: var(--color-secondary);
+  padding: 0.65rem 0.5rem;
   font-size: 0.85rem;
+  font-weight: 600;
   box-sizing: content-box;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -329,6 +336,7 @@ button.web-cli-tree-node:hover {
   height: 100%;
   max-width: 100%;
   overflow: auto;
+  background-color: var(--rp-c-code-block-bg);
 }
 
 .web-cli-tree-content pre {
@@ -338,6 +346,7 @@ button.web-cli-tree-node:hover {
   border-bottom-right-radius: 0.5rem !important;
   overflow: visible !important;
   font-size: 0.9rem;
+  background-color: var(--rp-c-code-block-bg);
 }
 
 .web-cli-tree-note {

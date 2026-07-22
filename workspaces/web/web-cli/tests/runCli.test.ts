@@ -15,6 +15,7 @@ const ALL_WORKSPACE_NAMES = [
   "@demo/frontend-a",
   "@demo/backend-a",
   "@demo/shared-a",
+  "@demo/shared-b",
   "@demo/frontend-b",
   "@demo/backend-b",
   "@demo/frontend-utils",
@@ -57,13 +58,13 @@ test("list-workspaces shows tags and aliases from the project/workspace configs"
   const { runPacwichCli } = await import("../src/web-cli-runtime");
 
   const { stdout, exitCode } = await runPacwichCli(
-    "info @demo/shared-a --json",
+    "info @demo/shared-b --json",
     { terminalWidth: 80 },
   );
 
   expect(exitCode).toBe(0);
   const info = JSON.parse(stdout);
-  expect(info.aliases).toEqual(["shr-a"]);
+  expect(info.aliases).toEqual(["shr-b"]);
   expect(info.tags.sort()).toEqual(
     ["app", "app-b", "app-share", "shared"].sort(),
   );
@@ -162,9 +163,18 @@ test("run --dep-order starts dependencies before their dependents", async () => 
     startedAt("@demo/shared-a"),
   );
   expect(startedAt("@demo/shared-a")).toBeLessThan(
-    startedAt("@demo/frontend-b"),
+    startedAt("@demo/frontend-a"),
   );
   expect(startedAt("@demo/shared-a")).toBeLessThan(
+    startedAt("@demo/backend-a"),
+  );
+  expect(startedAt("@demo/shared-utils")).toBeLessThan(
+    startedAt("@demo/shared-b"),
+  );
+  expect(startedAt("@demo/shared-b")).toBeLessThan(
+    startedAt("@demo/frontend-b"),
+  );
+  expect(startedAt("@demo/shared-b")).toBeLessThan(
     startedAt("@demo/backend-b"),
   );
 });
@@ -190,6 +200,7 @@ test("affected list --files resolves affected workspaces (glob)", async () => {
       "@demo/frontend-a",
       "@demo/backend-a",
       "@demo/shared-a",
+      "@demo/shared-b",
       "@demo/frontend-b",
       "@demo/backend-b",
     ]),
@@ -210,7 +221,7 @@ test("affected list --files scopes to the changed workspace", async () => {
   // frontend-b has no dependents, so only frontend-b is affected.
   expect(stdout).toContain("@demo/frontend-b");
   expect(stdout).not.toContain("@demo/backend-b");
-  expect(stdout).not.toContain("@demo/shared-a");
+  expect(stdout).not.toContain("@demo/shared-b");
 });
 
 test("affected run --files runs the mocked script on affected workspaces", async () => {

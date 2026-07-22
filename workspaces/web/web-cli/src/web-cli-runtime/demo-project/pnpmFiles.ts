@@ -1,7 +1,8 @@
 export const PNPM_WORKSPACE_YAML = `packages:
   - apps/my-app-a/frontend-a
   - apps/my-app-a/backend-a
-  - apps/my-app-b/shared-a
+  - apps/my-app-a/shared-a
+  - apps/my-app-b/shared-b
   - apps/my-app-b/*
   - libraries/frontend-utils
   - libraries/backend-utils
@@ -45,6 +46,9 @@ importers:
       '@demo/backend-utils':
         specifier: workspace:*
         version: link:../../../libraries/backend-utils
+      '@demo/shared-a':
+        specifier: workspace:*
+        version: link:../shared-a
       '@demo/shared-utils':
         specifier: workspace:*
         version: link:../../../libraries/shared-utils
@@ -67,6 +71,9 @@ importers:
       '@demo/frontend-utils':
         specifier: workspace:*
         version: link:../../../libraries/frontend-utils
+      '@demo/shared-a':
+        specifier: workspace:*
+        version: link:../shared-a
       '@demo/shared-utils':
         specifier: workspace:*
         version: link:../../../libraries/shared-utils
@@ -96,14 +103,30 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
+  apps/my-app-a/shared-a:
+    dependencies:
+      '@demo/shared-utils':
+        specifier: workspace:*
+        version: link:../../../libraries/shared-utils
+      zod:
+        specifier: catalog:shared
+        version: 3.25.76
+    devDependencies:
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.7.0)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   apps/my-app-b/backend-b:
     dependencies:
       '@demo/backend-utils':
         specifier: workspace:*
         version: link:../../../libraries/backend-utils
-      '@demo/shared-a':
+      '@demo/shared-b':
         specifier: workspace:*
-        version: link:../shared-a
+        version: link:../shared-b
       '@demo/shared-utils':
         specifier: workspace:*
         version: link:../../../libraries/shared-utils
@@ -126,9 +149,9 @@ importers:
       '@demo/frontend-utils':
         specifier: workspace:*
         version: link:../../../libraries/frontend-utils
-      '@demo/shared-a':
+      '@demo/shared-b':
         specifier: workspace:*
-        version: link:../shared-a
+        version: link:../shared-b
       '@demo/shared-utils':
         specifier: workspace:*
         version: link:../../../libraries/shared-utils
@@ -158,7 +181,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/my-app-b/shared-a:
+  apps/my-app-b/shared-b:
     dependencies:
       '@demo/shared-utils':
         specifier: workspace:*
