@@ -6,6 +6,7 @@ AGENTS.md
 pnpm*.yaml
 
 **/generated/**/*.js
+**/generated/**/*.ts
 
 # MDX formatting is very buggy
 **/*.mdx 
