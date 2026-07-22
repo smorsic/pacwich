@@ -17,8 +17,7 @@
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "test": "bun test",
-    "generate-demo-config": "bun scripts/generateDemoConfig.ts",
-    "prepare": "bun run generate-demo-config"
+    "generate-demo-config": "bun scripts/generateDemoConfig.ts"
   },
   "dependencies": {
     "pacwich_local": "workspace:*",
