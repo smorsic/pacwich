@@ -16,21 +16,19 @@
  * directories are workspaces; each workspace still needs its own
  * `package.json`.
  *
- * `demo-project/pacwich.project.ts` is real, hand-authored config, actually
- * evaluated (see `scripts/generateDemoConfig.ts`, run automatically on
- * `bun install` via this workspace's `prepare` script) against the rest of
- * this demo project to resolve each workspace's tags/rules for real, since
- * the browser CLI never evaluates `.ts` configs itself
- * (`--disable-executable-configs`). The resolved output lands in
- * `demo-project/generated/` (gitignored) and gets flattened into each
- * workspace's own `pacwich.workspace.jsonc` below.
+ * Pacwich configs are hand-authored in `demo-project/pacwichConfigs.ts`: the
+ * project config carries the defaults and tag-based workspace dependency
+ * rules, and each workspace's own config carries just its alias and tags.
+ * The browser CLI never evaluates `.ts` configs
+ * (`--disable-executable-configs`), so each config is seeded twice: a
+ * `.jsonc` file pacwich actually parses, and a `.ts` display twin derived
+ * from that same jsonc so the file tree shows idiomatic TS config files.
  */
 import { vol } from "memfs";
 import {
-  PACWICH_PROJECT_TS_SOURCE,
-  WORKSPACE_TAGS_AND_RULES,
-} from "./demo-project/generated/workspaceConfig";
-import { WORKSPACE_ALIASES } from "./demo-project/pacwichConfigs";
+  PACWICH_PROJECT_JSONC_SOURCE,
+  WORKSPACE_CONFIGS,
+} from "./demo-project/pacwichConfigs";
 import { SCRIPT_MOCKS } from "./demo-project/scriptMocks";
 import {
   buildBaseFileMap,
@@ -42,21 +40,21 @@ import {
 export { PROJECT_ROOT, WORKSPACE_DIRS } from "./demoProjectBase";
 
 /**
- * Keys that are valid JS identifiers are unquoted so the generated
- * `pacwich.workspace.ts` reads like idiomatic `defineWorkspaceConfig` usage
- * instead of raw JSON. It's display only: the real config pacwich parses is
- * the sibling `.jsonc` file, since `--disable-executable-configs` means
- * `.ts` config files are never evaluated here. The tree view hides the
- * `.jsonc` file (see `CONFIG_JSONC_FILENAME` below) so the pair reads as
- * one file, not two.
+ * Keys that are valid JS identifiers are unquoted so a derived config `.ts`
+ * twin reads like idiomatic `defineProjectConfig`/`defineWorkspaceConfig`
+ * usage instead of raw JSON. It's display only: the real config pacwich
+ * parses is the sibling `.jsonc` file, since `--disable-executable-configs`
+ * means `.ts` config files are never evaluated here. The tree view hides
+ * the `.jsonc` files (see `CONFIG_JSONC_PATTERN` below) so each pair reads
+ * as one file, not two.
  */
 const IDENTIFIER_KEY_PATTERN = /"([A-Za-z_$][A-Za-z0-9_$]*)":/g;
 
-/** The one config filename that only exists to be parsed, with a `.ts` display twin. */
-const CONFIG_JSONC_FILENAME = "pacwich.workspace.jsonc";
+/** Config files that exist only to be parsed, each with a `.ts` display twin. */
+const CONFIG_JSONC_PATTERN = /\/pacwich\.(project|workspace)\.jsonc$/;
 
-const toDefineWorkspaceConfigTs = (jsonc: string): string =>
-  `import { defineWorkspaceConfig } from "pacwich/config";\n\nexport default defineWorkspaceConfig(${jsonc.replace(
+const toConfigDisplayTs = (defineFunctionName: string, jsonc: string): string =>
+  `import { ${defineFunctionName} } from "pacwich/config";\n\nexport default ${defineFunctionName}(${jsonc.replace(
     IDENTIFIER_KEY_PATTERN,
     "$1:",
   )});\n`;
@@ -65,18 +63,20 @@ const toDefineWorkspaceConfigTs = (jsonc: string): string =>
 const buildFileMap = (): Record<string, string> => {
   const files: Record<string, string> = {
     ...buildBaseFileMap(),
-    [`${PROJECT_ROOT}/pacwich.project.ts`]: PACWICH_PROJECT_TS_SOURCE,
+    [`${PROJECT_ROOT}/pacwich.project.jsonc`]: PACWICH_PROJECT_JSONC_SOURCE,
+    [`${PROJECT_ROOT}/pacwich.project.ts`]: toConfigDisplayTs(
+      "defineProjectConfig",
+      PACWICH_PROJECT_JSONC_SOURCE,
+    ),
   };
   for (const { dir } of WORKSPACE_DIRS) {
-    const workspaceConfig = {
-      alias: WORKSPACE_ALIASES[dir],
-      ...WORKSPACE_TAGS_AND_RULES[dir],
-    };
-    const workspaceConfigJsonc = json(workspaceConfig);
+    const workspaceConfigJsonc = json(WORKSPACE_CONFIGS[dir]);
     files[`${PROJECT_ROOT}/${dir}/pacwich.workspace.jsonc`] =
       workspaceConfigJsonc;
-    files[`${PROJECT_ROOT}/${dir}/pacwich.workspace.ts`] =
-      toDefineWorkspaceConfigTs(workspaceConfigJsonc);
+    files[`${PROJECT_ROOT}/${dir}/pacwich.workspace.ts`] = toConfigDisplayTs(
+      "defineWorkspaceConfig",
+      workspaceConfigJsonc,
+    );
   }
   return files;
 };
@@ -155,7 +155,7 @@ export type DemoProjectFile = {
  */
 export const getDemoProjectFiles = (): DemoProjectFile[] =>
   Object.entries(buildFileMap())
-    .filter(([path]) => !path.endsWith(`/${CONFIG_JSONC_FILENAME}`))
+    .filter(([path]) => !CONFIG_JSONC_PATTERN.test(path))
     .map(([path, content]) => ({
       relativePath: path.slice(`${PROJECT_ROOT}/`.length),
       content,

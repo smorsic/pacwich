@@ -1,10 +1,9 @@
 /**
  * The demo project's structure with no pacwich config files at all:
  * package.json/tsconfig.json/source files for the root and every workspace.
- * Split out from `demoProject.ts` so `scripts/generateDemoConfig.ts` (which
- * writes this same structure to a real temp directory to actually resolve
- * `pacwich.project.ts` for real) never has to depend on that generation's
- * own output, which wouldn't exist yet on a first run.
+ * Split out from `demoProject.ts` to keep the raw structure data separate
+ * from the pacwich config twins seeded on top of it (see
+ * `demo-project/pacwichConfigs.ts`).
  */
 import backendAPkg from "./demo-project/apps/my-app-a/backend-a/package.json";
 import backendATsconfig from "./demo-project/apps/my-app-a/backend-a/tsconfig.json";

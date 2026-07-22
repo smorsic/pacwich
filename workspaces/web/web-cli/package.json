@@ -16,8 +16,7 @@
     "preview": "portless pacwich-web-cli-preview rspress preview",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
-    "test": "bun test",
-    "generate-demo-config": "bun scripts/generateDemoConfig.ts"
+    "test": "bun test"
   },
   "dependencies": {
     "pacwich_local": "workspace:*",
