@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "PACWICH_DOCS_ENV=development portless pacwich-docs rspress dev --host",
+    "dev:plain": "PACWICH_DOCS_ENV=development rspress dev",
     "lint": "eslint src/",
     "build": "PACWICH_DOCS_ENV=production bun run scripts/build.ts",
     "build:dev": "PACWICH_DOCS_ENV=development bun run scripts/build.ts",
@@ -13,6 +14,8 @@
   },
   "devDependencies": {
     "@fontsource/unifontex": "catalog:web",
+    "@rsbuild/core": "^2.0.8",
+    "@rsbuild/plugin-node-polyfill": "^1.4.6",
     "@rsbuild/plugin-svgr": "catalog:web",
     "@rspress/core": "catalog:web",
     "@rspress/plugin-client-redirects": "catalog:web",
@@ -20,21 +23,15 @@
     "@types/lodash": "catalog:web",
     "@types/react": "catalog:web",
     "@types/react-syntax-highlighter": "catalog:web",
-    "@types/shell-quote": "catalog:pacwich-dev",
-    "@xterm/addon-fit": "^0.11.0",
-    "@xterm/xterm": "^6.0.0",
     "@pacwich/common": "workspace:*",
-    "bw-web-service-shared": "0.2.0",
+    "@pacwich/web-cli": "workspace:*",
     "lodash": "catalog:web",
     "pacwich_local": "workspace:*",
     "react": "catalog:web",
-    "react-arborist": "catalog:web",
     "react-dom": "catalog:web",
-    "react-icons": "catalog:web",
     "react-router": "catalog:web",
     "react-router-dom": "catalog:web",
     "react-syntax-highlighter": "catalog:web",
-    "shell-quote": "catalog:pacwich-prod",
     "zustand": "catalog:web"
   }
 }

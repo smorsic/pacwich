@@ -1,16 +1,19 @@
+@import "@pacwich/web-cli/css/web-cli-tokens.css";
+
 :root {
-  --color-primary: #018f6e;
+  --color-primary: #04ac85;
   --color-secondary: #f67b3d;
+
+  --dark-bg-color: #131212;
+  --dark-primary-color: #1dff99;
 
   --rp-nav-height: 5rem !important;
 
   --rp-font-family-base: "IBM Plex Sans", sans-serif;
   --rp-font-family-mono: "UnifontEx", monospace;
-  --rp-font-family-terminal: "Kode Mono", monospace;
   --rp-c-text-1: #202020;
   --rp-c-text-2: #434343;
   --rp-c-text-3: #848484;
-  --rp-c-code-block-bg: #f8f8f8;
   --rp-c-text-code: #202020;
   --rp-c-bg: #fdfdfd;
   --rp-c-bg-soft: #f8f6f6;
@@ -23,22 +26,7 @@
   --code-built-in-color: #c06917;
   --code-comment-color: #828282;
 
-  --web-cli-green: #2e7e14;
-  --web-cli-blue: #407ca8;
-  --web-cli-magenta: #8f69c5;
-  --web-cli-cyan: #3b93a0;
-  --web-cli-yellow: #a58029;
-  --web-cli-red: #d25151;
-  --web-cli-black: #3d3d3d;
-  --web-cli-bright-black: #6b6b6b;
-  --web-cli-divider: rgb(232, 232, 232);
-
-  --web-cli-width: clamp(35rem, 90vw, 55rem);
-  --web-cli-height: clamp(20rem, 50vh, 30rem);
-
   --nav-color: #f0f0f060;
-
-  --bwunster-eye-color: #4f5dcd;
 
   --feature-shuttle-color: #0fb9d6;
   --feature-violin-color: #944e14;
@@ -106,13 +94,12 @@
   --color-primary: #1dff99;
   --color-secondary: #ff7d55;
 
-  --rp-c-bg: #131212;
+  --rp-c-bg: var(--dark-bg-color);
   --nav-color: #020101a0;
   --rp-c-bg-soft: #1e1b1b;
   --rp-c-bg-mute: #2d2a2a;
   --rp-c-text-code-bg: #281f1f;
   --rp-c-text-code: #f2f2f2;
-  --rp-c-code-block-bg: #0c0b0b;
   --rp-c-text-1: #ffffff;
   --rp-c-text-2: #c8c8c8;
 
@@ -122,16 +109,6 @@
   --code-attr-color: #a2b9f7;
   --code-built-in-color: #fdb240;
   --code-comment-color: #919191;
-
-  --web-cli-green: #6a9f58;
-  --web-cli-blue: #2ba1f6;
-  --web-cli-magenta: #8f69c5;
-  --web-cli-cyan: #58a7b4;
-  --web-cli-yellow: #fef78f;
-  --web-cli-red: #e05a5a;
-  --web-cli-black: #5a5757;
-  --web-cli-bright-black: #828282;
-  --web-cli-divider: transparent;
 
   --feature-shuttle-color: #92e1ef;
   --feature-violin-color: #c8956b;
@@ -627,16 +604,14 @@ a code {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 1rem;
+  margin: 1rem 0;
 }
 
 .web-cli-button {
   font-family: "Jersey 10", sans-serif;
-  background-color: var(--color-secondary);
-  text-shadow: 1px 1px 3px
-    color-mix(in srgb, var(--color-secondary) 10%, black 90%);
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  color: white;
+  background-color: var(--dark-primary-color);
+  box-shadow: var(--elevation-1_5-shadow);
+  color: var(--dark-bg-color);
   padding: 0.75rem 1.5rem;
   text-align: center;
   line-height: 0.75;
@@ -648,7 +623,7 @@ a code {
 .web-cli-button:hover,
 .web-cli-button:focus,
 .web-cli-button:active {
-  background-color: var(--rp-c-link) !important;
+  background-color: var(--color-secondary);
   color: white !important;
   animation: none !important;
   opacity: 1 !important;
@@ -779,6 +754,10 @@ a code {
   gap: 0.5rem;
   font-size: 0.9rem;
   color: var(--rp-c-link);
+}
+
+.pm-tabs-links .web-cli-link {
+  color: var(--web-cli-blue);
 }
 
 .pm-tabs-tabs {

@@ -1,5 +1,8 @@
 import fs from "fs";
 import path from "path";
+import { createMockSubprocessRspackPlugin } from "@pacwich/web-cli/web-cli-runtime/mockSubprocessRspackPlugin";
+import { rspack } from "@rsbuild/core";
+import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
 import { defineConfig } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
@@ -15,6 +18,21 @@ import {
   BLOG_URL,
   createSidebar,
 } from "./rspressLinks";
+
+// The web CLI (/web-cli) runs the real pacwich CLI in-browser over memfs —
+// browser-only machinery that must NOT leak into rspress's SSR ("node")
+// compilation pass, which other pages (CliInstall.tsx, PmTabs.tsx,
+// runScriptJson.ts) use to render real pacwich data server-side. Scoped
+// below to builderConfig.environments.web (the client-only bundle) instead
+// of the top level, which would apply to every environment.
+const WEB_CLI_RUNTIME_DIR = path.resolve(
+  __dirname,
+  "../web-cli/src/web-cli-runtime",
+);
+const fsShim = path.join(WEB_CLI_RUNTIME_DIR, "fsShim.ts");
+const osShim = path.join(WEB_CLI_RUNTIME_DIR, "osShim.ts");
+const stubs = path.join(WEB_CLI_RUNTIME_DIR, "stubs.ts");
+const mockSubprocessPlugin = createMockSubprocessRspackPlugin(rspack);
 
 const TITLE =
   "pacwich: Monorepo tooling for Bun, npm, and pnpm workspaces | Documentation";
@@ -69,6 +87,12 @@ export default defineConfig({
   icon: "/favicon.ico",
   logo: "/images/png/bwunster_64x70.png",
   logoText: `pacwich`,
+  // /web-cli uses memfs/xterm/the in-browser CLI — it can't be server
+  // rendered, so it falls back to pure client hydration while every other
+  // route stays fully SSG'd.
+  ssg: {
+    experimentalExcludeRoutePaths: ["/web-cli"],
+  },
   search: {
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
@@ -108,6 +132,48 @@ export default defineConfig({
   },
   builderConfig: {
     dev: {},
+    // Scoped to the client/browser bundle only — see the comment above
+    // WEB_CLI_RUNTIME_DIR. Left untouched: environments.node (SSR) and
+    // environments.node_md (llms.txt), both of which need real fs/child_process
+    // for CliInstall.tsx/PmTabs.tsx/runScriptJson.ts's real pacwich usage.
+    environments: {
+      web: {
+        plugins: [
+          pluginNodePolyfill({
+            globals: { process: false, Buffer: true },
+            protocolImports: true,
+            // The plugin's own isServer check (which normally skips
+            // polyfilling for a Node-target build) doesn't correctly detect
+            // this as a client build when registered inside
+            // builderConfig.environments.web instead of at the config root
+            // — force it on, since this environment IS the client bundle.
+            force: true,
+          }),
+        ],
+        resolve: {
+          alias: {
+            fs: fsShim,
+            "node:fs": fsShim,
+            os: osShim,
+            "node:os": osShim,
+            child_process: stubs,
+            "node:child_process": stubs,
+            readline: stubs,
+            "node:readline": stubs,
+            module: stubs,
+            "node:module": stubs,
+            "stream/consumers": stubs,
+            "node:stream/consumers": stubs,
+            jiti: stubs,
+          },
+        },
+        tools: {
+          rspack: (_config, { appendPlugins }) => {
+            appendPlugins(mockSubprocessPlugin);
+          },
+        },
+      },
+    },
     tools: {
       rspack: {
         ignoreWarnings: [
@@ -121,21 +187,38 @@ export default defineConfig({
       cleanDistPath: true,
     },
     source: {
+      // Defined as individual `process.env.X` paths, not a single `process`
+      // key replacing the whole identifier — the latter clobbered every
+      // `process.on`/`.exit`/`.stdout` reference site-wide (including inside
+      // the bundled pacwich CLI powering /web-cli), since Rsbuild's define
+      // does a literal AST substitution of whatever key you give it.
       define: {
-        process: `({
-          env: {
-            YEAR: ${JSON.stringify(new Date().getFullYear())},
-            BUILD_ID: ${JSON.stringify(process.env.BUILD_ID ?? "(no build ID)")},
-            BWUNSTER_ASCII: ${JSON.stringify(BWUNSTER_ASCII)},
-            PACWICH_WEB_SERVICE_BASE_URL: ${JSON.stringify(process.env.PACWICH_WEB_SERVICE_BASE_URL ?? "http://localhost:8080")},
-            PACWICH_DOCS_ENV: ${JSON.stringify(process.env.PACWICH_DOCS_ENV ?? "production")},
-            BLOG_URL: ${JSON.stringify(BLOG_URL)},
-          },
-        })`,
+        "process.env.YEAR": JSON.stringify(new Date().getFullYear()),
+        "process.env.BUILD_ID": JSON.stringify(
+          process.env.BUILD_ID ?? "(no build ID)",
+        ),
+        "process.env.BWUNSTER_ASCII": JSON.stringify(BWUNSTER_ASCII),
+        "process.env.PACWICH_DOCS_ENV": JSON.stringify(
+          process.env.PACWICH_DOCS_ENV ?? "production",
+        ),
+        "process.env.BLOG_URL": JSON.stringify(BLOG_URL),
       },
     },
     html: {
       tags: [
+        // Safety net, runs before any bundled JS: a bare `process.env.X`
+        // reference anywhere on the site (outside the specific paths listed
+        // in source.define above) would otherwise throw "process is not
+        // defined" in the browser — e.g. @pacwich/common/version reading
+        // process.env._IS_PACWICH_LOCAL_SOURCE. Only installs if nothing has
+        // defined `process` yet, so it never shadows the real Node process
+        // during SSR, and /web-cli's own runPacwichCli.ts still installs its
+        // fuller shim on top when a command actually runs.
+        {
+          tag: "script",
+          children:
+            "if(typeof window.process==='undefined'){window.process={env:{}};}",
+        },
         ...(process.env.PACWICH_DOCS_ENV === "development"
           ? [
               {

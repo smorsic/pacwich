@@ -4,6 +4,7 @@ import { createScriptLogger } from "./workspaces/meta/util";
 const logger = createScriptLogger({ name: "prepare" });
 
 await $`bun init-pacwich-package`;
+await $`bun init-web-cli`;
 
 if (process.env.DISABLE_README_AUTO_UPDATE !== "true") {
   await $`bun create-readme`;

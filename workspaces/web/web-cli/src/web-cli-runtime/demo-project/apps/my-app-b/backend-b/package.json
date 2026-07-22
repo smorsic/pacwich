@@ -1,0 +1,21 @@
+{
+  "name": "@demo/backend-b",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@demo/backend-utils": "workspace:*",
+    "@demo/shared-b": "workspace:*",
+    "@demo/shared-utils": "workspace:*",
+    "express": "catalog:backend"
+  },
+  "devDependencies": {
+    "@types/express": "catalog:backend",
+    "typescript": "catalog:",
+    "eslint": "catalog:"
+  }
+}

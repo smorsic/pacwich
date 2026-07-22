@@ -6,7 +6,8 @@
     "packages": [
       "workspaces/**/*",
       "!workspaces/packages/pacwich/**/*",
-      "!workspaces/sandboxes/local-vs-release/**/*"
+      "!workspaces/sandboxes/local-vs-release/**/*",
+      "!workspaces/web/web-cli/src/web-cli-runtime/**/*"
     ],
     "catalog": {},
     "catalogs": {
@@ -55,6 +56,7 @@
     "cli:node": "node workspaces/packages/pacwich/dist/bin/cli.js",
     "pw": "pacwich ri --workspace=pw --script",
     "docs": "pacwich ri --workspace=docs --script",
+    "wc": "pacwich ri --workspace=wc --script",
     "sandbox": "pacwich ri --workspace=sandbox --script",
     "lint": "pacwich run lint '*' not:tag:sandbox",
     "lint:fix": "eslint . --fix",
@@ -73,6 +75,7 @@
     "portless-start": "portless proxy start --no-tls",
     "portless-stop": "portless proxy stop",
     "init-pacwich-package": "PACWICH_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/pacwich run create-modules && bun --cwd=workspaces/libraries/pacwich-common run build:dts",
+    "init-web-cli": "bun wc generate-demo-config",
     "prepare": "bun prepare.ts"
   },
   "devDependencies": {
