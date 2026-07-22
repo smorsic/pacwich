@@ -1,0 +1,394 @@
+.web-cli-page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.web-cli-page-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 0 !important;
+}
+
+.web-cli-page-header p {
+  line-height: 1.5 !important;
+  text-align: center;
+  max-width: min(40rem, 90vw);
+  margin: 0.5rem 0 !important;
+}
+
+.web-cli-mobile-warning {
+  display: none;
+  color: var(--rp-container-warning-text);
+  text-align: center;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .web-cli-mobile-warning {
+    display: block;
+  }
+}
+
+.web-cli-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  margin: auto;
+}
+
+.web-cli-terminal-screen-container {
+  padding: 0.65rem;
+  padding-right: 0;
+  width: var(--web-cli-width);
+  height: var(--web-cli-height);
+  box-sizing: border-box;
+  padding-bottom: 0;
+  background-color: var(--rp-c-code-block-bg);
+}
+
+.web-cli-terminal-screen {
+  width: calc(100% - 0.5rem);
+  height: var(--web-cli-height);
+  background: var(--rp-c-code-block-bg);
+}
+
+.web-cli-terminal .xterm,
+.web-cli-terminal .xterm-viewport {
+  height: 100%;
+}
+
+.web-cli-terminal .xterm-cursor,
+.web-cli-terminal .xterm-cursor-layer {
+  display: none !important;
+}
+
+.web-cli-input-form {
+  display: flex;
+  align-items: center;
+  width: var(--web-cli-width);
+  max-width: 100%;
+  gap: 0.5rem;
+  background-color: var(--rp-c-bg-mute);
+  padding: 0.75rem;
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  border-top: 1px solid var(--web-cli-divider);
+  z-index: 1;
+  position: relative;
+}
+
+.web-cli-input-label {
+  color: var(--rp-c-text-1);
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-family: var(--rp-font-family-mono);
+  color: var(--rp-c-link);
+  white-space: nowrap;
+}
+
+.web-cli-input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  flex: 1;
+  caret-shape: block;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: var(--rp-font-family-mono);
+}
+
+.web-cli-input::placeholder {
+  color: var(--rp-c-text-3);
+  opacity: 0.75;
+  padding-left: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.xterm-viewport {
+  background-color: var(--rp-c-code-block-bg) !important;
+}
+
+.web-cli-input-submit {
+  color: var(--rp-c-bg);
+  background-color: var(--rp-c-link);
+  padding: 0.75rem 1.5rem;
+  box-sizing: content-box;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition:
+    opacity 0.25s,
+    background-color 0.25s,
+    filter 0.25s;
+}
+
+.web-cli-input-submit:focus {
+  filter: brightness(1.25);
+}
+
+/*
+ * A positive offset (unlike the inset ring on the view-selector tabs above)
+ * draws outside the button, over the surrounding form's own background
+ * rather than the button's own --rp-c-link fill, so it stays visible without
+ * needing a per-state color override.
+ */
+.web-cli-input-submit:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: 2px;
+}
+
+.web-cli-input-submit:disabled {
+  opacity: 0.5;
+  background-color: var(--rp-c-text-3) !important;
+  cursor: not-allowed;
+}
+
+.xterm {
+  background-color: var(--rp-c-code-block-bg) !important;
+}
+
+.web-cli-terminal-examples-container {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.web-cli-terminal-example-button {
+  color: white;
+  background-color: var(--bwunster-eye-color);
+  padding: 0.575rem 0.5rem;
+  font-size: 0.85rem;
+  box-sizing: content-box;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition:
+    opacity 0.25s,
+    background-color 0.25s,
+    filter 0.25s;
+}
+
+.web-cli-terminal-example-button:focus {
+  filter: brightness(1.25);
+}
+
+.web-cli-terminal-example-button:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: 2px;
+}
+
+.web-cli-terminal-examples-content {
+  position: absolute;
+  top: calc(-100% - calc(var(--web-cli-height) - 7rem));
+  height: calc(var(--web-cli-height) - 5rem);
+  max-height: calc(var(--web-cli-height) - 5rem);
+  overflow-y: auto;
+  width: calc(var(--web-cli-width) - 5rem);
+  max-width: 90vw;
+  background-color: var(--rp-c-bg-mute);
+  box-shadow: 0 8px 30px 0px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 0.5rem;
+}
+
+.web-cli-terminal-example {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  line-height: 1.25;
+}
+
+.web-cli-terminal-example.odd {
+  background-color: var(--rp-c-bg);
+}
+
+.web-cli-terminal-example.even {
+  background-color: var(--rp-c-bg-soft);
+}
+
+.web-cli-terminal-example:hover,
+.web-cli-terminal-example:focus {
+  background-color: var(--rp-c-bg-mute);
+}
+
+.web-cli-terminal-example-name {
+  font-weight: 600;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.web-cli-terminal-example-description {
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5 !important;
+}
+
+.web-cli-terminal-example-command {
+  font-size: 0.9rem;
+  color: var(--rp-c-text-2);
+  white-space: nowrap;
+  margin-left: -0.25rem;
+}
+
+.web-cli-notes {
+  margin-top: 1rem;
+  line-height: 1.25;
+}
+
+.web-cli-notes ul {
+  line-height: 1.25 !important;
+  margin-top: 0.5rem;
+}
+
+.web-cli-notes-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.web-cli-input-warning {
+  color: var(--rp-container-warning-text);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  min-height: 1.25rem;
+}
+
+.web-cli-tree {
+  display: flex;
+  width: var(--web-cli-width);
+  height: calc(var(--web-cli-height) + 4rem);
+  margin: auto;
+}
+
+.web-cli-tree-files {
+  width: fit-content;
+  font-family: var(--rp-font-family-mono);
+  font-size: 1.25rem;
+  background-color: var(--rp-c-bg-mute);
+  padding: 0.5rem;
+  padding-right: 0;
+  border-right: 1px solid var(--web-cli-divider);
+  border-bottom-left-radius: 0.5rem;
+}
+
+.web-cli-tree-files > [role="tree"] {
+  height: 100% !important;
+}
+
+.web-cli-tree-files > [role="tree"] > div {
+  height: 100% !important;
+}
+
+.web-cli-tree-files .web-cli-tree-node {
+  background-color: transparent;
+  display: flex;
+  width: 100%;
+  cursor: default;
+}
+
+.web-cli-tree-node.directory {
+  opacity: 0.85;
+}
+
+button.web-cli-tree-node {
+  appearance: none;
+  cursor: pointer !important;
+}
+
+button.web-cli-tree-node:hover {
+  color: var(--rp-c-link) !important;
+}
+
+.web-cli-tree-node.selected-parent {
+  color: var(--web-cli-yellow) !important;
+}
+
+.web-cli-tree-node > span {
+  box-sizing: border-box;
+  padding-left: 0.25rem;
+  flex: 1;
+  text-align: left;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.web-cli-tree-node.selected > span {
+  color: var(--web-cli-yellow) !important;
+  background-color: var(--rp-c-code-block-bg);
+}
+
+.web-cli-tree-content {
+  flex: 1;
+  height: 100%;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.web-cli-tree-content pre {
+  height: 100%;
+  margin-top: 0 !important;
+  border-radius: 0 !important;
+  border-bottom-right-radius: 0.5rem !important;
+  overflow: visible !important;
+  font-size: 0.9rem;
+}
+
+.web-cli-tree-note {
+  color: var(--rp-c-text-2);
+  font-size: 0.85rem;
+  text-align: center;
+  margin: 0.5rem;
+  line-height: 1.15 !important;
+}
+
+.web-cli-view-selector {
+  display: flex;
+  width: var(--web-cli-width);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.web-cli-view-selector-button {
+  background: var(--rp-c-bg-soft);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  line-height: 0.75;
+  cursor: pointer;
+  transition:
+    background-color 0.25s,
+    color 0.25s;
+}
+
+.web-cli-view-selector-button.selected {
+  background: var(--rp-c-link);
+  color: var(--rp-c-code-block-bg);
+}
+
+/* rspress's own base styles zero out button focus outlines; restore one here. */
+.web-cli-view-selector-button:focus-visible {
+  outline: 2px solid var(--rp-c-link);
+  outline-offset: -2px;
+}
+
+/*
+ * The selected tab's fill is the same --rp-c-link the ring above uses, so an
+ * inset ring there is invisible against its own background. Swap to the
+ * token already used for this tab's own text color, which by construction
+ * already contrasts against --rp-c-link.
+ */
+.web-cli-view-selector-button.selected:focus-visible {
+  outline-color: var(--rp-c-code-block-bg);
+}

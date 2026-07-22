@@ -69,12 +69,17 @@ ${PM_COMMANDS[pm].localCall}
   return (
     <PmTabs
       links={
-        docLinks && (
-          <div className="pm-tabs-links">
-            <Link href="/cli">CLI Docs</Link>
-            <Link href="/api">API Docs</Link>
-          </div>
-        )
+        <div className="pm-tabs-links">
+          <Link href="/web-cli" className="web-cli-link">
+            NEW: Try the Web CLI in your browser now!
+          </Link>
+          {docLinks && (
+            <>
+              <Link href="/cli">CLI Docs</Link>
+              <Link href="/api">API Docs</Link>
+            </>
+          )}
+        </div>
       }
       title="Install"
       sections={{

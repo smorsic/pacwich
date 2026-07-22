@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { createMockSubprocessRspackPlugin } from "@pacwich/web-common/web-cli-runtime/mockSubprocessRspackPlugin";
+import { createMockSubprocessRspackPlugin } from "@pacwich/web-cli/web-cli-runtime/mockSubprocessRspackPlugin";
 import { rspack } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
@@ -27,7 +27,7 @@ import {
 // of the top level, which would apply to every environment.
 const WEB_CLI_RUNTIME_DIR = path.resolve(
   __dirname,
-  "../../libraries/web-common/web-cli-runtime",
+  "../web-cli/src/web-cli-runtime",
 );
 const fsShim = path.join(WEB_CLI_RUNTIME_DIR, "fsShim.ts");
 const osShim = path.join(WEB_CLI_RUNTIME_DIR, "osShim.ts");

@@ -1,13 +1,10 @@
 import path from "path";
-import { createMockSubprocessRspackPlugin } from "@pacwich/web-common/web-cli-runtime/mockSubprocessRspackPlugin";
 import { rspack } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { defineConfig } from "@rspress/core";
+import { createMockSubprocessRspackPlugin } from "./src/web-cli-runtime/mockSubprocessRspackPlugin";
 
-const RUNTIME_DIR = path.resolve(
-  __dirname,
-  "../../libraries/web-common/web-cli-runtime",
-);
+const RUNTIME_DIR = path.resolve(__dirname, "src/web-cli-runtime");
 const fsShim = path.join(RUNTIME_DIR, "fsShim.ts");
 const osShim = path.join(RUNTIME_DIR, "osShim.ts");
 const stubs = path.join(RUNTIME_DIR, "stubs.ts");

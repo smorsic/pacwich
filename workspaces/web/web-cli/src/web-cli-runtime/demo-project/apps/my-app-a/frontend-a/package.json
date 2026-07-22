@@ -1,0 +1,24 @@
+{
+  "name": "@demo/frontend-a",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rsbuild build",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@demo/frontend-utils": "workspace:*",
+    "@demo/shared-utils": "workspace:*",
+    "react": "catalog:frontend",
+    "react-dom": "catalog:frontend"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "catalog:frontend",
+    "@rsbuild/plugin-react": "catalog:frontend",
+    "@types/react": "catalog:frontend",
+    "@types/react-dom": "catalog:frontend",
+    "typescript": "catalog:",
+    "eslint": "catalog:"
+  }
+}

@@ -6,7 +6,7 @@ import { expect, test } from "bun:test";
 
 test("stdout/stderr report a TTY, so pacwich's grouped output style is picked", async () => {
   const { installProcessShim } =
-    await import("@pacwich/web-common/web-cli-runtime/processShim");
+    await import("../src/web-cli-runtime/processShim");
 
   const proc = installProcessShim();
 
@@ -16,7 +16,7 @@ test("stdout/stderr report a TTY, so pacwich's grouped output style is picked", 
 
 test("repeat installs return the same object, updating dimensions in place", async () => {
   const { installProcessShim } =
-    await import("@pacwich/web-common/web-cli-runtime/processShim");
+    await import("../src/web-cli-runtime/processShim");
 
   const first = installProcessShim({ columns: 40, rows: 10 });
   expect(first.stdout.columns).toBe(40);
@@ -33,7 +33,7 @@ test("repeat installs return the same object, updating dimensions in place", asy
 
 test("a call with no dimensions leaves the existing dimensions untouched", async () => {
   const { installProcessShim } =
-    await import("@pacwich/web-common/web-cli-runtime/processShim");
+    await import("../src/web-cli-runtime/processShim");
 
   installProcessShim({ columns: 100, rows: 40 });
   const proc = installProcessShim();
@@ -44,7 +44,7 @@ test("a call with no dimensions leaves the existing dimensions untouched", async
 
 test("stdin stub tolerates the calls grouped output makes without throwing", async () => {
   const { installProcessShim } =
-    await import("@pacwich/web-common/web-cli-runtime/processShim");
+    await import("../src/web-cli-runtime/processShim");
 
   const proc = installProcessShim();
 

@@ -1,6 +1,7 @@
 /**
  * Minimal global stylesheet for the standalone preview: just the shared
- * web-cli tokens/structure from @pacwich/web-common. rspress's own default
+ * web-cli tokens/structure from this workspace's own css/ dir. rspress's
+ * own default
  * theme already ships sensible --rp-c- and --rp-container- prefixed
  * defaults (see base-vars.css, Callout/index.css) for both light and dark,
  * so this workspace doesn't need to redeclare them.
@@ -13,8 +14,8 @@
  * documentation-website loads them, via the Google Fonts <link> tags in
  * rspress.config.ts's builderConfig.html.tags.
  */
-@import "@pacwich/web-common/css/web-cli-tokens.css";
-@import "@pacwich/web-common/css/web-cli.css";
+@import "../../css/web-cli-tokens.css";
+@import "../../css/web-cli.css";
 
 :root {
   --rp-font-family-base: "IBM Plex Sans", sans-serif;

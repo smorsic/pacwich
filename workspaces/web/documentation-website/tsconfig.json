@@ -4,12 +4,12 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    // @pacwich/web-common's web-cli-runtime consumes `pacwich` as raw TS
+    // @pacwich/web-cli's web-cli-runtime consumes `pacwich` as raw TS
     // source (workspace dep), which tsc now reaches transitively through
     // this workspace's web-cli imports. Its generated ajv `.js` validators
     // ship without declarations; tsc surfaces them as implicit-any imports.
-    // Same exception web-cli/web-common's own tsconfigs already carry, for
-    // the same reason.
+    // Same exception web-cli's own tsconfig already carries, for the same
+    // reason.
     "noImplicitAny": false
   },
   "include": ["src"],

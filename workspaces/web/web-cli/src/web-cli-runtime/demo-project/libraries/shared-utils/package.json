@@ -1,0 +1,19 @@
+{
+  "name": "@demo/shared-utils",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "catalog:shared"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "eslint": "catalog:"
+  }
+}

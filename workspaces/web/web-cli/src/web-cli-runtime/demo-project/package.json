@@ -1,0 +1,10 @@
+{
+  "name": "demo-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "devDependencies": {
+    "eslint": "catalog:",
+    "typescript-eslint": "catalog:"
+  }
+}

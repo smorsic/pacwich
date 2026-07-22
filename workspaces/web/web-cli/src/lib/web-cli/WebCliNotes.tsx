@@ -19,10 +19,15 @@ export const WebCliNotes = () => {
           args to <code>pacwich</code> aren't supported.
         </li>
         <li>
-          Inline scripts, the <code>doctor</code> command, changing the working
-          directory via <code>--cwd</code>, and git-based affected diffs (
-          <code>--base</code>/<code>--head</code>) aren't supported here — use{" "}
-          <code>--files</code> instead for affected resolution.
+          Inline scripts and changing the working directory via{" "}
+          <code>--cwd</code> aren't supported here.
+        </li>
+        <li>
+          Git-based affected diffs, which <code>affected list</code>/
+          <code>affected run</code> use by default (with or without{" "}
+          <code>--base</code>/<code>--head</code>), aren't supported here — pass{" "}
+          <code>--files</code> instead to provide a list of changed files
+          manually.
         </li>
       </ul>
     </div>

@@ -1,8 +1,11 @@
-@import "@pacwich/web-common/css/web-cli-tokens.css";
+@import "@pacwich/web-cli/css/web-cli-tokens.css";
 
 :root {
-  --color-primary: #018f6e;
+  --color-primary: #04ac85;
   --color-secondary: #f67b3d;
+
+  --dark-bg-color: #131212;
+  --dark-primary-color: #1dff99;
 
   --rp-nav-height: 5rem !important;
 
@@ -91,7 +94,7 @@
   --color-primary: #1dff99;
   --color-secondary: #ff7d55;
 
-  --rp-c-bg: #131212;
+  --rp-c-bg: var(--dark-bg-color);
   --nav-color: #020101a0;
   --rp-c-bg-soft: #1e1b1b;
   --rp-c-bg-mute: #2d2a2a;
@@ -601,16 +604,14 @@ a code {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 1rem;
+  margin: 1rem 0;
 }
 
 .web-cli-button {
   font-family: "Jersey 10", sans-serif;
-  background-color: var(--color-secondary);
-  text-shadow: 1px 1px 3px
-    color-mix(in srgb, var(--color-secondary) 10%, black 90%);
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-  color: white;
+  background-color: var(--dark-primary-color);
+  box-shadow: var(--elevation-1_5-shadow);
+  color: var(--dark-bg-color);
   padding: 0.75rem 1.5rem;
   text-align: center;
   line-height: 0.75;
@@ -622,7 +623,7 @@ a code {
 .web-cli-button:hover,
 .web-cli-button:focus,
 .web-cli-button:active {
-  background-color: var(--rp-c-link) !important;
+  background-color: var(--color-secondary);
   color: white !important;
   animation: none !important;
   opacity: 1 !important;
@@ -753,6 +754,10 @@ a code {
   gap: 0.5rem;
   font-size: 0.9rem;
   color: var(--rp-c-link);
+}
+
+.pm-tabs-links .web-cli-link {
+  color: var(--web-cli-blue);
 }
 
 .pm-tabs-tabs {

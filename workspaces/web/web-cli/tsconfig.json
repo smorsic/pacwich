@@ -7,7 +7,14 @@
     // ours, so relax this for the cross-package boundary.
     "noImplicitAny": false,
     // The demo project is loaded from static `.json` files (see demoProject.ts).
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    // demo-project/pacwich.project.ts imports "pacwich/config" (the real
+    // published name, matching genuine end-user syntax) for type-checking
+    // purposes here; this workspace otherwise depends on the local build
+    // under "pacwich_local" to avoid clashing with the published package.
+    "paths": {
+      "pacwich/config": ["../../packages/pacwich/src/config/public.ts"]
+    }
   },
   "include": [
     "src/**/*.ts",

@@ -1,4 +1,5 @@
 import "@fontsource/unifontex";
-import { WebCliPage } from "../lib/web-cli/WebCliPage";
+import { WebCliNotes } from "../lib/web-cli/WebCliNotes";
+import { WebCliPage } from "../web-cli-ui";
 
-export default () => <WebCliPage />;
+export default () => <WebCliPage notes={<WebCliNotes />} />;

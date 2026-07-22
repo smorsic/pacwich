@@ -2,7 +2,13 @@
   "name": "@pacwich/web-cli",
   "private": true,
   "type": "module",
-  "description": "The real pacwich CLI running in the browser over an in-memory filesystem (memfs), matching the UI/CSS of the (currently unrouted) web CLI demo in documentation-website.",
+  "description": "The real pacwich CLI running in the browser over an in-memory filesystem (memfs). `src/web-cli-ui/` is a portable component tree consumed directly by documentation-website's /web-cli page; `src/pages`/`src/theme` are this workspace's own standalone preview app around it.",
+  "exports": {
+    "./web-cli-ui": "./src/web-cli-ui/index.ts",
+    "./web-cli-runtime": "./src/web-cli-runtime/index.ts",
+    "./web-cli-runtime/*": "./src/web-cli-runtime/*.ts",
+    "./css/*": "./src/css/*"
+  },
   "scripts": {
     "dev": "portless pacwich-web-cli rspress dev --host",
     "dev:plain": "rspress dev",
@@ -10,25 +16,26 @@
     "preview": "portless pacwich-web-cli-preview rspress preview",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "generate-demo-config": "bun scripts/generateDemoConfig.ts",
+    "prepare": "bun run generate-demo-config"
   },
   "dependencies": {
-    "@pacwich/web-common": "workspace:*"
+    "pacwich_local": "workspace:*",
+    "memfs": "^4.17.0",
+    "path-browserify": "^1.0.1"
   },
   "devDependencies": {
     "@fontsource/unifontex": "catalog:web",
     "@rsbuild/core": "^2.0.8",
     "@rsbuild/plugin-node-polyfill": "^1.4.6",
     "@rspress/core": "catalog:web",
-    "@types/lodash": "catalog:web",
     "@types/react": "catalog:web",
     "@types/react-dom": "^19.2.0",
     "@types/react-syntax-highlighter": "catalog:web",
     "@types/shell-quote": "catalog:pacwich-dev",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
-    "lodash": "catalog:web",
-    "memfs": "^4.17.0",
     "react": "catalog:web",
     "react-arborist": "catalog:web",
     "react-dom": "catalog:web",

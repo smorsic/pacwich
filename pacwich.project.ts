@@ -54,10 +54,21 @@ export default defineProjectConfig({
             allowPatterns: [
               "@pacwich/common",
               "@pacwich/meta",
-              "@pacwich/web-common",
               "pacwich_local",
             ],
             denyPatterns: [],
+          },
+        },
+      },
+    },
+    {
+      // documentation-website embeds web-cli's portable componentry directly
+      // on its /web-cli page, rather than each maintaining its own copy.
+      patterns: ["path:workspaces/web/documentation-website"],
+      config: {
+        rules: {
+          workspaceDependencies: {
+            allowPatterns: ["@pacwich/web-cli"],
           },
         },
       },

@@ -1,0 +1,40 @@
+---
+pageType: doc
+sidebar: false
+outline: false
+footer: false
+---
+
+import { WebCliPage } from "@pacwich/web-cli/web-cli-ui";
+import { Link } from "@rspress/core/theme-original";
+
+<WebCliPage notes={
+  <div className="web-cli-notes">
+    <h6 className="web-cli-notes-title">Notes:</h6>
+    <ul>
+      <li>
+        See the full CLI documentation{" "}
+        <Link className="inline-link" href="/cli">
+          here
+        </Link>
+        .
+      </li>
+      <li>
+        This isn't a full bash shell, so shell operations beyond providing
+        args to <code>pacwich</code> aren't supported.
+      </li>
+      <li> Features <b>not</b> supported:
+        <ul>
+          <li>
+            <Link className="inline-link" href="/concepts/inline-scripts">
+              Inline scripts
+            </Link>
+          </li>
+          <li>appending args to scripts (<code>--args</code> or <code>-- [args]</code>)</li>
+          <li>changing the working directory via <code>--cwd</code></li>
+          <li>git-based affected diffs, which <code>affected list</code>/<code>affected run</code> use by default (with or without <code>--base</code>/<code>--head</code>). Pass <code>--files</code> instead to provide a list of changed files manually.</li>
+        </ul>
+      </li>
+    </ul>
+  </div>}
+/>
