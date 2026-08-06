@@ -2,8 +2,31 @@ import {
   type CliCommandConfig,
   type CliCommandName,
   getCliCommandConfig,
+  getCliFullCommandUsage,
 } from "@pacwich/common/cli";
 import type { CliCommandContent, CliCommandInfo } from "./cliOption";
+
+/**
+ * Commands provided automatically by the CLI framework (Commander) rather
+ * than pacwich's own command config, so they are defined here as a
+ * doc-site-only concern.
+ */
+const BUILTIN_CLI_COMMAND_NAMES = ["help"] as const;
+
+type BuiltinCliCommandName = (typeof BUILTIN_CLI_COMMAND_NAMES)[number];
+
+/** Command names documented on the site, including CLI-framework builtins */
+export type DocCliCommandName = CliCommandName | BuiltinCliCommandName;
+
+const isBuiltinCliCommandName = (
+  commandName: DocCliCommandName,
+): commandName is BuiltinCliCommandName =>
+  (BUILTIN_CLI_COMMAND_NAMES as readonly string[]).includes(commandName);
+
+const defineBuiltinCommandContent = (
+  commandName: BuiltinCliCommandName,
+  content: Omit<CliCommandContent, "commandName">,
+): CliCommandContent => ({ commandName, ...content });
 
 const defineCommandContent = (
   commandName: CliCommandName,
@@ -587,10 +610,39 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
       'pacwich config debug --workspace-patterns="my-pattern-* my-workspace"',
     ],
   })),
-} as const satisfies Record<CliCommandName, CliCommandContent>;
+  help: defineBuiltinCommandContent("help", {
+    command: "help [command]",
+    isGlobal: true,
+    aliases: [],
+    options: {},
+    title: "Help",
+    description:
+      "Print help for the CLI or for a specific command. Equivalent to passing the --help option.",
+    examples: [
+      "# Same as pacwich --help",
+      "pacwich help",
+      "",
+      "# Help for a specific command (same as pacwich run --help)",
+      "pacwich help run",
+      "",
+      "# Command aliases work too",
+      "pacwich help ls",
+    ],
+  }),
+} as const satisfies Record<DocCliCommandName, CliCommandContent>;
 
-export const getCliCommandContent = (commandName: CliCommandName) =>
+export const getCliCommandContent = (commandName: DocCliCommandName) =>
   CLI_PROJECT_COMMANDS_CONTENT[commandName];
 
 export const getCliCommandsContent = () =>
   Object.values(CLI_PROJECT_COMMANDS_CONTENT);
+
+/**
+ * Usage string for a documented command. Builtins are not part of
+ * @pacwich/common's command config, so their usage comes from the local
+ * content map.
+ */
+export const getDocCliCommandUsage = (commandName: DocCliCommandName) =>
+  isBuiltinCliCommandName(commandName)
+    ? getCliCommandContent(commandName).command
+    : getCliFullCommandUsage(commandName);

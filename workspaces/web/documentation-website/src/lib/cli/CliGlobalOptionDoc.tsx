@@ -1,14 +1,16 @@
-import type { CliGlobalOptionName } from "@pacwich/common/cli";
 import { useId } from "react";
 import { SyntaxHighlighter } from "../util/highlight";
-import { getCliGlobalOptionContent } from "./cliGlobalOptions";
+import {
+  getCliGlobalOptionContent,
+  type DocCliGlobalOptionName,
+} from "./cliGlobalOptions";
 import { getGlobalOptionId } from "./searchIds";
 
 export const CliGlobalOptionDoc = ({
   option,
   deprecationText,
 }: {
-  option: CliGlobalOptionName;
+  option: DocCliGlobalOptionName;
   deprecationText?: React.ReactNode;
 }) => {
   const content = getCliGlobalOptionContent(option);

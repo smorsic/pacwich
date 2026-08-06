@@ -21,6 +21,18 @@ const defineOptionContent = (
   };
 };
 
+/**
+ * Options provided automatically by the CLI framework (Commander) rather
+ * than pacwich's own global option config, so they are defined here as a
+ * doc-site-only concern.
+ */
+const defineBuiltinOptionContent = (
+  optionName: BuiltinCliGlobalOptionName,
+  content: Omit<CliGlobalOptionContent, "optionName">,
+): CliGlobalOptionContent => ({ optionName, ...content });
+
+type BuiltinCliGlobalOptionName = "help" | "version";
+
 const CLI_GLOBAL_OPTIONS_CONTENT = {
   cwd: defineOptionContent("cwd", ({ mainOption, shortOption }) => ({
     title: "Working Directory",
@@ -82,9 +94,43 @@ const CLI_GLOBAL_OPTIONS_CONTENT = {
       ],
     }),
   ),
-} as const satisfies Record<CliGlobalOptionName, CliGlobalOptionContent>;
+  help: defineBuiltinOptionContent("help", {
+    mainOption: "--help",
+    shortOption: "-h",
+    description:
+      "Print help. Available on the CLI itself and on every command to show its usage and options. ",
+    defaultValue: "",
+    values: null,
+    param: "",
+    title: "Help",
+    examples: [
+      "# Help for the CLI overall",
+      "pacwich --help",
+      "",
+      "# Help for a specific command",
+      "pacwich run --help",
+      "pacwich affected list -h",
+    ],
+  }),
+  version: defineBuiltinOptionContent("version", {
+    mainOption: "--version",
+    shortOption: "-V",
+    description: "Print pacwich's version.",
+    defaultValue: "",
+    values: null,
+    param: "",
+    title: "Version",
+    examples: ["pacwich --version", "pacwich -V"],
+  }),
+} as const satisfies Record<
+  CliGlobalOptionName | BuiltinCliGlobalOptionName,
+  CliGlobalOptionContent
+>;
 
-export const getCliGlobalOptionContent = (optionName: CliGlobalOptionName) =>
+/** Global option names documented on the site, including CLI-framework builtins */
+export type DocCliGlobalOptionName = keyof typeof CLI_GLOBAL_OPTIONS_CONTENT;
+
+export const getCliGlobalOptionContent = (optionName: DocCliGlobalOptionName) =>
   CLI_GLOBAL_OPTIONS_CONTENT[optionName];
 
 export const getCliGlobalOptionsContent = () =>
