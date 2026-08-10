@@ -122,6 +122,15 @@ const TEST_PROJECTS = {
   verifyWithIgnoreWarnings: "verify/withIgnoreWarnings",
   verifyWithMatchAllIgnore: "verify/withMatchAllIgnore",
   verifyWithPatternConfigVerify: "verify/withPatternConfigVerify",
+  verifyWithAncestorDependency: "verify/withAncestorDependency",
+  verifyWithNestedAncestorDependency: "verify/withNestedAncestorDependency",
+  verifyWithAncestorDependencyStrictProject:
+    "verify/withAncestorDependencyStrictProject",
+  verifyWithAncestorDependencyStrictWorkspace:
+    "verify/withAncestorDependencyStrictWorkspace",
+  verifyWithAncestorDependencyImportIgnore:
+    "verify/withAncestorDependencyImportIgnore",
+  verifyAncestorMatrix: "verify/ancestorMatrix",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;

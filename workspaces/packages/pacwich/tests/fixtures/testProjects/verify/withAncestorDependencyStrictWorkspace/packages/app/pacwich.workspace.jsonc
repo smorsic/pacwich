@@ -1,0 +1,9 @@
+{
+  // Workspace-level opt-in: --strict fails on ancestorWorkspaceDependency
+  // findings for this workspace only, unlike "quiet" which has no override.
+  "verify": {
+    "workspaceDependencies": {
+      "strictDisallowAncestorWorkspaceDeps": true
+    }
+  }
+}

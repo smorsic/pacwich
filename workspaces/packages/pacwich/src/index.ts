@@ -48,6 +48,7 @@ export {
   type ImplicitWorkspaceDependencyMetadata,
   type ImplicitWorkspaceDependencyMetadataFile,
   type ImplicitWorkspaceDependencyMetadataOccurrence,
+  type AncestorWorkspaceDependencyMetadata,
   isOptionsForDiffSource,
 } from "./project";
 export * from "./config/public";

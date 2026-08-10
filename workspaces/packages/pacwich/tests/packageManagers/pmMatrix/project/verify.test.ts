@@ -1,5 +1,6 @@
 import {
   createFileSystemProject,
+  type AncestorWorkspaceDependencyMetadata,
   type ImplicitWorkspaceDependencyMetadata,
   type VerifyIssue,
   type VerifyResult,
@@ -36,6 +37,16 @@ const allImplicitDepMetadata = (
     .filter(
       (issue): issue is VerifyIssue<"implicitWorkspaceDependency"> =>
         issue.name === "implicitWorkspaceDependency",
+    )
+    .map((issue) => issue.metadata);
+
+const allAncestorDepMetadata = (
+  result: VerifyResult,
+): AncestorWorkspaceDependencyMetadata[] =>
+  [...result.errors, ...result.warnings]
+    .filter(
+      (issue): issue is VerifyIssue<"ancestorWorkspaceDependency"> =>
+        issue.name === "ancestorWorkspaceDependency",
     )
     .map((issue) => issue.metadata);
 
@@ -123,6 +134,50 @@ describeEachPm("project.verify() — pm matrix", ({ pm }) => {
       expect(metadata!.fixHint).toContain(
         `"${EXPECTED_FIX_HINT_VERSIONS[pm.id]}"`,
       );
+    });
+  });
+
+  // ancestorWorkspaceDependency is the PM-agnostic finding: unlike
+  // implicitWorkspaceDependency (an npm-hoisting artifact, confirmed
+  // absent under bun/pnpm's default isolated linking), a dependency
+  // declared only by an ancestor workspace (here, root) resolves via
+  // Node's directory walk-up under every backend equally.
+  describe("ancestorWorkspaceDependency consistency across pms", () => {
+    const makeAncestorProject = () =>
+      createFileSystemProject({
+        rootDirectory: loadFixture("verifyAncestorMatrix", { pm: pm.id }),
+      });
+
+    test(`detects app → shared-lib as an ancestor workspace dep under ${pm.id}`, async () => {
+      const project = makeAncestorProject();
+      const result = await project.verify();
+      const metadata = allAncestorDepMetadata(result).find(
+        (entry) =>
+          entry.workspace === "app" && entry.dependency === "shared-lib",
+      );
+      expect(metadata).toBeDefined();
+      expect(metadata!.ancestorWorkspaces).toEqual(["ancestor-matrix-root"]);
+    });
+
+    test(`does not classify it as implicitWorkspaceDependency under ${pm.id}`, async () => {
+      const project = makeAncestorProject();
+      const result = await project.verify();
+      const implicit = allImplicitDepMetadata(result).find(
+        (entry) =>
+          entry.workspace === "app" && entry.dependency === "shared-lib",
+      );
+      expect(implicit).toBeUndefined();
+    });
+
+    test(`ancestor findings stay warnings under --strict by default under ${pm.id}`, async () => {
+      const project = makeAncestorProject();
+      const result = await project.verify({ strict: true });
+      expect(result.ok).toBe(true);
+      expect(
+        result.warnings.some(
+          (issue) => issue.name === "ancestorWorkspaceDependency",
+        ),
+      ).toBe(true);
     });
   });
 });

@@ -2,11 +2,15 @@ import { InvalidJSTypeError } from "../../../src/internal/core";
 import { logger } from "../../../src/internal/logger";
 import {
   createFileSystemProject,
+  type AncestorWorkspaceDependencyMetadata,
   type ImplicitWorkspaceDependencyMetadata,
   type VerifyIssue,
   type VerifyResult,
 } from "../../../src/project";
-import { getProjectRoot } from "../../fixtures/testProjects";
+import {
+  getProjectRoot,
+  type TestProjectName,
+} from "../../fixtures/testProjects";
 import {
   afterEach,
   beforeEach,
@@ -17,16 +21,13 @@ import {
 } from "../../util/testFramework";
 
 const buildProject = (
-  fixtureName:
-    | "verifySimple"
-    | "verifyWithIgnore"
-    | "verifyWithRootWorkspace"
-    | "verifyWithWorkspaceIgnore"
-    | "verifyWithImportIgnore"
-    | "verifyWithIgnoreWarnings"
-    | "verifyWithMatchAllIgnore"
-    | "verifyWithPatternConfigVerify",
-) => createFileSystemProject({ rootDirectory: getProjectRoot(fixtureName) });
+  fixtureName: Extract<TestProjectName, `verify${string}`>,
+  options: { includeRootWorkspace?: boolean } = {},
+) =>
+  createFileSystemProject({
+    rootDirectory: getProjectRoot(fixtureName),
+    ...options,
+  });
 
 const allIssues = (result: VerifyResult): VerifyIssue[] => [
   ...result.errors,
@@ -49,6 +50,26 @@ const findImplicitDep = (
   dependency: string,
 ): ImplicitWorkspaceDependencyMetadata | undefined =>
   allImplicitDepMetadata(result).find(
+    (metadata) =>
+      metadata.workspace === workspace && metadata.dependency === dependency,
+  );
+
+const allAncestorDepMetadata = (
+  result: VerifyResult,
+): AncestorWorkspaceDependencyMetadata[] =>
+  allIssues(result)
+    .filter(
+      (issue): issue is VerifyIssue<"ancestorWorkspaceDependency"> =>
+        issue.name === "ancestorWorkspaceDependency",
+    )
+    .map((issue) => issue.metadata);
+
+const findAncestorDep = (
+  result: VerifyResult,
+  workspace: string,
+  dependency: string,
+): AncestorWorkspaceDependencyMetadata | undefined =>
+  allAncestorDepMetadata(result).find(
     (metadata) =>
       metadata.workspace === workspace && metadata.dependency === dependency,
   );
@@ -475,6 +496,157 @@ describe("project.verify (API)", () => {
       const result = await project.verify();
       const metadata = allImplicitDepMetadata(result);
       expect(metadata.map((m) => m.workspace)).toEqual(["app-b"]);
+    });
+  });
+
+  describe("ancestorWorkspaceDependency", () => {
+    test("flags app importing shared-lib, which only root declares", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      const result = await project.verify();
+      const metadata = findAncestorDep(result, "app", "shared-lib");
+      expect(metadata).toBeDefined();
+      expect(metadata!.ancestorWorkspaces).toEqual(["verify-ancestor-root"]);
+      expect(metadata!.files).toEqual([
+        {
+          path: "packages/app/src/index.ts",
+          occurrences: [{ line: 1, specifier: "shared-lib" }],
+        },
+      ]);
+      expect(metadata!.fixHint).toContain("shared-lib");
+    });
+
+    test("issue message names the ancestor and hints the dependency for the ignore pattern", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      const result = await project.verify();
+      const issue = result.warnings.find(
+        (w) =>
+          w.name === "ancestorWorkspaceDependency" &&
+          w.metadata.workspace === "app",
+      );
+      expect(issue).toBeDefined();
+      expect(issue!.message).toContain(
+        'ancestor workspace "verify-ancestor-root" declares it',
+      );
+      expect(issue!.message).toContain(
+        'add "shared-lib" to "verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns"',
+      );
+    });
+
+    test("root-ancestor findings are warnings, not errors, in non-strict mode", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      const result = await project.verify();
+      const metadata = findAncestorDep(result, "app", "shared-lib");
+      const issue = result.warnings.find(
+        (w) =>
+          w.name === "ancestorWorkspaceDependency" && w.metadata === metadata,
+      );
+      expect(issue).toBeDefined();
+    });
+
+    test("root-ancestor findings stay warnings under --strict by default", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      // Scoped to "app" alone: the fixture's "consumer" workspace has a
+      // separate implicitWorkspaceDependency finding, which --strict
+      // always promotes to an error regardless of the ancestor-only flag
+      // this test is isolating.
+      const result = await project.verify({
+        strict: true,
+        workspacePatterns: ["app"],
+      });
+      expect(result.ok).toBe(true);
+      const metadata = findAncestorDep(result, "app", "shared-lib");
+      expect(metadata).toBeDefined();
+      const issue = result.warnings.find(
+        (w) => w.name === "ancestorWorkspaceDependency",
+      );
+      expect(issue).toBeDefined();
+    });
+
+    test("behaves identically with includeRootWorkspace: true (the gap this closes)", async () => {
+      const project = buildProject("verifyWithAncestorDependency", {
+        includeRootWorkspace: true,
+      });
+      const result = await project.verify();
+      const metadata = findAncestorDep(result, "app", "shared-lib");
+      expect(metadata).toBeDefined();
+      expect(metadata!.ancestorWorkspaces).toEqual(["verify-ancestor-root"]);
+    });
+
+    test("sibling-declared (non-ancestor) dependency stays implicitWorkspaceDependency", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      const result = await project.verify();
+      expect(findAncestorDep(result, "consumer", "other-lib")).toBeUndefined();
+      const implicit = findImplicitDep(result, "consumer", "other-lib");
+      expect(implicit).toBeDefined();
+    });
+
+    test("does not flag sibling-declarer itself (it declares other-lib)", async () => {
+      const project = buildProject("verifyWithAncestorDependency");
+      const result = await project.verify();
+      expect(
+        findImplicitDep(result, "sibling-declarer", "other-lib"),
+      ).toBeUndefined();
+      expect(
+        findAncestorDep(result, "sibling-declarer", "other-lib"),
+      ).toBeUndefined();
+    });
+
+    test("flags a workspace nested inside a non-root ancestor that declares the dep", async () => {
+      const project = buildProject("verifyWithNestedAncestorDependency");
+      const result = await project.verify();
+      const metadata = findAncestorDep(result, "child", "shared-lib");
+      expect(metadata).toBeDefined();
+      expect(metadata!.ancestorWorkspaces).toEqual(["parent"]);
+    });
+
+    test("strictDisallowAncestorWorkspaceDeps at project level promotes findings to errors under --strict", async () => {
+      const project = buildProject("verifyWithAncestorDependencyStrictProject");
+      const nonStrict = await project.verify();
+      expect(nonStrict.ok).toBe(true);
+      expect(findAncestorDep(nonStrict, "app", "shared-lib")).toBeDefined();
+
+      const strict = await project.verify({ strict: true });
+      expect(strict.ok).toBe(false);
+      const errorIssue = strict.errors.find(
+        (e) => e.name === "ancestorWorkspaceDependency",
+      );
+      expect(errorIssue).toBeDefined();
+    });
+
+    test("strictDisallowAncestorWorkspaceDeps at workspace level only promotes that workspace", async () => {
+      const project = buildProject(
+        "verifyWithAncestorDependencyStrictWorkspace",
+      );
+      const result = await project.verify({ strict: true });
+      expect(result.ok).toBe(false);
+
+      const appError = result.errors.find(
+        (e) =>
+          e.name === "ancestorWorkspaceDependency" &&
+          e.metadata.workspace === "app",
+      );
+      expect(appError).toBeDefined();
+
+      const quietWarning = result.warnings.find(
+        (w) =>
+          w.name === "ancestorWorkspaceDependency" &&
+          w.metadata.workspace === "quiet",
+      );
+      expect(quietWarning).toBeDefined();
+      const quietError = result.errors.find(
+        (e) =>
+          e.name === "ancestorWorkspaceDependency" &&
+          e.metadata.workspace === "quiet",
+      );
+      expect(quietError).toBeUndefined();
+    });
+
+    test("ignoreImportsFromWorkspacePatterns suppresses ancestor findings the same as implicit ones", async () => {
+      const project = buildProject("verifyWithAncestorDependencyImportIgnore");
+      const result = await project.verify();
+      expect(findAncestorDep(result, "app", "shared-lib")).toBeUndefined();
+      expect(findImplicitDep(result, "app", "shared-lib")).toBeUndefined();
+      expect(allIssues(result)).toEqual([]);
     });
   });
 
