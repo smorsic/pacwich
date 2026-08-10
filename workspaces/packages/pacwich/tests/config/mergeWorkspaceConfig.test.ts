@@ -309,6 +309,77 @@ describe("mergeWorkspaceConfig", () => {
       });
     });
 
+    test("strictDisallowAncestorWorkspaceDeps: later config's value wins", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: false,
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: { strictDisallowAncestorWorkspaceDeps: false },
+        },
+      });
+    });
+
+    test("strictDisallowAncestorWorkspaceDeps: unset in one config falls back to the other's value", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          { verify: { workspaceDependencies: {} } },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: { strictDisallowAncestorWorkspaceDeps: true },
+        },
+      });
+    });
+
+    test("strictDisallowAncestorWorkspaceDeps merges independently of the array fields", () => {
+      expect(
+        mergeWorkspaceConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["a"],
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: { ignoreInputFiles: ["b"] },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: ["a", "b"],
+            strictDisallowAncestorWorkspaceDeps: true,
+          },
+        },
+      });
+    });
+
     test("not present in result when neither config sets it", () => {
       expect(mergeWorkspaceConfig({}, {})).not.toHaveProperty("verify");
     });

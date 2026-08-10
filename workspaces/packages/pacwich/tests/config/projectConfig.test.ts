@@ -26,6 +26,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -47,6 +48,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -67,6 +69,7 @@ describe("Test project config", () => {
             workspaceDependencies: {
               ignoreInputFiles: [],
               ignoreImportsFromWorkspacePatterns: [],
+              strictDisallowAncestorWorkspaceDeps: false,
             },
           },
         },
@@ -89,6 +92,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -176,6 +180,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -197,6 +202,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -259,6 +265,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -284,6 +291,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -307,6 +315,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -412,6 +421,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -433,6 +443,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -458,6 +469,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -481,6 +493,7 @@ describe("Test project config", () => {
           workspaceDependencies: {
             ignoreInputFiles: [],
             ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
           },
         },
       });
@@ -712,6 +725,7 @@ describe("Test project config", () => {
         workspaceDependencies: {
           ignoreInputFiles: [],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -721,6 +735,7 @@ describe("Test project config", () => {
         workspaceDependencies: {
           ignoreInputFiles: [],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -732,6 +747,7 @@ describe("Test project config", () => {
         workspaceDependencies: {
           ignoreInputFiles: [],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -749,6 +765,7 @@ describe("Test project config", () => {
         workspaceDependencies: {
           ignoreInputFiles: ["scripts/codegen/**/*", "/legacy/**/*.ts"],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -808,6 +825,7 @@ describe("Test project config", () => {
         workspaceDependencies: {
           ignoreInputFiles: [],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -831,6 +849,7 @@ describe("Test project config", () => {
             "tag:internal-tooling",
             "my-generated-package",
           ],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -854,6 +873,51 @@ describe("Test project config", () => {
           verify: {
             workspaceDependencies: {
               ignoreImportsFromWorkspacePatterns: [5 as unknown as string],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+  });
+
+  describe("verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps", () => {
+    test("defaults to false when not provided in config", () => {
+      expect(
+        resolveProjectConfig({}).verify.workspaceDependencies
+          .strictDisallowAncestorWorkspaceDeps,
+      ).toBe(false);
+    });
+
+    test("passes through an explicit true", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: true,
+            },
+          },
+        }).verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps,
+      ).toBe(true);
+    });
+
+    test("passes through an explicit false", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: false,
+            },
+          },
+        }).verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps,
+      ).toBe(false);
+    });
+
+    test("throws when strictDisallowAncestorWorkspaceDeps is not a boolean", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: "true" as unknown as boolean,
             },
           },
         }),

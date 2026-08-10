@@ -12,14 +12,18 @@ export const resolveVerifyConfig = (
     ignoreInputFiles: config?.workspaceDependencies?.ignoreInputFiles ?? [],
     ignoreImportsFromWorkspacePatterns:
       config?.workspaceDependencies?.ignoreImportsFromWorkspacePatterns ?? [],
+    strictDisallowAncestorWorkspaceDeps:
+      config?.workspaceDependencies?.strictDisallowAncestorWorkspaceDeps ??
+      false,
   },
 });
 
 /**
- * Merge `verify.workspaceDependencies` across configs, concatenating and
- * deduplicating both array fields. Returns `undefined` when neither side
- * contributes any verify config so the merged result omits the key
- * entirely.
+ * Merge `verify.workspaceDependencies` across configs: the two array
+ * fields concatenate and deduplicate, `strictDisallowAncestorWorkspaceDeps`
+ * is later-wins (only set in the result when either side set it). Returns
+ * `undefined` when neither side contributes any verify config so the
+ * merged result omits the key entirely.
  */
 export const mergeVerifyConfig = (
   base: VerifyConfig | undefined,
@@ -37,11 +41,17 @@ export const mergeVerifyConfig = (
     base?.workspaceDependencies?.ignoreImportsFromWorkspacePatterns,
     override?.workspaceDependencies?.ignoreImportsFromWorkspacePatterns,
   );
+  const strictDisallowAncestorWorkspaceDeps =
+    override?.workspaceDependencies?.strictDisallowAncestorWorkspaceDeps ??
+    base?.workspaceDependencies?.strictDisallowAncestorWorkspaceDeps;
   return {
     workspaceDependencies: {
       ...(ignoreInputFiles && { ignoreInputFiles }),
       ...(ignoreImportsFromWorkspacePatterns && {
         ignoreImportsFromWorkspacePatterns,
+      }),
+      ...(strictDisallowAncestorWorkspaceDeps !== undefined && {
+        strictDisallowAncestorWorkspaceDeps,
       }),
     },
   };

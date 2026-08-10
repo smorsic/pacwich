@@ -234,11 +234,23 @@ export type VerifyWorkspaceDependenciesConfig = {
   ignoreInputFiles?: string[];
   /**
    * All workspaces matching these patterns will have their imports
-   * ignored when detecting implicit workspace dependencies.
+   * ignored when detecting implicit workspace dependencies. Applies to
+   * both implicit workspace dependency and ancestor workspace dependency
+   * findings.
    *
    * @example ["tag:internal-tooling", "my-workspace"]
    */
   ignoreImportsFromWorkspacePatterns?: string[];
+  /**
+   * When `true`, `--strict` also fails the run on
+   * ancestor workspace dependency findings (an import that only resolves
+   * because an ancestor workspace, e.g. the project root, declares the
+   * dependency).
+   *
+   * Defaults to `false`. Under `--strict`, ancestor workspace dependency findings still warn rather than error,
+   * unlike implicit workspace dependency findings, unless this option is set to `true`.
+   */
+  strictDisallowAncestorWorkspaceDeps?: boolean;
 };
 
 /**
@@ -315,6 +327,8 @@ export type ResolvedVerifyWorkspaceDependenciesConfig = {
   ignoreInputFiles: string[];
   /** Always present. Defaults to `[]` when not configured. */
   ignoreImportsFromWorkspacePatterns: string[];
+  /** Always present. Defaults to `false`. */
+  strictDisallowAncestorWorkspaceDeps: boolean;
 };
 
 /**

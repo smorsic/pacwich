@@ -16,6 +16,7 @@ const DEFAULT_VERIFY = {
   workspaceDependencies: {
     ignoreInputFiles: [],
     ignoreImportsFromWorkspacePatterns: [],
+    strictDisallowAncestorWorkspaceDeps: false,
   },
 };
 
@@ -395,6 +396,31 @@ describe("workspace config", () => {
           }),
         ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
       });
+
+      test("accepts strictDisallowAncestorWorkspaceDeps as a boolean", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("throws when strictDisallowAncestorWorkspaceDeps is not a boolean", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            verify: {
+              workspaceDependencies: {
+                // @ts-expect-error - Invalid config
+                strictDisallowAncestorWorkspaceDeps: "true",
+              },
+            },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
     });
   });
 
@@ -413,8 +439,21 @@ describe("workspace config", () => {
         workspaceDependencies: {
           ignoreInputFiles: ["generated/**/*.ts"],
           ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
+    });
+
+    test("passes through an explicit strictDisallowAncestorWorkspaceDeps: true", () => {
+      expect(
+        resolveWorkspaceConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: true,
+            },
+          },
+        }).verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps,
+      ).toBe(true);
     });
   });
 

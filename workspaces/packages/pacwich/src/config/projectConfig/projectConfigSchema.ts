@@ -68,6 +68,9 @@ export const PROJECT_CONFIG_JSON_SCHEMA = {
               type: "array",
               items: { type: "string" },
             },
+            strictDisallowAncestorWorkspaceDeps: {
+              type: "boolean",
+            },
           },
         },
       },
