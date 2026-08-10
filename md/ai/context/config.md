@@ -184,7 +184,7 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`
 receiving the accumulated config so far.
 
-- Scalar fields (`packageManager`, `strictDisallowAncestorWorkspaceDeps`, everything under `defaults`): later config wins.
+- Scalar fields (`packageManager`, everything under `defaults`): later config wins.
 - `workspacePatternConfigs`: entries are concatenated in order.
 - `verify.workspaceDependencies.ignoreInputFiles` and
   `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`:
