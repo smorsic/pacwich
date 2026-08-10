@@ -46,7 +46,7 @@ See the [verify](/concepts/verify) page for more information on this feature.
 
 * `verify.workspaceDependencies.ignoreInputFiles`: Ignore these [input files](/concepts/inputs) for verification of workspace dependencies, relative to the project root.
 * `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`: Ignore imports/exports from these workspaces, using [workspace patterns](/concepts/workspace-patterns).
-* `verify.strictDisallowAncestorWorkspaceDeps`: When `true`, strict mode will fail on ancestor workspace dependencies instead of just warning.
+* `verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps`: When `true`, strict mode will fail on ancestor workspace dependencies instead of just warning.
 
 The same options can be used in [workspace configs](/config/workspace). Workspace verify configuration
 is additive with the project-level config.
