@@ -109,17 +109,21 @@ pnpm exec pacwich --help
 
 ### The `verify` Feature
 
-`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace.
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace. `pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
+other workspaces as dependencies explicitly in their own `package.json`. The `verify` feature exists to help catch instances where this can be dodged.
 
-In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies.
+In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies. **npm** workspaces do not require explicit `package.json` dependencies at all, so undeclared workspace imports simply work.
 
-However, **npm** workspaces do not require explicit `package.json` dependencies, so `pacwich` cannot detect implicit dependencies without source code analysis.
+Nested workspaces also create a gap in explicit dependencies. A dependency declared by an ancestor workspace, most commonly the root `package.json`, resolves for every workspace beneath it through recursive parent-directory `node_modules` lookup, whether or not the importing workspace declares it.
 
-The `verify` feature performs simple analysis to detect imports/exports in JS/TS files from other workspaces not listed in a workspace's `package.json`.
+The `verify` feature performs simple analysis of imports/exports in JS/TS files to catch both cases:
+
+- **Implicit workspace dependencies**: a workspace imports another workspace that neither it nor any ancestor declares. Generally only possible with npm workspaces.
+- **Ancestor workspace dependencies**: the import resolves only because an ancestor workspace declares it. Possible with any package manager.
 
 Adding `pacwich verify` to a `"prepare"` script, pre-commit hook, CI pipeline, or similar can be especially helpful to catch issues.
 
-`pacwich verify --strict` will fail if implicit workspace dependencies are detected.
+`pacwich verify --strict` will fail on implicit workspace dependencies. Ancestor findings warn by default, and the `strictDisallowAncestorWorkspaceDeps` config option makes strict mode fail on those as well.
 
 ### CLI Quickstart
 
