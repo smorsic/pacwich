@@ -89,4 +89,58 @@ describe("warning suppression", () => {
     expect(wasPrinted(WARNING_ID)).toBe(false);
     expect(wasPrinted(OTHER_ID)).toBe(false);
   });
+
+  // VerifyIssue.* namespaces its two categories under the parent VerifyIssue
+  // id so both "suppress everything under verify" and "suppress just one
+  // category" are expressible.
+  describe("dot-namespaced ids (VerifyIssue.*)", () => {
+    const PARENT_ID = "VerifyIssue" as WarningId;
+    const IMPLICIT_ID = "VerifyIssue.ImplicitWorkspaceDependency" as WarningId;
+    const ANCESTOR_ID = "VerifyIssue.AncestorWorkspaceDependency" as WarningId;
+
+    const wasVerifyIssuePrinted = (id: WarningId): boolean => {
+      stderrSpy.mockClear();
+      logger.warn(id, { message: "test message" } as unknown as Parameters<
+        typeof logger.warn
+      >[1]);
+      return stderrSpy.mock.calls.some(([chunk]: [unknown]) =>
+        String(chunk).includes(id),
+      );
+    };
+
+    test("suppressing the parent id suppresses both child categories", () => {
+      setSuppressWarnings([PARENT_ID]);
+      expect(wasVerifyIssuePrinted(IMPLICIT_ID)).toBe(false);
+      expect(wasVerifyIssuePrinted(ANCESTOR_ID)).toBe(false);
+    });
+
+    test("suppressing one child id leaves the other child unsuppressed", () => {
+      setSuppressWarnings([IMPLICIT_ID]);
+      expect(wasVerifyIssuePrinted(IMPLICIT_ID)).toBe(false);
+      expect(wasVerifyIssuePrinted(ANCESTOR_ID)).toBe(true);
+    });
+
+    test("suppressing a child id does not suppress the parent id itself", () => {
+      setSuppressWarnings([IMPLICIT_ID]);
+      expect(wasVerifyIssuePrinted(PARENT_ID)).toBe(true);
+    });
+
+    test("suppressing the parent via the env var also suppresses both children", () => {
+      process.env[ENV_VAR] = PARENT_ID;
+      expect(wasVerifyIssuePrinted(IMPLICIT_ID)).toBe(false);
+      expect(wasVerifyIssuePrinted(ANCESTOR_ID)).toBe(false);
+    });
+
+    test("a comma-separated env var can list a child id alongside an unrelated id", () => {
+      process.env[ENV_VAR] = `${OTHER_ID}, ${ANCESTOR_ID}`;
+      expect(wasVerifyIssuePrinted(ANCESTOR_ID)).toBe(false);
+      expect(wasVerifyIssuePrinted(IMPLICIT_ID)).toBe(true);
+    });
+
+    test("suppressing an unrelated id does not suppress either child", () => {
+      setSuppressWarnings([OTHER_ID]);
+      expect(wasVerifyIssuePrinted(IMPLICIT_ID)).toBe(true);
+      expect(wasVerifyIssuePrinted(ANCESTOR_ID)).toBe(true);
+    });
+  });
 });

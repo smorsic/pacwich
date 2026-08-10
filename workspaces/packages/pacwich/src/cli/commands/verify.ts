@@ -1,9 +1,19 @@
+import type { WarningId } from "@pacwich/common/warnings";
 import { logger } from "../../internal/logger";
+import type { VerifyIssueName } from "../../project";
 import {
   commandOutputLogger,
   createJsonLines,
   handleProjectCommand,
 } from "./commandHandlerUtils";
+
+type VerifyWarningId = Extract<WarningId, `VerifyIssue.${string}`>;
+
+/** The namespaced `VerifyIssue.*` warning id each finding category emits. */
+const WARNING_ID_BY_ISSUE_NAME: Record<VerifyIssueName, VerifyWarningId> = {
+  implicitWorkspaceDependency: "VerifyIssue.ImplicitWorkspaceDependency",
+  ancestorWorkspaceDependency: "VerifyIssue.AncestorWorkspaceDependency",
+};
 
 export const verify = handleProjectCommand(
   "verify",
@@ -37,7 +47,9 @@ export const verify = handleProjectCommand(
     }
 
     for (const issue of result.warnings) {
-      logger.warn("VerifyIssue", { message: issue.message });
+      logger.warn(WARNING_ID_BY_ISSUE_NAME[issue.name], {
+        message: issue.message,
+      });
     }
     for (const issue of result.errors) {
       logger.error(issue.message);
