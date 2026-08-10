@@ -90,6 +90,10 @@ workspaces not listed in a workspace's package.json. This is only done for input
 to have `pacwich verify` as a `"prepare"` script or pre-commit hook to catch these issues early especially
 for npm projects. `pacwich verify --strict` will fail if any implicit dependencies are found instead of simply warning.
 
+The verify feature also detects workspaces imported that are only declared in an ancestor's package.json file. These are warnings only by default,
+but opting into `strictDisallowAncestorWorkspaceDeps` in pacwich config for the verify feature will treat them as an error in strict mode.
+This is often seen when the root workspace declares workspace dependencies in the root package.json.
+
 Pacwich config files can be used to ignore input files or imports/exports from given workspaces in scanning
 at the project or workspace scope.
 

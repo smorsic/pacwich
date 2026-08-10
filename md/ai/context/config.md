@@ -40,6 +40,8 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
       "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
       // Workspaces to ignore imports/exports from in the verify scan
       "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
+      // When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode
+      "strictDisallowAncestorWorkspaceDeps": true,
     },
   },
 }
@@ -88,6 +90,9 @@ Tags are strings to group workspaces together. They do not need to be unique.
       "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
       // Workspaces to ignore imports/exports from in the verify scan
       "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
+      // When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode
+      // Note that if the project sets this to true, workspaces can't opt out of it
+      "strictDisallowAncestorWorkspaceDeps": true,
     },
   },
   "rules": {
@@ -179,7 +184,7 @@ The factory `(workspace: RawWorkspace, prevConfig: ResolvedWorkspaceConfig) => W
 Any argument may be a factory function `(prev: ProjectConfig) => ProjectConfig`
 receiving the accumulated config so far.
 
-- Scalar fields (`packageManager`, everything under `defaults`): later config wins.
+- Scalar fields (`packageManager`, `strictDisallowAncestorWorkspaceDeps`, everything under `defaults`): later config wins.
 - `workspacePatternConfigs`: entries are concatenated in order.
 - `verify.workspaceDependencies.ignoreInputFiles` and
   `verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns`:
@@ -282,7 +287,8 @@ export default mergeWorkspaceConfig(
     verify: {
       workspaceDependencies: {
         ignoreInputFiles: ["scripts/**/*", "legacy/**/*"], // deduplicated + appended
-        ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+        ignoreImportsFromWorkspacePatterns: ["tag:internal"], // deduplicated + appended
+        strictDisallowAncestorWorkspaceDeps: true, // later config wins
       },
     },
   },
@@ -309,6 +315,7 @@ export default mergeWorkspaceConfig(
 //     workspaceDependencies: {
 //       ignoreInputFiles: ["scripts/**/*", "legacy/**/*"],
 //       ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+//       strictDisallowAncestorWorkspaceDeps: true,
 //     },
 //   },
 // }
