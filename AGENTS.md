@@ -19,7 +19,7 @@ pacwich's main features are to get metadata about the project and workspaces, an
 
 pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich affected list`/`pacwich affected run` for orchestrating builds, tests, etc. across only the workspaces that need them.
 
-pacwich detects the workspace dependency graph via explicit declarations in package.json.pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration.
+pacwich detects the workspace dependency graph via explicit declarations in workspace package.json files. pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration. Verify also detects workspace dependencies a workspace imports without declaring when they are declared only by an ancestor workspace (most commonly the root workspace). These resolve under any package manager via the ancestor's node_modules directory, and are reported as warnings, with a config option to treat them as errors in verify's strict mode.
 
 Optional config files: `pacwich.project.{ts,js,jsonc,json}` at root or `pacwich.workspace.{ts,js,jsonc,json}` at any workspace root, with utilities exported from `"pacwich/config"`.
 
@@ -169,6 +169,10 @@ pacwich does not normally perform source code analysis when constructing the dep
 workspaces not listed in a workspace's package.json. This is only done for input files. It is recommended
 to have `pacwich verify` as a `"prepare"` script or pre-commit hook to catch these issues early especially
 for npm projects. `pacwich verify --strict` will fail if any implicit dependencies are found instead of simply warning.
+
+The verify feature also detects workspaces imported that are only declared in an ancestor's package.json file. These are warnings only by default,
+but opting into `strictDisallowAncestorWorkspaceDeps` in pacwich config for the verify feature will treat them as an error in strict mode.
+This is often seen when the root workspace declares workspace dependencies in the root package.json.
 
 Pacwich config files can be used to ignore input files or imports/exports from given workspaces in scanning
 at the project or workspace scope.
@@ -528,7 +532,8 @@ await project.runAffectedWorkspaceScript({
 
 // Detect implicit workspace dependencies (imports of other workspaces'
 // package names that aren't declared in the importing workspace's
-// package.json). Returns a Promise<VerifyResult>.
+// package.json) or imports from workspaces declared by an ancestor
+// workspace's dependencies only. Returns a Promise<VerifyResult>.
 //
 // Scope: each workspace's inputs (`defaultInputs.files`, default
 // `["."]`) determine which files are scanned. Only git-trackable
@@ -541,8 +546,7 @@ const verifyResult = await project.verify({
   strict: false,
 });
 // VerifyResult: { ok: boolean; errors: VerifyIssue[]; warnings: VerifyIssue[] }
-// VerifyIssue.name discriminates the rich `metadata` shape. Today the
-// only category is "implicitWorkspaceDependency".
+// VerifyIssue.name discriminates the rich `metadata` shape.
 ```
 
 `createMemoryProject` and the `MemoryProject` type are also exported but are flagged `@experimental`. They cover only the read-only `Project` surface today (no `runWorkspaceScript`, `runScriptAcrossWorkspaces`, `determineAffectedWorkspaces`, `runAffectedWorkspaceScript`, or `verify`) and the constructor shape is expected to change. Prefer `createFileSystemProject` for non-test code paths.
@@ -632,6 +636,8 @@ Config defaults here take precedence over environment variables. Explicit CLI ar
       "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
       // Workspaces to ignore imports/exports from in the verify scan
       "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
+      // When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode
+      "strictDisallowAncestorWorkspaceDeps": true,
     },
   },
 }
@@ -680,6 +686,9 @@ Tags are strings to group workspaces together. They do not need to be unique.
       "ignoreInputFiles": ["scripts/codegen/**/*", "/legacy/**/*.ts"],
       // Workspaces to ignore imports/exports from in the verify scan
       "ignoreImportsFromWorkspacePatterns": ["tag:legacy"],
+      // When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode
+      // Note that if the project sets this to true, workspaces can't opt out of it
+      "strictDisallowAncestorWorkspaceDeps": true,
     },
   },
   "rules": {
@@ -874,7 +883,8 @@ export default mergeWorkspaceConfig(
     verify: {
       workspaceDependencies: {
         ignoreInputFiles: ["scripts/**/*", "legacy/**/*"], // deduplicated + appended
-        ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+        ignoreImportsFromWorkspacePatterns: ["tag:internal"], // deduplicated + appended
+        strictDisallowAncestorWorkspaceDeps: true, // later config wins
       },
     },
   },
@@ -901,6 +911,7 @@ export default mergeWorkspaceConfig(
 //     workspaceDependencies: {
 //       ignoreInputFiles: ["scripts/**/*", "legacy/**/*"],
 //       ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+//       strictDisallowAncestorWorkspaceDeps: true,
 //     },
 //   },
 // }
@@ -1130,4 +1141,4 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 
 <!--End pacwich development-->
 
-<!--pacwich v0.6.0-->
+<!--pacwich v0.7.0-->
