@@ -109,7 +109,9 @@ pnpm exec pacwich --help
 
 ### The `verify` Feature
 
-`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace. `pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace.
+
+`pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
 other workspaces as dependencies explicitly in their own `package.json`. The `verify` feature exists to help catch instances where this can be dodged.
 
 In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies. **npm** workspaces do not require explicit `package.json` dependencies at all, so undeclared workspace imports simply work.

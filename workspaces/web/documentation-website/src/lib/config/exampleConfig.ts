@@ -180,6 +180,7 @@ export default mergeProjectConfig(
       workspaceDependencies: {
         // "scripts/codegen/**/*" deduplicated, "legacy/**/*.ts" appended
         ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
+        strictDisallowAncestorWorkspaceDeps: true,
       },
     },
   },
@@ -197,6 +198,7 @@ export default mergeProjectConfig(
 //     workspaceDependencies: {
 //       ignoreInputFiles: ["scripts/codegen/**/*", "legacy/**/*.ts"],
 //       ignoreImportsFromWorkspacePatterns: ["tag:legacy"],
+//       strictDisallowAncestorWorkspaceDeps: true,
 //     },
 //   },
 // }

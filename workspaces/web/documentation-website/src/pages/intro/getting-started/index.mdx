@@ -72,7 +72,9 @@ See more starter code in the [CLI Quickstart](/cli) or [TS/JS API Quickstart](/a
 
 ## Using the Verify Command
 
-You can use the `verify` command just to check for issues with your project. This is especially useful for **npm** users.
+You can use the `verify` command just to check for issues with your project. This is especially useful for **npm** users but
+can catch issues that affect `pacwich`'s workspace dependency graph detection with all package managers.
+
 Read more [here](/concepts/verify).
 
 Adding the [`verify` command](/cli/commands#verify) to your root `package.json`'s `"prepare"` script or as a pre-commit hook can help catch issues with your Project setup

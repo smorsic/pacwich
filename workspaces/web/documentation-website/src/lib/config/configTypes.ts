@@ -59,6 +59,12 @@ const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
         array: true,
         item: { primitive: true, types: ["string"] },
       },
+      strictDisallowAncestorWorkspaceDeps: {
+        comment:
+          "When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode",
+        primitive: true,
+        types: ["boolean"],
+      },
     },
   },
   workspacePatternConfigs: {
@@ -158,6 +164,12 @@ const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
         comment: "Ignore imports/exports from these workspaces",
         array: true,
         item: { primitive: true, types: ["string"] },
+      },
+      strictDisallowAncestorWorkspaceDeps: {
+        comment:
+          "When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode",
+        primitive: true,
+        types: ["boolean"],
       },
     },
   },
