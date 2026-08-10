@@ -1,0 +1,7 @@
+{
+  "name": "verify-ancestor-root",
+  "workspaces": ["packages/*"],
+  "dependencies": {
+    "shared-lib": "workspace:*"
+  }
+}

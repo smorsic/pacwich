@@ -23,6 +23,21 @@ const readEnvSuppressedWarnings = (): Set<string> => {
   return new Set(raw ? splitCsvList(raw) : []);
 };
 
+/**
+ * A suppressed id matches itself exactly, or matches as a dot-namespaced
+ * parent of the warning id (e.g. suppressing "VerifyIssue" also suppresses
+ * "VerifyIssue.ImplicitWorkspaceDependency").
+ */
+const isWarningIdSuppressed = (
+  id: string,
+  suppressedIds: Iterable<string>,
+): boolean => {
+  for (const suppressedId of suppressedIds) {
+    if (id === suppressedId || id.startsWith(`${suppressedId}.`)) return true;
+  }
+  return false;
+};
+
 /** Errors thrown by {@link setLogLevel} when given a value outside
  * the accepted set of log levels. Subclass of {@link PacwichError}. */
 export const LOGGER_ERRORS = defineErrors("InvalidLogLevel");
@@ -202,7 +217,10 @@ class _Logger implements Logger {
       time: new Date(),
     };
 
-    if (this._suppressWarnings.has(id) || readEnvSuppressedWarnings().has(id))
+    if (
+      isWarningIdSuppressed(id, this._suppressWarnings) ||
+      isWarningIdSuppressed(id, readEnvSuppressedWarnings())
+    )
       return log;
 
     if (this.shouldPrint("warn")) {

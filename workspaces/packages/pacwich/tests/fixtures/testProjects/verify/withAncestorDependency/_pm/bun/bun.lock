@@ -1,0 +1,41 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "verify-ancestor-root",
+      "dependencies": {
+        "shared-lib": "workspace:*",
+      },
+    },
+    "packages/shared-lib": {
+      "name": "shared-lib",
+    },
+    "packages/app": {
+      "name": "app",
+    },
+    "packages/other-lib": {
+      "name": "other-lib",
+    },
+    "packages/sibling-declarer": {
+      "name": "sibling-declarer",
+      "dependencies": {
+        "other-lib": "workspace:*",
+      },
+    },
+    "packages/consumer": {
+      "name": "consumer",
+    },
+  },
+  "packages": {
+    "shared-lib": ["shared-lib@workspace:packages/shared-lib"],
+
+    "app": ["app@workspace:packages/app"],
+
+    "other-lib": ["other-lib@workspace:packages/other-lib"],
+
+    "sibling-declarer": ["sibling-declarer@workspace:packages/sibling-declarer"],
+
+    "consumer": ["consumer@workspace:packages/consumer"],
+  }
+}

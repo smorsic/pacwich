@@ -5,6 +5,7 @@ import {
   toPosixPath,
 } from "../internal/core";
 import { logger } from "../internal/logger";
+import { listNestedWorkspacePaths } from "../workspaces";
 
 const FILE_PATTERN_NEGATION_PREFIX = "!";
 
@@ -98,39 +99,6 @@ const splitFilePatterns = (patterns: string[]): SplitFilePatterns => {
 type ResolvedFilePattern = {
   inputPattern: string;
   resolvedPattern: string;
-};
-
-const normalizeWorkspacePath = (workspacePath: string): string => {
-  const posixPath = stripTrailingSlashes(toPosixPath(workspacePath));
-  return posixPath === "." ? "" : posixPath;
-};
-
-/**
- * Paths of other workspaces located inside the given workspace's
- * directory. Files under these are owned by the nested workspace and
- * must not count as the outer workspace's inputs (most commonly the
- * root workspace, whose directory contains every other workspace).
- */
-const listNestedWorkspacePaths = ({
-  workspacePath,
-  otherWorkspacePaths,
-}: {
-  workspacePath: string;
-  otherWorkspacePaths: string[];
-}): string[] => {
-  const normalizedParent = normalizeWorkspacePath(workspacePath);
-  const nestedPaths: string[] = [];
-  for (const otherPath of otherWorkspacePaths) {
-    const normalizedOther = normalizeWorkspacePath(otherPath);
-    if (!normalizedOther || normalizedOther === normalizedParent) continue;
-    if (
-      !normalizedParent ||
-      normalizedOther.startsWith(`${normalizedParent}/`)
-    ) {
-      nestedPaths.push(normalizedOther);
-    }
-  }
-  return nestedPaths;
 };
 
 const resolveFilePatterns = ({

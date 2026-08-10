@@ -17,7 +17,13 @@ import {
   extractFileImports,
   normalizeImportSpecifierToPackageName,
 } from "../../../verify";
-import { matchWorkspacesByPatterns, type Workspace } from "../../../workspaces";
+import {
+  findAncestorWorkspaces,
+  matchWorkspacesByPatterns,
+  resolvePackageJsonContent,
+  resolvePackageJsonPath,
+  type Workspace,
+} from "../../../workspaces";
 import type { FileSystemProject } from "./fileSystemProject";
 
 const DEFAULT_INPUT_FILE_PATTERN = ".";
@@ -123,6 +129,82 @@ const collectDeclaredDependencyNames = (workspace: Workspace): Set<string> => {
     declared.add(externalDep.name);
   }
   return declared;
+};
+
+/**
+ * The root workspace's own declared workspace-package names, read
+ * directly from its `package.json` rather than `Workspace.dependencies`,
+ * since it may or may not be treated as a true project workspace.
+ */
+const collectRootDeclaredWorkspaceDependencyNames = ({
+  rootDirectory,
+  workspaceNamesByName,
+}: {
+  rootDirectory: string;
+  workspaceNamesByName: Set<string>;
+}): Set<string> => {
+  const packageJsonPath = resolvePackageJsonPath(rootDirectory);
+  if (!packageJsonPath) return new Set();
+  const content = resolvePackageJsonContent(packageJsonPath, []);
+  const declaredNames = new Set([
+    ...Object.keys(content.dependencies),
+    ...Object.keys(content.devDependencies),
+    ...Object.keys(content.peerDependencies),
+    ...Object.keys(content.optionalDependencies),
+  ]);
+  const declaredWorkspaceNames = new Set<string>();
+  for (const name of declaredNames) {
+    if (workspaceNamesByName.has(name)) declaredWorkspaceNames.add(name);
+  }
+  return declaredWorkspaceNames;
+};
+
+/**
+ * Dependency names declared by any ancestor of `workspace` in the
+ * literal directory chain (root or any other parent directory
+ * workspace).
+ */
+const collectAncestorDependencyNames = ({
+  workspace,
+  allWorkspaces,
+  rootDeclaredWorkspaceNames,
+  rootWorkspaceName,
+}: {
+  workspace: Workspace;
+  allWorkspaces: Workspace[];
+  rootDeclaredWorkspaceNames: Set<string>;
+  rootWorkspaceName: string;
+}): Map<string, string[]> => {
+  const ancestorsByDependencyName = new Map<string, Set<string>>();
+  const addAncestor = (dependencyName: string, ancestorName: string) => {
+    const existing = ancestorsByDependencyName.get(dependencyName);
+    if (existing) {
+      existing.add(ancestorName);
+    } else {
+      ancestorsByDependencyName.set(dependencyName, new Set([ancestorName]));
+    }
+  };
+
+  if (workspace.isRoot) return new Map();
+
+  for (const name of rootDeclaredWorkspaceNames) {
+    addAncestor(name, rootWorkspaceName);
+  }
+  for (const ancestor of findAncestorWorkspaces({
+    workspace,
+    allWorkspaces,
+  })) {
+    for (const name of ancestor.dependencies) {
+      addAncestor(name, ancestor.name);
+    }
+  }
+
+  return new Map(
+    [...ancestorsByDependencyName].map(([name, ancestors]) => [
+      name,
+      [...ancestors].sort(),
+    ]),
+  );
 };
 
 const resolveTargetWorkspaces = (
@@ -270,6 +352,34 @@ export type ImplicitWorkspaceDependencyMetadata = {
 };
 
 /**
+ * Metadata about a workspace dependency that is resolved by
+ * an ancestor workspace. This is a workspace that declares deps
+ * used by workspaces nested within its directory, like the
+ * root workspace.
+ *
+ * This is detected as a potential issue since
+ * the workspace will resolve via a parent node_modules,
+ * but the dependency isn't explicitly declared for the dependent
+ * workspace.
+ */
+export type AncestorWorkspaceDependencyMetadata = {
+  /** The importing workspace's package.json name. */
+  workspace: string;
+  /** The imported workspace's package.json name (not declared as a dep). */
+  dependency: string;
+  /**
+   * Sorted names of every ancestor workspace that declares `dependency`
+   * (often the root workspace, but more than one ancestor can
+   * declare the same name when workspaces are nested).
+   */
+  ancestorWorkspaces: string[];
+  /** Files in `workspace` that reference `dependency`. */
+  files: ImplicitWorkspaceDependencyMetadataFile[];
+  /** Human-readable remediation string, embedded into `VerifyIssue.message`. */
+  fixHint: string;
+};
+
+/**
  * Mapping from verify issue category to the rich metadata shape it
  * carries. Adding a new category in the future means extending this
  * map and updating the verify orchestrator to emit issues of that
@@ -277,6 +387,7 @@ export type ImplicitWorkspaceDependencyMetadata = {
  */
 type IssueNameToMetadata = {
   implicitWorkspaceDependency: ImplicitWorkspaceDependencyMetadata;
+  ancestorWorkspaceDependency: AncestorWorkspaceDependencyMetadata;
 };
 
 /** Discriminant naming a verify finding's category. */
@@ -345,9 +456,9 @@ const buildFixHint = ({
 };
 
 const formatOccurrenceLocations = (
-  metadata: ImplicitWorkspaceDependencyMetadata,
+  files: ImplicitWorkspaceDependencyMetadataFile[],
 ): string =>
-  metadata.files
+  files
     .flatMap((file) =>
       file.occurrences.map((occurrence) => `${file.path}:${occurrence.line}`),
     )
@@ -361,7 +472,7 @@ const buildImplicitDepIssueMessage = (
   return (
     `${prefix}Workspace ${JSON.stringify(metadata.workspace)} imports ` +
     `${JSON.stringify(metadata.dependency)} but does not declare it as a ` +
-    `dependency (${formatOccurrenceLocations(metadata)}).\n  ${metadata.fixHint}`
+    `dependency (${formatOccurrenceLocations(metadata.files)}).\n  ${metadata.fixHint}`
   );
 };
 
@@ -375,6 +486,37 @@ const buildImplicitDepIssue = ({
   name: "implicitWorkspaceDependency",
   level,
   message: buildImplicitDepIssueMessage(metadata, level),
+  metadata,
+});
+
+const buildAncestorDepIssueMessage = (
+  metadata: AncestorWorkspaceDependencyMetadata,
+  level: VerifyIssueLevel,
+): string => {
+  const prefix = level === "error" ? "[Ancestor dependency error] " : "";
+  const ancestorList = metadata.ancestorWorkspaces
+    .map((name) => JSON.stringify(name))
+    .join(", ");
+  return (
+    `${prefix}Workspace ${JSON.stringify(metadata.workspace)} imports ` +
+    `${JSON.stringify(metadata.dependency)} but does not declare it as a ` +
+    `dependency (${formatOccurrenceLocations(metadata.files)}). It only resolves ` +
+    `because ancestor workspace${metadata.ancestorWorkspaces.length > 1 ? "s" : ""} ${ancestorList} declare${metadata.ancestorWorkspaces.length === 1 ? "s" : ""} it.\n  ${metadata.fixHint} ` +
+    `Alternatively, if this is intentional, add ${JSON.stringify(metadata.dependency)} ` +
+    `to "verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns".`
+  );
+};
+
+const buildAncestorDepIssue = ({
+  metadata,
+  level,
+}: {
+  metadata: AncestorWorkspaceDependencyMetadata;
+  level: VerifyIssueLevel;
+}): VerifyIssue<"ancestorWorkspaceDependency"> => ({
+  name: "ancestorWorkspaceDependency",
+  level,
+  message: buildAncestorDepIssueMessage(metadata, level),
   metadata,
 });
 
@@ -392,6 +534,9 @@ export const verifyProject = async (
       project.config.project.verify.workspaceDependencies
         .ignoreImportsFromWorkspacePatterns,
   });
+  const projectStrictDisallowAncestor =
+    project.config.project.verify.workspaceDependencies
+      .strictDisallowAncestorWorkspaceDeps;
 
   const targetWorkspaces = resolveTargetWorkspaces(
     project,
@@ -410,6 +555,11 @@ export const verifyProject = async (
   const allWorkspacePaths = project.workspaces.map(
     (workspace) => workspace.path,
   );
+  const rootDeclaredWorkspaceNames =
+    collectRootDeclaredWorkspaceDependencyNames({
+      rootDirectory: project.rootDirectory,
+      workspaceNamesByName,
+    });
 
   const trackableFiles = await listProjectTrackableFiles({
     rootDirectory: project.rootDirectory,
@@ -420,6 +570,8 @@ export const verifyProject = async (
   });
 
   const implicitDeps: ImplicitWorkspaceDependencyMetadata[] = [];
+  const ancestorDeps: AncestorWorkspaceDependencyMetadata[] = [];
+  const strictDisallowAncestorByWorkspace = new Map<string, boolean>();
   for (const workspace of targetWorkspaces) {
     const workspaceConfig = project.config.workspaces[workspace.name];
     const inputFilePatterns = workspaceConfig?.defaultInputs?.files ?? [
@@ -452,6 +604,19 @@ export const verifyProject = async (
     for (const name of workspaceIgnoredImportNames) {
       declaredDependencyNames.add(name);
     }
+    const ancestorNamesToAncestors = collectAncestorDependencyNames({
+      workspace,
+      allWorkspaces: project.workspaces,
+      rootDeclaredWorkspaceNames,
+      rootWorkspaceName: project.rootWorkspace.name,
+    });
+    strictDisallowAncestorByWorkspace.set(
+      workspace.name,
+      projectStrictDisallowAncestor ||
+        (workspaceConfig?.verify.workspaceDependencies
+          .strictDisallowAncestorWorkspaceDeps ??
+          false),
+    );
     const occurrencesByDep = new Map<string, Map<string, ScanOccurrence[]>>();
 
     for (const matchedFile of matchedFiles) {
@@ -488,17 +653,29 @@ export const verifyProject = async (
           ),
         }),
       );
-      implicitDeps.push({
-        workspace: workspace.name,
+      const fixHint = buildFixHint({
+        importingWorkspace: workspace,
         dependency: depName,
-        files,
-        fixHint: buildFixHint({
-          importingWorkspace: workspace,
-          dependency: depName,
-          adapter,
-          workspaceByName,
-        }),
+        adapter,
+        workspaceByName,
       });
+      const ancestorWorkspaces = ancestorNamesToAncestors.get(depName);
+      if (ancestorWorkspaces) {
+        ancestorDeps.push({
+          workspace: workspace.name,
+          dependency: depName,
+          ancestorWorkspaces,
+          files,
+          fixHint,
+        });
+      } else {
+        implicitDeps.push({
+          workspace: workspace.name,
+          dependency: depName,
+          files,
+          fixHint,
+        });
+      }
     }
   }
 
@@ -507,18 +684,32 @@ export const verifyProject = async (
       a.workspace.localeCompare(b.workspace) ||
       a.dependency.localeCompare(b.dependency),
   );
+  ancestorDeps.sort(
+    (a, b) =>
+      a.workspace.localeCompare(b.workspace) ||
+      a.dependency.localeCompare(b.dependency),
+  );
 
-  // Strict mode routes implicit-dep findings to errors (which fail
-  // the run); non-strict routes them to warnings. Future categories
-  // may always be errors or always be warnings independent of strict.
+  // Strict mode always routes implicit-dep findings to errors (which
+  // fail the run); ancestor-dep findings only do when the workspace (or
+  // the project default) opts in via strictDisallowAncestorWorkspaceDeps,
+  // since resolving via an ancestor isn't inherently broken the way an
+  // undeclared-anywhere import is.
   const implicitDepLevel: VerifyIssueLevel = strict ? "error" : "warn";
   const implicitDepIssues = implicitDeps.map((metadata) =>
     buildImplicitDepIssue({ metadata, level: implicitDepLevel }),
   );
+  const ancestorDepIssues = ancestorDeps.map((metadata) => {
+    const disallowUnderStrict =
+      strictDisallowAncestorByWorkspace.get(metadata.workspace) ?? false;
+    const level: VerifyIssueLevel =
+      strict && disallowUnderStrict ? "error" : "warn";
+    return buildAncestorDepIssue({ metadata, level });
+  });
 
   const errors: VerifyIssue[] = [];
   const warnings: VerifyIssue[] = [];
-  for (const issue of implicitDepIssues) {
+  for (const issue of [...implicitDepIssues, ...ancestorDepIssues]) {
     (issue.level === "error" ? errors : warnings).push(issue);
   }
 

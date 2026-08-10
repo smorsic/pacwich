@@ -3,6 +3,8 @@ const TEMPLATES = {
     "The {flag} flag from bun-workspaces is deprecated and will be removed in a future version. This is now pacwich's default behavior.",
   BashLoginShellHint: "{hint}",
   VerifyIssue: "{message}",
+  "VerifyIssue.ImplicitWorkspaceDependency": "{message}",
+  "VerifyIssue.AncestorWorkspaceDependency": "{message}",
   DeprecatedNoPrefixFlag:
     "--no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.",
   DeprecatedListAffectedCliCommand:

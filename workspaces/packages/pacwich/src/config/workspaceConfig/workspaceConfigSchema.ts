@@ -84,6 +84,9 @@ export const WORKSPACE_CONFIG_JSON_SCHEMA = {
               type: "array",
               items: { type: "string" },
             },
+            strictDisallowAncestorWorkspaceDeps: {
+              type: "boolean",
+            },
           },
         },
       },

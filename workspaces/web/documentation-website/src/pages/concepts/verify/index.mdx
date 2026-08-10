@@ -14,31 +14,47 @@ The `verify` feature exists to help detect issues with a project.
 
 ## Detecting Missing Workspace Dependencies
 
-`pacwich` uses workspaces' `package.json` files to detect when a workspace [depends on another workspace](/concepts/workspace-dependencies). 
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace. 
 
-In Bun and pnpm, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies.
-
-However, `npm` workspaces do not require explicit `package.json` dependencies, so `pacwich` cannot detect implicit dependencies without source code analysis.
+`pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
+other workspaces as dependencies explicitly in their own `package.json`. The `verify` feature exists to help catch instances where this can be dodged.
 
 The `verify` feature performs simple analysis to detect imports/exports in JS/TS files from other workspaces not listed in a workspace's `package.json`. 
 
 Analysis is only performed on workspace [input files](/concepts/inputs). You can further configure the verify
-command's behavior at the [project level](/config/project) or [workspace level](/config/workspace).
+command's behavior at the [project level](/config/project#verify) or [workspace level](/config/workspace#verify).
+
+### Types of Issues
+
+In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies. **npm** workspaces do not require explicit `package.json` dependencies at all, so undeclared workspace imports simply work.
+
+Nested workspaces also create a gap in explicit dependencies. A dependency declared by an ancestor workspace, most commonly the root `package.json`, resolves for every workspace beneath it through recursive parent-directory `node_modules` lookup, whether or not the importing workspace declares it.
+
+The `verify` feature performs simple analysis of imports/exports in JS/TS files to catch both cases:
+
+- **Implicit workspace dependencies**: a workspace imports another workspace that neither it nor any ancestor declares. Generally only possible with npm workspaces.
+- **Ancestor workspace dependencies**: the import resolves only because an ancestor workspace declares it. Possible with any package manager.
+
+Adding `pacwich verify` to a `"prepare"` script, pre-commit hook, CI pipeline, or similar can be especially helpful to catch issues.
+
+`pacwich verify --strict` will fail on implicit workspace dependencies. Ancestor findings warn by default, and the `strictDisallowAncestorWorkspaceDeps` [config option](/config/project#verify) makes strict mode fail on those as well.
 
 ## Usage
 
 Adding `pacwich verify` to your root `package.json` `"prepare"` script, a pre-commit hook, or a CI pipeline can be especially helpful to catch issues. 
 
-`pacwich verify --strict` will fail if implicit workspace dependencies are detected.
+`pacwich verify --strict` will fail if implicit workspace dependencies are detected or ancestor workspace dependencies are detected and disallowed via the `strictDisallowAncestorWorkspaceDeps` [config option](/config/project#verify).
 
 See the [CLI reference](/cli/commands#verify) or the [API reference](/api/reference#verify) for more information.
 
 **Example output**:
 ```
 $ pacwich verify
-[pacwich WARN: VerifyIssue]: Workspace "a" imports "b" but does not declare it as a 
-dependency (packages/a/hello.ts:1).
-  Add "b": "workspace:*" to the "dependencies" field of packages/a/package.json.
+[pacwich WARN: VerifyIssue.AncestorWorkspaceDependency]: Workspace "a" imports "b" 
+but does not declare it as a dependency (packages/a/hello.ts:1). It only resolves 
+because ancestor workspace "my-root" declares it.
+Add "b": "workspace:*" to the "dependencies" field of packages/a/package.json.
+Alternatively, if this is intentional, add "b" to 
+"verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns".
 Verify finished with 1 warning.
-Re-run with --strict to make warnings fail, or address each warning above.
 ```

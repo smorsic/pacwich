@@ -146,7 +146,8 @@ await project.runAffectedWorkspaceScript({
 
 // Detect implicit workspace dependencies (imports of other workspaces'
 // package names that aren't declared in the importing workspace's
-// package.json). Returns a Promise<VerifyResult>.
+// package.json) or imports from workspaces declared by an ancestor
+// workspace's dependencies only. Returns a Promise<VerifyResult>.
 //
 // Scope: each workspace's inputs (`defaultInputs.files`, default
 // `["."]`) determine which files are scanned. Only git-trackable
@@ -159,8 +160,7 @@ const verifyResult = await project.verify({
   strict: false,
 });
 // VerifyResult: { ok: boolean; errors: VerifyIssue[]; warnings: VerifyIssue[] }
-// VerifyIssue.name discriminates the rich `metadata` shape. Today the
-// only category is "implicitWorkspaceDependency".
+// VerifyIssue.name discriminates the rich `metadata` shape.
 ```
 
 `createMemoryProject` and the `MemoryProject` type are also exported but are flagged `@experimental`. They cover only the read-only `Project` surface today (no `runWorkspaceScript`, `runScriptAcrossWorkspaces`, `determineAffectedWorkspaces`, `runAffectedWorkspaceScript`, or `verify`) and the constructor shape is expected to change. Prefer `createFileSystemProject` for non-test code paths.

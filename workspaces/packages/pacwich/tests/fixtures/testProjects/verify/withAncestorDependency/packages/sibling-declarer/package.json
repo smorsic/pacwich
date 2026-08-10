@@ -1,0 +1,6 @@
+{
+  "name": "sibling-declarer",
+  "dependencies": {
+    "other-lib": "workspace:*"
+  }
+}

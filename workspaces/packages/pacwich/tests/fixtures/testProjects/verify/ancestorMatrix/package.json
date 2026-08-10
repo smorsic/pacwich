@@ -1,0 +1,7 @@
+{
+  "name": "ancestor-matrix-root",
+  "workspaces": ["packages/*"],
+  "dependencies": {
+    "shared-lib": "workspace:*"
+  }
+}

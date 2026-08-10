@@ -10,6 +10,7 @@ type ParsedIssue = {
     dependency: string;
     files: { path: string }[];
     fixHint: string;
+    ancestorWorkspaces?: string[];
   };
 };
 
@@ -265,6 +266,73 @@ describe("CLI verify", () => {
       expect(parsed.warnings.map((issue) => issue.metadata.workspace)).toEqual([
         "app-b",
       ]);
+    });
+  });
+
+  describe("ancestorWorkspaceDependency", () => {
+    test("--json includes the ancestorWorkspaces list for a root-ancestor finding", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithAncestorDependency",
+      });
+      const result = await run("verify", "--json");
+      const parsed: ParsedResult = JSON.parse(result.stdout.sanitized);
+      const finding = parsed.warnings.find(
+        (issue) =>
+          issue.name === "ancestorWorkspaceDependency" &&
+          issue.metadata.workspace === "app",
+      );
+      expect(finding).toBeDefined();
+      expect(finding!.metadata.ancestorWorkspaces).toEqual([
+        "verify-ancestor-root",
+      ]);
+    });
+
+    test("non-JSON output emits the VerifyIssue.AncestorWorkspaceDependency warning id", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithAncestorDependency",
+      });
+      const result = await run("verify", "app");
+      expect(result.stderr.sanitized).toContain(
+        "[pacwich WARN: VerifyIssue.AncestorWorkspaceDependency]",
+      );
+    });
+
+    test("non-JSON output emits VerifyIssue.ImplicitWorkspaceDependency for the sibling-declared finding", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithAncestorDependency",
+      });
+      const result = await run("verify", "consumer");
+      expect(result.stderr.sanitized).toContain(
+        "[pacwich WARN: VerifyIssue.ImplicitWorkspaceDependency]",
+      );
+      expect(result.stderr.sanitized).not.toContain(
+        "VerifyIssue.AncestorWorkspaceDependency",
+      );
+    });
+
+    test("--suppress-warnings can silence just the ancestor category, leaving implicit visible", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithAncestorDependency",
+      });
+      const result = await run(
+        "verify",
+        "--suppress-warnings=VerifyIssue.AncestorWorkspaceDependency",
+      );
+      expect(result.stderr.sanitized).not.toContain(
+        "VerifyIssue.AncestorWorkspaceDependency",
+      );
+      expect(result.stderr.sanitized).toContain(
+        "VerifyIssue.ImplicitWorkspaceDependency",
+      );
+    });
+
+    test("--suppress-warnings=VerifyIssue (parent) silences both categories", async () => {
+      const { run } = setupCliTest({
+        testProject: "verifyWithAncestorDependency",
+      });
+      const result = await run("verify", "--suppress-warnings=VerifyIssue");
+      expect(result.exitCode).toBe(0);
+      expect(result.stderr.sanitized).not.toContain("VerifyIssue.");
     });
   });
 });
