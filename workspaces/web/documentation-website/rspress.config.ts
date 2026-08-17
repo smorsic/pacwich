@@ -333,15 +333,7 @@ export default defineConfig({
         content: GITHUB_REPO_URL,
       },
       {
-        icon: {
-          svg: fs.readFileSync(
-            path.resolve(
-              __dirname,
-              "src/pages/public/images/external/npm-logo.svg",
-            ),
-            "utf8",
-          ),
-        },
+        icon: "npm",
         mode: "link",
         content: "https://www.npmjs.com/package/pacwich",
       },
