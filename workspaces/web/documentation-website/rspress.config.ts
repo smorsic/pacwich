@@ -4,7 +4,7 @@ import { createMockSubprocessRspackPlugin } from "@pacwich/web-cli/web-cli-runti
 import { rspack } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
-import { defineConfig } from "@rspress/core";
+import { defineConfig, type LlmsTxtRenderer } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
 import { pluginSitemap } from "@rspress/plugin-sitemap";
 import packageJson from "../../packages/pacwich/package.json";
@@ -77,6 +77,40 @@ const BWUNSTER_ASCII = fs.readFileSync(
   path.resolve(__dirname, "../../../bwunster.txt"),
   "utf8",
 );
+
+/** Pages not useful to agents */
+const LLMS_TXT_EXCLUDED_ROUTE_PATHS = new Set([
+  "/lore",
+  "/how",
+  "/web-cli",
+  "/roadmap",
+]);
+
+const renderLlmsTxt: LlmsTxtRenderer = ({ title, description, sections }) => {
+  const summary = title
+    ? `# ${title}${description ? `\n\n> ${description}` : ""}`
+    : "";
+  const versionLine = `> pacwich v${packageJson.version} — see the changelog for release history: ${CHANGELOG_URL}`;
+  const header = [summary, versionLine].filter(Boolean).join("\n");
+
+  const lines: string[] = [];
+  for (const section of sections) {
+    const pages = section.pages.filter(
+      (page) =>
+        !LLMS_TXT_EXCLUDED_ROUTE_PATHS.has(page.routePath.replace(/\/$/, "")),
+    );
+    if (pages.length === 0) continue;
+    lines.push(`\n## ${section.title}\n`);
+    lines.push(
+      ...pages.map(
+        (page) =>
+          `- [${page.title}](${page.link})${page.description ? `: ${page.description}` : ""}`,
+      ),
+    );
+  }
+
+  return lines.length > 0 ? `${header}\n${lines.join("\n")}` : header;
+};
 
 export default defineConfig({
   root: "src/pages",
@@ -310,7 +344,6 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    llmsUI: false,
     enableScrollToTop: true,
     darkMode: true,
     socialLinks: [
