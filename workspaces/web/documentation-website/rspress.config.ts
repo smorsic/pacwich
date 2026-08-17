@@ -131,10 +131,15 @@ export default defineConfig({
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
   llms: {
+    llmsTxt: renderLlmsTxt,
     remarkSplitMdxOptions: {
       excludes: [
         [["CliInstall"], "@/lib/cli/CliInstall"],
         [["ApiInstall"], "@/lib/api/ApiInstall"],
+        [
+          ["WorkspaceDependencyExample"],
+          "@/lib/concepts/WorkspaceDependencyExample",
+        ],
       ],
     },
   },

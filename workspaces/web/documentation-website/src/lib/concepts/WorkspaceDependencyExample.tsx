@@ -174,3 +174,76 @@ packages:
     />
   );
 };
+
+/** Separate from WorkspaceDependencyExample to provide hidden text used for markdown generation in place of dynamic display component */
+export const WorkspaceDependencyExampleAlt = () => {
+  return (
+    <div
+      style={{
+        visibility: "hidden",
+        position: "absolute",
+        left: "-9999px",
+      }}
+    >
+      <div>
+        Alt workspace dependency examples for .md page in place of{" "}
+        {`<WorkspaceDependencyExample />`} above:
+      </div>
+
+      <h3>bun:</h3>
+      <div>
+        Root <code>package.json</code>:{" "}
+        <code>{`{ "name": "my-project-root", "workspaces": ["packages/*"] }`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-a/package.json</code>, where{" "}
+        <code>workspace-a</code> exports some code from its{" "}
+        <code>index.ts</code>:{" "}
+        <code>{`{ "name": "workspace-a", "type": "module", "main": "index.ts" }`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-b/package.json</code>: JS/TS files in this
+        workspace can import from <code>"workspace-a"</code>:{" "}
+        <code>{`{ "name": "workspace-b", "dependencies": { "workspace-a": "workspace:*" } }`}</code>
+      </div>
+
+      <h3>pnpm:</h3>
+      <div>
+        Root <code>pnpm-workspace.yaml</code>:{" "}
+        <code>{`packages: ["packages/*"]`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-a/package.json</code>, where{" "}
+        <code>workspace-a</code> exports some code from its{" "}
+        <code>index.ts</code>:{" "}
+        <code>{`{ "name": "workspace-a", "type": "module", "main": "index.ts" }`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-b/package.json</code>: JS/TS files in this
+        workspace can import from <code>"workspace-a"</code>:{" "}
+        <code>{`{ "name": "workspace-b", "type": "module", "dependencies": { "workspace-a": "workspace:*" } }`}</code>
+      </div>
+
+      <h3>npm:</h3>
+      <div>
+        Root <code>package.json</code>:{" "}
+        <code>{`{ "name": "my-project-root", "workspaces": ["packages/*"] }`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-a/package.json</code>, where{" "}
+        <code>workspace-a</code> exports some code from its{" "}
+        <code>index.ts</code>:{" "}
+        <code>{`{ "name": "workspace-a", "type": "module", "main": "index.ts" }`}</code>
+      </div>
+      <div>
+        <code>packages/workspace-b/package.json</code>: JS/TS files in this
+        workspace can import from <code>"workspace-a"</code>. When using npm,
+        placing <code>{`{ "workspace-a": "*" }`}</code> in dependencies is not
+        necessary, but this is how <code>pacwich</code> determines dependencies.
+        Use the <code>verify</code> feature to detect dependencies not declared
+        in a workspace's package.json.{" "}
+        <code>{`{ "name": "workspace-b", "type": "module", "dependencies": { "workspace-a": "*" } }`}</code>
+      </div>
+    </div>
+  );
+};
