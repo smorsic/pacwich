@@ -18,6 +18,7 @@ import {
   BLOG_URL,
   createSidebar,
 } from "./rspressLinks";
+import { isLlmsExcludedRoutePath } from "./src/lib/util/llmsExcludedRoutes";
 
 // The web CLI (/web-cli) runs the real pacwich CLI in-browser over memfs —
 // browser-only machinery that must NOT leak into rspress's SSR ("node")
@@ -78,14 +79,6 @@ const BWUNSTER_ASCII = fs.readFileSync(
   "utf8",
 );
 
-/** Pages not useful to agents */
-const LLMS_TXT_EXCLUDED_ROUTE_PATHS = new Set([
-  "/lore",
-  "/how",
-  "/web-cli",
-  "/roadmap",
-]);
-
 const renderLlmsTxt: LlmsTxtRenderer = ({ title, description, sections }) => {
   const summary = title
     ? `# ${title}${description ? `\n\n> ${description}` : ""}`
@@ -96,8 +89,7 @@ const renderLlmsTxt: LlmsTxtRenderer = ({ title, description, sections }) => {
   const lines: string[] = [];
   for (const section of sections) {
     const pages = section.pages.filter(
-      (page) =>
-        !LLMS_TXT_EXCLUDED_ROUTE_PATHS.has(page.routePath.replace(/\/$/, "")),
+      (page) => !isLlmsExcludedRoutePath(page.routePath),
     );
     if (pages.length === 0) continue;
     lines.push(`\n## ${section.title}\n`);
