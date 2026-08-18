@@ -1,20 +1,8 @@
-import { CliInstall, CliInstallAlt } from "@/lib/cli/CliInstall";
 import { Link } from "@/theme";
 
-export interface CliHeaderProps {
-  fullInstallDoc?: boolean;
-}
-
-export const CliHeader = ({ fullInstallDoc = false }: CliHeaderProps) => {
+export const CliHeader = () => {
   return (
     <div className="sub-header">
-      {fullInstallDoc && (
-        <>
-          <CliInstall />
-          <CliInstallAlt />
-          <br />
-        </>
-      )}
       See the <Link href="/intro/getting-started">Getting Started</Link> or{" "}
       <Link href="/concepts/glossary">Glossary</Link> pages for more starting
       info.

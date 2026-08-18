@@ -10,11 +10,19 @@ footer: false
 
 import { SyntaxHighlighter } from "../../lib/util/highlight";
 import { ApiHeader } from '../../lib/api/ApiHeader';
+import { ApiInstall, ApiInstallAlt } from '@/lib/api/ApiInstall';
 import { API_QUICKSTART } from "../../lib/api/apiExamples";
 
 # TS/JS API
 
-<ApiHeader fullInstallDoc/>
+<div className="doc-pm-tabs-container">
+  <ApiInstall />
+</div>
+<ApiInstallAlt />
+
+<br/>
+
+<ApiHeader />
 
 
 ## Quick Start

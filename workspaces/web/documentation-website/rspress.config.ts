@@ -4,7 +4,7 @@ import { createMockSubprocessRspackPlugin } from "@pacwich/web-cli/web-cli-runti
 import { rspack } from "@rsbuild/core";
 import { pluginNodePolyfill } from "@rsbuild/plugin-node-polyfill";
 import { pluginSvgr } from "@rsbuild/plugin-svgr";
-import { defineConfig } from "@rspress/core";
+import { defineConfig, type LlmsTxtRenderer } from "@rspress/core";
 import { pluginClientRedirects } from "@rspress/plugin-client-redirects";
 import { pluginSitemap } from "@rspress/plugin-sitemap";
 import packageJson from "../../packages/pacwich/package.json";
@@ -18,6 +18,7 @@ import {
   BLOG_URL,
   createSidebar,
 } from "./rspressLinks";
+import { isLlmsExcludedRoutePath } from "./src/lib/util/llmsExcludedRoutes";
 
 // The web CLI (/web-cli) runs the real pacwich CLI in-browser over memfs —
 // browser-only machinery that must NOT leak into rspress's SSR ("node")
@@ -78,6 +79,31 @@ const BWUNSTER_ASCII = fs.readFileSync(
   "utf8",
 );
 
+const renderLlmsTxt: LlmsTxtRenderer = ({ title, description, sections }) => {
+  const summary = title
+    ? `# ${title}${description ? `\n\n> ${description}` : ""}`
+    : "";
+  const versionLine = `> pacwich v${packageJson.version} — see the changelog for release history: ${CHANGELOG_URL}`;
+  const header = [summary, versionLine].filter(Boolean).join("\n");
+
+  const lines: string[] = [];
+  for (const section of sections) {
+    const pages = section.pages.filter(
+      (page) => !isLlmsExcludedRoutePath(page.routePath),
+    );
+    if (pages.length === 0) continue;
+    lines.push(`\n## ${section.title}\n`);
+    lines.push(
+      ...pages.map(
+        (page) =>
+          `- [${page.title}](${page.link})${page.description ? `: ${page.description}` : ""}`,
+      ),
+    );
+  }
+
+  return lines.length > 0 ? `${header}\n${lines.join("\n")}` : header;
+};
+
 export default defineConfig({
   root: "src/pages",
   themeDir: path.join(__dirname, "src/theme"),
@@ -97,10 +123,15 @@ export default defineConfig({
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },
   llms: {
+    llmsTxt: renderLlmsTxt,
     remarkSplitMdxOptions: {
       excludes: [
         [["CliInstall"], "@/lib/cli/CliInstall"],
         [["ApiInstall"], "@/lib/api/ApiInstall"],
+        [
+          ["WorkspaceDependencyExample"],
+          "@/lib/concepts/WorkspaceDependencyExample",
+        ],
       ],
     },
   },
@@ -310,7 +341,6 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    llmsUI: false,
     enableScrollToTop: true,
     darkMode: true,
     socialLinks: [
@@ -333,15 +363,7 @@ export default defineConfig({
         content: GITHUB_REPO_URL,
       },
       {
-        icon: {
-          svg: fs.readFileSync(
-            path.resolve(
-              __dirname,
-              "src/pages/public/images/external/npm-logo.svg",
-            ),
-            "utf8",
-          ),
-        },
+        icon: "npm",
         mode: "link",
         content: "https://www.npmjs.com/package/pacwich",
       },

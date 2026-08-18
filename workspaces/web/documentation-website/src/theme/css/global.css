@@ -234,12 +234,6 @@ aside .nav-title-container {
   border-bottom: none !important;
 }
 
-.rp-nav-menu__item__container > div:has(> svg) {
-  width: 1.25rem !important;
-  margin-left: 0.25rem;
-  margin-right: 0 !important;
-}
-
 .rp-nav-menu__item__container::after {
   display: none !important;
 }
@@ -455,10 +449,6 @@ hr {
 
 .deprecated {
   color: var(--rp-container-danger-text) !important;
-}
-
-.sub-header {
-  margin-top: -1rem;
 }
 
 .sub-header hr {

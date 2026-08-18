@@ -10,17 +10,15 @@ export const BLOG_URL = process.env.BLOG_URL || "https://smorsic.io/blog";
 export const CHANGELOG_URL = `${GITHUB_REPO_URL}/releases`;
 export const LICENSE_URL = GITHUB_REPO_URL + "/blob/main/LICENSE.md";
 
-// Inline an SVG file as a nav-item `tag` string. Comments are stripped
-// because rspress v2's Tag component checks for comma-separated arrays
-// before checking for SVG strings, so any comma in the SVG (commonly a
-// vendor comment like "Fonticons, Inc.") sends it down the wrong path.
+// Inlined (not a public URL) so the SVGs' `fill="currentColor"` picks up
+// the surrounding nav text color and tracks light/dark theme automatically.
+// rspress's `icon` field renders a URL/path as a plain <img>, which loses
+// that CSS color inheritance.
 const navIconSvg = (relativePath: string) =>
-  fs
-    .readFileSync(
-      path.resolve(__dirname, "src/pages/public/images/svg", relativePath),
-      "utf8",
-    )
-    .replace(/<!--[\s\S]*?-->/g, "");
+  fs.readFileSync(
+    path.resolve(__dirname, "src/pages/public/images/svg", relativePath),
+    "utf8",
+  );
 
 export const HEADER_NAV_LINKS: NavItem[] = [
   {
@@ -50,7 +48,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/cli",
     position: "left",
     activeMatch: "/cli|web-cli",
-    tag: navIconSvg("cli-nav-icon.svg"),
+    icon: navIconSvg("cli-nav-icon.svg"),
     items: [
       {
         text: "Web CLI (Demo)",
@@ -77,7 +75,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/api",
     position: "left",
     activeMatch: "/api",
-    tag: navIconSvg("api-nav-icon.svg"),
+    icon: navIconSvg("api-nav-icon.svg"),
     items: [
       {
         text: "Quick Start",
@@ -95,7 +93,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/config",
     position: "left",
     activeMatch: "/config",
-    tag: navIconSvg("config-nav-icon.svg"),
+    icon: navIconSvg("config-nav-icon.svg"),
     items: [
       {
         text: "Overview",
@@ -129,7 +127,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     link: "/concepts/glossary",
     position: "left",
     activeMatch: "/concepts",
-    tag: navIconSvg("concepts-nav-icon.svg"),
+    icon: navIconSvg("concepts-nav-icon.svg"),
     items: [
       {
         text: "Glossary",
@@ -185,7 +183,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     text: "AI",
     link: "/ai",
     position: "left",
-    tag: navIconSvg("ai-nav-icon.svg"),
+    icon: navIconSvg("ai-nav-icon.svg"),
     items: [
       {
         text: "Overview",
@@ -217,7 +215,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
   {
     text: "More",
     position: "left",
-    tag: navIconSvg("more-nav-icon.svg"),
+    icon: navIconSvg("more-nav-icon.svg"),
     items: [
       {
         text: "Security",
@@ -253,7 +251,7 @@ export const HEADER_NAV_LINKS: NavItem[] = [
     text: "Blog",
     position: "right",
     link: BLOG_URL,
-    tag: navIconSvg("blog-nav-icon.svg"),
+    icon: navIconSvg("blog-nav-icon.svg"),
   },
 ];
 
