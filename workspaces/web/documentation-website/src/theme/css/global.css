@@ -451,10 +451,6 @@ hr {
   color: var(--rp-container-danger-text) !important;
 }
 
-.sub-header {
-  margin-top: -1rem;
-}
-
 .sub-header hr {
   margin: 2rem 0;
 }
