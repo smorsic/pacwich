@@ -1,7 +1,7 @@
 {
   "bun": {
     "endUserRequirement": "^1.2.0",
-    "devLock": "1.3.14"
+    "devLock": "1.4.0"
   },
   "node": {
     "endUserRequirement": ">=22.0.0 <=26.x",
