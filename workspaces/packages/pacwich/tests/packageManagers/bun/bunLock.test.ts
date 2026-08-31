@@ -72,10 +72,10 @@ describe("bun.lock utilities", () => {
       expect(
         parseBunLock(`{
         /* this is jsonc */
-        "lockfileVersion": 2, // this is jsonc
+        "lockfileVersion": 3, // this is jsonc
       }`),
       ).toEqual({
-        lockfileVersion: 1,
+        lockfileVersion: 2,
         workspaces: {},
       });
     });
@@ -117,7 +117,7 @@ describe("bun.lock utilities", () => {
       const projectBunLock = readBunLockfile(rootDirectory) as RelevantBunLock;
 
       expect(projectBunLock).toEqual({
-        lockfileVersion: 1,
+        lockfileVersion: 2,
         workspaces: expect.any(Object),
       });
 
