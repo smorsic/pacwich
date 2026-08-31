@@ -117,7 +117,7 @@ describe("bun.lock utilities", () => {
       const projectBunLock = readBunLockfile(rootDirectory) as RelevantBunLock;
 
       expect(projectBunLock).toEqual({
-        lockfileVersion: 2,
+        lockfileVersion: 1,
         workspaces: expect.any(Object),
       });
 
