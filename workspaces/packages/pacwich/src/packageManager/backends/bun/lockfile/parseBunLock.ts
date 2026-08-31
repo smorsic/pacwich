@@ -39,7 +39,7 @@ export type RelevantBunLock = {
  * (`>=MIN <=MAX`) like the pnpm backend does.
  */
 export const MIN_SUPPORTED_BUN_LOCK_VERSION = 1;
-export const MAX_SUPPORTED_BUN_LOCK_VERSION = 1;
+export const MAX_SUPPORTED_BUN_LOCK_VERSION = 2;
 
 export const parseBunLock = (
   jsonString: string,

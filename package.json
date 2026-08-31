@@ -103,6 +103,9 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.4"
   },
+  "overrides": {
+    "typescript": "^5.9.3"
+  },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json,css,md,mdx,yaml,yml}": [
       "eslint --fix",
