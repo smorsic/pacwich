@@ -31,18 +31,29 @@ runs:
         bun_v="${BUN_INPUT:-$(jq -r '.bun.devLock' "$TV")}"
         node_v="${NODE_INPUT:-$(jq -r '.node.devLock' "$TV")}"
         pnpm_v="${PNPM_INPUT:-$(jq -r '.pnpm.devLock' "$TV")}"
+        pnpm_major="${pnpm_v%%.*}"
         {
           echo "bun=$bun_v"
           echo "node=$node_v"
           echo "pnpm=$pnpm_v"
+          echo "pnpm_major=$pnpm_major"
         } >> "$GITHUB_OUTPUT"
         echo "Resolved versions: bun=$bun_v node=$node_v pnpm=$pnpm_v"
 
-    - name: Install pnpm
+    # pnpm/setup only supports pnpm >=11, so pnpm 10 stays on action-setup
+    - name: Install pnpm (<=10)
+      if: ${{ steps.versions.outputs.pnpm_major <= 10 }}
       uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
       with:
         version: ${{ steps.versions.outputs.pnpm }}
         run_install: false
+
+    - name: Install pnpm (>=11)
+      if: ${{ steps.versions.outputs.pnpm_major > 10 }}
+      uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+      with:
+        version: ${{ steps.versions.outputs.pnpm }}
+        install: false
 
     - name: Install Bun
       uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
