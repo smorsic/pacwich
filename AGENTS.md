@@ -74,7 +74,7 @@ npm install -D pacwich
 
 - **bun:** ^1.2.0
 - **node:** >=22.0.0 <=26.x
-- **pnpm:** >=10.0.0 <=11.x
+- **pnpm:** >=10.0.0 <=12.x
 
 <!--End pacwich overview-->
 
