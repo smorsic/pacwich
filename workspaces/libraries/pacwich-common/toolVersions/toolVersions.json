@@ -8,7 +8,7 @@
     "devLock": "24.15.0"
   },
   "pnpm": {
-    "endUserRequirement": ">=10.0.0 <=11.x",
+    "endUserRequirement": ">=10.0.0 <=12.x",
     "devLock": "11.2.2"
   }
 }
