@@ -6,6 +6,6 @@
   },
   "os": ["ubuntu-latest", "windows-latest", "macos-latest"],
   "pm": {
-    "pnpm": ["10.16.0", "11.2.2", "12.2.1"]
+    "pnpm": ["10.16.0", "11.25.0", "12.2.1"]
   }
 }
