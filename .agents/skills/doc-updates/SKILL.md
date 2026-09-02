@@ -74,3 +74,4 @@ Findings based on below may be appropriate to split into more tasks, but not for
 - If a page is renamed/moved, it needs a redirect in rspress.config.ts
   - This should be a very rare need
   - Note that the rspress framework will catch old dead links at compile time already
+- The bun-workspaces migration guide page should be reviewed for anything needing update for accuracy/thoroughness

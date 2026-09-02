@@ -808,3 +808,7 @@ a code {
 .doc-pm-tabs-container {
   margin-bottom: -1rem;
 }
+
+.warning {
+  color: var(--web-cli-yellow);
+}
