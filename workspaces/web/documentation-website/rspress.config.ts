@@ -233,6 +233,10 @@ export default defineConfig({
           process.env.PACWICH_DOCS_ENV ?? "production",
         ),
         "process.env.BLOG_URL": JSON.stringify(BLOG_URL),
+        "process.env.CHANGELOG_URL": JSON.stringify(CHANGELOG_URL),
+        "process.env.GITHUB_REPO_URL": JSON.stringify(GITHUB_REPO_URL),
+        "process.env.LICENSE_URL": JSON.stringify(LICENSE_URL),
+        "process.env.NPM_PACKAGE_URL": JSON.stringify(NPM_PACKAGE_URL),
       },
     },
     html: {
