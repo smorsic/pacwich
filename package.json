@@ -100,11 +100,11 @@
     "pacwich_local": "workspace:*",
     "portless": "^0.13.1",
     "prettier": "^3.8.3",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.0",
     "typescript-eslint": "^8.59.4"
   },
   "overrides": {
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.0"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json,css,md,mdx,yaml,yml}": [
