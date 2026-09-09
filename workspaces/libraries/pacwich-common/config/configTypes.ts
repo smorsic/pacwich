@@ -66,6 +66,13 @@ export type WorkspaceInputsConfig = {
    *   `externalDependencies` are silently ignored.
    */
   externalDependencies?: string[];
+  /**
+   * Environment variable names that should be considered inputs for a script.
+   *
+   * These are not relevant to affected workspace resolution, since they are
+   * not tracked in static files.
+   */
+  environmentVariables?: string[];
 };
 
 /** Configuration that applies to a specific package.json script */
