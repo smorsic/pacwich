@@ -26,10 +26,16 @@ export type WorkspaceRules = {
   workspaceDependencies?: WorkspaceDependenciesRule;
 };
 
+export type CustomInputContext = {
+  workspace: RawWorkspace;
+};
+
 /**
  * A function that dynamically returns a string value to be used as a script input.
  */
-export type CustomInputFunction = () => string | Promise<string>;
+export type CustomInputFunction = (
+  context: CustomInputContext,
+) => string | Promise<string>;
 
 /** The value of a custom input */
 export type CustomInput = string | CustomInputFunction;
@@ -87,6 +93,8 @@ export type WorkspaceInputsConfig = {
   /**
    * Custom inputs as string values. These are usually provided as functions
    * that dynamically determine some string value that is used as a script input.
+   *
+   * Function inputs are only available in TS/JS config files.
    */
   customInputs?: CustomInputConfig;
 };
