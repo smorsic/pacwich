@@ -1,4 +1,5 @@
 import path from "path";
+import type { CustomInputContext, RawWorkspace } from "@pacwich/common/config";
 import { LOAD_CONFIG_ERRORS } from "../../src/config";
 import {
   loadWorkspaceConfig,
@@ -323,6 +324,143 @@ describe("workspace config", () => {
         ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
       });
 
+      test("accepts defaultInputs.environmentVariables as a string array", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: { environmentVariables: ["NODE_ENV", "CI"] },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts defaultInputs.environmentVariables as a single-item array", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: { environmentVariables: ["NODE_ENV"] },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts defaultInputs.environmentVariables as an empty array", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: { environmentVariables: [] },
+          }),
+        ).not.toThrow();
+      });
+
+      test("throws when defaultInputs.environmentVariables is not an array", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { environmentVariables: "NODE_ENV" },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when defaultInputs.environmentVariables contains non-strings", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { environmentVariables: ["NODE_ENV", 123] },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("accepts defaultInputs.customInputs with string values", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: { customInputs: { salt: "1" } },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts defaultInputs.customInputs with function values", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: {
+              customInputs: { dynamic: () => "value" },
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts defaultInputs.customInputs with mixed string and function values", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: {
+              customInputs: {
+                salt: "1",
+                dynamic: async () => "value",
+              },
+            },
+          }),
+        ).not.toThrow();
+      });
+
+      test("accepts empty defaultInputs.customInputs object", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: { customInputs: {} },
+          }),
+        ).not.toThrow();
+      });
+
+      test("throws when defaultInputs.customInputs is an array", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { customInputs: ["salt"] },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("throws when defaultInputs.customInputs is a string", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            // @ts-expect-error - Invalid config
+            defaultInputs: { customInputs: "salt" },
+          }),
+        ).toThrow(WORKSPACE_CONFIG_ERRORS.InvalidWorkspaceConfig);
+      });
+
+      test("accepts a customInputs function typed with CustomInputContext", () => {
+        const workspaceNameInput = ({ workspace }: CustomInputContext) =>
+          workspace.name;
+        expect(() =>
+          validateWorkspaceConfig({
+            defaultInputs: {
+              customInputs: { workspaceName: workspaceNameInput },
+            },
+          }),
+        ).not.toThrow();
+        // no feature invokes custom inputs yet, so lock the call contract directly
+        const workspace: RawWorkspace = {
+          name: "my-workspace",
+          isRoot: false,
+          path: "packages/my-workspace",
+          matchPattern: "packages/*",
+          scripts: ["build"],
+          dependencies: [],
+          dependents: [],
+        };
+        expect(workspaceNameInput({ workspace })).toBe("my-workspace");
+      });
+
+      test("accepts script-level inputs with environmentVariables and customInputs", () => {
+        expect(() =>
+          validateWorkspaceConfig({
+            scripts: {
+              build: {
+                inputs: {
+                  environmentVariables: ["NODE_ENV"],
+                  customInputs: { salt: "1", dynamic: () => "value" },
+                },
+              },
+            },
+          }),
+        ).not.toThrow();
+      });
+
       test("throws when defaultInputs has unknown property", () => {
         expect(() =>
           validateWorkspaceConfig({
@@ -442,6 +580,18 @@ describe("workspace config", () => {
           strictDisallowAncestorWorkspaceDeps: false,
         },
       });
+    });
+
+    test("passes defaultInputs through with environmentVariables and customInputs intact", () => {
+      const dynamicInput = () => "value";
+      const defaultInputs = {
+        files: ["src/**/*.ts"],
+        environmentVariables: ["NODE_ENV"],
+        customInputs: { salt: "1", dynamic: dynamicInput },
+      };
+      expect(resolveWorkspaceConfig({ defaultInputs }).defaultInputs).toEqual(
+        defaultInputs,
+      );
     });
 
     test("passes through an explicit strictDisallowAncestorWorkspaceDeps: true", () => {
