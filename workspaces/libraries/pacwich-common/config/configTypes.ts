@@ -26,7 +26,9 @@ export type WorkspaceRules = {
   workspaceDependencies?: WorkspaceDependenciesRule;
 };
 
+/** Data passed to {@link CustomInputFunction} */
 export type CustomInputContext = {
+  /** Basic data about the relevant workspace before full config resolution */
   workspace: RawWorkspace;
 };
 
