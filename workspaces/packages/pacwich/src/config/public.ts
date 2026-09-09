@@ -6,6 +6,8 @@ export type {
   ResolvedWorkspaceConfig,
   WorkspaceRules,
   WorkspaceInputsConfig,
+  CustomInputFunction,
+  CustomInput,
   ScriptConfig,
   RawWorkspace,
   WorkspacePatternConfigFactory,

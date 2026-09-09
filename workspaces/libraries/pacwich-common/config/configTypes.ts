@@ -27,6 +27,17 @@ export type WorkspaceRules = {
 };
 
 /**
+ * A function that dynamically returns a string value to be used as a script input.
+ */
+export type CustomInputFunction = () => string | Promise<string>;
+
+/** The value of a custom input */
+export type CustomInput = string | CustomInputFunction;
+
+/** Map of key names as custom inputs resolving to some {@link CustomInput} value */
+export type CustomInputConfig = Record<string, CustomInput>;
+
+/**
  * Configured inputs for a script.
  *
  * These can be used to specify the files and workspace patterns
@@ -73,6 +84,11 @@ export type WorkspaceInputsConfig = {
    * not tracked in static files.
    */
   environmentVariables?: string[];
+  /**
+   * Custom inputs as string values. These are usually provided as functions
+   * that dynamically determine some string value that is used as a script input.
+   */
+  customInputs?: CustomInputConfig;
 };
 
 /** Configuration that applies to a specific package.json script */
