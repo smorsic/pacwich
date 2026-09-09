@@ -17,6 +17,15 @@ const WORKSPACE_INPUTS_CONFIG_SCHEMA = {
       type: "array",
       items: { type: "string" },
     },
+    environmentVariables: {
+      type: "array",
+      items: { type: "string" },
+    },
+    customInputs: {
+      type: "object",
+      // values may be functions in TS/JS configs, validated in resolution
+      additionalProperties: {},
+    },
   },
 } as const satisfies JSONSchema;
 
