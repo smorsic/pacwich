@@ -812,3 +812,9 @@ a code {
 .warning {
   color: var(--web-cli-yellow);
 }
+
+.hidden-llms-text {
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
