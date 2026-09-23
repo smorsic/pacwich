@@ -49,13 +49,7 @@ export const ApiInstall = () => {
 /* Separate for markdown generation */
 export const ApiInstallAlt = () => {
   return (
-    <div
-      style={{
-        visibility: "hidden",
-        position: "absolute",
-        left: "-9999px",
-      }}
-    >
+    <div className="hidden-llms-text">
       <div>
         Alt install instructions for .md page in place of {`<ApiInstall />`}{" "}
         above:

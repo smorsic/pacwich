@@ -121,13 +121,7 @@ ${PM_COMMANDS[pm].localCall}
 /** Separate from CliInstall to provide hidden text used for markdown generation in place of dynamic display component */
 export const CliInstallAlt = () => {
   return (
-    <div
-      style={{
-        visibility: "hidden",
-        position: "absolute",
-        left: "-9999px",
-      }}
-    >
+    <div className="hidden-llms-text">
       <div>
         Alt install instructions for .md page in place of {`<CliInstall />`}{" "}
         above:

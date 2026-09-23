@@ -178,13 +178,7 @@ packages:
 /** Separate from WorkspaceDependencyExample to provide hidden text used for markdown generation in place of dynamic display component */
 export const WorkspaceDependencyExampleAlt = () => {
   return (
-    <div
-      style={{
-        visibility: "hidden",
-        position: "absolute",
-        left: "-9999px",
-      }}
-    >
+    <div className="hidden-llms-text">
       <div>
         Alt workspace dependency examples for .md page in place of{" "}
         {`<WorkspaceDependencyExample />`} above:
