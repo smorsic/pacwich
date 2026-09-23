@@ -388,6 +388,8 @@ pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvail
 
 The API is held in close parity with the CLI. It is developed first so that the CLI is a thin wrapper around the API.
 
+For complete TypeScript types, read the installed package's declaration files: `node_modules/pacwich/src/index.d.ts` for the main entry (the `types` field of pacwich's package.json), with each subpath export (e.g. `pacwich/config`, `pacwich/script`) having its own `.d.ts` listed under `exports`.
+
 ```typescript
 import { createFileSystemProject } from "pacwich";
 
@@ -1141,4 +1143,4 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 
 <!--End pacwich development-->
 
-<!--pacwich v0.7.2-->
+<!--pacwich v0.7.3-->
