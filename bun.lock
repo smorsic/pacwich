@@ -1648,7 +1648,7 @@
 
     "pacwich_local": ["pacwich_local@workspace:workspaces/packages/pacwich"],
 
-    "pacwich_release": ["pacwich@0.7.2", "", { "bin": { "pacwich": "bin/cli.js" } }, "sha512-69MJchK49eSIYTcAi/fwZgD5sabmgAQ6SAGqOGP20aEVqjR+78HoPqljnj3q3AcRxqfJdOKbjwKHubEK9YJuhg=="],
+    "pacwich_release": ["pacwich@0.7.3", "", { "bin": { "pacwich": "bin/cli.js" } }, "sha512-aZuBQzENoa0EhT+errw8ofDvuQ2u7SBvlyt3gaRgCpgEwa9c7CAFfKSflck3RpXVj6exAQ+D6UWzM7JEInr59g=="],
 
     "pako": ["pako@1.0.11", "", {}, "sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw=="],
 
