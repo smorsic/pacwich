@@ -10,7 +10,7 @@
     "build:dev": "PACWICH_DOCS_ENV=development bun run scripts/build.ts",
     "build:rspress-only": "SKIP_PACWICH_BUILD=true bunx rspress build",
     "preview": "portless pacwich-docs-preview rspress preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   },
   "devDependencies": {
     "@fontsource/unifontex": "catalog:web",
