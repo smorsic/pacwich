@@ -8,7 +8,7 @@
     "create-claude-skill-links": "bun scripts/createClaudeSkillLinks.ts",
     "print-dev-tool-version": "bun scripts/printDevToolVersion.ts",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   },
   "dependencies": {
     "@pacwich/common": "workspace:*"

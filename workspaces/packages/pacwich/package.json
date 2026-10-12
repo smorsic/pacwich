@@ -59,7 +59,7 @@
     "test:build": "command -v bun && bun run test:build:bun || bun run test:build:node",
     "test:build:bun": "cd dist.test && IS_BUILD=true bunx --bun vitest",
     "test:build:node": "cd dist.test && IS_BUILD=true npx vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "catalog:pacwich-dev",

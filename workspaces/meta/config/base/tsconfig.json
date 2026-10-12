@@ -9,6 +9,8 @@
     "allowJs": true,
     "isolatedModules": true,
 
+    "types": ["bun"],
+
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

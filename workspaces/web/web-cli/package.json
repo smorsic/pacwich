@@ -15,7 +15,7 @@
     "build": "rspress build",
     "preview": "portless pacwich-web-cli-preview rspress preview",
     "lint": "eslint src",
-    "type-check": "tsc --noEmit",
+    "type-check": "bun check",
     "test": "bun test"
   },
   "dependencies": {
