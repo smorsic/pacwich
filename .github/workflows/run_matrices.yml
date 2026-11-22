@@ -16,9 +16,9 @@ jobs:
     name: Runtime Matrix
     uses: ./.github/workflows/runtime_matrix.yml
     with:
-      test_args: ${{ inputs.test_args }}
+      test_args: ${{ inputs.test_args || 'tests/packageManagers/' }}
   pm_matrix:
     name: Package Manager Matrix
     uses: ./.github/workflows/pm_matrix.yml
     with:
-      test_args: ${{ inputs.test_args }}
+      test_args: ${{ inputs.test_args || 'tests/packageManagers/pnpm tests/packageManagers/pmMatrix' }}
