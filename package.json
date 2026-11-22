@@ -20,7 +20,7 @@
         "yaml": "2.9.0"
       },
       "pacwich-dev": {
-        "@modelcontextprotocol/inspector": "^0.21.1",
+        "@modelcontextprotocol/inspector": "^2.4.0",
         "@rslib/core": "^0.21.2",
         "@types/semver": "^7.7.1",
         "@types/shell-quote": "^1.7.5",
