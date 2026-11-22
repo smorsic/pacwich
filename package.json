@@ -17,7 +17,7 @@
         "semver": "7.8.0",
         "shell-quote": "1.12.0",
         "sucrase": "3.35.1",
-        "yaml": "2.9.0"
+        "yaml": "2.9.1"
       },
       "pacwich-dev": {
         "@modelcontextprotocol/inspector": "^2.4.0",
