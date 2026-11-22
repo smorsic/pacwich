@@ -158,5 +158,5 @@ declare module "vitest" {
   // interface form intact through `eslint --fix`, which would otherwise
   // collapse it back to a type alias and re-break the merge.
   // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type, @typescript-eslint/no-unused-vars
-  interface Assertion<T> extends BunStyleMatchers<void> {}
+  interface Assertion extends BunStyleMatchers<void> {}
 }
