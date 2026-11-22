@@ -46,7 +46,7 @@ const validateJsonRoot = (
 export const readPackageJson = (
   packageJsonPath: string,
 ): UnknownPackageJson => {
-  let json: unknown = {};
+  let json: unknown;
   try {
     json = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
   } catch (error) {

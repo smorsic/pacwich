@@ -53,7 +53,7 @@ export const parsePackageLock = (
   /** Only used for error messages */
   npmLockPath?: string,
 ): RelevantPackageLock | PacwichError => {
-  let raw: { lockfileVersion?: unknown; packages?: unknown } | null = null;
+  let raw: { lockfileVersion?: unknown; packages?: unknown };
   try {
     raw = parseJSONC(jsonString);
   } catch (error) {
