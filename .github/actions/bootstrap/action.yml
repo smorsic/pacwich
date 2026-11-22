@@ -43,14 +43,14 @@ runs:
     # pnpm/setup only supports pnpm >=11, so pnpm 10 stays on action-setup
     - name: Install pnpm (<=10)
       if: ${{ steps.versions.outputs.pnpm_major <= 10 }}
-      uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       with:
         version: ${{ steps.versions.outputs.pnpm }}
         run_install: false
 
     - name: Install pnpm (>=11)
       if: ${{ steps.versions.outputs.pnpm_major > 10 }}
-      uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+      uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v3.2.0
       with:
         version: ${{ steps.versions.outputs.pnpm }}
         install: false
