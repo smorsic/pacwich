@@ -15,6 +15,33 @@ name: Runtime Matrix
 
 on:
   workflow_call:
+    inputs:
+      bun_version:
+        description: Single Bun version (collapses the bun axis)
+        required: false
+        type: string
+      node_version:
+        description: Single Node version (collapses the node axis)
+        required: false
+        type: string
+      pnpm_version:
+        description: Single pnpm version (defaults to devLock)
+        required: false
+        type: string
+      os:
+        description: Single OS, e.g. ubuntu-latest (collapses the os axis)
+        required: false
+        type: string
+      runtime:
+        description: Single runtime - skips the other test job
+        required: false
+        type: string
+        default: ""
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/"
   workflow_dispatch:
     inputs:
       bun_version:
