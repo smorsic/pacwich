@@ -2,5 +2,5 @@
 silent = true
 
 [install]
-minimumReleaseAge = 2592000             # 30 days
+minimumReleaseAge = 604800              # 7 days
 minimumReleaseAgeExcludes = ["pacwich"]
