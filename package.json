@@ -27,8 +27,8 @@
         "@xterm/headless": "^6.0.0",
         "ajv": "^8.20.0",
         "knip": "^6.45.1",
-        "dts-bundle-generator": "^9.5.1",
-        "vitest": "^4.1.6"
+        "dts-bundle-generator": "^10.0.0",
+        "vitest": "^5.1.0"
       },
       "web": {
         "@fontsource/unifontex": "^5.2.6",
