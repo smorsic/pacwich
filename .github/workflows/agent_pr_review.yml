@@ -29,11 +29,11 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/pull/{0}/head', inputs.pr_number) || '' }}
-      - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
+      - uses: anthropics/claude-code-action@acfe7992852970efb4fee683d63d628e3e52df67 # v1.0.286
         name: Run Claude Code
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
