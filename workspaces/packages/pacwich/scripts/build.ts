@@ -275,10 +275,14 @@ export const runBuild = async () => {
   if (IS_TEST_BUILD) {
     logger.debug(`Copying tests to ${DIST_PATH}/tests...`);
 
+    // Fixture node_modules are install artifacts (symlink-heavy) recreated by global setup
     cpSync(
       path.resolve(__dirname, "../tests"),
       path.resolve(DIST_PATH, "tests"),
-      { recursive: true },
+      {
+        recursive: true,
+        filter: (source) => path.basename(source) !== "node_modules",
+      },
     );
     cpSync(
       path.resolve(__dirname, "../scripts"),
@@ -292,6 +296,11 @@ export const runBuild = async () => {
     copyFileSync(
       path.resolve(__dirname, "../setupTests.ts"),
       path.resolve(DIST_PATH, "setupTests.ts"),
+    );
+    // vitest 5+ no longer searches parent dirs for a config
+    copyFileSync(
+      path.resolve(__dirname, "../vitest.config.ts"),
+      path.resolve(DIST_PATH, "vitest.config.ts"),
     );
 
     // Mark the CLI entrypoint executable (no-op on Windows)
