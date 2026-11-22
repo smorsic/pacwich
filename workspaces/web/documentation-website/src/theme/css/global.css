@@ -238,10 +238,6 @@ aside .nav-title-container {
   display: none !important;
 }
 
-.rp-nav__right .rp-nav-menu__item {
-  margin-right: -0.5rem !important;
-}
-
 .rp-nav::before {
   content: "";
   position: absolute;
@@ -296,7 +292,7 @@ aside .nav-title-container {
 .rp-nav-menu__item__container {
   border-radius: 0.5rem;
   padding: 0.75rem;
-  margin: -0.75rem;
+  margin: -0.25rem;
   transition: background-color 0.2s ease;
 }
 
