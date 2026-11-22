@@ -5,7 +5,7 @@
   },
   "node": {
     "endUserRequirement": ">=22.0.0 <=26.x",
-    "devLock": "24.15.0"
+    "devLock": "26.13.1"
   },
   "pnpm": {
     "endUserRequirement": ">=10.0.0 <=12.x",
