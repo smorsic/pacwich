@@ -39,6 +39,11 @@ on:
         type: choice
         options: ["", "bun", "node"]
         default: ""
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/"
 
 permissions:
   contents: read
@@ -121,7 +126,7 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/"
+      test_args: ${{ inputs.test_args }}
 
   test_node:
     needs: prep
@@ -136,4 +141,4 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/"
+      test_args: ${{ inputs.test_args }}

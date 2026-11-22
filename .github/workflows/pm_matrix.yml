@@ -45,6 +45,11 @@ on:
         type: choice
         options: [node, bun]
         default: node
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
 
 permissions:
   contents: read
@@ -106,4 +111,4 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
+      test_args: ${{ inputs.test_args }}
