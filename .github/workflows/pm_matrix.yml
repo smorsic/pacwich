@@ -41,7 +41,7 @@ on:
         description: Extra arguments to pass to the test script
         required: false
         type: string
-        default: "tests/packageManagers/"
+        default: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
   workflow_dispatch:
     inputs:
       pnpm_version:
