@@ -46,7 +46,7 @@ export const parseBunLock = (
   /** Only for error message */
   bunLockPath?: string,
 ): RelevantBunLock | PacwichError => {
-  let bunLockJson: RelevantBunLock | null = null;
+  let bunLockJson: RelevantBunLock;
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {
@@ -164,7 +164,7 @@ export const parseBunLockWorkspaceLinkNames = (
   jsonString: string,
   bunLockPath?: string,
 ): Set<string> | PacwichError => {
-  let bunLockJson: { packages?: unknown } | null = null;
+  let bunLockJson: { packages?: unknown };
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {
@@ -195,7 +195,7 @@ export const parseBunLockPackageVersions = (
   jsonString: string,
   bunLockPath?: string,
 ): BunLockVersionMap | PacwichError => {
-  let bunLockJson: { packages?: unknown } | null = null;
+  let bunLockJson: { packages?: unknown };
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {
