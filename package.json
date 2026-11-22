@@ -21,7 +21,7 @@
       },
       "pacwich-dev": {
         "@modelcontextprotocol/inspector": "^2.4.0",
-        "@rslib/core": "^0.21.2",
+        "@rslib/core": "^1.0.7",
         "@types/semver": "^7.7.1",
         "@types/shell-quote": "^1.7.5",
         "@xterm/headless": "^6.0.0",
