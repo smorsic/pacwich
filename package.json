@@ -98,7 +98,7 @@
     "json-schema-to-ts": "^3.1.1",
     "lint-staged": "^17.6.1",
     "pacwich_local": "workspace:*",
-    "portless": "^0.17.0",
+    "portless": "^0.18.0",
     "prettier": "^3.10.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.2"
