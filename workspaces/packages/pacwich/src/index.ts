@@ -1,6 +1,7 @@
 export {
   createFileSystemProject,
   createMemoryProject,
+  isOptionsForDiffSource,
   type Project,
   type ProjectConfigs,
   type FileSystemProject,
@@ -49,7 +50,7 @@ export {
   type ImplicitWorkspaceDependencyMetadataFile,
   type ImplicitWorkspaceDependencyMetadataOccurrence,
   type AncestorWorkspaceDependencyMetadata,
-  isOptionsForDiffSource,
+  type IssueNameToMetadata,
 } from "./project";
 export * from "./config/public";
 export {
@@ -71,6 +72,8 @@ export {
   type ProcessOutputChunk,
   type ByteChunk,
   type TextChunk,
+  type TextCompletionOutput,
+  type TextStreamEvent,
 } from "./runScript";
 export {
   type Workspace,

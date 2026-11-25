@@ -385,7 +385,7 @@ export type AncestorWorkspaceDependencyMetadata = {
  * map and updating the verify orchestrator to emit issues of that
  * name.
  */
-type IssueNameToMetadata = {
+export type IssueNameToMetadata = {
   implicitWorkspaceDependency: ImplicitWorkspaceDependencyMetadata;
   ancestorWorkspaceDependency: AncestorWorkspaceDependencyMetadata;
 };
