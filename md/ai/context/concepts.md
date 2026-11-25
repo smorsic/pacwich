@@ -70,6 +70,7 @@ A workspace is "affected" when something in its set of **inputs** has changed. I
 Inputs are configurable per workspace (`defaultInputs`) and per script (`scripts[name].inputs`):
 
 - `files`: file/dir/glob patterns relative to the workspace. Leading `/` makes a pattern relative to the project root. Prefix `!` to exclude. Only git-trackable files match.
+  - If a workspace is nested within another workspace, the parent workspace's input files cannot be in the nested workspace (usually relevant when including the root workspace)
 - `workspacePatterns`: workspace patterns whose matched workspaces are treated as inputs (like dependencies, but without needing a real `package.json` dep).
 - `externalDependencies`: an allowlist of package names. Omitted = all external deps participate; `[]` = none participate; non-empty = only listed names participate (intersected with the workspace's actual external deps).
 
@@ -79,5 +80,21 @@ There are two diff sources:
 - **fileList**: pass changed files explicitly (paths, dirs, or globs). Bypasses git entirely.
 
 Use `--explain` for a per-workspace summary of changed inputs and dep cascade reasons, and `--explain --detailed` for full per-file/edge breakdowns including the affected-dep chain.
+
+### Verify
+
+The verify feature is mainly in place to check for implicit workspace dependencies, which are dependencies that are not declared in the `package.json` file but are used in the code. This is generally only possible with npm workspaces, since bun and pnpm require explicit package.json dependencies.
+
+pacwich does not normally perform source code analysis when constructing the dependency graph, so it cannot detect implicit dependencies. However, the verify feature does analyze TS/JS files to detect imports/exports from
+workspaces not listed in a workspace's package.json. This is only done for input files. It is recommended
+to have `pacwich verify` as a `"prepare"` script or pre-commit hook to catch these issues early especially
+for npm projects. `pacwich verify --strict` will fail if any implicit dependencies are found instead of simply warning.
+
+The verify feature also detects workspaces imported that are only declared in an ancestor's package.json file. These are warnings only by default,
+but opting into `strictDisallowAncestorWorkspaceDeps` in pacwich config for the verify feature will treat them as an error in strict mode.
+This is often seen when the root workspace declares workspace dependencies in the root package.json.
+
+Pacwich config files can be used to ignore input files or imports/exports from given workspaces in scanning
+at the project or workspace scope.
 
 <!--End pacwich concepts-->

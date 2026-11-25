@@ -34,9 +34,11 @@ const loadCurrentVersions = ({
   if (contents === null) return new Map();
   const parsed = parsePnpmLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse current pnpm-lock.yaml: ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("PnpmLockParseFailed", {
+      context: "current pnpm-lock.yaml",
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -54,9 +56,11 @@ const loadVersionsAtGitRef = async ({
   if (contents === null) return new Map();
   const parsed = parsePnpmLockPackageVersions(contents);
   if (parsed instanceof PacwichError) {
-    logger.warn(
-      `Could not parse pnpm-lock.yaml at ref "${ref}": ${parsed.message}. Treating as empty.`,
-    );
+    logger.warn("PnpmLockParseFailed", {
+      context: `pnpm-lock.yaml at ref "${ref}"`,
+      detail: parsed.message,
+      fallback: "Treating as empty.",
+    });
     return new Map();
   }
   return parsed;
@@ -91,9 +95,11 @@ export const loadPnpmWorkspaceLinks = ({
   if (contents === null) return null;
   const links = parsePnpmLockWorkspaceLinks(contents);
   if (links instanceof PacwichError) {
-    logger.warn(
-      `Could not parse pnpm-lock.yaml for workspace links: ${links.message}. Falling back to static dependency analysis.`,
-    );
+    logger.warn("PnpmLockParseFailed", {
+      context: "pnpm-lock.yaml for workspace links",
+      detail: links.message,
+      fallback: "Falling back to static dependency analysis.",
+    });
     return null;
   }
   return {

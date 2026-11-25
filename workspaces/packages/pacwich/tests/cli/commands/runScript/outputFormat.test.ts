@@ -156,7 +156,7 @@ success2
     expect(result.exitCode).toBe(0);
     assertOutputMatches(
       result.stderr.sanitizedCompactLines,
-      `[pacwich WARN]: --no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.`,
+      `[pacwich WARN: DeprecatedNoPrefixFlag]: --no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.`,
     );
   });
 

@@ -123,12 +123,10 @@ describe("Workspace tags - API", () => {
       project.mapTagsToWorkspaces();
       project.mapTagsToWorkspaces();
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Project.tagMap"),
-      );
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("mapTagsToWorkspaces"),
-      );
+      expect(warnSpy).toHaveBeenCalledWith("DeprecatedProjectMapMethod", {
+        oldName: "mapTagsToWorkspaces",
+        newName: "tagMap",
+      });
     });
   });
 

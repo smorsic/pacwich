@@ -439,12 +439,10 @@ describe("Test Project utilities", () => {
       project.mapScriptsToWorkspaces();
       project.mapScriptsToWorkspaces();
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Project.scriptMap"),
-      );
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("mapScriptsToWorkspaces"),
-      );
+      expect(warnSpy).toHaveBeenCalledWith("DeprecatedProjectMapMethod", {
+        oldName: "mapScriptsToWorkspaces",
+        newName: "scriptMap",
+      });
     });
   });
 });

@@ -1,0 +1,48 @@
+/**
+ * CSS custom properties web-cli.css depends on that rspress's own default
+ * theme (base-vars.css, Callout/index.css, etc.) doesn't already provide —
+ * ANSI palette, fixed widget dimensions, terminal font family, and the two
+ * brand tokens (`--rp-c-code-block-bg`, `--bwunster-eye-color`) that have no
+ * rspress default. Extracted from documentation-website's global.css so
+ * both it and the standalone web-cli workspace share one source of truth.
+ * Values copied verbatim; no visual change for existing consumers.
+ *
+ * Everything else web-cli.css references (--rp-c-text-*, --rp-c-bg*,
+ * --rp-c-link, --rp-c-divider, --rp-container-danger/warning-text,
+ * --rp-font-family-mono) already has a sensible rspress default and is left
+ * to the consumer's rspress theme to provide/override.
+ */
+
+:root {
+  --web-cli-green: #2e7e14;
+  --web-cli-blue: #407ca8;
+  --web-cli-magenta: #8f69c5;
+  --web-cli-cyan: #3b93a0;
+  --web-cli-yellow: #a58029;
+  --web-cli-red: #d25151;
+  --web-cli-black: #3d3d3d;
+  --web-cli-bright-black: #6b6b6b;
+  --web-cli-divider: rgb(232, 232, 232);
+
+  --web-cli-width: clamp(35rem, 90vw, 55rem);
+  --web-cli-height: clamp(20rem, 50vh, 30rem);
+
+  --rp-font-family-terminal: "Kode Mono", monospace;
+
+  --rp-c-code-block-bg: #f8f8f8;
+  --bwunster-eye-color: #4f5dcd;
+}
+
+.dark {
+  --web-cli-green: #6a9f58;
+  --web-cli-blue: #2ba1f6;
+  --web-cli-magenta: #8f69c5;
+  --web-cli-cyan: #58a7b4;
+  --web-cli-yellow: #fef78f;
+  --web-cli-red: #e05a5a;
+  --web-cli-black: #5a5757;
+  --web-cli-bright-black: #828282;
+  --web-cli-divider: transparent;
+
+  --rp-c-code-block-bg: #0c0b0b;
+}

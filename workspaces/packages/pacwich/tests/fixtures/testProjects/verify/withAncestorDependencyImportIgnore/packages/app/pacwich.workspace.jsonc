@@ -1,0 +1,9 @@
+{
+  // Applies to both implicitWorkspaceDependency and
+  // ancestorWorkspaceDependency findings for imports of shared-lib.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreImportsFromWorkspacePatterns": ["shared-lib"]
+    }
+  }
+}

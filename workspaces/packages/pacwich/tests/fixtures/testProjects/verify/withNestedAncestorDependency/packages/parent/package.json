@@ -1,0 +1,6 @@
+{
+  "name": "parent",
+  "dependencies": {
+    "shared-lib": "workspace:*"
+  }
+}

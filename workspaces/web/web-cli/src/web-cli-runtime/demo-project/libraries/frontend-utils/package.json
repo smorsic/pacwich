@@ -1,0 +1,21 @@
+{
+  "name": "@demo/frontend-utils",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "catalog:frontend"
+  },
+  "devDependencies": {
+    "react": "catalog:frontend",
+    "@types/react": "catalog:frontend",
+    "typescript": "catalog:",
+    "eslint": "catalog:"
+  }
+}

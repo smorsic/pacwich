@@ -1,4 +1,5 @@
 import {
+  createJsonLines,
   createScriptInfoLines,
   createWorkspaceInfoLines,
   splitWhitespaceArg,
@@ -121,5 +122,33 @@ describe("output sanitization of external workspace fields", () => {
     expect(joined).toContain("Script: build");
     expect(joined).toContain(" - alpha");
     expect(joined).toContain(" - beta");
+  });
+});
+
+describe("createJsonLines", () => {
+  test("replaces a named function with a marker object", () => {
+    function myFactory() {}
+    const lines = createJsonLines({ config: myFactory }, { pretty: false });
+    expect(JSON.parse(lines.join("\n"))).toEqual({
+      config: { __function: true, name: "myFactory" },
+    });
+  });
+
+  test("replaces an anonymous function with a null name", () => {
+    const fns = [() => {}];
+    const lines = createJsonLines(fns, { pretty: false });
+    expect(JSON.parse(lines.join("\n"))).toEqual([
+      { __function: true, name: null },
+    ]);
+  });
+
+  test("leaves plain data untouched", () => {
+    const lines = createJsonLines({ a: 1, b: ["x", "y"] }, { pretty: false });
+    expect(JSON.parse(lines.join("\n"))).toEqual({ a: 1, b: ["x", "y"] });
+  });
+
+  test("pretty-prints with 2-space indentation", () => {
+    const lines = createJsonLines({ a: 1 }, { pretty: true });
+    expect(lines.join("\n")).toBe(JSON.stringify({ a: 1 }, null, 2));
   });
 });

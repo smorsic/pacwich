@@ -48,6 +48,7 @@ export {
   type ImplicitWorkspaceDependencyMetadata,
   type ImplicitWorkspaceDependencyMetadataFile,
   type ImplicitWorkspaceDependencyMetadataOccurrence,
+  type AncestorWorkspaceDependencyMetadata,
   isOptionsForDiffSource,
 } from "./project";
 export * from "./config/public";
@@ -88,5 +89,7 @@ export {
   type ErrorMap,
   PacwichError,
 } from "./internal/core";
+export { PACWICH_ERRORS } from "./errorExports";
 export { type LogLevelSetting } from "@pacwich/common/logging";
+export { WARNING_IDS, type WarningId } from "@pacwich/common/warnings";
 export { setLogLevel } from "./internal/logger";

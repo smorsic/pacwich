@@ -1,0 +1,23 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "verify-ancestor-strict-project-root",
+      "dependencies": {
+        "shared-lib": "workspace:*",
+      },
+    },
+    "packages/shared-lib": {
+      "name": "shared-lib",
+    },
+    "packages/app": {
+      "name": "app",
+    },
+  },
+  "packages": {
+    "shared-lib": ["shared-lib@workspace:packages/shared-lib"],
+
+    "app": ["app@workspace:packages/app"],
+  }
+}

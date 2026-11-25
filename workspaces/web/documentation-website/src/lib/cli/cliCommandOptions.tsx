@@ -2,8 +2,31 @@ import {
   type CliCommandConfig,
   type CliCommandName,
   getCliCommandConfig,
+  getCliFullCommandUsage,
 } from "@pacwich/common/cli";
 import type { CliCommandContent, CliCommandInfo } from "./cliOption";
+
+/**
+ * Commands provided automatically by the CLI framework (Commander) rather
+ * than pacwich's own command config, so they are defined here as a
+ * doc-site-only concern.
+ */
+const BUILTIN_CLI_COMMAND_NAMES = ["help"] as const;
+
+type BuiltinCliCommandName = (typeof BUILTIN_CLI_COMMAND_NAMES)[number];
+
+/** Command names documented on the site, including CLI-framework builtins */
+export type DocCliCommandName = CliCommandName | BuiltinCliCommandName;
+
+const isBuiltinCliCommandName = (
+  commandName: DocCliCommandName,
+): commandName is BuiltinCliCommandName =>
+  (BUILTIN_CLI_COMMAND_NAMES as readonly string[]).includes(commandName);
+
+const defineBuiltinCommandContent = (
+  commandName: BuiltinCliCommandName,
+  content: Omit<CliCommandContent, "commandName">,
+): CliCommandContent => ({ commandName, ...content });
 
 const defineCommandContent = (
   commandName: CliCommandName,
@@ -18,7 +41,7 @@ const defineCommandContent = (
     (example) => example.trim() && !example.match(/^\s*#/),
   );
 
-  const getMainFlag = (flags: string[]) => {
+  const getMainFlag = (flags: string[] | readonly string[]) => {
     const longFlag = flags[flags.length - 1];
     return longFlag.trim().split(" ")[0];
   };
@@ -293,7 +316,8 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
   })),
   listAffected: defineCommandContent("listAffected", () => ({
     title: "List Affected",
-    description: "List all workspaces that are affected by a change",
+    description:
+      "(DEPRECATED) Use `affected list` instead. List all workspaces that are affected by a change",
     examples: [
       "# Default output. Shows metadata about workspaces affected",
       "# by a change against the default git base (main when not configured)",
@@ -337,7 +361,8 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
   })),
   runAffected: defineCommandContent("runAffected", () => ({
     title: "Run Affected",
-    description: "Run a script across the workspaces affected by a change",
+    description:
+      "(DEPRECATED) Use `affected run` instead. Run a script across the workspaces affected by a change",
     examples: [
       "# Run a script for all workspaces affected by a change",
       "# using the default git base (main when not configured)",
@@ -371,6 +396,105 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
       "",
       "# Other than specifying workspaces, takes all options as run-script",
       'pacwich run-affected "echo my-inline-script" \\',
+      "  --parallel=false \\",
+      "  --output-style=grouped \\",
+      "  --grouped-lines=10 \\",
+      "  --inline \\",
+      "  --inline-name=my-inline-script \\",
+      "  --shell=system \\",
+      "  --dep-order \\",
+      "  --ignore-dep-failure \\",
+      "  --args='--my-arg --another-arg=<workspaceName>' \\",
+      "  --json-outfile=results.json",
+      "",
+    ],
+  })),
+  affected: defineCommandContent("affected", () => ({
+    title: "Affected",
+    description:
+      "Group of commands for affected workspaces. Not a real command on its own: prints usage and exits non-zero. See `affected list` and `affected run` below.",
+    examples: ["# Prints usage and exits non-zero", `pacwich affected`],
+  })),
+  affectedList: defineCommandContent("affectedList", () => ({
+    title: "Affected: List",
+    description:
+      "List all workspaces that are affected by a change. Same as the deprecated list-affected/ls-affected command.",
+    examples: [
+      "# Default output. Shows metadata about workspaces affected",
+      "# by a change against the default git base (main when not configured)",
+      `pacwich affected list`,
+      "",
+      "# Outputs reasons for affected workspaces",
+      `pacwich affected list --explain`,
+      "",
+      "# More detailed output about every changed file and dependency",
+      `pacwich affected list --explain --detailed`,
+      "",
+      "# Output as JSON",
+      `pacwich affected list --json --pretty`,
+      "",
+      "# See affected workspaces for a specific script's inputs",
+      "pacwich affected list --script=my-script",
+      "",
+      "# Configure the base or head git refs for comparison (branch, commit, tag, etc.)",
+      `pacwich affected list --base=my-branch-a --head=my-branch-b`,
+      "",
+      "# Specify changed files instead of using git (paths/dirs/globs, '!' to exclude)",
+      "# Separate by whitespace, using backslashes to escape spaces if needed",
+      `pacwich affected list --files="packages/a/src/index.ts packages/b/src/index.ts"`,
+      "",
+      "# Ignore specific git changes that are considered by default",
+      `pacwich affected list --ignore-untracked`,
+      `pacwich affected list --ignore-unstaged`,
+      `pacwich affected list --ignore-staged`,
+      "# Ignores staged, unstaged, and untracked changes",
+      `pacwich affected list --ignore-uncommitted`,
+      "",
+      "# Ignore changes to workspace dependencies",
+      `pacwich affected list --ignore-workspace-deps`,
+      "",
+      "# Ignore changes to external dependencies (e.g. npm packages)",
+      `pacwich affected list --ignore-external-deps`,
+      "",
+    ],
+  })),
+  affectedRun: defineCommandContent("affectedRun", () => ({
+    title: "Affected: Run",
+    description:
+      "Run a script across the workspaces affected by a change. Same as the deprecated run-affected command.",
+    examples: [
+      "# Run a script for all workspaces affected by a change",
+      "# using the default git base (main when not configured)",
+      `pacwich affected run my-script`,
+      "",
+      "# Script can be a positional arg or an option",
+      "pacwich affected run --script=my-script",
+      "",
+      "# Takes most options as affected list",
+      "",
+      "# Configure the base or head git refs for comparison",
+      `pacwich affected run my-script --base=my-branch-a --head=my-branch-b`,
+      "",
+      "# Specify changed files instead of using git (paths/globs, '!' to exclude)",
+      "# Separate by whitespace, using backslashes to escape spaces if needed",
+      `pacwich affected run my-script \\
+  --files="packages/a/src/index.ts packages/b/src/index.ts"`,
+      "",
+      "# Ignore specific git changes that are considered by default",
+      `pacwich affected run my-script --ignore-untracked`,
+      `pacwich affected run my-script --ignore-unstaged`,
+      `pacwich affected run my-script --ignore-staged`,
+      "# Ignores staged, unstaged, and untracked changes",
+      `pacwich affected run my-script --ignore-uncommitted`,
+      "",
+      "# Ignore changes to workspace dependencies",
+      `pacwich affected run my-script --ignore-workspace-deps`,
+      "",
+      "# Ignore changes to external dependencies (e.g. npm packages)",
+      `pacwich affected run my-script --ignore-external-deps`,
+      "",
+      "# Other than specifying workspaces, takes all options as run-script",
+      'pacwich affected run "echo my-inline-script" \\',
       "  --parallel=false \\",
       "  --output-style=grouped \\",
       "  --grouped-lines=10 \\",
@@ -431,10 +555,94 @@ const CLI_PROJECT_COMMANDS_CONTENT = {
       "pacwich doctor --json --pretty # Output as formatted JSON",
     ],
   })),
-} as const satisfies Record<CliCommandName, CliCommandContent>;
+  completion: defineCommandContent("completion", () => ({
+    title: "Completion",
+    description:
+      "By default, print completion help for bash, zsh, or fish, or run install subcommand to auto-write user shell config.",
+    examples: [
+      "# Print help for completion setup:",
+      "pacwich completion",
+      "",
+      "# Attempt to automatically install completion for your shell",
+      "pacwich completion install",
+      "",
+      "# Specify a shell explicitly",
+      "pacwich completion install zsh",
+      "",
+      "# Print the completion script for a specific shell",
+      "pacwich completion zsh",
+    ],
+  })),
+  completionInstall: defineCommandContent("completionInstall", () => ({
+    title: "Completion: Install",
+    description:
+      "Wire completions into your shell's config, auto-detecting the current shell when none is given",
+    examples: [
+      "# Auto-detect your shell and install",
+      "pacwich completion install",
+      "",
+      "# Specify a shell explicitly",
+      "pacwich completion install zsh",
+    ],
+  })),
+  config: defineCommandContent("config", () => ({
+    title: "Config",
+    description: "Parent command of config-related subcommands",
+    examples: ["pacwich config"],
+  })),
+  configDebug: defineCommandContent("configDebug", () => ({
+    title: "Config: Debug",
+    description: "Print project and workspace configuration as JSON",
+    examples: [
+      "# Print all project and workspace configs",
+      "pacwich config debug",
+      "",
+      "# Pretty-print JSON output",
+      "pacwich config debug --pretty",
+      "",
+      "# Print only project configuration",
+      "pacwich config debug --project",
+      "",
+      "# Print only workspace configuration by name/alias",
+      "pacwich config debug --workspace=my-name-or-alias",
+      "",
+      "# Print workspace configs by workspace pattern",
+      'pacwich config debug --workspace-patterns="my-pattern-* my-workspace"',
+    ],
+  })),
+  help: defineBuiltinCommandContent("help", {
+    command: "help [command]",
+    isGlobal: true,
+    aliases: [],
+    options: {},
+    title: "Help",
+    description:
+      "Print help for the CLI or for a specific command. Equivalent to passing the --help option.",
+    examples: [
+      "# Same as pacwich --help",
+      "pacwich help",
+      "",
+      "# Help for a specific command (same as pacwich run --help)",
+      "pacwich help run",
+      "",
+      "# Command aliases work too",
+      "pacwich help ls",
+    ],
+  }),
+} as const satisfies Record<DocCliCommandName, CliCommandContent>;
 
-export const getCliCommandContent = (commandName: CliCommandName) =>
+export const getCliCommandContent = (commandName: DocCliCommandName) =>
   CLI_PROJECT_COMMANDS_CONTENT[commandName];
 
 export const getCliCommandsContent = () =>
   Object.values(CLI_PROJECT_COMMANDS_CONTENT);
+
+/**
+ * Usage string for a documented command. Builtins are not part of
+ * @pacwich/common's command config, so their usage comes from the local
+ * content map.
+ */
+export const getDocCliCommandUsage = (commandName: DocCliCommandName) =>
+  isBuiltinCliCommandName(commandName)
+    ? getCliCommandContent(commandName).command
+    : getCliFullCommandUsage(commandName);

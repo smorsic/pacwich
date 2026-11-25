@@ -1,6 +1,6 @@
 {
-  "name": "pacwich",
-  "version": "0.2.1",
+  "name": "pacwich_local",
+  "version": "0.7.3",
   "exports": {
     ".": "./src/index.ts",
     "./cli": "./src/cli/index.ts",
@@ -47,17 +47,19 @@
     "cli:bun:dev": "NODE_ENV=development bun run dist/bin/cli.js",
     "cli:node": "node dist/bin/cli.js",
     "cli:node:dev": "NODE_ENV=development node dist/bin/cli.js",
-    "create-modules": "bun run ajv && bun run create-public-agent-docs",
+    "create-modules": "bun run ajv && bun run create-public-agent-docs && bun run create-dev-package-link",
+    "create-dev-package-link": "bun run scripts/createDevPackageLink.ts",
     "create-pnpm-test-fixtures": "bun run scripts/createPnpmTestFixtures.ts",
     "create-public-agent-docs": "bun run scripts/createPublicAgentDocs.ts",
     "knip": "knip",
     "lint": "eslint src",
     "mcp:inspect": "mcp-inspector bun run bin/cli.js --cwd ../../../ mcp",
     "test": "bunx --bun vitest",
+    "try-completion": "bun run scripts/tryCompletion.ts",
     "test:build": "command -v bun && bun run test:build:bun || bun run test:build:node",
     "test:build:bun": "cd dist.test && IS_BUILD=true bunx --bun vitest",
     "test:build:node": "cd dist.test && IS_BUILD=true npx vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "bun check"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "catalog:pacwich-dev",

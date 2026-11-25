@@ -6,6 +6,7 @@ import { resolveOptionalArray } from "../../internal/core";
 import _validate from "../../internal/generated/ajv/validateWorkspaceConfig";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
+import { resolveVerifyConfig } from "../verifyConfig";
 import { WORKSPACE_CONFIG_ERRORS } from "./errors";
 
 const validate = _validate as unknown as AjvSchemaValidator<WorkspaceConfig>;
@@ -44,6 +45,7 @@ export const resolveWorkspaceConfig = (
     scripts: config.scripts ?? {},
     rules: config.rules ?? {},
     ...(config.defaultInputs && { defaultInputs: config.defaultInputs }),
+    verify: resolveVerifyConfig(config.verify),
   };
 };
 

@@ -101,31 +101,35 @@ const { success } = handleSomething({ value: "a", isSomething: true });
 
 #### Public Exports
 
-Any public export is encouraged to have TSDoc for about every possible target (types, properties of types, functions, etc.).
+Any public (user-facing specifically) export is encouraged to have TSDoc.
 
-Don't use TSDoc tags that are already inferred by TS (e.g. params, which should generally be in a parameter object that has
-its own TSDoc for itself and its properties).
+Don't use TSDoc tags that are already inferred by TS (e.g. params and return types).
 
 Functions and methods should have at least a minimal `@example` that covers parameters, and types used as parameters and return types
-may benefit from a brief example too, like an example object of values.
+may benefit from a brief example too if it helps clarify user usage (e.g. config/parameter objects or complex return types), like
+a simple parameter object with a complete set of example values.
 
 #### Internal Code
 
-Prefer descriptive code with minimal comments, but they are still encouraged to add clarity,
-explain reasoning (especially for something unconventional, hacky, or otherwise surprising),
-and provide light structure.
+Internal code should follow different commenting conventions than public exports.
 
-Comments should be kept brief and add context that isn't immediately
-inferrable by the code naming underneath it (e.g. no "// This runs a script across workspaces"
-over `function runScriptAcrossWorkspaces`.) Structural comments (e.g headings for grouping etc.)
-should also be minimal, more useful in grouping meaningful chunks of lengthy repetition and
-especially long flat spans of code, but are not as encouraged if the code's nesting/naming would
-provide the same structure/meaning already.
+Prefer descriptive, self-documenting code over verbose comments. Do not use comments
+to re-explain what a variable or function name does (e.g. no "// add two numbers together" above `addTwo()`
+or similar).
 
-Avoid em dashes and prose semicolons in general.
+Most agents' default comment verbosity is usually overkill and can lead to drift.
+Repeating long explanations frequently makes drift more likely. Agents and people usually end up
+investigating the accuracy of verbose comments anyway, and skipping them increases risk of misinterpreting
+code truth from an outdated comment. **Overly verbose internal comments will not be approved.**
 
-VSCode settings encourage the "Better Comments" extension for highlighted comments.
-However, prefer TSDoc `@todo` over `TODO`.
+Comments should be reserved for explaining something potentially surprising (hacky or breaking project conventions)
+or non-obvious. Prefer to limit comments to 1-2 lines at most unless more is truly justified.
+
+Exported internal code having a brief TSDoc can still still useful for development, but these should still
+stay brief.
+
+Avoid em dashes and prose semicolons in general. Use clear grammar, but brief, casual language
+can be useful for keeping comments quickly readable without full sentence strictness.
 
 ### Security Considerations
 
@@ -134,7 +138,7 @@ However, prefer TSDoc `@todo` over `TODO`.
   - If used in CLI output, strip ANSI/control codes to prevent terminal display manipulation (minor exceptions for allowed ANSI in workspace script output etc.)
   - If used in subprocess argv like how affected feature git commands are constructed, prevent injections like CLI flags (e.g. how the `--base` option is processed)
 - Temp files and similar: prevent TOCTOU vulnerabilities by using atomic file operations or proper locking mechanisms.
-- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option (defaulting on for the `mcp-server` command) restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
+- Executable config files (`pacwich.project.{ts,js}`, `pacwich.workspace.{ts,js}`) are evaluated via jiti by default. The `--disable-executable-configs` CLI flag and `disableExecutableConfigs` factory option restrict loading to `.jsonc`/`.json` and the `package.json` `pacwich-*` keys for untrusted contexts.
 - GitHub actions
   - External actions versions must be SHA-pinned (dev should likely look up latest version)
   - Install dependencies with `--frozen-lockfile` and `--ignore-scripts` if possible
@@ -182,5 +186,6 @@ should hit all Project properties/methods across the matrix of pms, and the adap
 - Whether the above stages are planned or implemented separately, in combination, or in smaller chunks of each will be case-by-case depending on complexity
 - When implementing a plan that involves multiple concerns, pause for a commit between each if not instructed to commit yourself
 - If a new set of errors is defined via `defineErrors`, include this in the public exports (`src/errorExports.ts`)
+- New or changed CLI behavior (commands, flags, output) should be checked against the in-browser CLI runtime (`workspaces/web/web-cli/src/web-cli-runtime`, consumed via `@pacwich/web-cli/web-cli-runtime` by both that workspace's own preview app and documentation-website's `/web-cli` page, which depends on `@pacwich/web-cli` directly) before considering the change done. Most CLI additions just work there unmodified, but some genuinely can't or shouldn't work in a browser (real filesystem access outside the seeded demo project, git, spawning real processes) and need to be added to `webCliGuards.ts`'s block list with a friendly message rather than left to fail with a confusing error; others may need a new Node API shim (`stubs.ts`, `fsShim.ts`, etc.) if they touch something not yet covered. This isn't just a nice-to-have: `bun docs build` compiles `/web-cli`'s module graph as part of documentation-website's site-wide build (even though the page itself is client-only), so a real break there fails the whole doc site build and can block deployment.
 
 <!--End pacwich development-->

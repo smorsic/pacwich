@@ -1,2 +1,6 @@
 [run]
 silent = true
+
+# This env only takes effect when running raw workspaces, will not be set in production builds
+[env]
+_IS_PACWICH_LOCAL_SOURCE = true

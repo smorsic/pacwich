@@ -1,0 +1,9 @@
+{
+  // "." resolves to the project root, ignoring every file, so verify
+  // reports no findings anywhere in the project.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreInputFiles": ["."]
+    }
+  }
+}

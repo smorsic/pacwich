@@ -15,6 +15,33 @@ name: Runtime Matrix
 
 on:
   workflow_call:
+    inputs:
+      bun_version:
+        description: Single Bun version (collapses the bun axis)
+        required: false
+        type: string
+      node_version:
+        description: Single Node version (collapses the node axis)
+        required: false
+        type: string
+      pnpm_version:
+        description: Single pnpm version (defaults to devLock)
+        required: false
+        type: string
+      os:
+        description: Single OS, e.g. ubuntu-latest (collapses the os axis)
+        required: false
+        type: string
+      runtime:
+        description: Single runtime - skips the other test job
+        required: false
+        type: string
+        default: ""
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/"
   workflow_dispatch:
     inputs:
       bun_version:
@@ -39,6 +66,11 @@ on:
         type: choice
         options: ["", "bun", "node"]
         default: ""
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/"
 
 permissions:
   contents: read
@@ -51,7 +83,7 @@ jobs:
       bun_matrix: ${{ steps.gen.outputs.bun_matrix }}
       node_matrix: ${{ steps.gen.outputs.node_matrix }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix JSON
         id: gen
@@ -121,7 +153,7 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/"
+      test_args: ${{ inputs.test_args }}
 
   test_node:
     needs: prep
@@ -136,4 +168,4 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/"
+      test_args: ${{ inputs.test_args }}

@@ -1,0 +1,7 @@
+{
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreImportsFromWorkspacePatterns": ["tag:internal-tooling"]
+    }
+  }
+}

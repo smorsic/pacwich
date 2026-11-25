@@ -3,11 +3,12 @@ import { createCommand } from "../internal/bundledDeps/commander";
 import { PacwichError } from "../internal/core";
 import { logger } from "../internal/logger";
 import {
-  CLI_COMMANDS_CONFIG,
   defineGlobalCommands,
   defineProjectCommands,
+  resolveCliCommandName,
 } from "./commands";
 import { commandOutputLogger } from "./commands/commandHandlerUtils";
+import { tryRunCompletionRequest } from "./commands/completion";
 import { fatalErrorLogger } from "./fatalErrorLogger";
 import { initializeWithGlobalOptions } from "./globalOptions";
 import {
@@ -129,6 +130,15 @@ export const createCli = ({
       const postTerminatorArgs =
         terminatorIndex !== -1 ? argv.slice(terminatorIndex + 1) : [];
 
+      // Shell completion: handled before global options are parsed and the
+      // full command tree is built, so tab completion is fast, lazy-loading
+      // project for relevant candidates only.
+      if (
+        tryRunCompletionRequest(args, postTerminatorArgs, outputWriters.stdout)
+      ) {
+        return;
+      }
+
       middleware.processArgv({ ...defaultContext, args, postTerminatorArgs });
 
       const {
@@ -136,7 +146,9 @@ export const createCli = ({
         projectError,
         workingDirectory,
         disableExecutableConfigs,
-      } = initializeWithGlobalOptions(program, args, middleware);
+      } = initializeWithGlobalOptions(program, args, middleware, {
+        programmatic: !!programmatic,
+      });
 
       // Caught here, after global options (including --log-level) are
       // applied, so the deprecation warning honors the configured log level.
@@ -207,20 +219,23 @@ export const createCli = ({
 
 /**
  * @deprecated
+ *
+ * Strips the removed bun-workspaces `-w`/`--workspace-root` flag, but only
+ * while it sits in global position (before any real command starts), so a
+ * command remains free to define its own `-w` option. "Command started" is
+ * keyed on a resolvable top-level command word or alias, not any word in
+ * the tree, so subcommand-only words like `list`/`run`/`install` appearing
+ * as positionals do not count.
  */
 const tempCatchDeprecatedFlags = (args: string[]) => {
   args.forEach((arg, index) => {
     if (
       (arg === "-w" || arg === "--workspace-root") &&
-      !args.slice(0, index).find((prevArg) =>
-        Object.values(CLI_COMMANDS_CONFIG)
-          .map((config) => config.command.split(/\s+/)[0])
-          .includes(prevArg),
-      )
+      !args
+        .slice(0, index)
+        .some((prevArg) => resolveCliCommandName(prevArg) !== null)
     ) {
-      logger.warn(
-        `The ${arg} flag from bun-workspaces is deprecated and will be removed in a future version. This is now pacwich's default behavior.`,
-      );
+      logger.warn("DeprecatedBunWorkspacesFlag", { flag: arg });
       args.splice(index, 1);
     }
   });

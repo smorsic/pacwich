@@ -17,7 +17,13 @@ pacwich --cwd=/path/to/your/project run my-script
 pacwich --pm=pnpm ls
 
 # Pass --log-level to any command (debug, info, warn, error, or silent)
+# A default can also be set with the PACWICH_LOG_LEVEL env var (the flag overrides it)
 pacwich --log-level=debug ls
+
+# Suppress specific warning messages (can also be set by project config)
+# Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings)
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 
 ####################
 # Getting metadata #
@@ -113,18 +119,41 @@ pacwich --log-level=silent run my-script --output-style=none
 #####################
 
 # List affected workspaces based on git diff (main vs. HEAD by default)
-pacwich list-affected
+pacwich affected list
 
 # Set the git base and head for comparison
-pacwich list-affected --base=my-branch-a --head=my-branch-b
+pacwich affected list --base=my-branch-a --head=my-branch-b
 
 # See detailed reasons for affected workspaces
-pacwich list-affected --explain --detailed
+pacwich affected list --explain --detailed
 
 # Run a script across the workspaces affected by a change
-pacwich run-affected my-script
-# ra is an alias for run-affected
-pacwich ra my-script --base=my-branch-a --head=my-branch-b
+pacwich affected run my-script
+pacwich affected run my-script --base=my-branch-a --head=my-branch-b
+
+# Aliases
+pacwich affected ls
+pacwich af ls
+pacwich af run
+
+##########
+# Config #
+##########
+
+# Commands for pacwich's optional configuration
+
+# Print project and all workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty # pretty print JSON
+
+# Print just the project config as JSON
+pacwich config debug --project
+
+# Print a single workspace config as JSON
+pacwich config debug --workspace=name-or-alias
+
+# Print workspace configs matching a pattern as JSON
+pacwich config debug --workspace-patterns="my-pattern-*"
 `.trim();
 
 export const INLINE_SCRIPT_EXAMPLE = `

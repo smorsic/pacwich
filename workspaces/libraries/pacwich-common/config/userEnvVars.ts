@@ -6,8 +6,11 @@ export const USER_ENV_VARS = {
   disableExecutableConfigsDefault: "PACWICH_DISABLE_EXECUTABLE_CONFIGS_DEFAULT",
   packageManager: "PACWICH_PACKAGE_MANAGER",
   cliScriptOutputStyleDefault: "PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT",
+  suppressWarnings: "PACWICH_SUPPRESS_WARNINGS",
+  logLevel: "PACWICH_LOG_LEVEL",
 } as const;
 
 export type UserEnvVarName = keyof typeof USER_ENV_VARS;
 
-export const getUserEnvVarName = (key: UserEnvVarName) => USER_ENV_VARS[key];
+export const getUserEnvVarName = <K extends UserEnvVarName>(key: K) =>
+  USER_ENV_VARS[key];

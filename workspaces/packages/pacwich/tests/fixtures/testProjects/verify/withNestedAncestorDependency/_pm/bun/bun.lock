@@ -1,0 +1,28 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "verify-nested-ancestor-root",
+    },
+    "packages/shared-lib": {
+      "name": "shared-lib",
+    },
+    "packages/parent": {
+      "name": "parent",
+      "dependencies": {
+        "shared-lib": "workspace:*",
+      },
+    },
+    "packages/parent/nested/child": {
+      "name": "child",
+    },
+  },
+  "packages": {
+    "shared-lib": ["shared-lib@workspace:packages/shared-lib"],
+
+    "parent": ["parent@workspace:packages/parent"],
+
+    "child": ["child@workspace:packages/parent/nested/child"],
+  }
+}

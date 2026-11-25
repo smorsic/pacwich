@@ -3,6 +3,9 @@ import { logger, LOGGER_ERRORS, setLogLevel } from "../../src/internal/logger";
 import { stripANSI } from "../util/runtime";
 import { test, describe, expect, spyOn, afterAll } from "../util/testFramework";
 
+const DEPRECATED_NO_PREFIX_MESSAGE =
+  "--no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.";
+
 describe("setLogLevel", () => {
   afterAll(() => {
     setLogLevel("silent");
@@ -17,7 +20,7 @@ describe("setLogLevel", () => {
 
     logger.debug("test debug 1");
     logger.info("test info 1");
-    logger.warn("test warn 1");
+    logger.warn("DeprecatedNoPrefixFlag", {});
     logger.error("test error 1");
     expect(stderrSpy).toHaveBeenCalledTimes(3);
     expect(stdoutSpy).toHaveBeenCalledTimes(1);
@@ -25,7 +28,7 @@ describe("setLogLevel", () => {
       stderrSpy.mock.calls.map((call) => stripANSI(call[0] as string)),
     ).toEqual([
       "[pacwich DEBUG]: test debug 1\n",
-      "[pacwich WARN]: test warn 1\n",
+      `[pacwich WARN: DeprecatedNoPrefixFlag]: ${DEPRECATED_NO_PREFIX_MESSAGE}\n`,
       "test error 1\n",
     ]);
     expect(stdoutSpy).toHaveBeenCalledWith("test info 1\n");
@@ -38,14 +41,17 @@ describe("setLogLevel", () => {
 
     logger.debug("test debug 2");
     logger.info("test info 2");
-    logger.warn("test warn 2");
+    logger.warn("DeprecatedNoPrefixFlag", {});
     logger.error("test error 2");
 
     expect(stderrSpy).toHaveBeenCalledTimes(2);
     expect(stdoutSpy).toHaveBeenCalledTimes(1);
     expect(
       stderrSpy.mock.calls.map((call) => stripANSI(call[0] as string)),
-    ).toEqual(["[pacwich WARN]: test warn 2\n", "test error 2\n"]);
+    ).toEqual([
+      `[pacwich WARN: DeprecatedNoPrefixFlag]: ${DEPRECATED_NO_PREFIX_MESSAGE}\n`,
+      "test error 2\n",
+    ]);
     expect(stdoutSpy).toHaveBeenCalledWith("test info 2\n");
 
     setLogLevel("warn");
@@ -56,13 +62,16 @@ describe("setLogLevel", () => {
 
     logger.debug("test debug 3");
     logger.info("test info 3");
-    logger.warn("test warn 3");
+    logger.warn("DeprecatedNoPrefixFlag", {});
     logger.error("test error 3");
     expect(stdoutSpy).not.toHaveBeenCalled();
     expect(stderrSpy).toHaveBeenCalledTimes(2);
     expect(
       stderrSpy.mock.calls.map((call) => stripANSI(call[0] as string)),
-    ).toEqual(["[pacwich WARN]: test warn 3\n", "test error 3\n"]);
+    ).toEqual([
+      `[pacwich WARN: DeprecatedNoPrefixFlag]: ${DEPRECATED_NO_PREFIX_MESSAGE}\n`,
+      "test error 3\n",
+    ]);
 
     setLogLevel("error");
     expect(logger.printLevel).toBe("error");
@@ -72,7 +81,7 @@ describe("setLogLevel", () => {
 
     logger.debug("test debug 4");
     logger.info("test info 4");
-    logger.warn("test warn 4");
+    logger.warn("DeprecatedNoPrefixFlag", {});
     logger.error("test error 4");
     expect(stdoutSpy).not.toHaveBeenCalled();
     expect(stderrSpy).toHaveBeenCalledTimes(1);

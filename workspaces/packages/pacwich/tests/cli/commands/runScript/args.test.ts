@@ -181,6 +181,91 @@ passed args: library-1b
     });
   });
 
+  describe("shell metacharacter sanitization", () => {
+    // Regression guard for command injection via string-form --args. Each
+    // payload must reach the script as literal argument bytes, never as a
+    // separate command run by the shell that pacwich generates.
+    const cases: { name: string; payload: string; expected: string }[] = [
+      {
+        name: "semicolon does not start a new command",
+        payload: "; echo INJECTED",
+        expected: "passed args: ; echo INJECTED",
+      },
+      {
+        name: "&& does not chain a new command",
+        payload: "&& echo INJECTED",
+        expected: "passed args: && echo INJECTED",
+      },
+      {
+        name: "pipe does not pipe to a new command",
+        payload: "| tee /tmp/pacwich-should-not-exist",
+        expected: "passed args: | tee /tmp/pacwich-should-not-exist",
+      },
+      {
+        name: "$(...) command substitution is inert",
+        payload: "$(echo INJECTED)",
+        expected: "passed args: $ ( echo INJECTED )",
+      },
+      {
+        name: "backtick command substitution is inert",
+        payload: "`echo INJECTED`",
+        expected: "passed args: `echo INJECTED`",
+      },
+      {
+        name: "glob pattern is passed literally, not expanded",
+        payload: "*.ts",
+        expected: "passed args: *.ts",
+      },
+      {
+        name: "'#' is preserved as a literal arg, not dropped as a comment",
+        payload: "keep # this",
+        expected: "passed args: keep # this",
+      },
+    ];
+
+    for (const { name, payload, expected } of cases) {
+      test(name, async () => {
+        const { run } = setupCliTest({
+          testProject: "runScriptWithEchoArgs",
+        });
+        const result = await run(
+          "run-script",
+          "test-echo",
+          "appA",
+          `--args=${payload}`,
+          "--output-style=plain",
+          "--parallel=false",
+        );
+        expect(result.exitCode).toBe(0);
+        assertOutputMatches(
+          result.stdoutAndErr.sanitizedCompactLines,
+          `${expected}
+✅ application-1a: test-echo
+1 script ran successfully`,
+        );
+      });
+    }
+
+    test("a script name carrying shell metacharacters is not injected", async () => {
+      const { run } = setupCliTest({
+        testProject: "runScriptWithMetacharScriptName",
+      });
+      const result = await run(
+        "run-script",
+        "evil; echo INJECTED",
+        "--output-style=plain",
+        "--parallel=false",
+      );
+      expect(result.exitCode).toBe(0);
+      assertOutputMatches(
+        result.stdoutAndErr.sanitizedCompactLines,
+        `ran the real script
+✅ pkg-a: evil; echo INJECTED
+1 script ran successfully`,
+      );
+    });
+  });
+
   describe("argument terminator (--)", () => {
     test("args after -- are passed to script", async () => {
       const { run } = setupCliTest({

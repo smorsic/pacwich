@@ -1,5 +1,5 @@
+import { type PackageManagerName } from "@pacwich/common/parameters";
 import { Link } from "@rspress/core/theme-original";
-import { type PackageManagerName } from "pacwich";
 import { PmTabs } from "../components/PmTabs";
 
 export const PM_COMMANDS: Record<
@@ -31,6 +31,13 @@ export interface CliInstallProps {
   docLinks?: boolean;
 }
 
+const COMPLETIONS_TEXT = `
+# Print help for installing completions
+pacwich completion
+# Attempt to automatically install completions for your shell
+pacwich completion install
+`;
+
 export const CliInstall = ({ docLinks }: CliInstallProps) => {
   const globalInstallDescription = (
     <>
@@ -47,7 +54,7 @@ export const CliInstall = ({ docLinks }: CliInstallProps) => {
   );
 
   const createGlobalInstallCode = (pm: PackageManagerName) => {
-    return PM_COMMANDS[pm].globalInstall;
+    return PM_COMMANDS[pm].globalInstall + "\n" + COMPLETIONS_TEXT;
   };
 
   const createLocalInstallCode = (pm: PackageManagerName) => {
@@ -62,12 +69,17 @@ ${PM_COMMANDS[pm].localCall}
   return (
     <PmTabs
       links={
-        docLinks && (
-          <div className="pm-tabs-links">
-            <Link href="/cli">CLI Docs</Link>
-            <Link href="/api">API Docs</Link>
-          </div>
-        )
+        <div className="pm-tabs-links">
+          <Link href="/web-cli" className="web-cli-link">
+            NEW: Try the Web CLI in your browser now!
+          </Link>
+          {docLinks && (
+            <>
+              <Link href="/cli">CLI Docs</Link>
+              <Link href="/api">API Docs</Link>
+            </>
+          )}
+        </div>
       }
       title="Install"
       sections={{
@@ -109,13 +121,7 @@ ${PM_COMMANDS[pm].localCall}
 /** Separate from CliInstall to provide hidden text used for markdown generation in place of dynamic display component */
 export const CliInstallAlt = () => {
   return (
-    <div
-      style={{
-        visibility: "hidden",
-        position: "absolute",
-        left: "-9999px",
-      }}
-    >
+    <div className="hidden-llms-text">
       <div>
         Alt install instructions for .md page in place of {`<CliInstall />`}{" "}
         above:
@@ -125,7 +131,11 @@ export const CliInstallAlt = () => {
         <div key={`cli-install-${pm}`}>
           <h3>{pm}:</h3>
           <div>
-            Global install: <code>{commands.globalInstall}</code>
+            Global install:{" "}
+            <code>
+              {commands.globalInstall}
+              {COMPLETIONS_TEXT}
+            </code>
             <br />
             Local install: <code>{commands.localInstall}</code>
             <br />

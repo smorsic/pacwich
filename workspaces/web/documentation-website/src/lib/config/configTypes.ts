@@ -4,6 +4,8 @@ import {
   type WorkspaceConfig,
 } from "@pacwich/common/config";
 import {
+  OUTPUT_STYLE_VALUES,
+  PACKAGE_MANAGER_NAMES,
   PARALLEL_MAX_VALUES,
   SCRIPT_SHELL_OPTIONS,
 } from "@pacwich/common/parameters";
@@ -52,6 +54,17 @@ const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
         array: true,
         item: { primitive: true, types: ["string"] },
       },
+      ignoreImportsFromWorkspacePatterns: {
+        comment: "Ignore imports/exports from these workspaces",
+        array: true,
+        item: { primitive: true, types: ["string"] },
+      },
+      strictDisallowAncestorWorkspaceDeps: {
+        comment:
+          "When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode",
+        primitive: true,
+        types: ["boolean"],
+      },
     },
   },
   workspacePatternConfigs: {
@@ -72,6 +85,17 @@ const rootDisplay: ValueToDisplay<RequiredDeep<ProjectConfig>> = {
 export const PROJECT_CONFIG_TYPE =
   "type ProjectConfig = " +
   formatSimpleTypeToDisplay(rootDisplay)
+    .replace(
+      "cliScriptOutputStyle?: string",
+      "cliScriptOutputStyle?: " +
+        OUTPUT_STYLE_VALUES.map((value) => `"${value}"`).join(" | "),
+    )
+    .replace(
+      "packageManager?: string",
+      "packageManager?: " +
+        PACKAGE_MANAGER_NAMES.map((name) => `"${name}"`).join(" | ") +
+        ' | "auto"',
+    )
     .replace(
       "parallelMax?: number | string",
       "parallelMax?: number | `${number}%` | " +
@@ -126,6 +150,27 @@ const workspaceDisplay: ValueToDisplay<RequiredDeep<WorkspaceConfig>> = {
         comment: "Optional sorting order for running scripts",
       },
       inputs: inputsConfigDisplay,
+    },
+  },
+  verify: {
+    workspaceDependencies: {
+      ignoreInputFiles: {
+        comment:
+          "Ignore these input files for verification of workspace dependencies.\nThese are relative to the workspace directory.\nUsing a leading slash will match from the project root.",
+        array: true,
+        item: { primitive: true, types: ["string"] },
+      },
+      ignoreImportsFromWorkspacePatterns: {
+        comment: "Ignore imports/exports from these workspaces",
+        array: true,
+        item: { primitive: true, types: ["string"] },
+      },
+      strictDisallowAncestorWorkspaceDeps: {
+        comment:
+          "When true, treat workspace dependencies that are only declared by an ancestor workspace as an error in strict verify mode",
+        primitive: true,
+        types: ["boolean"],
+      },
     },
   },
   rules: {

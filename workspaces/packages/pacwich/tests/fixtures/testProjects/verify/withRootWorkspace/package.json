@@ -1,0 +1,9 @@
+{
+  "name": "verify-root-project",
+  "workspaces": ["packages/*"],
+  "pacwich-project": {
+    "defaults": {
+      "includeRootWorkspace": true
+    }
+  }
+}

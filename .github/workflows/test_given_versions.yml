@@ -17,7 +17,7 @@ on:
       bun-version:
         required: true
         type: string
-        default: "1.3"
+        default: "1.4"
       node-version:
         required: true
         type: string
@@ -25,7 +25,7 @@ on:
       pnpm-version:
         required: true
         type: string
-        default: "11"
+        default: "12"
       test_args:
         required: false
         type: string
@@ -61,7 +61,26 @@ jobs:
     name: Test Build - ${{ inputs.test_runtime }} (bun ${{ inputs.bun-version }}, node ${{ inputs.node-version }}, pnpm ${{ inputs.pnpm-version }}, ${{ inputs.os }})
     runs-on: ${{ inputs.os }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Windows - Disable Defender for CI paths
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $paths = @(
+            $env:GITHUB_WORKSPACE,
+            $env:RUNNER_TEMP,
+            $env:TEMP,
+            $env:TMP,
+            "$env:USERPROFILE\.bun"
+          ) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
+          $processes = @('bun.exe', 'node.exe', 'npm.cmd', 'pnpm.cmd', 'git.exe')
+          foreach ($p in $paths)     { Add-MpPreference -ExclusionPath    $p -ErrorAction SilentlyContinue }
+          foreach ($p in $processes) { Add-MpPreference -ExclusionProcess $p -ErrorAction SilentlyContinue }
+          Write-Host "Defender exclusion paths:"
+          (Get-MpPreference).ExclusionPath
+          Write-Host "Defender exclusion processes:"
+          (Get-MpPreference).ExclusionProcess
 
       - uses: ./.github/actions/bootstrap
         with:

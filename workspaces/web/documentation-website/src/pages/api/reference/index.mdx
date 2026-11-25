@@ -8,8 +8,10 @@ outline: true
 footer: false
 ---
 
+import { getUserEnvVarName } from "@pacwich/common/config";
 import { SyntaxHighlighter } from "../../../lib/util/highlight";
 import { ApiHeader } from "../../../lib/api/ApiHeader";
+import { ApiTypesAlt } from "../../../lib/api/ApiTypesAlt";
 import { 
   CREATE_FS_PROJECT_EXAMPLE, 
   FIND_WORKSPACE_BY_ALIAS_EXAMPLE, 
@@ -34,6 +36,8 @@ import {
 # TS/JS API: Reference
 
 <ApiHeader />
+
+<ApiTypesAlt />
 
 See the [API quick start here](/api).
 
@@ -232,7 +236,7 @@ Run a script in all workspaces that have it in their package.json "scripts" fiel
 
 
 ### .determineAffectedWorkspaces
-`determineAffectedWorkspaces(options: DetermineAffectedWorkspacesOptions): AffectedWorkspacesResult`
+`determineAffectedWorkspaces(options: DetermineAffectedWorkspacesOptions): Promise<AffectedWorkspacesResult>`
 
 Determine the workspaces that are affected by a change. The return object
 is the same as the CLI's output for `list-affected --explain --json`.
@@ -255,7 +259,7 @@ Using a list of changed files to determine affected workspaces:
 <hr className="reference-divider"/>
 
 ### .runAffectedWorkspaceScript
-`runAffectedWorkspaceScript(options: RunAffectedWorkspaceScriptOptions): RunAffectedWorkspaceScriptResult`
+`runAffectedWorkspaceScript(options: RunAffectedWorkspaceScriptOptions): Promise<RunScriptAcrossWorkspacesResult>`
 
 Run a script in the workspaces that are affected by a change.
 
@@ -275,10 +279,12 @@ while also taking similar options to [determineAffectedWorkspaces](/api/referenc
 <hr className="reference-divider"/>
 
 ### .verify
-`verify(options: VerifyOptions): VerifyResult`
+`verify(options: VerifyOptions): Promise<VerifyResult>`
 
 Verify the project for issues. The result is the same
 as the CLI [`verify`](/cli/commands#verify) command's JSON output.
+
+You can read more about the verify feature [here](/concepts/verify).
 
 <SyntaxHighlighter language="typescript">
 {API_VERIFY_EXAMPLE}
@@ -310,6 +316,8 @@ A `MemoryProject` currently does not support running scripts directly, though a 
 `setLogLevel(level: LogLevelSetting)`
 
 Set the global logging level. Defaults to "info" or "error" when `NODE_ENV` is "test".
+The default log level can be set with the <code>{getUserEnvVarName("logLevel")}</code> environment variable.
 <SyntaxHighlighter language="typescript">
 {SET_LOG_LEVEL_EXAMPLE}
 </SyntaxHighlighter>
+

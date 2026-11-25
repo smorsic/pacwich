@@ -20,16 +20,6 @@ Start running some [CLI commands](https://pacwich.dev/cli) right away in your re
 - [Getting Started Guide](https://pacwich.dev/intro/getting-started)
 - Changelog: [GitHub Releases](https://github.com/smorsic/pacwich/releases)
 
-#### Note: bun-workspaces
-
-This is the continuation of the `bun-workspaces` package that only worked with Bun.
-See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
-
-You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
-to assist with migration.
-
-Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
-
 ### Terminology
 
 The definitions of **workspace** and **project** differ between package managers and monorepo tooling.
@@ -42,29 +32,58 @@ This means you have a root **project** that has some number of **workspaces**. T
 
 [Docs: Glossary page](https://pacwich.dev/concepts/glossary)
 
+> #### Note: bun-workspaces
+>
+> This is the continuation of the `bun-workspaces` package that only worked with Bun.
+> See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
+>
+> You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
+> to assist with migration.
+>
+> Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
+
 ## Quick Start
 
 ### Installation
 
-Use the global install and/or local install. The global install gives you a convenient
-`pacwich` binary, which will still delegate to a local install's CLI, if available.
+#### Global CLI
+
+The global install gives you a convenient `pacwich` binary, which will still delegate to a local install's CLI, if available.
+
+```bash
+# Use the package manager of your choice:
+bun add -g pacwich
+# OR
+pnpm add -g pacwich
+# OR
+npm install -g pacwich
+```
+
+##### Completions
+
+When using the global install, you can set up shell completions for bash, zsh, or fish.
+
+```bash
+# Print help for setting up completions
+pacwich completion
+
+# Attempt to automatically install completion for your shell
+pacwich completion install
+```
+
+#### Local install
+
+Pin the CLI version for your project, and/or use the TypeScript library.
 
 If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
 you need in your project.
 
 ```bash
-# Use the global install command of choice below
-bun add -g pacwich
-# or
-pnpm add -g pacwich
-# or
-npm install -g pacwich
-
-# And/or local install in your project
+# Use the package manager of your choice:
 bun add -d pacwich
-# or
+# OR
 pnpm add -D pacwich
-# or
+# OR
 npm install -D pacwich
 ```
 
@@ -88,6 +107,26 @@ bunx pacwich --help
 pnpm exec pacwich --help
 ```
 
+### The `verify` Feature
+
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace.
+
+`pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
+other workspaces as dependencies explicitly in their own `package.json`. The `verify` feature exists to help catch instances where this can be dodged.
+
+In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies. **npm** workspaces do not require explicit `package.json` dependencies at all, so undeclared workspace imports simply work.
+
+Nested workspaces also create a gap in explicit dependencies. A dependency declared by an ancestor workspace, most commonly the root `package.json`, resolves for every workspace beneath it through recursive parent-directory `node_modules` lookup, whether or not the importing workspace declares it.
+
+The `verify` feature performs simple analysis of imports/exports in JS/TS files to catch both cases:
+
+- **Implicit workspace dependencies**: a workspace imports another workspace that neither it nor any ancestor declares. Generally only possible with npm workspaces.
+- **Ancestor workspace dependencies**: the import resolves only because an ancestor workspace declares it. Possible with any package manager.
+
+Adding `pacwich verify` to a `"prepare"` script, pre-commit hook, CI pipeline, or similar can be especially helpful to catch issues.
+
+`pacwich verify --strict` will fail on implicit workspace dependencies. Ancestor findings warn by default, and the `strictDisallowAncestorWorkspaceDeps` config option makes strict mode fail on those as well.
+
 ### CLI Quickstart
 
 [Full CLI documentation here](https://pacwich.dev/cli)
@@ -96,7 +135,7 @@ pnpm exec pacwich --help
 <<CLI_QUICKSTART>>
 ```
 
-### API Quickstart
+### TS API Quickstart
 
 [Full API documentation here](https://pacwich.dev/api)
 

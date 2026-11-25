@@ -72,10 +72,10 @@ describe("bun.lock utilities", () => {
       expect(
         parseBunLock(`{
         /* this is jsonc */
-        "lockfileVersion": 2, // this is jsonc
+        "lockfileVersion": 3, // this is jsonc
       }`),
       ).toEqual({
-        lockfileVersion: 1,
+        lockfileVersion: 2,
         workspaces: {},
       });
     });
@@ -133,7 +133,7 @@ describe("bun.lock utilities", () => {
 
       expect(
         projectBunLock.workspaces["workspaces/packages/pacwich"].name,
-      ).toBe("pacwich");
+      ).toBe("pacwich_local");
       expect(
         projectBunLock.workspaces["workspaces/web/documentation-website"].name,
       ).toBe("@pacwich/documentation-website");

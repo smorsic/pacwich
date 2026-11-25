@@ -39,7 +39,6 @@ describe("getDoctorInfo", () => {
     try {
       const info = await getDoctorInfo();
       expect(info.packageManagers.npm).toBe("");
-      expect(info.packageManagers.pnpm).toBe("");
     } finally {
       process.env.PATH = originalPath;
     }

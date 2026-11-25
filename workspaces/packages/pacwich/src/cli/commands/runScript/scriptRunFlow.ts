@@ -168,9 +168,7 @@ export const handleScriptRunFlow = async ({
   logger.debug(`Effective grouped lines: ${JSON.stringify(groupedLines)}`);
 
   if (!cliOptions.prefix) {
-    logger.warn(
-      "--no-prefix is deprecated and will be removed in a future version. Use --output-style=plain instead.",
-    );
+    logger.warn("DeprecatedNoPrefixFlag", {});
     if (!cliOptions.outputStyle) {
       cliOptions.outputStyle = "plain";
     }

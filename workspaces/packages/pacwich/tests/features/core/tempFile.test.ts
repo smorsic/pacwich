@@ -15,7 +15,7 @@ describe("Temp file utils", () => {
       expect(stat.mode & 0o777).toBe(0o700);
 
       const { uid } = os.userInfo();
-      expect(DEFAULT_TEMP_DIR.dir).toContain(`pacwich-${uid}`);
+      expect(DEFAULT_TEMP_DIR.dir).toContain(`pacwich-runtime-${uid}`);
     },
   );
 

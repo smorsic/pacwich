@@ -22,7 +22,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -38,7 +44,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -53,7 +65,13 @@ describe("Test project config", () => {
           },
           packageManager: "auto",
           workspacePatternConfigs: [],
-          verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+          verify: {
+            workspaceDependencies: {
+              ignoreInputFiles: [],
+              ignoreImportsFromWorkspacePatterns: [],
+              strictDisallowAncestorWorkspaceDeps: false,
+            },
+          },
         },
       );
     });
@@ -70,7 +88,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -101,6 +125,44 @@ describe("Test project config", () => {
         loadProjectConfig(getProjectRoot("projectConfigInvalidType")),
       ).toThrow("Project config is invalid: config.defaults must be object");
     });
+
+    test("invalid type error message names the config file", () => {
+      expect(() =>
+        loadProjectConfig(getProjectRoot("projectConfigInvalidType")),
+      ).toThrow("pacwich.project.jsonc");
+    });
+
+    test("invalid workspacePatternConfigs entry error from file names the config file and entry", () => {
+      let caught: unknown;
+      try {
+        loadProjectConfig(getProjectRoot("projectConfigInvalidPatternEntry"));
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("pacwich.project.jsonc");
+      expect(message).toContain("workspacePatternConfigs[0].config");
+      expect(message).toContain("Workspace config is invalid");
+    });
+
+    test("invalid workspacePatternConfigs entry error names the entry index", () => {
+      let caught: unknown;
+      try {
+        resolveProjectConfig({
+          workspacePatternConfigs: [
+            { patterns: ["*"], config: {} },
+            // @ts-expect-error - Invalid config
+            { patterns: ["*"], config: { alias: 5 } },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("workspacePatternConfigs[1].config");
+      expect(message).toContain("Workspace config is invalid");
+      expect(message).toContain("config.alias must be string,array");
+    });
   });
 
   describe("TypeScript config files", () => {
@@ -114,7 +176,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -130,7 +198,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -171,6 +245,8 @@ describe("Test project config", () => {
       // The actual validation message reaches the caller.
       expect(message).toContain("Project config is invalid");
       expect(message).toContain("packageManager");
+      // The config file path is prefixed so the source is identifiable.
+      expect(message).toContain("pacwich.project.ts");
     });
 
     test("ts config loads with precedence over js, jsonc, json, and package.json", () => {
@@ -185,7 +261,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
   });
@@ -205,7 +287,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -223,7 +311,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -323,7 +417,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -339,7 +439,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
   });
@@ -359,7 +465,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -377,7 +489,13 @@ describe("Test project config", () => {
         },
         packageManager: "auto",
         workspacePatternConfigs: [],
-        verify: { workspaceDependencies: { ignoreInputFiles: [] } },
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: [],
+            ignoreImportsFromWorkspacePatterns: [],
+            strictDisallowAncestorWorkspaceDeps: false,
+          },
+        },
       });
     });
 
@@ -604,20 +722,34 @@ describe("Test project config", () => {
   describe("verify.workspaceDependencies.ignoreInputFiles", () => {
     test("defaults to [] when not provided in config", () => {
       expect(resolveProjectConfig({}).verify).toEqual({
-        workspaceDependencies: { ignoreInputFiles: [] },
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
+        },
       });
     });
 
     test("defaults to [] when verify object is empty", () => {
       expect(resolveProjectConfig({ verify: {} }).verify).toEqual({
-        workspaceDependencies: { ignoreInputFiles: [] },
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
+        },
       });
     });
 
     test("defaults to [] when workspaceDependencies is empty", () => {
       expect(
         resolveProjectConfig({ verify: { workspaceDependencies: {} } }).verify,
-      ).toEqual({ workspaceDependencies: { ignoreInputFiles: [] } });
+      ).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
+        },
+      });
     });
 
     test("passes through a non-empty patterns list", () => {
@@ -632,6 +764,8 @@ describe("Test project config", () => {
       ).toEqual({
         workspaceDependencies: {
           ignoreInputFiles: ["scripts/codegen/**/*", "/legacy/**/*.ts"],
+          ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
         },
       });
     });
@@ -678,6 +812,112 @@ describe("Test project config", () => {
             workspaceDependencies: {
               // @ts-expect-error intentional unknown key
               ignoreDependencies: ["x"],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+  });
+
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("defaults to [] when not provided in config", () => {
+      expect(resolveProjectConfig({}).verify).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [],
+          strictDisallowAncestorWorkspaceDeps: false,
+        },
+      });
+    });
+
+    test("passes through a non-empty patterns list", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns: [
+                "tag:internal-tooling",
+                "my-generated-package",
+              ],
+            },
+          },
+        }).verify,
+      ).toEqual({
+        workspaceDependencies: {
+          ignoreInputFiles: [],
+          ignoreImportsFromWorkspacePatterns: [
+            "tag:internal-tooling",
+            "my-generated-package",
+          ],
+          strictDisallowAncestorWorkspaceDeps: false,
+        },
+      });
+    });
+
+    test("throws when ignoreImportsFromWorkspacePatterns is not an array", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns:
+                "tag:x" as unknown as string[],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+
+    test("throws when ignoreImportsFromWorkspacePatterns entries are not strings", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              ignoreImportsFromWorkspacePatterns: [5 as unknown as string],
+            },
+          },
+        }),
+      ).toThrow("Project config is invalid");
+    });
+  });
+
+  describe("verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps", () => {
+    test("defaults to false when not provided in config", () => {
+      expect(
+        resolveProjectConfig({}).verify.workspaceDependencies
+          .strictDisallowAncestorWorkspaceDeps,
+      ).toBe(false);
+    });
+
+    test("passes through an explicit true", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: true,
+            },
+          },
+        }).verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps,
+      ).toBe(true);
+    });
+
+    test("passes through an explicit false", () => {
+      expect(
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: false,
+            },
+          },
+        }).verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps,
+      ).toBe(false);
+    });
+
+    test("throws when strictDisallowAncestorWorkspaceDeps is not a boolean", () => {
+      expect(() =>
+        resolveProjectConfig({
+          verify: {
+            workspaceDependencies: {
+              strictDisallowAncestorWorkspaceDeps: "true" as unknown as boolean,
             },
           },
         }),

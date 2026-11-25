@@ -1,0 +1,4 @@
+{
+  "name": "verify-nested-ancestor-root",
+  "workspaces": ["packages/*", "packages/parent/nested/*"]
+}

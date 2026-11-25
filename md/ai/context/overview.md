@@ -15,11 +15,54 @@ pacwich's main features are to get metadata about the project and workspaces, an
 
 ## Notable features
 
-pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich list-affected`/`pacwich run-affected` for orchestrating builds, tests, etc. across only the workspaces that need them.
+pacwich also supports **affected workspace** detection: given a set of changed files (from a git diff or an explicit list), it determines which workspaces are meaningfully changed. This drives `pacwich affected list`/`pacwich affected run` for orchestrating builds, tests, etc. across only the workspaces that need them.
 
-pacwich detects the workspace dependency graph via explicit declarations in package.json.pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration.
+pacwich detects the workspace dependency graph via explicit declarations in workspace package.json files. pacwich additionally provides a `verify` command that detects "implicit workspace dependencies" (imports of other workspaces' package names that aren't declared in the importing workspace's `package.json`), closing a safety-net gap that opens once a project uses a package manager (notably npm) that resolves workspace imports regardless of declaration. Verify also detects workspace dependencies a workspace imports without declaring when they are declared only by an ancestor workspace (most commonly the root workspace). These resolve under any package manager via the ancestor's node_modules directory, and are reported as warnings, with a config option to treat them as errors in verify's strict mode.
 
 Optional config files: `pacwich.project.{ts,js,jsonc,json}` at root or `pacwich.workspace.{ts,js,jsonc,json}` at any workspace root, with utilities exported from `"pacwich/config"`.
+
+## Installation
+
+### Global CLI
+
+The global install gives you a convenient `pacwich` binary, which will still delegate to a local install's CLI, if available.
+
+```bash
+# Use the package manager of your choice:
+bun add -g pacwich
+# OR
+pnpm add -g pacwich
+# OR
+npm install -g pacwich
+```
+
+#### Completions
+
+When using the global install, you can set up shell completions for bash, zsh, or fish.
+
+```bash
+# Print help for setting up completions
+pacwich completion
+
+# Attempt to automatically install completion for your shell
+pacwich completion install
+```
+
+### Local install
+
+Pin the CLI version for your project, and/or use the TypeScript library.
+
+If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
+you need in your project.
+
+```bash
+# Use the package manager of your choice:
+bun add -d pacwich
+# OR
+pnpm add -D pacwich
+# OR
+npm install -D pacwich
+```
 
 ## Support
 

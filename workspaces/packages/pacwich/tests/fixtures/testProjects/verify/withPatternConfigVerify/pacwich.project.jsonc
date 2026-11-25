@@ -1,0 +1,26 @@
+{
+  "workspacePatternConfigs": [
+    {
+      // Suppresses lib-a imports for app-a only.
+      "patterns": ["app-a"],
+      "config": {
+        "verify": {
+          "workspaceDependencies": {
+            "ignoreImportsFromWorkspacePatterns": ["lib-a"]
+          }
+        }
+      }
+    },
+    {
+      // Concatenates with app-b's local ignoreInputFiles.
+      "patterns": ["app-b"],
+      "config": {
+        "verify": {
+          "workspaceDependencies": {
+            "ignoreInputFiles": ["scripts/legacy/**/*"]
+          }
+        }
+      }
+    }
+  ]
+}

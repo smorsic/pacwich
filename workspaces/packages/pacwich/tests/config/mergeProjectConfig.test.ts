@@ -297,6 +297,138 @@ describe("mergeProjectConfig", () => {
     });
   });
 
+  describe("verify.workspaceDependencies.ignoreImportsFromWorkspacePatterns", () => {
+    test("entries from two configs are concatenated and deduplicated", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:a", "shared"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreImportsFromWorkspacePatterns: ["tag:b", "shared"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "shared", "tag:b"],
+          },
+        },
+      });
+    });
+
+    test("merges independently of ignoreInputFiles in the same config", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["a/**/*"],
+                ignoreImportsFromWorkspacePatterns: ["tag:a"],
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["b/**/*"],
+                ignoreImportsFromWorkspacePatterns: ["tag:b"],
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: ["a/**/*", "b/**/*"],
+            ignoreImportsFromWorkspacePatterns: ["tag:a", "tag:b"],
+          },
+        },
+      });
+    });
+  });
+
+  describe("verify.workspaceDependencies.strictDisallowAncestorWorkspaceDeps", () => {
+    test("later config's value wins over an earlier true", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: false,
+              },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: { strictDisallowAncestorWorkspaceDeps: false },
+        },
+      });
+    });
+
+    test("a config that doesn't set it falls back to the earlier config's value", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          { defaults: { parallelMax: 4 } },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: { strictDisallowAncestorWorkspaceDeps: true },
+        },
+      });
+    });
+
+    test("merges independently of the array fields in the same config", () => {
+      expect(
+        mergeProjectConfig(
+          {
+            verify: {
+              workspaceDependencies: {
+                ignoreInputFiles: ["a/**/*"],
+                strictDisallowAncestorWorkspaceDeps: true,
+              },
+            },
+          },
+          {
+            verify: {
+              workspaceDependencies: { ignoreInputFiles: ["b/**/*"] },
+            },
+          },
+        ),
+      ).toMatchObject({
+        verify: {
+          workspaceDependencies: {
+            ignoreInputFiles: ["a/**/*", "b/**/*"],
+            strictDisallowAncestorWorkspaceDeps: true,
+          },
+        },
+      });
+    });
+  });
+
   test("is exported from the main module", async () => {
     const { mergeProjectConfig: imported } = await import("../../src/index");
     expect(imported).toBe(mergeProjectConfig);

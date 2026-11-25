@@ -1,21 +1,8 @@
 import { Link } from "@rspress/core/theme-original";
-import { ApiInstall, ApiInstallAlt } from "./ApiInstall";
 
-export interface ApiHeaderProps {
-  fullInstallDoc?: boolean;
-  divider?: boolean;
-}
-
-export const ApiHeader = ({ fullInstallDoc = false }: ApiHeaderProps) => {
+export const ApiHeader = () => {
   return (
     <div className="sub-header">
-      {fullInstallDoc && (
-        <>
-          <ApiInstall />
-          <ApiInstallAlt />
-          <br />
-        </>
-      )}
       See the <Link href="/intro/getting-started">Getting Started</Link> or{" "}
       <Link href="/concepts/glossary">Glossary</Link> pages for more starting
       info.

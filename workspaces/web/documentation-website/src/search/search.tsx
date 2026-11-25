@@ -12,8 +12,37 @@ const matches = (s: string, query: string) =>
   sanitize(s).includes(sanitize(query)) ||
   sanitize(query).includes(sanitize(s));
 
+const EXTERNAL_LINKS = [
+  {
+    statement: "Changelog",
+    link: process.env.CHANGELOG_URL ?? "",
+    title: "GitHub Releases | All Versions",
+    keywords: ["changelog", "notes", "releases", "versions"],
+  },
+  {
+    statement: "Blog",
+    link: process.env.BLOG_URL ?? "",
+    title: "Smorsic Labs Blog | Release Posts",
+    keywords: ["blog"],
+  },
+];
+
 const onSearch: OnSearch = async (query, defaultResult) => {
   query = sanitize(query);
+
+  for (const { statement, link, title, keywords } of EXTERNAL_LINKS) {
+    if (keywords.some((keyword) => matches(keyword, query))) {
+      defaultResult[0].result?.splice(0, 0, {
+        statement,
+        link,
+        type: "content",
+        title,
+        header: "",
+        query: "",
+        highlightInfoList: [],
+      });
+    }
+  }
 
   for (const command of getCliCommandsContent()) {
     if (

@@ -1,0 +1,9 @@
+{
+  // Suppresses lib-b and lib-c imports as implicit dependencies for
+  // every importing workspace in the project.
+  "verify": {
+    "workspaceDependencies": {
+      "ignoreImportsFromWorkspacePatterns": ["lib-b", "lib-c"]
+    }
+  }
+}

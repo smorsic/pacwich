@@ -1,5 +1,5 @@
 if (process.env.CI === "true") {
-  console.log("CI=true, skipping mise install");
+  console.log("CI=true, skipping mise step");
   process.exit(0);
 }
 

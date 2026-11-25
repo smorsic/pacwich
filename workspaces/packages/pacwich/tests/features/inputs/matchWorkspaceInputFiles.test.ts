@@ -131,6 +131,83 @@ describe("matchWorkspaceInputFiles", () => {
     expect(result.map((m) => m.filePath)).toEqual(filePaths);
   });
 
+  describe("nested workspace ownership (otherWorkspacePaths)", () => {
+    test("root workspace with `.` skips files owned by nested workspaces", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "root",
+        workspacePath: "",
+        inputFilePatterns: ["."],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/a", "packages/b"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual(["root-file.ts"]);
+    });
+
+    test("explicit include pattern cannot match nested workspace files", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "root",
+        workspacePath: "",
+        inputFilePatterns: ["packages/a/src/**/*.ts", "root-file.ts"],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/a", "packages/b"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual(["root-file.ts"]);
+    });
+
+    test("sibling workspace files via project-root-relative pattern still match", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "a",
+        workspacePath: "packages/a",
+        inputFilePatterns: ["/packages/b/src"],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/b"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual([
+        "packages/b/src/index.ts",
+      ]);
+    });
+
+    test("workspace nested inside a non-root workspace is excluded from the outer workspace", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "a",
+        workspacePath: "packages/a",
+        inputFilePatterns: ["."],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/a/src/nested", "packages/b"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual([
+        "packages/a/src/index.ts",
+        "packages/a/README.md",
+        "packages/a/dist/index.js",
+      ]);
+    });
+
+    test("own path and the root path in otherWorkspacePaths are ignored", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "a",
+        workspacePath: "packages/a",
+        inputFilePatterns: ["src"],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/a", "", ".", "packages/b"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual([
+        "packages/a/src/index.ts",
+        "packages/a/src/nested/util.ts",
+      ]);
+    });
+
+    test("nested paths normalize `.`-style and trailing-slash forms", () => {
+      const result = matchWorkspaceInputFiles({
+        workspaceName: "root",
+        workspacePath: ".",
+        inputFilePatterns: ["."],
+        projectFilePaths: filePaths,
+        otherWorkspacePaths: ["packages/a/", "packages/b/"],
+      });
+      expect(result.map((m) => m.filePath)).toEqual(["root-file.ts"]);
+    });
+  });
+
   describe("out-of-project patterns", () => {
     beforeAll(() => setLogLevel("warn"));
     afterAll(() => setLogLevel("silent"));
@@ -154,7 +231,9 @@ describe("matchWorkspaceInputFiles", () => {
 
       const warnings = stderrSpy.mock.calls
         .map((call) => stripANSI(call[0] as string))
-        .filter((message) => message.includes("[pacwich WARN]"));
+        .filter((message) =>
+          message.includes("[pacwich WARN: InputPatternOutsideProject]"),
+        );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toContain("../../../external");
       expect(warnings[0]).toContain('workspace "a"');
@@ -177,7 +256,9 @@ describe("matchWorkspaceInputFiles", () => {
 
       const warnings = stderrSpy.mock.calls
         .map((call) => stripANSI(call[0] as string))
-        .filter((message) => message.includes("[pacwich WARN]"));
+        .filter((message) =>
+          message.includes("[pacwich WARN: InputPatternOutsideProject]"),
+        );
       expect(warnings).toHaveLength(1);
       expect(warnings[0]).toContain("!../../../external");
 

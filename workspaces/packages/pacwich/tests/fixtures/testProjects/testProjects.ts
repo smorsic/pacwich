@@ -30,6 +30,7 @@ const TEST_PROJECTS = {
   runScriptWithFailures: "forRunScript/withFailures",
   runScriptWithMixedOutput: "forRunScript/withMixedOutput",
   runScriptWithEchoArgs: "forRunScript/withEchoArgs",
+  runScriptWithMetacharScriptName: "forRunScript/withMetacharScriptName",
   runScriptWithRuntimeMetadataDebug: "forRunScript/withRuntimeMetadataDebug",
   runScriptWithDelaysAndSequenceConfig:
     "forRunScript/withDelaysAndSequenceConfig",
@@ -66,6 +67,8 @@ const TEST_PROJECTS = {
   projectConfigPackage: "projectConfig/package",
   projectConfigInvalidJson: "projectConfig/invalidJson",
   projectConfigInvalidType: "projectConfig/invalidType",
+  projectConfigInvalidPatternEntry: "projectConfig/invalidPatternEntry",
+  projectConfigInvalidPatternFactory: "projectConfig/invalidPatternFactory",
   projectConfigInvalidShell: "projectConfig/invalidShell",
   projectConfigInvalidParallel: "projectConfig/invalidParallel",
   projectConfigParallelMaxOnly: "projectConfig/parallelMaxOnly",
@@ -73,6 +76,8 @@ const TEST_PROJECTS = {
     "projectConfig/cliScriptOutputStylePlain",
   projectConfigPackageManagerNpm: "projectConfig/packageManagerNpm",
   projectConfigWorkspacePatternConfigs: "projectConfig/workspacePatternConfigs",
+  projectConfigWorkspacePatternConfigsFactory:
+    "projectConfig/workspacePatternConfigsFactory",
   withCatalogSimple: "withCatalog/simple",
   withRootWorkspace: "withRootWorkspace/simple",
   withRootWorkspaceWithConfigFiles: "withRootWorkspace/withConfigFiles",
@@ -111,6 +116,21 @@ const TEST_PROJECTS = {
   semverWorkspaceLink: "semverWorkspaceLink",
   verifySimple: "verify/simple",
   verifyWithIgnore: "verify/withIgnore",
+  verifyWithRootWorkspace: "verify/withRootWorkspace",
+  verifyWithWorkspaceIgnore: "verify/withWorkspaceIgnore",
+  verifyWithImportIgnore: "verify/withImportIgnore",
+  verifyWithIgnoreWarnings: "verify/withIgnoreWarnings",
+  verifyWithMatchAllIgnore: "verify/withMatchAllIgnore",
+  verifyWithPatternConfigVerify: "verify/withPatternConfigVerify",
+  verifyWithAncestorDependency: "verify/withAncestorDependency",
+  verifyWithNestedAncestorDependency: "verify/withNestedAncestorDependency",
+  verifyWithAncestorDependencyStrictProject:
+    "verify/withAncestorDependencyStrictProject",
+  verifyWithAncestorDependencyStrictWorkspace:
+    "verify/withAncestorDependencyStrictWorkspace",
+  verifyWithAncestorDependencyImportIgnore:
+    "verify/withAncestorDependencyImportIgnore",
+  verifyAncestorMatrix: "verify/ancestorMatrix",
 };
 
 export type TestProjectName = keyof typeof TEST_PROJECTS;

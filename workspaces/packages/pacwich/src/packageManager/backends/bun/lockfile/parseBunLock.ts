@@ -39,14 +39,14 @@ export type RelevantBunLock = {
  * (`>=MIN <=MAX`) like the pnpm backend does.
  */
 export const MIN_SUPPORTED_BUN_LOCK_VERSION = 1;
-export const MAX_SUPPORTED_BUN_LOCK_VERSION = 1;
+export const MAX_SUPPORTED_BUN_LOCK_VERSION = 2;
 
 export const parseBunLock = (
   jsonString: string,
   /** Only for error message */
   bunLockPath?: string,
 ): RelevantBunLock | PacwichError => {
-  let bunLockJson: RelevantBunLock | null = null;
+  let bunLockJson: RelevantBunLock;
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {
@@ -89,9 +89,11 @@ export const parseBunLock = (
   // fields we read. Warn and parse it as the newest version we know;
   // the structural guards below catch anything actually incompatible.
   if (lockfileVersion > MAX_SUPPORTED_BUN_LOCK_VERSION) {
-    logger.warn(
-      `Bun lockfile ${bunLockPath ? `at "${bunLockPath}"` : ""} reports version ${lockfileVersion}, newer than the latest supported (${MAX_SUPPORTED_BUN_LOCK_VERSION}). Parsing anyway; results may be incomplete.`,
-    );
+    logger.warn("BunLockNewerVersion", {
+      atPath: bunLockPath ? ` at "${bunLockPath}"` : "",
+      version: String(lockfileVersion),
+      maxVersion: String(MAX_SUPPORTED_BUN_LOCK_VERSION),
+    });
   }
 
   if (bunLockJson.workspaces && typeof bunLockJson.workspaces !== "object") {
@@ -162,7 +164,7 @@ export const parseBunLockWorkspaceLinkNames = (
   jsonString: string,
   bunLockPath?: string,
 ): Set<string> | PacwichError => {
-  let bunLockJson: { packages?: unknown } | null = null;
+  let bunLockJson: { packages?: unknown };
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {
@@ -193,7 +195,7 @@ export const parseBunLockPackageVersions = (
   jsonString: string,
   bunLockPath?: string,
 ): BunLockVersionMap | PacwichError => {
-  let bunLockJson: { packages?: unknown } | null = null;
+  let bunLockJson: { packages?: unknown };
   try {
     bunLockJson = parseJSONC(jsonString);
   } catch (error) {

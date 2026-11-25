@@ -9,7 +9,6 @@
     "prepare": "cd test-project && bun install"
   },
   "devDependencies": {
-    "pacwich_local": "file:../../packages/pacwich",
     "pacwich_release": "npm:pacwich@latest"
   }
 }

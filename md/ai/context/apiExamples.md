@@ -2,6 +2,8 @@
 
 The API is held in close parity with the CLI. It is developed first so that the CLI is a thin wrapper around the API.
 
+For complete TypeScript types, read the installed package's declaration files: `node_modules/pacwich/src/index.d.ts` for the main entry (the `types` field of pacwich's package.json), with each subpath export (e.g. `pacwich/config`, `pacwich/script`) having its own `.d.ts` listed under `exports`.
+
 ```typescript
 import { createFileSystemProject } from "pacwich";
 
@@ -58,27 +60,47 @@ const { output, exit } = project.runWorkspaceScript({
   interactive: false,
 });
 
-const { output, summary, workspaces } = project.runScriptAcrossWorkspaces({
-  script: "lint",
-  workspacePatterns: [
-    "alias:my-alias-pattern-*",
-    "path:my-glob/**/*",
-    "workspace-name-a",
-    "workspace-alias-b",
-  ],
-  parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
-  // same as for runWorkspaceScript
-  args: ["--my", "--appended", "--args"],
-  // Optional, callback when script starts, skips, or exits
-  onScriptEvent: (event, { workspace, exitResult }) => {
-    // event: "start", "skip", "exit"
+const { output, summary, workspaces } = await project.runScriptAcrossWorkspaces(
+  {
+    script: "lint",
+    workspacePatterns: [
+      "alias:my-alias-pattern-*",
+      "path:my-glob/**/*",
+      "workspace-name-a",
+      "workspace-alias-b",
+    ],
+    parallel: true, // also could be { max: 2 }, max taking same options as seen in CLI examples above (e.g. "50%", "auto", etc.)
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+    // same as for runWorkspaceScript
+    args: ["--my", "--appended", "--args"],
+    // Optional, callback when script starts, skips, or exits
+    onScriptEvent: (event, { workspace, exitResult }) => {
+      // event: "start", "skip", "exit"
+    },
   },
-});
+);
+
+// Raw byte output also available via output.bytes()
+for await (const { metadata, chunk } of output.text()) {
+  console.log(metadata.streamName); // stdout/stderr
+  console.log(metadata.workspace); // Workspace
+  console.log(chunk); // string content
+}
+
+const {
+  scriptResults, // array of script exit details
+  allSuccess,
+  durationMs,
+  startTimeISO,
+  endTimeISO,
+  successCount,
+  failureCount,
+  totalCount,
+} = await summary;
 
 // Determine affected workspaces — git mode (default)
-project.determineAffectedWorkspaces({
+const { workspaceResults } = await project.determineAffectedWorkspaces({
   diffSource: "git",
   // optional: resolve inputs for a specific script (uses scripts[name].inputs)
   script: "build",
@@ -96,8 +118,12 @@ project.determineAffectedWorkspaces({
   },
 });
 
+workspaceResults.forEach((result) => {
+  console.log(result.workspace, result.isAffected, result.affectedReasons);
+});
+
 // Determine affected workspaces — fileList mode (bypass git)
-project.determineAffectedWorkspaces({
+const fileListAffected = await project.determineAffectedWorkspaces({
   diffSource: "fileList",
   // paths, directories, or globs (relative to project root); '!' to exclude
   changedFiles: ["packages/a/**/*.ts", "!packages/a/**/*.test.ts"],
@@ -106,18 +132,24 @@ project.determineAffectedWorkspaces({
 // Run a script across affected workspaces. Accepts the same affected options
 // as determineAffectedWorkspaces, plus the script-execution options from
 // runScriptAcrossWorkspaces (parallel, dependencyOrder, args, onScriptEvent, etc.).
-project.runAffectedWorkspaceScript({
-  script: "build",
-  diffSource: "git",
-  diffOptions: { baseRef: "main", ignoreUncommitted: true },
-  parallel: { max: 2 },
-  dependencyOrder: true,
-  ignoreDependencyFailure: true,
+// Has same return type as runScriptAcrossWorkspaces.
+await project.runAffectedWorkspaceScript({
+  affectedOptions: {
+    diffSource: "git",
+    diffOptions: { baseRef: "main", ignoreUncommitted: true },
+  },
+  scriptOptions: {
+    script: "my-script",
+    parallel: { max: 2 },
+    dependencyOrder: true,
+    ignoreDependencyFailure: true,
+  },
 });
 
 // Detect implicit workspace dependencies (imports of other workspaces'
 // package names that aren't declared in the importing workspace's
-// package.json). Returns a Promise<VerifyResult>.
+// package.json) or imports from workspaces declared by an ancestor
+// workspace's dependencies only. Returns a Promise<VerifyResult>.
 //
 // Scope: each workspace's inputs (`defaultInputs.files`, default
 // `["."]`) determine which files are scanned. Only git-trackable
@@ -130,8 +162,7 @@ const verifyResult = await project.verify({
   strict: false,
 });
 // VerifyResult: { ok: boolean; errors: VerifyIssue[]; warnings: VerifyIssue[] }
-// VerifyIssue.name discriminates the rich `metadata` shape. Today the
-// only category is "implicitWorkspaceDependency".
+// VerifyIssue.name discriminates the rich `metadata` shape.
 ```
 
 `createMemoryProject` and the `MemoryProject` type are also exported but are flagged `@experimental`. They cover only the read-only `Project` surface today (no `runWorkspaceScript`, `runScriptAcrossWorkspaces`, `determineAffectedWorkspaces`, `runAffectedWorkspaceScript`, or `verify`) and the constructor shape is expected to change. Prefer `createFileSystemProject` for non-test code paths.

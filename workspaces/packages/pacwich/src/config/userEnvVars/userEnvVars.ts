@@ -1,4 +1,5 @@
 import { USER_ENV_VARS, type UserEnvVarName } from "@pacwich/common/config";
+import { splitCsvList } from "../../internal/core";
 
 export const getUserEnvVar = (key: UserEnvVarName) =>
   process.env[USER_ENV_VARS[key]];
@@ -14,4 +15,17 @@ export const getUserBoolEnvVar = (key: UserEnvVarName): boolean | undefined => {
   if (value === "true") return true;
   if (value === "false") return false;
   return undefined;
+};
+
+/**
+ * Parse a user env var as a comma-separated list. Returns `undefined`
+ * when unset, so callers can distinguish "empty list configured" from
+ * "not configured at all."
+ */
+export const getUserListEnvVar = (
+  key: UserEnvVarName,
+): string[] | undefined => {
+  const value = getUserEnvVar(key);
+  if (value === undefined) return undefined;
+  return splitCsvList(value);
 };

@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigests",
     ":dependencyDashboard",
   ],
+  rebaseWhen: "behind-base-branch",
   packageRules: [
     {
       // pacwich-prod catalog: these ship bundled in pacwich's released code, so

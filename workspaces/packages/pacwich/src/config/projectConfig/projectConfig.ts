@@ -1,7 +1,6 @@
 import {
   type ProjectConfig,
   type ResolvedProjectConfig,
-  type ResolvedProjectVerifyConfig,
 } from "@pacwich/common/config";
 import {
   OUTPUT_STYLE_VALUES,
@@ -11,12 +10,14 @@ import {
   type ParallelMaxValue,
 } from "@pacwich/common/parameters";
 import { resolveDefaultAffectedBaseRef } from "../../affected/affectedBaseRef";
+import { prefixPacwichErrorMessage } from "../../internal/core";
 import { validate } from "../../internal/generated/ajv/validateProjectConfig";
 import { logger } from "../../internal/logger";
 import { determineParallelMax, resolveScriptShell } from "../../runScript";
 import { getUserEnvVar } from "../userEnvVars";
 import type { AjvSchemaValidator } from "../util/ajvTypes";
 import { executeValidator } from "../util/validateConfig";
+import { resolveVerifyConfig } from "../verifyConfig";
 import { validateWorkspaceConfig } from "../workspaceConfig/workspaceConfig";
 import { PROJECT_CONFIG_ERRORS } from "./errors";
 
@@ -53,11 +54,10 @@ const resolveCliScriptOutputStyleConfigValue = (
   const envValue = getUserEnvVar("cliScriptOutputStyleDefault");
   if (envValue === undefined) return undefined;
   if (isOutputStyleName(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_CLI_SCRIPT_OUTPUT_STYLE_DEFAULT value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${OUTPUT_STYLE_VALUES.join(", ")}).`,
-  );
+  logger.warn("InvalidCliScriptOutputStyleEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: OUTPUT_STYLE_VALUES.join(", "),
+  });
   return undefined;
 };
 
@@ -76,32 +76,30 @@ const resolvePackageManagerConfigValue = (
   const envValue = getUserEnvVar("packageManager");
   if (envValue === undefined) return "auto";
   if (isPackageManagerValue(envValue)) return envValue;
-  logger.warn(
-    `Ignoring invalid PACWICH_PACKAGE_MANAGER value ${JSON.stringify(
-      envValue,
-    )} (expected one of: ${PACKAGE_MANAGER_VALUES.join(", ")}). Falling back to "auto".`,
-  );
+  logger.warn("InvalidPackageManagerEnvVar", {
+    envValue: JSON.stringify(envValue),
+    values: PACKAGE_MANAGER_VALUES.join(", "),
+  });
   return "auto";
 };
-
-const resolveProjectVerifyConfig = (
-  config: ProjectConfig["verify"],
-): ResolvedProjectVerifyConfig => ({
-  workspaceDependencies: {
-    ignoreInputFiles: config?.workspaceDependencies?.ignoreInputFiles ?? [],
-  },
-});
 
 export const resolveProjectConfig = (
   config: ProjectConfig,
 ): ResolvedProjectConfig => {
   validateProjectConfig(config);
 
-  for (const entry of config.workspacePatternConfigs ?? []) {
+  (config.workspacePatternConfigs ?? []).forEach((entry, entryIndex) => {
     if (typeof entry.config !== "function") {
-      validateWorkspaceConfig(entry.config);
+      try {
+        validateWorkspaceConfig(entry.config);
+      } catch (error) {
+        throw prefixPacwichErrorMessage(
+          error,
+          `workspacePatternConfigs[${entryIndex}].config`,
+        );
+      }
     }
-  }
+  });
 
   return {
     packageManager: resolvePackageManagerConfigValue(config.packageManager),
@@ -122,6 +120,6 @@ export const resolveProjectConfig = (
       ),
     },
     workspacePatternConfigs: config.workspacePatternConfigs ?? [],
-    verify: resolveProjectVerifyConfig(config.verify),
+    verify: resolveVerifyConfig(config.verify),
   };
 };

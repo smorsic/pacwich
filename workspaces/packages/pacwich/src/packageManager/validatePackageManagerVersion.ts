@@ -14,7 +14,7 @@ const DETECTION_TIMEOUT_MS = 5_000;
 const detectViaShellSync = (binary: string): string => {
   const cached = VERSION_CACHE.get(binary);
   if (cached !== undefined) return cached;
-  let result = "";
+  let result: string;
   try {
     const stdout = execFileSync(binary, ["--version"], {
       timeout: DETECTION_TIMEOUT_MS,

@@ -2,6 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { assertOutputMatches, setupCliTest } from "../../../util/cliTestUtils";
+import { removeTempDirSync } from "../../../util/tempDirs";
 import {
   afterAll,
   beforeAll,
@@ -44,7 +45,7 @@ describe("CLI commands — missing pnpm-lock.yaml error rendering", () => {
   });
 
   afterAll(() => {
-    fs.rmSync(fixtureDir, { force: true, recursive: true });
+    removeTempDirSync(fixtureDir);
   });
 
   test.each(["ls-scripts", "ls", "list-tags"] as const)(

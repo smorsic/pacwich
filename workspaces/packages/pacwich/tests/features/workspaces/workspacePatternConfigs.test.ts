@@ -370,6 +370,125 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
       expect(appA.tags).toContain("from-factory");
       expect(appB.tags).toContain("from-factory");
     });
+
+    test("invalid factory result error names the entry index and workspace", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            { patterns: ["library-*"], config: { tags: ["lib"] } },
+            {
+              patterns: ["application-1b"],
+              // @ts-expect-error - Invalid config
+              config: () => ({ alias: 42 }),
+            },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain(
+        'project config: workspacePatternConfigs[1] (workspace "application-1b")',
+      );
+      expect(message).toContain("Workspace config is invalid");
+    });
+
+    test("factory error prefix uses projectConfigPath when provided", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            {
+              patterns: ["application-1a"],
+              // @ts-expect-error - Invalid config
+              config: () => ({ alias: 42 }),
+            },
+          ],
+          projectConfigPath: "pacwich.project.ts",
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain(
+        'pacwich.project.ts: workspacePatternConfigs[0] (workspace "application-1a")',
+      );
+    });
+
+    test("factory throwing a plain error is wrapped with entry and workspace context", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            {
+              patterns: ["application-1a"],
+              config: () => {
+                throw new Error("boom from factory");
+              },
+            },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeInstanceOf(
+        WORKSPACE_ERRORS.WorkspacePatternConfigError,
+      );
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain(
+        'project config: workspacePatternConfigs[0] (workspace "application-1a")',
+      );
+      expect(message).toContain("boom from factory");
+    });
+
+    test("factory error thrown for the failing workspace only names that workspace", () => {
+      let caught: unknown;
+      try {
+        assembleProject({
+          adapter,
+          rootDirectory: WORKSPACE_TAGS_ROOT,
+          workspacePatternConfigs: [
+            {
+              patterns: ["application-*"],
+              // @ts-expect-error - Invalid config
+              config: (ctx) =>
+                ctx.name === "application-1b" ? { alias: 42 } : {},
+            },
+          ],
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain('workspace "application-1b"');
+      expect(message).not.toContain('workspace "application-1a"');
+    });
+  });
+
+  describe("invalid factory result via project config file", () => {
+    test("error names the config file, entry index, and workspace", () => {
+      let caught: unknown;
+      try {
+        createFileSystemProject({
+          rootDirectory: getProjectRoot("projectConfigInvalidPatternFactory"),
+        });
+      } catch (error) {
+        caught = error;
+      }
+      const message = (caught as Error)?.message ?? "";
+      expect(message).toContain("pacwich.project.ts");
+      expect(message).toContain(
+        'workspacePatternConfigs[0] (workspace "workspace-a")',
+      );
+      expect(message).toContain("Workspace config is invalid");
+    });
   });
 
   describe("combined with local workspace config", () => {
@@ -434,6 +553,38 @@ describe("workspacePatternConfigs - via findWorkspaces", () => {
         workspaceMap["a"].config.rules.workspaceDependencies?.allowPatterns ??
         [];
       expect(allow.indexOf("c")).toBeLessThan(allow.indexOf("b"));
+    });
+
+    test("local verify config entries appear before pattern config entries in merged config", () => {
+      // app-a in verifyWithWorkspaceIgnore has local verify
+      // ignoreInputFiles; the pattern config concatenates on top
+      const { workspaceMap } = assembleProject({
+        adapter,
+        rootDirectory: getProjectRoot("verifyWithWorkspaceIgnore"),
+        workspacePatternConfigs: [
+          {
+            patterns: ["app-a"],
+            config: {
+              verify: {
+                workspaceDependencies: {
+                  ignoreInputFiles: ["scripts/extra/**/*"],
+                  ignoreImportsFromWorkspacePatterns: ["tag:pattern-added"],
+                },
+              },
+            },
+          },
+        ],
+      });
+      const verifyConfig =
+        workspaceMap["app-a"].config.verify.workspaceDependencies;
+      expect(verifyConfig.ignoreInputFiles).toEqual([
+        "scripts/codegen/**/*",
+        "/packages/app-a/scripts/legacy/**/*.ts",
+        "scripts/extra/**/*",
+      ]);
+      expect(verifyConfig.ignoreImportsFromWorkspacePatterns).toEqual([
+        "tag:pattern-added",
+      ]);
     });
 
     test("workspaceMap config reflects merged result of local config and pattern configs", () => {

@@ -5,6 +5,7 @@ import {
   toPosixPath,
 } from "../internal/core";
 import { logger } from "../internal/logger";
+import { listNestedWorkspacePaths } from "../workspaces";
 
 const FILE_PATTERN_NEGATION_PREFIX = "!";
 
@@ -21,7 +22,7 @@ const PARENT_SEGMENT = "..";
  * and a pattern that resolves to the project root becomes `""` (matches
  * everything).
  */
-const resolveInputPattern = ({
+export const resolveInputPattern = ({
   workspacePath,
   inputPattern,
 }: {
@@ -121,9 +122,10 @@ const resolveFilePatterns = ({
       const displayPattern = isExclude
         ? `${FILE_PATTERN_NEGATION_PREFIX}${inputPattern}`
         : inputPattern;
-      logger.warn(
-        `Input pattern ${JSON.stringify(displayPattern)} for workspace "${workspaceName}" resolves outside the project root and will be ignored.`,
-      );
+      logger.warn("InputPatternOutsideProject", {
+        pattern: JSON.stringify(displayPattern),
+        workspaceName,
+      });
       continue;
     }
     resolved.push({ inputPattern, resolvedPattern });
@@ -152,6 +154,13 @@ export interface MatchWorkspaceInputFilesOptions {
   inputFilePatterns: string[];
   /** Candidate project-relative POSIX file paths to match against the patterns. */
   projectFilePaths: string[];
+  /**
+   * Project-relative paths of the other workspaces in the project.
+   * Files inside a workspace nested within this workspace's directory
+   * are owned by the nested workspace and never match, regardless of
+   * the include patterns.
+   */
+  otherWorkspacePaths?: string[];
 }
 
 /**
@@ -159,14 +168,27 @@ export interface MatchWorkspaceInputFilesOptions {
  * workspace's input patterns. A file matches when it satisfies at least
  * one include pattern and no exclude (`!`-prefixed) pattern. Patterns
  * that resolve outside the project root are warned about and ignored.
+ * Files owned by another workspace nested inside this workspace's
+ * directory (per `otherWorkspacePaths`) never match.
  */
 export const matchWorkspaceInputFiles = ({
   workspaceName,
   workspacePath,
   inputFilePatterns,
   projectFilePaths,
+  otherWorkspacePaths = [],
 }: MatchWorkspaceInputFilesOptions): InputFileMatch[] => {
   const { includes, excludes } = splitFilePatterns(inputFilePatterns);
+
+  const nestedWorkspacePaths = listNestedWorkspacePaths({
+    workspacePath,
+    otherWorkspacePaths,
+  });
+  const isOwnedByNestedWorkspace = (filePath: string): boolean =>
+    nestedWorkspacePaths.some(
+      (nestedPath) =>
+        filePath === nestedPath || filePath.startsWith(`${nestedPath}/`),
+    );
 
   const resolvedIncludes = resolveFilePatterns({
     workspaceName,
@@ -186,6 +208,7 @@ export const matchWorkspaceInputFiles = ({
 
   for (const filePath of projectFilePaths) {
     if (matchedFilePaths.has(filePath)) continue;
+    if (isOwnedByNestedWorkspace(filePath)) continue;
 
     const matchingInclude = resolvedIncludes.find(({ resolvedPattern }) =>
       matchesResolvedPattern({ filePath, resolvedPattern }),

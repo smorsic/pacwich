@@ -6,47 +6,53 @@
     "packages": [
       "workspaces/**/*",
       "!workspaces/packages/pacwich/**/*",
-      "!workspaces/sandboxes/local-vs-release/**/*"
+      "!workspaces/sandboxes/local-vs-release/**/*",
+      "!workspaces/web/web-cli/src/web-cli-runtime/**/*"
     ],
     "catalog": {},
     "catalogs": {
       "pacwich-prod": {
-        "commander": "12.1.0",
+        "commander": "15.0.0",
         "jiti": "2.7.0",
-        "semver": "7.8.0",
-        "shell-quote": "1.8.4",
+        "semver": "7.8.5",
+        "shell-quote": "1.12.0",
         "sucrase": "3.35.1",
-        "yaml": "2.9.0"
+        "yaml": "2.9.1"
       },
       "pacwich-dev": {
-        "@modelcontextprotocol/inspector": "^0.21.1",
-        "@rslib/core": "^0.21.2",
+        "@modelcontextprotocol/inspector": "^2.4.0",
+        "@rslib/core": "^1.0.7",
         "@types/semver": "^7.7.1",
         "@types/shell-quote": "^1.7.5",
         "@xterm/headless": "^6.0.0",
-        "ajv": "^8.17.1",
-        "knip": "^6.15.0",
-        "dts-bundle-generator": "^9.5.1",
-        "vitest": "^4.1.6"
+        "ajv": "^8.20.0",
+        "knip": "^6.45.1",
+        "dts-bundle-generator": "^10.0.0",
+        "vitest": "^5.1.0"
       },
       "web": {
-        "@fontsource/unifontex": "^5.2.6",
+        "@fontsource/unifontex": "^5.3.0",
+        "@rsbuild/core": "^2.3.2",
+        "@rsbuild/plugin-node-polyfill": "^1.4.6",
         "@rsbuild/plugin-svgr": "^1.3.1",
-        "@rspress/core": "^2.0.12",
-        "@rspress/plugin-client-redirects": "^2.0.12",
-        "@rspress/plugin-sitemap": "^2.0.12",
-        "@types/lodash": "^4.17.24",
-        "@types/react": "^19.2.15",
+        "@rspress/core": "^2.1.3",
+        "@rspress/plugin-client-redirects": "^2.1.3",
+        "@rspress/plugin-sitemap": "^2.1.3",
+        "@types/lodash": "^4.17.27",
+        "@types/react": "^19.3.0",
+        "@types/react-dom": "^19.3.0",
         "@types/react-syntax-highlighter": "^15.5.13",
+        "@xterm/addon-fit": "^0.11.0",
+        "@xterm/xterm": "^6.0.0",
         "lodash": "^4.18.1",
-        "react": "^19.2.6",
-        "react-arborist": "^3.7.0",
-        "react-dom": "^19.2.6",
-        "react-icons": "^5.6.0",
+        "react": "^19.3.1",
+        "react-arborist": "^4.0.1",
+        "react-dom": "^19.3.1",
+        "react-icons": "^5.7.0",
         "react-router": "^7.15.1",
         "react-router-dom": "^7.15.1",
-        "react-syntax-highlighter": "^16.1.1",
-        "zustand": "^5.0.13"
+        "react-syntax-highlighter": "^16.1.2",
+        "zustand": "^5.1.0"
       }
     }
   },
@@ -55,6 +61,7 @@
     "cli:node": "node workspaces/packages/pacwich/dist/bin/cli.js",
     "pw": "pacwich ri --workspace=pw --script",
     "docs": "pacwich ri --workspace=docs --script",
+    "wc": "pacwich ri --workspace=wc --script",
     "sandbox": "pacwich ri --workspace=sandbox --script",
     "lint": "pacwich run lint '*' not:tag:sandbox",
     "lint:fix": "eslint . --fix",
@@ -66,34 +73,38 @@
     "create-agents-md": "pacwich -l warn ri create-agents-md meta",
     "create-readme": "pacwich -l warn ri create-readme meta",
     "create-mise-toml": "pacwich -l warn ri create-mise-toml meta",
+    "create-claude-skill-links": "pacwich -l warn ri create-claude-skill-links meta",
     "print-dev-bun-version": "pacwich -l silent ri print-dev-tool-version -- bun",
     "print-dev-node-version": "pacwich -l silent ri print-dev-tool-version -- node",
     "mise": "bun mise.ts",
     "portless-start": "portless proxy start --no-tls",
     "portless-stop": "portless proxy stop",
     "init-pacwich-package": "PACWICH_PROJECT_PATH=$PWD bun --cwd=workspaces/packages/pacwich run create-modules && bun --cwd=workspaces/libraries/pacwich-common run build:dts",
-    "prepare": "husky"
+    "prepare": "bun prepare.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@pacwich/meta": "workspace:*",
-    "@types/bun": "^1.3.14",
-    "@types/node": "^25.9.1",
+    "@types/bun": "^1.4.4",
+    "@types/node": "^26.6.6",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
-    "eslint": "^9.39.4",
+    "@typescript-eslint/parser": "^8.72.2",
+    "eslint": "^10.15.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^16.5.0",
+    "globals": "^17.14.0",
     "husky": "^9.1.7",
     "json-schema-to-ts": "^3.1.1",
-    "lint-staged": "^17.0.8",
-    "pacwich": "workspace:*",
-    "portless": "^0.13.1",
-    "prettier": "^3.8.3",
+    "lint-staged": "^17.6.1",
+    "pacwich_local": "workspace:*",
+    "portless": "^0.18.0",
+    "prettier": "^3.10.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.4"
+    "typescript-eslint": "^8.72.2"
+  },
+  "overrides": {
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx,json,css,md,mdx,yaml,yml}": [

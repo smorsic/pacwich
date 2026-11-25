@@ -1,0 +1,28 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "verify-ancestor-strict-workspace-root",
+      "dependencies": {
+        "shared-lib": "workspace:*",
+      },
+    },
+    "packages/shared-lib": {
+      "name": "shared-lib",
+    },
+    "packages/app": {
+      "name": "app",
+    },
+    "packages/quiet": {
+      "name": "quiet",
+    },
+  },
+  "packages": {
+    "shared-lib": ["shared-lib@workspace:packages/shared-lib"],
+
+    "app": ["app@workspace:packages/app"],
+
+    "quiet": ["quiet@workspace:packages/quiet"],
+  }
+}

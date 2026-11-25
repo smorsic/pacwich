@@ -6,7 +6,7 @@
 
 # pacwich
 
-<sub>Latest: 0.2.1</sub>
+<sub>Latest: 0.7.3</sub>
 
 Monorepo tooling that works on top of **Bun**, **npm**, and **pnpm** workspaces. Zero config required. [AI-friendly](https://pacwich.dev/ai) and human-friendly documentation. Has an [affected graph](https://pacwich.dev/concepts/affected) and [rules for workspace code sharing](https://pacwich.dev/config/workspace#workspace-dependency-rules). Comes with a CLI and TypeScript API.
 
@@ -20,16 +20,6 @@ Start running some [CLI commands](https://pacwich.dev/cli) right away in your re
 - [Getting Started Guide](https://pacwich.dev/intro/getting-started)
 - Changelog: [GitHub Releases](https://github.com/smorsic/pacwich/releases)
 
-#### Note: bun-workspaces
-
-This is the continuation of the `bun-workspaces` package that only worked with Bun.
-See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
-
-You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
-to assist with migration.
-
-Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
-
 ### Terminology
 
 The definitions of **workspace** and **project** differ between package managers and monorepo tooling.
@@ -42,29 +32,58 @@ This means you have a root **project** that has some number of **workspaces**. T
 
 [Docs: Glossary page](https://pacwich.dev/concepts/glossary)
 
+> #### Note: bun-workspaces
+>
+> This is the continuation of the `bun-workspaces` package that only worked with Bun.
+> See the [migration guide](https://pacwich.dev/intro/bun-workspaces-migration) for more information. [Read the blog post](https://smorsic.io/blog/pacwich-launch) about motivations and development strategy.
+>
+> You can also instruct an agent to read `https://pacwich.dev/intro/bun-workspaces-migration/index.md`
+> to assist with migration.
+>
+> Thanks to most core code and tests carrying over from `bun-workspaces`, `pacwich` inherits its maturity to a large degree.
+
 ## Quick Start
 
 ### Installation
 
-Use the global install and/or local install. The global install gives you a convenient
-`pacwich` binary, which will still delegate to a local install's CLI, if available.
+#### Global CLI
+
+The global install gives you a convenient `pacwich` binary, which will still delegate to a local install's CLI, if available.
+
+```bash
+# Use the package manager of your choice:
+bun add -g pacwich
+# OR
+pnpm add -g pacwich
+# OR
+npm install -g pacwich
+```
+
+##### Completions
+
+When using the global install, you can set up shell completions for bash, zsh, or fish.
+
+```bash
+# Print help for setting up completions
+pacwich completion
+
+# Attempt to automatically install completion for your shell
+pacwich completion install
+```
+
+#### Local install
+
+Pin the CLI version for your project, and/or use the TypeScript library.
 
 If you only use a local install, you can still invoke the `pacwich` command within `package.json` scripts, potentially using your root `package.json` scripts for common `pacwich` operations
 you need in your project.
 
 ```bash
-# Use the global install command of choice below
-bun add -g pacwich
-# or
-pnpm add -g pacwich
-# or
-npm install -g pacwich
-
-# And/or local install in your project
+# Use the package manager of your choice:
 bun add -d pacwich
-# or
+# OR
 pnpm add -D pacwich
-# or
+# OR
 npm install -D pacwich
 ```
 
@@ -87,6 +106,26 @@ npx pacwich --help
 bunx pacwich --help
 pnpm exec pacwich --help
 ```
+
+### The `verify` Feature
+
+`pacwich` uses workspaces' `package.json` files to detect when a workspace depends on another workspace.
+
+`pacwich` is relatively unopinionated, but it is **highly encouraged** for workspaces to always declare
+other workspaces as dependencies explicitly in their own `package.json`. The `verify` feature exists to help catch instances where this can be dodged.
+
+In **Bun** and **pnpm**, explicit dependencies are required to import/export from another workspace, by adding `"my-workspace": "workspace:*"` to `package.json` dependencies. **npm** workspaces do not require explicit `package.json` dependencies at all, so undeclared workspace imports simply work.
+
+Nested workspaces also create a gap in explicit dependencies. A dependency declared by an ancestor workspace, most commonly the root `package.json`, resolves for every workspace beneath it through recursive parent-directory `node_modules` lookup, whether or not the importing workspace declares it.
+
+The `verify` feature performs simple analysis of imports/exports in JS/TS files to catch both cases:
+
+- **Implicit workspace dependencies**: a workspace imports another workspace that neither it nor any ancestor declares. Generally only possible with npm workspaces.
+- **Ancestor workspace dependencies**: the import resolves only because an ancestor workspace declares it. Possible with any package manager.
+
+Adding `pacwich verify` to a `"prepare"` script, pre-commit hook, CI pipeline, or similar can be especially helpful to catch issues.
+
+`pacwich verify --strict` will fail on implicit workspace dependencies. Ancestor findings warn by default, and the `strictDisallowAncestorWorkspaceDeps` config option makes strict mode fail on those as well.
 
 ### CLI Quickstart
 
@@ -111,7 +150,13 @@ pacwich --cwd=/path/to/your/project run my-script
 pacwich --pm=pnpm ls
 
 # Pass --log-level to any command (debug, info, warn, error, or silent)
+# A default can also be set with the PACWICH_LOG_LEVEL env var (the flag overrides it)
 pacwich --log-level=debug ls
+
+# Suppress specific warning messages (can also be set by project config)
+# Warning IDs can be seen in warning log prefixes (full list: https://pacwich.dev/config/warnings)
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles ls
+pacwich --suppress-warnings=MultiplePackageManagerLockfiles,ParallelExceedsAvailableCpus run lint
 
 ####################
 # Getting metadata #
@@ -207,21 +252,44 @@ pacwich --log-level=silent run my-script --output-style=none
 #####################
 
 # List affected workspaces based on git diff (main vs. HEAD by default)
-pacwich list-affected
+pacwich affected list
 
 # Set the git base and head for comparison
-pacwich list-affected --base=my-branch-a --head=my-branch-b
+pacwich affected list --base=my-branch-a --head=my-branch-b
 
 # See detailed reasons for affected workspaces
-pacwich list-affected --explain --detailed
+pacwich affected list --explain --detailed
 
 # Run a script across the workspaces affected by a change
-pacwich run-affected my-script
-# ra is an alias for run-affected
-pacwich ra my-script --base=my-branch-a --head=my-branch-b
+pacwich affected run my-script
+pacwich affected run my-script --base=my-branch-a --head=my-branch-b
+
+# Aliases
+pacwich affected ls
+pacwich af ls
+pacwich af run
+
+##########
+# Config #
+##########
+
+# Commands for pacwich's optional configuration
+
+# Print project and all workspace configs as JSON
+pacwich config debug
+pacwich config debug --pretty # pretty print JSON
+
+# Print just the project config as JSON
+pacwich config debug --project
+
+# Print a single workspace config as JSON
+pacwich config debug --workspace=name-or-alias
+
+# Print workspace configs matching a pattern as JSON
+pacwich config debug --workspace-patterns="my-pattern-*"
 ```
 
-### API Quickstart
+### TS API Quickstart
 
 [Full API documentation here](https://pacwich.dev/api)
 
@@ -360,7 +428,7 @@ Workspace configs can be placed in a workspace's directory at `pacwich.workspace
 [Workspace configuration documentation here](https://pacwich.dev/config/workspace)
 
 ```typescript
-// pacwich.workspace.ts — place in a workspace directory
+// pacwich.workspace.ts - placed in a workspace directory
 
 // Also supported: pacwich.workspace.js, pacwich.workspace.json, pacwich.workspace.jsonc,
 // or a "pacwich" key in package.json
@@ -368,8 +436,12 @@ Workspace configs can be placed in a workspace's directory at `pacwich.workspace
 import { defineWorkspaceConfig } from "pacwich/config";
 
 export default defineWorkspaceConfig({
-  alias: "my-web-app", // shorthand name; use array for multiple
+  // Shorthand name. use array for multiple
+  // Must be unique across workspace names and other aliases
+  alias: "my-web-app",
+
   tags: ["app", "frontend"],
+
   // Optional, for configuring affected workspace resolution inputs
   // Applies to all scripts that don't configure their own inputs
   defaultInputs: {
@@ -381,6 +453,19 @@ export default defineWorkspaceConfig({
     // Dependency names (e.g. "react") to treat as dependencies (default: all)
     externalDependencies: ["react"],
   },
+
+  // Configure the verify feature for this workspace
+  // This is additive with any project-level verify configuration
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning, relative to the workspace path
+      // Use a leading / for project-relative paths
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
+  },
+
   scripts: {
     // lower order runs first in sequenced script execution
     build: {
@@ -392,6 +477,7 @@ export default defineWorkspaceConfig({
     },
     test: { order: 2 },
   },
+
   rules: {
     workspaceDependencies: {
       // Only "my-workspace" or workspaces tagged "lib" are allowed as dependencies
@@ -413,7 +499,8 @@ which can also apply workspace configs in bulk by using workspace patterns.
 [More on workspace pattern configs here](https://pacwich.dev/config/workspace-pattern-configs)
 
 ```typescript
-// pacwich.project.ts — place in your project root directory
+// pacwich.project.ts - placed in your project root directory
+
 // Also supported: pacwich.project.js, pacwich.project.json, pacwich.project.jsonc,
 // or a "pacwich-root" key in package.json
 
@@ -427,6 +514,16 @@ export default defineRootConfig({
     shell: "system",
     // default value for global --include-root-workspace option
     includeRootWorkspace: false,
+  },
+
+  // Configure the verify feature
+  verify: {
+    workspaceDependencies: {
+      // Exclude paths from import/export scanning across the project
+      ignoreInputFiles: ["**/*.d.ts"],
+      // Ignore imports from specific workspaces
+      ignoreImportsFromWorkspacePatterns: ["tag:internal"],
+    },
   },
 
   // Apply workspace configs in bulk by workspace pattern, in order.

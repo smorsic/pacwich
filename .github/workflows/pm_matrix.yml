@@ -16,11 +16,32 @@ name: Package Manager Matrix
 on:
   workflow_call:
     inputs:
+      bun_version:
+        description: Single Bun version (collapses the bun axis)
+        required: false
+        type: string
+      node_version:
+        description: Single Node version (collapses the node axis)
+        required: false
+        type: string
+      pnpm_version:
+        description: Single pnpm version (defaults to devLock)
+        required: false
+        type: string
+      os:
+        description: Single OS, e.g. ubuntu-latest (collapses the os axis)
+        required: false
+        type: string
       runtime:
-        description: Runtime used to execute the tests (bun or node)
+        description: Single runtime - skips the other test job
         required: false
         type: string
         default: node
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
   workflow_dispatch:
     inputs:
       pnpm_version:
@@ -45,6 +66,11 @@ on:
         type: choice
         options: [node, bun]
         default: node
+      test_args:
+        description: Extra arguments to pass to the test script
+        required: false
+        type: string
+        default: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
 
 permissions:
   contents: read
@@ -56,7 +82,7 @@ jobs:
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate matrix JSON
         id: gen
@@ -106,4 +132,4 @@ jobs:
       bun-version: ${{ matrix.bun }}
       node-version: ${{ matrix.node }}
       pnpm-version: ${{ matrix.pnpm }}
-      test_args: "tests/packageManagers/pnpm tests/packageManagers/pmMatrix"
+      test_args: ${{ inputs.test_args }}

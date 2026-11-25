@@ -46,30 +46,30 @@ Files that are gitignored are never considered a part of the diff.
 <SyntaxHighlighter language="bash">
 {`
 # Uses diff of current HEAD against the default base ref (main when not configured)
-pacwich ls-affected
+pacwich affected list
 
 # Compare specific refs (can also pass commit SHA, tag, etc.)
-pacwich ls-affected --base=my-branch-a --head=my-branch-b
+pacwich affected list --base=my-branch-a --head=my-branch-b
 
 # Ignore uncommitted changes
-pacwich ls-affected --ignore-uncommitted # (staged, unstaged and untracked)
-pacwich ls-affected --ignore-untracked
-pacwich ls-affected --ignore-unstaged
-pacwich ls-affected --ignore-staged
+pacwich affected list --ignore-uncommitted # (staged, unstaged and untracked)
+pacwich affected list --ignore-untracked
+pacwich affected list --ignore-unstaged
+pacwich affected list --ignore-staged
 
 # Ignore changes to workspace dependencies derived from package.json files
-pacwich ls-affected --ignore-workspace-deps
+pacwich affected list --ignore-workspace-deps
 
 # Ignore changes to external dependencies (e.g. npm packages)
-pacwich ls-affected --ignore-external-deps
+pacwich affected list --ignore-external-deps
 
 # Run script across affected workspaces with similar options
-pacwich run-affected my-script --base=my-branch --ignore-uncommitted
+pacwich affected run my-script --base=my-branch --ignore-uncommitted
 `.trim()}
 </SyntaxHighlighter>
 
-* See CLI docs for [list-affected/ls-affected](/cli/commands#list-affected).
-* See CLI docs for [run-affected](/cli/commands#run-affected).
+* See CLI docs for [affected list](/cli/commands#affected-list).
+* See CLI docs for [affected run](/cli/commands#affected-run).
 
 #### Using a list of changed files
 
@@ -77,10 +77,10 @@ You can bypass using git entirely and simply pass a list of changed files that m
 
 <SyntaxHighlighter language="bash">
 {`
-pacwich ls-affected --files="packages/example/**/*.ts packages/example/my-file.json"
+pacwich affected list --files="tsconfig.json packages/example/**/*.ts"
 
 # Paths with leading / are relative to the project root
-pacwich run-affected --files="/tsconfig.json packages/example/**/*.ts"
+pacwich affected run --files="/tsconfig.json packages/example/**/*.ts"
 `.trim()}
 </SyntaxHighlighter>
 
@@ -91,10 +91,10 @@ You can use the `--explain` flag to get detailed reasoning for the affected work
 <SyntaxHighlighter language="bash">
 {`
 # Summary for each affected workspaces
-pacwich ls-affected --explain
+pacwich affected list --explain
 
 # More detailed output about every changed file and dependency
-pacwich ls-affected --explain --detailed
+pacwich affected list --explain --detailed
 `.trim()}
 </SyntaxHighlighter>
 

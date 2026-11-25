@@ -1,6 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { formatWarningMessage } from "@pacwich/common/warnings";
 import { logger } from "../../../src/internal/logger";
 import {
   PACKAGE_MANAGER_DOCS_URL,
@@ -139,7 +140,11 @@ describe("resolvePackageManagerValue", () => {
       });
       expect(resolved).toBe("bun");
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      const [message] = warnSpy.mock.calls[0] as [string];
+      const [id, options] = warnSpy.mock.calls[0] as [
+        "MultiplePackageManagerLockfiles",
+        { lockfiles: string; winner: string },
+      ];
+      const message = formatWarningMessage(id, options);
       expect(message).toInclude("bun.lock");
       expect(message).toInclude("package-lock.json");
       expect(message).toInclude(PACKAGE_MANAGER_DOCS_URL);
@@ -154,7 +159,11 @@ describe("resolvePackageManagerValue", () => {
       });
       expect(resolved).toBe("pnpm");
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      const [message] = warnSpy.mock.calls[0] as [string];
+      const [id, options] = warnSpy.mock.calls[0] as [
+        "MultiplePackageManagerLockfiles",
+        { lockfiles: string; winner: string },
+      ];
+      const message = formatWarningMessage(id, options);
       expect(message).toInclude("pnpm-lock.yaml");
       expect(message).toInclude("package-lock.json");
     });
@@ -169,7 +178,11 @@ describe("resolvePackageManagerValue", () => {
       });
       expect(resolved).toBe("bun");
       expect(warnSpy).toHaveBeenCalledTimes(1);
-      const [message] = warnSpy.mock.calls[0] as [string];
+      const [id, options] = warnSpy.mock.calls[0] as [
+        "MultiplePackageManagerLockfiles",
+        { lockfiles: string; winner: string },
+      ];
+      const message = formatWarningMessage(id, options);
       expect(message).toInclude("bun.lock");
       expect(message).toInclude("pnpm-lock.yaml");
       expect(message).toInclude("package-lock.json");

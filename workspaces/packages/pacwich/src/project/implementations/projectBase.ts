@@ -25,9 +25,7 @@ const warnDeprecatedOnce = (
 ) => {
   if (warnedDeprecatedMapMethods.has(oldName)) return;
   warnedDeprecatedMapMethods.add(oldName);
-  logger.warn(
-    `Project.${oldName}() is deprecated and will be removed in a future version. Use Project.${newName} instead.`,
-  );
+  logger.warn("DeprecatedProjectMapMethod", { oldName, newName });
 };
 
 /** For tests */
@@ -63,12 +61,14 @@ export abstract class ProjectBase implements Project {
   constructor({ packageManager }: ProjectBaseConstructorOptions) {
     const runtimeError = validateRuntime();
     if (runtimeError) {
-      logger.warn(runtimeError.message);
+      logger.warn("UnsupportedRuntime", { message: runtimeError.message });
     }
 
     const pmVersionError = validatePackageManagerVersion(packageManager);
     if (pmVersionError) {
-      logger.warn(pmVersionError.message);
+      logger.warn("UnsupportedPackageManagerVersion", {
+        message: pmVersionError.message,
+      });
     }
 
     this.#adapter = resolvePackageManagerAdapter(packageManager);

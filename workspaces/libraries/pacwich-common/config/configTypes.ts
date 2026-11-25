@@ -117,6 +117,12 @@ export type WorkspaceConfig = {
    * applied to all scripts that don't configure their own inputs.
    */
   defaultInputs?: WorkspaceInputsConfig;
+  /**
+   * Options for the `verify` command and its underlying API, scoped to
+   * this workspace. Additive with the project-level `verify` config
+   * (union, not override).
+   */
+  verify?: WorkspaceVerifyConfig;
 };
 
 export type ResolvedWorkspaceConfig = {
@@ -125,6 +131,7 @@ export type ResolvedWorkspaceConfig = {
   scripts: Record<string, ScriptConfig>;
   rules: WorkspaceRules;
   defaultInputs?: WorkspaceInputsConfig;
+  verify: ResolvedVerifyConfig;
 };
 
 /** Static workspace context passed to a {@link WorkspacePatternConfigFactory}.
@@ -205,35 +212,76 @@ export type ProjectConfig = {
 };
 
 /**
- * Project-level configuration for `pacwich verify` and `project.verify()`.
- *
- * Lives at the project level rather than per-workspace so users have a
- * single visible escape hatch for implicit workspace dependency findings.
- * Per-workspace toggles add config-resolution complexity that wouldn't
- * carry its weight here. If a more targeted exception is needed users
- * can scope `verify` to specific workspaces via its CLI positional
- * workspace patterns.
+ * Configuration for the verify feature.
  */
-export type ProjectVerifyConfig = {
+export type VerifyConfig = {
   /**
    * Verification rules concerning workspace-to-workspace dependencies.
    * Currently controls implicit-workspace-dependency detection.
    */
-  workspaceDependencies?: ProjectVerifyWorkspaceDependenciesConfig;
+  workspaceDependencies?: VerifyWorkspaceDependenciesConfig;
 };
 
-export type ProjectVerifyWorkspaceDependenciesConfig = {
+export type VerifyWorkspaceDependenciesConfig = {
   /**
-   * Project-relative globs to skip when scanning workspace source files
-   * for implicit workspace dependencies. A leading `/` is accepted and
-   * treated the same as no leading slash (both are project-relative).
-   * Negation prefixes (`!`) are not honored. This is an exception list,
-   * not an inputs list.
+   * Globs to skip when scanning workspace source files for implicit
+   * workspace dependencies. These are excluded from the scan.
+   * Input files are configured via `defaultInputs` in
+   * workspace configuration (default all git-tracked files in workspace directory).
    *
-   * @example ["scripts/codegen/**\/*", "legacy/**\/*.ts"]
+   * @example ["scripts/codegen/**\/*", "/legacy/**\/*.ts"]
    */
   ignoreInputFiles?: string[];
+  /**
+   * All workspaces matching these patterns will have their imports
+   * ignored when detecting implicit workspace dependencies. Applies to
+   * both implicit workspace dependency and ancestor workspace dependency
+   * findings.
+   *
+   * @example ["tag:internal-tooling", "my-workspace"]
+   */
+  ignoreImportsFromWorkspacePatterns?: string[];
+  /**
+   * When `true`, `--strict` also fails the run on
+   * ancestor workspace dependency findings (an import that only resolves
+   * because an ancestor workspace, e.g. the project root, declares the
+   * dependency).
+   *
+   * Defaults to `false`. Under `--strict`, ancestor workspace dependency findings still warn rather than error,
+   * unlike implicit workspace dependency findings, unless this option is set to `true`.
+   */
+  strictDisallowAncestorWorkspaceDeps?: boolean;
 };
+
+/**
+ * Project-scoped configuration for the verify feature.
+ *
+ * @see {@link VerifyConfig}
+ */
+export type ProjectVerifyConfig = VerifyConfig;
+
+/**
+ * Project-scoped configuration for verify workspace dependencies.
+ *
+ * @see {@link VerifyWorkspaceDependenciesConfig}
+ */
+export type ProjectVerifyWorkspaceDependenciesConfig =
+  VerifyWorkspaceDependenciesConfig;
+
+/**
+ * Workspace-scoped configuration for the verify feature.
+ *
+ * @see {@link VerifyConfig}
+ */
+export type WorkspaceVerifyConfig = VerifyConfig;
+
+/**
+ * Workspace-scoped configuration for verify workspace dependencies.
+ *
+ * @see {@link VerifyWorkspaceDependenciesConfig}
+ */
+export type WorkspaceVerifyWorkspaceDependenciesConfig =
+  VerifyWorkspaceDependenciesConfig;
 
 export type ResolvedProjectConfig = {
   /**
@@ -256,16 +304,51 @@ export type ResolvedProjectConfig = {
     cliScriptOutputStyle: OutputStyleName | undefined;
   };
   workspacePatternConfigs: WorkspacePatternConfigEntry[];
-  verify: ResolvedProjectVerifyConfig;
+  /** Configuration for the verify feature */
+  verify: ResolvedVerifyConfig;
 };
 
-export type ResolvedProjectVerifyConfig = {
-  workspaceDependencies: ResolvedProjectVerifyWorkspaceDependenciesConfig;
+/**
+ * Workspace-scoped configuration for the verify feature after config file resolution.
+ *
+ * @see {@link VerifyConfig}
+ */
+export type ResolvedVerifyConfig = {
+  workspaceDependencies: ResolvedVerifyWorkspaceDependenciesConfig;
 };
 
-export type ResolvedProjectVerifyWorkspaceDependenciesConfig = {
-  /**
-   * Always present. Defaults to `[]` when not configured.
-   */
+/**
+ * Workspace-scope configuration for verify workspace dependencies after config file resolution.
+ *
+ * @see {@link VerifyWorkspaceDependenciesConfig}
+ */
+export type ResolvedVerifyWorkspaceDependenciesConfig = {
+  /** Always present. Defaults to `[]` when not configured. */
   ignoreInputFiles: string[];
+  /** Always present. Defaults to `[]` when not configured. */
+  ignoreImportsFromWorkspacePatterns: string[];
+  /** Always present. Defaults to `false`. */
+  strictDisallowAncestorWorkspaceDeps: boolean;
 };
+
+/**
+ * Project-scope configuration for the verify feature after config file resolution.
+ *
+ * @see {@link ResolvedVerifyConfig}
+ */
+export type ResolvedProjectVerifyConfig = ResolvedVerifyConfig;
+
+/**
+ * Project-scope configuration for verify workspace dependencies after config file resolution.
+ *
+ * @see {@link ResolvedVerifyWorkspaceDependenciesConfig}
+ */
+export type ResolvedProjectVerifyWorkspaceDependenciesConfig =
+  ResolvedVerifyWorkspaceDependenciesConfig;
+
+/**
+ * Workspace-scope configuration for the verify feature after config file resolution.
+ *
+ * @see {@link ResolvedVerifyConfig}
+ */
+export type ResolvedWorkspaceVerifyConfig = ResolvedVerifyConfig;

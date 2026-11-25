@@ -1,0 +1,9 @@
+{
+  // Project-level opt-in: --strict should fail on ancestorWorkspaceDependency
+  // findings for every workspace, not just implicitWorkspaceDependency ones.
+  "verify": {
+    "workspaceDependencies": {
+      "strictDisallowAncestorWorkspaceDeps": true
+    }
+  }
+}

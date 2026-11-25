@@ -83,12 +83,9 @@ export const resolvePackageManagerValue = ({
   }
 
   const winner = present[0];
-  logger.warn(
-    `Multiple package manager lockfiles detected (${present
-      .map((pm) => PACKAGE_MANAGER_LOCKFILES[pm])
-      .join(
-        ", ",
-      )}). Picking "${winner}". Set "packageManager" explicitly (project config, --pm, or PACWICH_PACKAGE_MANAGER) to silence this. See ${PACKAGE_MANAGER_DOCS_URL}.`,
-  );
+  logger.warn("MultiplePackageManagerLockfiles", {
+    lockfiles: present.map((pm) => PACKAGE_MANAGER_LOCKFILES[pm]).join(", "),
+    winner,
+  });
   return winner;
 };

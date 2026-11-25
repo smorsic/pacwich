@@ -1,10 +1,15 @@
 import { PACWICH_VERSION } from "@pacwich/common/version";
-import { useLocation } from "@rspress/core/runtime";
-import { Layout as RspressLayout, Link } from "@rspress/core/theme-original";
-import { useEffect, useRef } from "react";
+import { useLocation, usePage } from "@rspress/core/runtime";
+import {
+  getCustomMDXComponent as getThemeOriginalMDXComponent,
+  Layout as RspressLayout,
+  Link,
+} from "@rspress/core/theme-original";
+import { useEffect, useRef, type ComponentProps } from "react";
 import "@fontsource/unifontex";
 import { Footer } from "../lib/components/Footer";
 import { BUILD_ID } from "../lib/util/env";
+import { isLlmsExcludedRoutePath } from "../lib/util/llmsExcludedRoutes";
 import { PixelArtImage } from "../lib/util/pixelArt";
 import { useLayout } from "../lib/util/useLayout";
 
@@ -77,7 +82,29 @@ const Layout = () => {
   );
 };
 
-export { Layout };
+const themeOriginalMDXComponents = getThemeOriginalMDXComponent();
+const ThemeOriginalH1 = themeOriginalMDXComponents.h1;
+
+/** The default H1 renders the llms copy-markdown UI. Skip it for pages excluded from llms.txt. */
+const H1 = ({ className, ...rest }: ComponentProps<"h1">) => {
+  const { page } = usePage();
+  if (isLlmsExcludedRoutePath(page.routePath)) {
+    return (
+      <h1
+        className={["rp-toc-include", className].filter(Boolean).join(" ")}
+        {...rest}
+      />
+    );
+  }
+  return <ThemeOriginalH1 className={className} {...rest} />;
+};
+
+const getCustomMDXComponent = () => ({
+  ...themeOriginalMDXComponents,
+  h1: H1,
+});
+
+export { Layout, getCustomMDXComponent };
 
 export * from "@rspress/core/theme-original";
 

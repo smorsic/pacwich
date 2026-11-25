@@ -186,9 +186,10 @@ export const runScripts = <ScriptMetadata extends object = object>({
     parallelBatchSize > recommendedParallelMax &&
     process.env._PACWICH_IS_INTERNAL_TEST !== "true"
   ) {
-    logger.warn(
-      `Number of scripts to run in parallel (${parallelBatchSize}) is greater than the available CPUs (${recommendedParallelMax})`,
-    );
+    logger.warn("ParallelExceedsAvailableCpus", {
+      batchSize: String(parallelBatchSize),
+      recommendedMax: String(recommendedParallelMax),
+    });
   }
 
   const pendingScripts = new Set<number>(scripts.map((_, i) => i));
