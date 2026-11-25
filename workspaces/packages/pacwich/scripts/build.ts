@@ -186,6 +186,7 @@ export const runBuild = async () => {
       dtsEntries.map((exp) => ({
         inlinedLibraries: bundledDependencies,
         filePath: path.resolve(__dirname, "..", exp as string),
+        output: { exportReferencedTypes: true },
       })),
       {
         preferredConfigPath: path.resolve(__dirname, "../tsconfig.json"),
