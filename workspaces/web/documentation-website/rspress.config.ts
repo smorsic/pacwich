@@ -119,6 +119,17 @@ export default defineConfig({
   ssg: {
     experimentalExcludeRoutePaths: ["/web-cli"],
   },
+  markdown: {
+    link: {
+      // Rendered by CliCommandDoc, so not visible to rspress's heading scan
+      checkAnchors: {
+        excludes: [
+          "/cli/commands#cli-command-help",
+          "/cli/global-options#cli-global-option-help",
+        ],
+      },
+    },
+  },
   search: {
     searchHooks: path.join(__dirname, "src/search/search.tsx"),
   },

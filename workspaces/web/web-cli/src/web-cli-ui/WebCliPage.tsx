@@ -24,7 +24,8 @@ export const WebCliPage = ({ notes }: WebCliPageProps) => {
         </div>
       </div>
       <Suspense fallback={<div className="web-cli-placeholder" />}>
-        <WebCliMainLazy />
+        {/* rspress 2.1's markdown SSG pass runs effects in Node, so skip without a DOM */}
+        {typeof document === "undefined" ? null : <WebCliMainLazy />}
       </Suspense>
       {notes}
     </div>
